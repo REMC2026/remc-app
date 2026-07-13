@@ -120,7 +120,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);-web
 <script>
   window.REMC_SUP_CLOUD = {
     url:      "https://etupmtayutnupkgbrxkg.supabase.co",
-    anonKey:  "PASTE_THE_SAME_ANON_KEY_AS_THE_MAIN_APP",
+    anonKey:  "sb_publishable_SU2eO_JM4tqx5hbI0RxJHg_cshf_kLF",
     workspace: "remc-main"
   };
 </script>
@@ -334,7 +334,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);-web
   var DOW=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
   // ---------- render ----------
-  function render(){ if(VIEW==='notes') renderAllNotes(); else if(VIEW==='list') renderProjects(); else if(VIEW==='week') renderWeek(); else renderMonth(); }
+  function render(){ try{ updateWarn(); }catch(e){} if(VIEW==='notes') renderAllNotes(); else if(VIEW==='list') renderProjects(); else if(VIEW==='week') renderWeek(); else renderMonth(); }
   function renderAllNotes(){
     var mine=myProjects();
     var withNotes=mine.filter(function(p){ return NOTES[String(p.id)] && String(NOTES[String(p.id)]).trim(); });
@@ -549,12 +549,16 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);-web
     var found = SUPERS.find(function(s){ return String(s.username||'').trim().toLowerCase()===u && String(s.password||'')===String(pass||''); });
     return found ? { username:found.username, name:found.name } : null;
   }
+  function updateWarn(){
+    var w=$('warn'); if(!w) return;
+    if(!ME || ME.openMode){ w.innerHTML=''; return; }
+    w.innerHTML = myProjects().length ? '' : '<div class="banner">No projects are assigned to you yet. Ask the office to set you as <b>Supervisor</b> on a project — the project\'s Supervisor must be your username (<b>'+esc(ME.username)+'</b>) or your name (<b>'+esc(ME.name)+'</b>).</div>';
+  }
   function startApp(){
     $('login').style.display='none'; $('app').style.display='';
     $('who-name').textContent = ME.name;
     try{ sessionStorage.setItem('remc_sup_me', JSON.stringify(ME)); }catch(e){}
-    var mine=myProjects();
-    $('warn').innerHTML = mine.length ? '' : '<div class="banner">No projects are assigned to you yet. Ask the office to set you as <b>Supervisor</b> on a project — the project\'s Supervisor must be your username (<b>'+esc(ME.username)+'</b>) or your name (<b>'+esc(ME.name)+'</b>).</div>';
+    updateWarn();
     subscribe();
     goHome();
   }
