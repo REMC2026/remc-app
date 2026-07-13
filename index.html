@@ -57,6 +57,15 @@
   .brand{font-size:18px}
   .nav-item{padding:0 8px}
 }
+/* Display setting: hide Residential (default) */
+body.hide-residential #ov-residential-col{display:none !important}
+body.hide-residential #ov-res-dept-row{display:none !important}
+body.hide-residential .overview-layout{grid-template-columns:200px 1fr 180px}
+@media (max-width:820px){ body.hide-residential .overview-layout{grid-template-columns:1fr} }
+.disp-slider{position:absolute;inset:0;background:var(--border2);border-radius:26px;cursor:pointer;transition:.2s}
+.disp-slider:before{content:'';position:absolute;width:20px;height:20px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+#disp-res-toggle:checked + .disp-slider{background:var(--green)}
+#disp-res-toggle:checked + .disp-slider:before{transform:translateX(20px)}
 </style>
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -138,7 +147,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
             <input type="checkbox" id="ov-chk-com" checked onchange="toggleOvDept('commercial')" style="width:14px;height:14px;accent-color:#2563eb;cursor:pointer">
             🏢 Commercial
           </label>
-          <label style="display:flex;align-items:center;gap:6px;padding:4px 0;cursor:pointer;font-size:11px;font-weight:700;color:var(--text)">
+          <label id="ov-res-dept-row" style="display:flex;align-items:center;gap:6px;padding:4px 0;cursor:pointer;font-size:11px;font-weight:700;color:var(--text)">
             <input type="checkbox" id="ov-chk-res" checked onchange="toggleOvDept('residential')" style="width:14px;height:14px;accent-color:#16a34a;cursor:pointer">
             🏠 Residential
           </label>
@@ -1235,6 +1244,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
         <div class="stab" onclick="showSettingsTab('subcontractors')"    data-tab="subcontractors">🔨 Sub-contractors</div>
         <div class="stab" onclick="showSettingsTab('storage')"           data-tab="storage">💾 Storage</div>
         <div class="stab" onclick="showSettingsTab('outlook')"           data-tab="outlook">📧 Email (Outlook)</div>
+        <div class="stab" onclick="showSettingsTab('display')"           data-tab="display">🖥️ Display</div>
       </div>
 
       <!-- TAB: COMMERCIAL PROJECTS -->
@@ -1617,11 +1627,29 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
         </div>
       </div>
 
+      <div class="stab-panel" id="stpanel-display">
+        <div class="stpanel-inner">
+          <div class="stpanel-desc">Choose what shows on the Overview screen. On phones, keeping Residential hidden avoids layout issues.</div>
+          <div class="step-card">
+            <div class="step-body" style="display:flex;align-items:center;justify-content:space-between;gap:16px">
+              <div>
+                <div style="font-weight:800;font-size:14px">Show Residential projects</div>
+                <div style="font-size:12px;color:var(--muted);margin-top:3px">Adds the Residential column to the Overview. Recommended OFF on mobile.</div>
+              </div>
+              <label style="position:relative;display:inline-block;width:46px;height:26px;flex-shrink:0">
+                <input type="checkbox" id="disp-res-toggle" onchange="remcSetShowResidential(this.checked)" style="opacity:0;width:0;height:0">
+                <span class="disp-slider"></span>
+              </label>
+            </div>
+          </div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px">This setting is saved on this device only, so your phone and computer can be different.</div>
+        </div>
+      </div>
+
     </div>
   </div>
 
   </div>
-
 
   </div>
   </div>
@@ -1909,6 +1937,15 @@ updateMeta(res, 'ov-res-count', 'ov-res-today-val', 'var(--green)');
 filterOverviewCol('com');
 filterOverviewCol('res');
 }
+
+function applyResidentialVis(){
+  var show=false; try{ show = localStorage.getItem('show_residential')==='1'; }catch(e){}
+  if(document.body) document.body.classList.toggle('hide-residential', !show);
+  var t=document.getElementById('disp-res-toggle'); if(t) t.checked=show;
+  var c=document.getElementById('ov-chk-res'); if(c) c.checked=show;
+}
+window.remcSetShowResidential=function(on){ try{ localStorage.setItem('show_residential', on?'1':'0'); }catch(e){} applyResidentialVis(); try{ if(typeof renderOverview==='function') renderOverview(); }catch(e){} };
+document.addEventListener('DOMContentLoaded', function(){ try{ applyResidentialVis(); }catch(e){} });
 
 function showSettingsTab(tab) {
 document.querySelectorAll('.stab').forEach(function(t) {
@@ -10304,6 +10341,8 @@ function teamEditProjectBooking(pid){
   }); }
 
   function showLogin(){
+    var savedEmail='', remOn=false, savedPass='';
+    try{ savedEmail=localStorage.getItem('login_saved_email')||''; remOn=localStorage.getItem('login_remember')==='1'; if(remOn) savedPass=localStorage.getItem('login_saved_pass')||''; }catch(e){}
     var ov = document.createElement('div'); ov.id='remc-login';
     ov.style.cssText='position:fixed;inset:0;z-index:100000;background:#0f1621;display:flex;align-items:center;justify-content:center;font-family:Barlow,sans-serif';
     ov.innerHTML='<div style="background:#fff;border-radius:16px;padding:28px;width:340px;max-width:92vw;box-shadow:0 20px 60px rgba(0,0,0,0.4)">'
@@ -10311,17 +10350,27 @@ function teamEditProjectBooking(pid){
       +'<div style="font-size:13px;color:#8b95a8;margin-bottom:18px">Sign in to continue</div>'
       +'<input id="remc-email" type="email" placeholder="Email" autocomplete="username" style="width:100%;padding:10px 12px;border:1.5px solid #e4e8ef;border-radius:8px;font-size:14px;margin-bottom:8px;box-sizing:border-box">'
       +'<input id="remc-pass" type="password" placeholder="Password" autocomplete="current-password" style="width:100%;padding:10px 12px;border:1.5px solid #e4e8ef;border-radius:8px;font-size:14px;margin-bottom:12px;box-sizing:border-box">'
+      +'<label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#4b5666;margin:0 0 12px;cursor:pointer;user-select:none"><input id="remc-remember" type="checkbox" style="width:16px;height:16px;cursor:pointer">Keep me signed in (auto-login on this device)</label>'
       +'<button id="remc-login-btn" style="width:100%;padding:11px;background:#e11d1d;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer">Sign in</button>'
       +'<div id="remc-login-msg" style="font-size:12px;color:#dc2626;margin-top:10px;text-align:center;min-height:16px"></div>'
       +'</div>';
     document.body.appendChild(ov);
+    try{ document.getElementById('remc-email').value=savedEmail; document.getElementById('remc-remember').checked=remOn; document.getElementById('remc-pass').value=savedPass; }catch(e){}
     var go = function(){
       var email=(document.getElementById('remc-email').value||'').trim();
       var pass=document.getElementById('remc-pass').value||'';
+      var remember=document.getElementById('remc-remember').checked;
       var msg=document.getElementById('remc-login-msg'); msg.textContent='Signing in…';
       sb.auth.signInWithPassword({ email:email, password:pass }).then(function(r){
-        if(r.error){ msg.textContent = r.error.message; } else { ov.remove(); onAuthed(); }
-      });
+        if(r.error){ msg.textContent = r.error.message; }
+        else {
+          try{
+            if(remember){ localStorage.setItem('login_saved_email',email); localStorage.setItem('login_saved_pass',pass); localStorage.setItem('login_remember','1'); }
+            else { localStorage.removeItem('login_saved_email'); localStorage.removeItem('login_saved_pass'); localStorage.setItem('login_remember','0'); }
+          }catch(e){}
+          ov.remove(); onAuthed();
+        }
+      }).catch(function(){ msg.textContent='Cannot reach the server. Check your internet and open the hosted link (…github.io…), not a local file.'; });
     };
     document.getElementById('remc-login-btn').onclick = go;
     document.getElementById('remc-pass').addEventListener('keydown', function(e){ if(e.key==='Enter') go(); });
@@ -10330,7 +10379,14 @@ function teamEditProjectBooking(pid){
   function boot(){
     setStatus('loading');
     sb.auth.getSession().then(function(r){
-      if(r && r.data && r.data.session){ onAuthed(); } else { showLogin(); }
+      if(r && r.data && r.data.session){ onAuthed(); return; }
+      var e2='', p2='', on=false;
+      try{ e2=localStorage.getItem('login_saved_email')||''; p2=localStorage.getItem('login_saved_pass')||''; on=localStorage.getItem('login_remember')==='1'; }catch(e){}
+      if(on && e2 && p2){
+        sb.auth.signInWithPassword({ email:e2, password:p2 }).then(function(r2){
+          if(r2 && !r2.error){ onAuthed(); } else { showLogin(); }
+        }).catch(function(){ showLogin(); });
+      } else { showLogin(); }
     });
   }
 
