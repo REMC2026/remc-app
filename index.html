@@ -4239,34 +4239,49 @@ function getSettings() {
   } catch(e) { return {}; }
 }
 
+function _remcPickSheet(wb, cb){
+  var old = document.getElementById('remc-sheet-picker'); if(old) old.remove();
+  var ov = document.createElement('div');
+  ov.id = 'remc-sheet-picker';
+  ov.style.cssText = 'position:fixed;inset:0;z-index:100001;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;font-family:Barlow,sans-serif';
+  var btns = wb.SheetNames.map(function(n){
+    var ref = wb.Sheets[n] && wb.Sheets[n]['!ref']; var cnt = 0;
+    if(ref){ var r = XLSX.utils.decode_range(ref); cnt = (r.e.r - r.s.r + 1); }
+    return '<button data-sheet="'+String(n).replace(/"/g,'&quot;')+'" style="display:block;width:100%;text-align:left;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:11px 14px;margin-bottom:8px;font-family:inherit;font-size:14px;font-weight:700;color:var(--text);cursor:pointer">'+String(n).replace(/</g,'&lt;')+' <span style="float:right;color:var(--muted);font-weight:600;font-size:12px">'+cnt+' rows</span></button>';
+  }).join('');
+  ov.innerHTML = '<div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;width:420px;max-width:92vw;max-height:80vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.25)">'
+    + '<div style="padding:16px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">'
+    + '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:18px;font-weight:800;text-transform:uppercase">Choose a sheet</div>'
+    + '<button id="remc-sheet-cancel" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted);line-height:1">&times;</button></div>'
+    + '<div style="padding:16px 18px"><div style="font-size:12px;color:var(--muted);margin-bottom:12px">This file has several sheets. Pick the one to import:</div>'+btns+'</div></div>';
+  document.body.appendChild(ov);
+  function close(){ ov.remove(); }
+  ov.addEventListener('click', function(e){ if(e.target===ov){ close(); cb(null); } });
+  document.getElementById('remc-sheet-cancel').onclick = function(){ close(); cb(null); };
+  Array.prototype.forEach.call(ov.querySelectorAll('[data-sheet]'), function(b){ b.onclick = function(){ var n=b.getAttribute('data-sheet'); close(); cb(n); }; });
+}
+
 function readXlsxFile(file, callback) {
 var reader = new FileReader();
 reader.onload = function(e) {
 try {
 var data = new Uint8Array(e.target.result);
 var wb = XLSX.read(data, { type: 'array', cellDates: true });
+if (!wb.SheetNames.length) { callback(new Error('No sheets found in the file'), null); return; }
 
-var bestSheet = wb.SheetNames[0];
-var bestCount = 0;
-wb.SheetNames.forEach(function(name) {
-var ref = wb.Sheets[name]['!ref'];
-if (!ref) return;
-var range = XLSX.utils.decode_range(ref);
-var count = (range.e.r - range.s.r) * (range.e.c - range.s.c);
-if (count > bestCount) { bestCount = count; bestSheet = name; }
-});
-var ws = wb.Sheets[bestSheet];
+function processSheet(name){
+try{
+var ws = wb.Sheets[name];
 var rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '', raw: false });
-
-while (rows.length && rows[0].every(function(c) { return String(c).trim() === ''; })) {
-rows.shift();
-}
-
-while (rows.length && rows[rows.length-1].every(function(c) { return String(c).trim() === ''; })) {
-rows.pop();
-}
-if (!rows || rows.length < 1) { callback(new Error('Sheet appears empty — no data rows found'), null); return; }
+while (rows.length && rows[0].every(function(c) { return String(c).trim() === ''; })) { rows.shift(); }
+while (rows.length && rows[rows.length-1].every(function(c) { return String(c).trim() === ''; })) { rows.pop(); }
+if (!rows || rows.length < 1) { callback(new Error('Sheet "'+name+'" appears empty — no data rows found'), null); return; }
 callback(null, rows);
+} catch(err) { callback(err, null); }
+}
+
+if (wb.SheetNames.length === 1) { processSheet(wb.SheetNames[0]); return; }
+_remcPickSheet(wb, function(chosen){ if(chosen) processSheet(chosen); /* cancelled → do nothing */ });
 } catch(err) { callback(err, null); }
 };
 reader.onerror = function() { callback(new Error('Failed to read file'), null); };
