@@ -67,8 +67,8 @@
     // Paste your Supabase Project URL and anon (public) key here to turn on cloud sync + login.
     // While these say PASTE_..., the app works exactly as before (offline, local only).
     window.REMC_CLOUD = {
-      url:      "https://etupmtayutnupkgbrxkg.supabase.co",
-      anonKey:  "sb_publishable_SU2eO_JM4tqx5hbI0RxJHg_cshf_kLF",
+      url:      "PASTE_YOUR_SUPABASE_URL_HERE",
+      anonKey:  "PASTE_YOUR_SUPABASE_ANON_KEY_HERE",
       workspace: "remc-main"
     };
   </script>
@@ -10280,7 +10280,13 @@ function teamEditProjectBooking(pid){
         var d = payload && payload.new && payload.new.data;
         if(!d || d.__client === CLIENT_ID) return; // ignore our own writes
         applyState(d);
-        location.reload(); // simplest reliable refresh for a remote change (testing phase)
+        // Soft refresh: bring in the new data and re-render the CURRENT page — do NOT reload the whole app
+        try{
+          var _sp = JSON.parse(localStorage.getItem('remc_projects')||'null');
+          if(Array.isArray(_sp) && _sp.length && typeof PROJ_DATA!=='undefined' && Array.isArray(PROJ_DATA)){ PROJ_DATA.length=0; _sp.forEach(function(p){ PROJ_DATA.push(p); }); }
+        }catch(e){}
+        try{ if(typeof _currentPage!=='undefined' && typeof showPage==='function') showPage(_currentPage); }catch(e){}
+        try{ scheduleBackup(); }catch(e){}
       }).subscribe();
   }
   function onAuthed(){ pull(function(){
