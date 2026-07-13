@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>REMC Supervisor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800;900&family=Barlow+Condensed:wght@700;800;900&display=swap');
+:root{--bg:#f4f6f9;--surface:#fff;--surface2:#f8fafc;--border:#e4e8ef;--border2:#d0d7e2;--red:#e11d1d;--green:#16a34a;--blue:#2563eb;--text:#0f1621;--mid:#4b5666;--muted:#8b95a8;--shadow:0 1px 4px rgba(0,0,0,.07),0 4px 16px rgba(0,0,0,.05)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);-webkit-tap-highlight-color:transparent}
+.topbar{position:sticky;top:0;z-index:50;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;padding:10px 14px;box-shadow:0 1px 8px rgba(0,0,0,.06)}
+.brand{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;letter-spacing:1px}
+.brand .r{color:var(--red)}
+.who{margin-left:auto;text-align:right}
+.who-name{font-size:13px;font-weight:800;line-height:1}
+.who-sub{font-size:10px;color:var(--muted)}
+.logout{background:none;border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-family:inherit;font-size:12px;font-weight:700;color:var(--mid);cursor:pointer}
+.cloud{font-size:10px;font-weight:800;padding:2px 7px;border-radius:6px;background:#f1f5f9;color:#64748b}
+.wrap{max-width:900px;margin:0 auto;padding:12px 12px 90px}
+.toolbar{display:flex;align-items:center;gap:8px;margin:8px 0 12px;flex-wrap:wrap}
+.seg{display:flex;background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:3px;gap:2px}
+.seg button{border:none;background:none;font-family:inherit;font-size:13px;font-weight:700;color:var(--muted);padding:6px 16px;border-radius:7px;cursor:pointer}
+.seg button.on{background:var(--red);color:#fff}
+.nav{display:flex;align-items:center;gap:4px;margin-left:auto}
+.nav button{width:34px;height:34px;border:1px solid var(--border);background:var(--surface);border-radius:8px;font-size:16px;color:var(--mid);cursor:pointer}
+.nav .lbl{font-size:13px;font-weight:800;min-width:130px;text-align:center}
+.book-btn{background:var(--blue);color:#fff;border:none;border-radius:9px;padding:9px 16px;font-family:inherit;font-size:14px;font-weight:800;cursor:pointer;box-shadow:0 2px 10px rgba(37,99,235,.3)}
+.menu{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.home{display:flex;flex-direction:column;gap:14px;padding:8px 0}
+.notes-link{align-self:center;margin-top:-6px;background:none;border:none;color:var(--muted);font-family:inherit;font-size:13px;font-weight:800;cursor:pointer;padding:2px 10px}
+.notes-link:active{opacity:.6}
+.home-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:26px 20px;box-shadow:var(--shadow);cursor:pointer;text-align:center;transition:.12s}
+.home-card:active{transform:scale(.99)}
+.home-card .hc-t{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:900;text-transform:uppercase;letter-spacing:1px;color:var(--text)}
+.home-card .hc-s{font-size:13px;color:var(--muted);margin-top:4px}
+.home-book{background:var(--blue);border-color:var(--blue)}
+.home-book .hc-t{color:#fff}
+.home-book .hc-s{color:rgba(255,255,255,.88)}
+.back{background:none;border:none;color:var(--blue);font-family:inherit;font-size:14px;font-weight:800;cursor:pointer;padding:6px 2px;margin-bottom:6px}
+.mbtn{flex:1;min-width:78px;background:var(--surface);color:var(--mid);border:1px solid var(--border);border-radius:10px;padding:11px 8px;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer;transition:.12s}
+.mbtn.on{background:var(--red);color:#fff;border-color:var(--red)}
+.mbtn.mbook{background:var(--blue);color:#fff;border-color:var(--blue);flex:1.25}
+.pcard{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:10px;box-shadow:var(--shadow)}
+.pcard .pn{font-size:15px;font-weight:800}
+.pcard .pm{font-size:12px;color:var(--muted);margin-top:2px}
+.pcard .pinfo{margin-top:9px;display:flex;flex-direction:column;gap:5px}
+.pcard .pi{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--mid)}
+.pcard .pi-ic{width:16px;text-align:center;flex-shrink:0;opacity:.8}
+.pcard .pi a{color:var(--blue);text-decoration:none;font-weight:700}
+.pcard .pf{display:flex;align-items:center;gap:10px;margin-top:10px}
+.pcard .pbook{background:var(--blue);color:#fff;border:none;border-radius:8px;padding:8px 14px;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer}
+.pcard .pnotes{background:var(--surface2);color:var(--mid);border:1px solid var(--border2);border-radius:8px;padding:8px 12px;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer}
+.pcard .ndot{color:var(--red);font-size:13px;line-height:1}
+.note-body{margin-top:9px;font-size:14px;color:var(--text);white-space:pre-wrap;line-height:1.5;background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:10px 12px}
+.pcard .pcount{font-size:12px;color:var(--muted)}
+.daycard{background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:8px;overflow:hidden;box-shadow:var(--shadow)}
+.daycard.today{border-color:var(--red)}
+.daycard.wknd{background:var(--surface2)}
+.dc-head{display:flex;align-items:center;gap:8px;padding:9px 14px;border-bottom:1px solid var(--border);background:var(--surface2)}
+.dc-dow{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted)}
+.dc-date{font-size:13px;font-weight:800}
+.daycard.today .dc-date{color:var(--red)}
+.dc-body{padding:8px 10px;display:flex;flex-direction:column;gap:6px}
+.bk{display:flex;align-items:center;gap:9px;border:1px solid var(--border);border-left:5px solid var(--blue);border-radius:9px;padding:8px 10px;cursor:pointer;background:var(--surface)}
+.bk:active{background:var(--surface2)}
+.bk-main{flex:1;min-width:0}
+.bk-name{font-size:13px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bk-sub{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bk-range{font-size:10px;color:var(--mid);font-weight:700;flex-shrink:0}
+.empty{color:var(--muted);font-size:12px;padding:6px 4px}
+.mgrid{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--shadow)}
+.mrow{display:grid;grid-template-columns:repeat(7,1fr)}
+.mhead{font-size:10px;font-weight:800;text-transform:uppercase;color:var(--muted);text-align:center;padding:8px 2px;background:var(--surface2)}
+.mcell{min-height:72px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);padding:3px 3px;position:relative;overflow:hidden}
+.mcell.out{background:var(--surface2)}
+.mcell.today .mnum{color:var(--red);font-weight:900}
+.mnum{font-size:11px;font-weight:700;color:var(--text)}
+.mbar{font-size:9px;font-weight:700;color:#fff;background:var(--blue);border-radius:4px;padding:1px 4px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+/* Modal */
+.ov{position:fixed;inset:0;background:rgba(15,22,33,.5);display:none;align-items:flex-end;justify-content:center;z-index:100}
+.ov.open{display:flex}
+.sheet{background:var(--surface);width:100%;max-width:560px;border-radius:16px 16px 0 0;max-height:92vh;overflow-y:auto;box-shadow:0 -8px 40px rgba(0,0,0,.3)}
+@media(min-width:560px){.ov{align-items:center}.sheet{border-radius:16px}}
+.sheet-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--surface)}
+.sheet-title{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;text-transform:uppercase}
+.x{background:none;border:none;font-size:20px;color:var(--muted);cursor:pointer;padding:2px 8px}
+.sheet-body{padding:16px 18px}
+.fld{margin-bottom:12px}
+.fld label{display:block;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--mid);margin-bottom:5px}
+.fld input,.fld select{width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:9px;padding:11px 12px;font-family:inherit;font-size:15px;color:var(--text);outline:none}
+.fld input:focus,.fld select:focus{border-color:var(--blue)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.chk{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--mid)}
+.swatches{display:flex;gap:8px;flex-wrap:wrap}
+.sw{width:30px;height:30px;border-radius:8px;cursor:pointer;border:3px solid transparent}
+.sw.on{border-color:var(--text)}
+.sheet-foot{display:flex;gap:10px;padding:14px 18px;border-top:1px solid var(--border);position:sticky;bottom:0;background:var(--surface)}
+.btn{flex:1;border:none;border-radius:10px;padding:13px;font-family:inherit;font-size:15px;font-weight:800;cursor:pointer}
+.btn-save{background:var(--blue);color:#fff}
+.btn-del{background:#fee2e2;color:#dc2626;flex:0 0 auto;padding:13px 18px}
+.btn-cancel{background:var(--surface2);color:var(--mid);border:1px solid var(--border)}
+/* Login */
+.login{position:fixed;inset:0;background:#0f1621;display:flex;align-items:center;justify-content:center;z-index:200;padding:20px}
+.login-card{background:#fff;border-radius:18px;padding:28px 24px;width:360px;max-width:100%;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+.login-brand{font-family:'Barlow Condensed',sans-serif;font-size:30px;font-weight:900;letter-spacing:1px;margin-bottom:2px}
+.login-sub{font-size:13px;color:var(--muted);margin-bottom:20px}
+.login input{width:100%;padding:13px 14px;border:1.5px solid var(--border);border-radius:10px;font-family:inherit;font-size:16px;margin-bottom:10px;outline:none}
+.login input:focus{border-color:var(--blue)}
+.login button{width:100%;padding:14px;background:var(--red);color:#fff;border:none;border-radius:10px;font-family:inherit;font-size:16px;font-weight:800;cursor:pointer}
+.login-msg{font-size:13px;color:#dc2626;text-align:center;min-height:18px;margin-top:10px}
+.banner{background:#fff8e6;border:1px solid #f0d080;color:#7a5c00;font-size:12px;padding:8px 12px;border-radius:9px;margin-bottom:12px}
+</style>
+</head>
+<body>
+
+<!-- ☁️ Same database as the main software. Paste the SAME anon key you used in the main app. -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  window.REMC_SUP_CLOUD = {
+    url:      "https://etupmtayutnupkgbrxkg.supabase.co",
+    anonKey:  "sb_publishable_SU2eO_JM4tqx5hbI0RxJHg_cshf_kLF",
+    workspace: "remc-main"
+  };
+</script>
+
+<!-- LOGIN -->
+<div class="login" id="login">
+  <div class="login-card">
+    <div class="login-brand"><span style="color:#e11d1d">R</span>EMC <span style="font-size:16px;color:#8b95a8">Supervisor</span></div>
+    <div class="login-sub">Sign in with your username</div>
+    <input id="lg-user" type="text" placeholder="Username" autocomplete="username" autocapitalize="characters">
+    <input id="lg-pass" type="password" placeholder="Password" autocomplete="current-password">
+    <button id="lg-btn">Sign in</button>
+    <div class="login-msg" id="lg-msg"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" style="display:none">
+  <div class="topbar">
+    <div class="brand"><span class="r">R</span>EMC</div>
+    <div class="cloud" id="cloud">•</div>
+    <div class="who">
+      <div class="who-name" id="who-name"></div>
+      <div class="who-sub">Supervisor</div>
+    </div>
+    <button class="logout" id="logout">Log out</button>
+  </div>
+
+  <div class="wrap">
+    <!-- HOME MENU -->
+    <div id="home" class="home">
+      <div class="home-card" onclick="goProjects()">
+        <div class="hc-t">Projects</div>
+        <div class="hc-s">View your projects</div>
+      </div>
+      <button class="notes-link" onclick="goAllNotes()">📝 View all notes</button>
+      <div class="home-card" onclick="goScheduled()">
+        <div class="hc-t">Booked Jobs</div>
+        <div class="hc-s">See what's scheduled</div>
+      </div>
+      <div class="home-card home-book" onclick="openBook()">
+        <div class="hc-t">Book Job</div>
+        <div class="hc-s">Schedule a new job</div>
+      </div>
+    </div>
+
+    <!-- MAIN (projects list or schedule) -->
+    <div id="main" style="display:none">
+      <button class="back" onclick="goHome()">‹ Menu</button>
+      <div id="warn"></div>
+      <div class="menu" id="sched-menu" style="display:none">
+        <button class="mbtn on" id="m-week" onclick="setView('week')">Week</button>
+        <button class="mbtn" id="m-month" onclick="setView('month')">Month</button>
+      </div>
+      <div class="toolbar" id="cal-toolbar" style="display:none">
+        <div class="nav">
+          <button onclick="shift(-1)">‹</button>
+          <div class="lbl" id="range-lbl"></div>
+          <button onclick="shift(1)">›</button>
+        </div>
+      </div>
+      <div id="view"></div>
+    </div>
+  </div>
+</div>
+
+<!-- BOOK/EDIT SHEET -->
+<div class="ov" id="sheet-ov">
+  <div class="sheet">
+    <div class="sheet-head">
+      <div class="sheet-title" id="sheet-title">Book Job</div>
+      <button class="x" onclick="closeSheet()">&times;</button>
+    </div>
+    <div class="sheet-body">
+      <div class="fld"><label>Project</label><select id="f-project"></select></div>
+      <div class="row2">
+        <div class="fld"><label>Start date</label><input id="f-start" type="date"></div>
+        <div class="fld"><label>End date</label><input id="f-end" type="date"></div>
+      </div>
+      <div class="fld"><label>Activity</label><input id="f-activity" list="act-list" placeholder="e.g. Bulk earthworks"><datalist id="act-list"><option value="Bulk earthworks"><option value="Detailed excavation"><option value="Site cut"><option value="Trenching"><option value="Backfill"><option value="Level & compact"><option value="Load out"></datalist></div>
+      <div class="fld"><label>Machine</label><input id="f-machine" list="mac-list" placeholder="e.g. 20T Excavator"><datalist id="mac-list"><option value="5T Excavator"><option value="8T Excavator"><option value="13T Excavator"><option value="20T Excavator"><option value="30T Excavator"><option value="Loader"><option value="Dozer"><option value="Skid steer"></datalist></div>
+      <div class="fld"><label>Colour</label><div class="swatches" id="f-swatches"></div></div>
+      <div class="fld"><div class="chk"><input type="checkbox" id="f-sat"> <label style="margin:0">Include Saturdays</label></div></div>
+      <div class="fld"><div class="chk"><input type="checkbox" id="f-sun"> <label style="margin:0">Include Sundays</label></div></div>
+    </div>
+    <div class="sheet-foot">
+      <button class="btn btn-del" id="f-del" style="display:none" onclick="cancelBooking()">Cancel job</button>
+      <button class="btn btn-cancel" onclick="closeSheet()">Close</button>
+      <button class="btn btn-save" onclick="saveBooking()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- NOTES SHEET -->
+<div class="ov" id="notes-ov">
+  <div class="sheet">
+    <div class="sheet-head">
+      <div class="sheet-title" id="notes-title">Notes</div>
+      <button class="x" onclick="closeNotes()">&times;</button>
+    </div>
+    <div class="sheet-body">
+      <div class="fld"><label id="notes-proj" style="color:var(--mid)"></label>
+        <textarea id="n-text" rows="7" placeholder="Write anything you need to remember or flag for the office…" style="width:100%;box-sizing:border-box;font-family:inherit;font-size:14px;padding:10px 12px;border:1px solid var(--border);border-radius:9px;resize:vertical;color:var(--text)"></textarea>
+      </div>
+    </div>
+    <div class="sheet-foot">
+      <button class="btn btn-cancel" onclick="closeNotes()">Close</button>
+      <button class="btn btn-save" onclick="saveNotes()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var CFG = window.REMC_SUP_CLOUD || {};
+  var WS = CFG.workspace || 'remc-main';
+  var CLIENT = Math.random().toString(36).slice(2);
+  var COLORS = ['#2563eb','#16a34a','#9333ea','#ea580c','#0891b2','#be123c','#b45309','#059669'];
+  var sb = null, connected = false;
+  var DATA = {};           // full shared document
+  var PROJECTS = [], BOOKINGS = [], SUPERS = [], NOTES = {};
+  var ME = null;           // {username, name}
+  var VIEW = 'list', OFFSET = 0, EDIT_ID = null, PICK_COLOR = COLORS[0], NOTES_PID = null;
+
+  function $(id){ return document.getElementById(id); }
+  function setCloud(t,bg,c){ var e=$('cloud'); if(!e)return; e.textContent=t; e.style.background=bg||'#f1f5f9'; e.style.color=c||'#64748b'; }
+
+  // ---------- Supabase ----------
+  function ensureClient(){
+    if(sb) return true;
+    if(typeof supabase==='undefined' || !supabase.createClient) return false;
+    if(!CFG.url || String(CFG.anonKey||'').indexOf('PASTE_')>=0) return false;
+    sb = supabase.createClient(CFG.url, CFG.anonKey);
+    return true;
+  }
+  function parseData(){
+    function j(k,def){ try{ return JSON.parse(DATA[k]||def); }catch(e){ return JSON.parse(def); } }
+    PROJECTS = j('remc_projects','[]'); if(!Array.isArray(PROJECTS)) PROJECTS=[];
+    BOOKINGS = j('remc_scheduler','[]'); if(!Array.isArray(BOOKINGS)) BOOKINGS=[];
+    SUPERS   = j('remc_supervisors','[]'); if(!Array.isArray(SUPERS)) SUPERS=[];
+    NOTES    = j('remc_project_notes','{}'); if(!NOTES || typeof NOTES!=='object' || Array.isArray(NOTES)) NOTES={};
+  }
+  function pull(cb){
+    if(!ensureClient()){ if(cb) cb('noconfig'); return; }
+    setCloud('…','#eff6ff','#1d4ed8');
+    sb.from('remc_state').select('data').eq('id',WS).maybeSingle().then(function(res){
+      if(res && res.error){ setCloud('offline','#fee2e2','#dc2626'); if(cb) cb(res.error.message||'error'); return; }
+      DATA = (res && res.data && res.data.data) ? res.data.data : {};
+      parseData(); connected=true; setCloud('☁︎','#dcfce7','#15803d'); if(cb) cb(null);
+    });
+  }
+  function pushBookings(cb){
+    if(!ensureClient()){ if(cb) cb('noconfig'); return; }
+    setCloud('saving…','#fef3c7','#92400e');
+    // read-modify-write: pull latest, change only remc_scheduler, push back
+    sb.from('remc_state').select('data').eq('id',WS).maybeSingle().then(function(res){
+      var d = (res && res.data && res.data.data) ? res.data.data : {};
+      d['remc_scheduler'] = JSON.stringify(BOOKINGS);
+      d['__client'] = CLIENT;
+      sb.from('remc_state').upsert({ id:WS, data:d, updated_at:new Date().toISOString() }).then(function(r2){
+        if(r2 && r2.error){ setCloud('offline','#fee2e2','#dc2626'); if(cb) cb(r2.error.message); }
+        else { DATA=d; setCloud('☁︎','#dcfce7','#15803d'); if(cb) cb(null); }
+      });
+    });
+  }
+  function pushNotes(cb){
+    if(!ensureClient()){ if(cb) cb('noconfig'); return; }
+    setCloud('saving…','#fef3c7','#92400e');
+    sb.from('remc_state').select('data').eq('id',WS).maybeSingle().then(function(res){
+      var d = (res && res.data && res.data.data) ? res.data.data : {};
+      d['remc_project_notes'] = JSON.stringify(NOTES);
+      d['__client'] = CLIENT;
+      sb.from('remc_state').upsert({ id:WS, data:d, updated_at:new Date().toISOString() }).then(function(r2){
+        if(r2 && r2.error){ setCloud('offline','#fee2e2','#dc2626'); if(cb) cb(r2.error.message); }
+        else { DATA=d; setCloud('☁︎','#dcfce7','#15803d'); if(cb) cb(null); }
+      });
+    });
+  }
+  function subscribe(){
+    if(!sb) return;
+    sb.channel('sup_'+WS).on('postgres_changes', {event:'*',schema:'public',table:'remc_state',filter:'id=eq.'+WS}, function(payload){
+      var d = payload && payload.new && payload.new.data;
+      if(!d || d.__client===CLIENT) return;
+      DATA=d; parseData(); render();
+    }).subscribe();
+  }
+
+  // ---------- helpers ----------
+  function keyOf(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+  function parseKey(s){ var p=String(s).split('-'); return new Date(+p[0],+p[1]-1,+p[2]); }
+  function addDays(d,n){ var x=new Date(d); x.setDate(x.getDate()+n); return x; }
+  function todayKey(){ return keyOf(new Date()); }
+  function myProjects(){
+    if(ME && ME.openMode) return PROJECTS.slice(); // login disabled → all projects
+    return PROJECTS.filter(function(p){
+    if(!ME || !p.supervisor) return false;
+    var v=String(p.supervisor).trim().toLowerCase();
+    return v===String(ME.name||'').trim().toLowerCase() || v===String(ME.username||'').trim().toLowerCase();
+  }); }
+  function myProjectIds(){ var s={}; myProjects().forEach(function(p){ s[String(p.id)]=true; }); return s; }
+  function projName(id){ var p=PROJECTS.find(function(x){return String(x.id)===String(id);}); return p?(p.name||('#'+id)):('#'+id); }
+  function myBookings(){ var ids=myProjectIds(); return BOOKINGS.filter(function(b){ return ids[String(b.projectId)]; }); }
+  function bookingCoversDay(b,dk){
+    if(dk < b.start || dk > b.end) return false;
+    var d=parseKey(dk), w=d.getDay();
+    if(w===6 && b.skipSat) return false;
+    if(w===0 && b.skipSun) return false;
+    return true;
+  }
+  var MN=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var DOW=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+  // ---------- render ----------
+  function render(){ if(VIEW==='notes') renderAllNotes(); else if(VIEW==='list') renderProjects(); else if(VIEW==='week') renderWeek(); else renderMonth(); }
+  function renderAllNotes(){
+    var mine=myProjects();
+    var withNotes=mine.filter(function(p){ return NOTES[String(p.id)] && String(NOTES[String(p.id)]).trim(); });
+    if(!withNotes.length){ $('view').innerHTML='<div class="empty" style="padding:26px;text-align:center;color:var(--muted)">No notes yet. Open a project and tap <b>Notes</b> to add one.</div>'; return; }
+    $('view').innerHTML = withNotes.map(function(p){
+      return '<div class="pcard">'
+        + '<div class="pn">'+esc(p.name||('Project '+p.id))+'</div>'
+        + '<div class="pm">'+esc([p.jobNumber,p.address].filter(Boolean).join(' · '))+'</div>'
+        + '<div class="note-body">'+esc(NOTES[String(p.id)])+'</div>'
+        + '</div>';
+    }).join('');
+  }
+  function renderProjects(){
+    var mine=myProjects();
+    if(!mine.length){
+      var total = PROJECTS.length;
+      var sups = {};
+      PROJECTS.forEach(function(p){ var s=(p.supervisor||'(none)'); sups[s]=(sups[s]||0)+1; });
+      var list = Object.keys(sups).map(function(s){ return esc(s)+' ('+sups[s]+')'; }).join(', ');
+      var diag = total
+        ? ('<div style="margin-top:12px;font-size:12px;color:var(--muted);line-height:1.6">Loaded <b>'+total+'</b> project(s) from the cloud. Supervisor values found: '+list+'.<br>You are <b>'+esc(ME&&ME.username||'')+'</b> / <b>'+esc(ME&&ME.name||'')+'</b>. Set a project\'s Supervisor to one of those in the main software.</div>')
+        : '<div style="margin-top:12px;font-size:12px;color:var(--muted)">No projects were received from the cloud yet. Open the main software (signed in) so it syncs the projects.</div>';
+      $('view').innerHTML='<div class="empty" style="padding:26px 18px;text-align:center;color:var(--muted)">No projects assigned to you yet.'+diag+'</div>';
+      return;
+    }
+    $('view').innerHTML = mine.map(function(p){
+      var cnt = BOOKINGS.filter(function(b){ return String(b.projectId)===String(p.id); }).length;
+      var info='';
+      if(p.address) info+='<div class="pi"><span class="pi-ic">📍</span><span>'+esc(p.address)+'</span></div>';
+      if(p.cName)   info+='<div class="pi"><span class="pi-ic">👤</span><span>'+esc(p.cName)+'</span></div>';
+      if(p.cPhone)  info+='<div class="pi"><span class="pi-ic">📞</span><a href="tel:'+esc(String(p.cPhone).replace(/[^0-9+]/g,''))+'">'+esc(p.cPhone)+'</a></div>';
+      if(p.cEmail)  info+='<div class="pi"><span class="pi-ic">✉️</span><a href="mailto:'+esc(p.cEmail)+'">'+esc(p.cEmail)+'</a></div>';
+      return '<div class="pcard">'
+        + '<div class="pn">'+esc(p.name||('Project '+p.id))+'</div>'
+        + '<div class="pm">'+esc([p.jobNumber,p.builder].filter(Boolean).join(' · '))+'</div>'
+        + (info?'<div class="pinfo">'+info+'</div>':'')
+        + '<div class="pf">'
+        +   '<button class="pbook" onclick="openBook(\''+esc(p.id)+'\')">+ Book a job</button>'
+        +   '<button class="pnotes" onclick="openNotes(\''+esc(p.id)+'\')">Notes'+(NOTES[String(p.id)] && String(NOTES[String(p.id)]).trim() ? ' <span class="ndot">●</span>':'')+'</button>'
+        +   '<span class="pcount">'+cnt+' booking'+(cnt===1?'':'s')+'</span>'
+        + '</div>'
+        + '</div>';
+    }).join('');
+  }
+
+  function weekDays(){
+    var base=addDays(new Date(), OFFSET*7); var dow=base.getDay();
+    var mon=addDays(base, dow===0?-6:1-dow); var out=[];
+    for(var i=0;i<7;i++) out.push(addDays(mon,i));
+    return out;
+  }
+  function renderWeek(){
+    var days=weekDays();
+    $('range-lbl').textContent = days[0].getDate()+' '+MN[days[0].getMonth()].slice(0,3)+' – '+days[6].getDate()+' '+MN[days[6].getMonth()].slice(0,3);
+    var bks=myBookings(); var tk=todayKey(); var html='';
+    days.forEach(function(d){
+      var dk=keyOf(d), w=d.getDay(), wknd=(w===0||w===6);
+      var today=dk===tk;
+      var todays=bks.filter(function(b){ return bookingCoversDay(b,dk); });
+      html+='<div class="daycard'+(today?' today':'')+(wknd?' wknd':'')+'">'
+        +'<div class="dc-head"><span class="dc-dow">'+DOW[w]+'</span><span class="dc-date">'+d.getDate()+' '+MN[d.getMonth()].slice(0,3)+'</span></div>'
+        +'<div class="dc-body">'
+        + (todays.length? todays.map(bkRow).join('') : '<div class="empty">No jobs</div>')
+        +'</div></div>';
+    });
+    $('view').innerHTML=html;
+  }
+  function bkRow(b){
+    return '<div class="bk" style="border-left-color:'+(b.color||'#2563eb')+'" onclick="openEdit(\''+b.id+'\')">'
+      +'<div class="bk-main"><div class="bk-name">'+esc(projName(b.projectId))+'</div>'
+      +'<div class="bk-sub">'+esc(b.activity||'')+(b.machine?' · '+esc(b.machine):'')+'</div></div>'
+      +'<div class="bk-range">'+fmtShort(b.start)+'→'+fmtShort(b.end)+'</div></div>';
+  }
+  function fmtShort(s){ var d=parseKey(s); return d.getDate()+'/'+(d.getMonth()+1); }
+
+  function renderMonth(){
+    var base=new Date(); base.setDate(1); base.setMonth(base.getMonth()+OFFSET);
+    var y=base.getFullYear(), m=base.getMonth();
+    $('range-lbl').textContent = MN[m]+' '+y;
+    var first=new Date(y,m,1); var start=addDays(first, -(((first.getDay())+6)%7));
+    var bks=myBookings(); var tk=todayKey();
+    var html='<div class="mgrid"><div class="mrow">'+['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(function(d){return '<div class="mhead">'+d+'</div>';}).join('')+'</div>';
+    for(var wk=0; wk<6; wk++){
+      html+='<div class="mrow">';
+      for(var c=0;c<7;c++){
+        var d=addDays(start, wk*7+c), dk=keyOf(d), out=(d.getMonth()!==m), today=dk===tk;
+        var todays=bks.filter(function(b){ return bookingCoversDay(b,dk); });
+        html+='<div class="mcell'+(out?' out':'')+(today?' today':'')+'">'
+          +'<div class="mnum">'+d.getDate()+'</div>'
+          + todays.slice(0,3).map(function(b){ return '<div class="mbar" style="background:'+(b.color||'#2563eb')+'" onclick="openEdit(\''+b.id+'\')">'+esc(projName(b.projectId))+'</div>'; }).join('')
+          + (todays.length>3?'<div style="font-size:9px;color:var(--muted)">+'+(todays.length-3)+'</div>':'')
+          +'</div>';
+      }
+      html+='</div>';
+    }
+    html+='</div>';
+    $('view').innerHTML=html;
+  }
+
+  function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/'/g,'&#39;'); }
+
+  // ---------- booking sheet ----------
+  function fillProjectSelect(){
+    var sel=$('f-project'); var mine=myProjects();
+    sel.innerHTML = mine.length ? mine.map(function(p){ return '<option value="'+esc(p.id)+'">'+esc(p.name||('#'+p.id))+(p.jobNumber?' ('+esc(p.jobNumber)+')':'')+'</option>'; }).join('')
+      : '<option value="">No projects assigned to you</option>';
+  }
+  function fillSwatches(){
+    $('f-swatches').innerHTML = COLORS.map(function(c){ return '<div class="sw'+(c===PICK_COLOR?' on':'')+'" style="background:'+c+'" onclick="pickColor(\''+c+'\')"></div>'; }).join('');
+  }
+  window.pickColor=function(c){ PICK_COLOR=c; fillSwatches(); };
+
+  window.openBook=function(pid){
+    EDIT_ID=null; PICK_COLOR=COLORS[0];
+    $('sheet-title').textContent='Book Job';
+    $('f-del').style.display='none';
+    fillProjectSelect();
+    if(pid!=null){ var _s=$('f-project'); if(_s) _s.value=String(pid); }
+    var t=todayKey(); $('f-start').value=t; $('f-end').value=t;
+    $('f-activity').value=''; $('f-machine').value=''; $('f-sat').checked=false; $('f-sun').checked=false;
+    fillSwatches();
+    $('sheet-ov').classList.add('open');
+  };
+  window.openEdit=function(id){
+    var b=BOOKINGS.find(function(x){return String(x.id)===String(id);}); if(!b) return;
+    EDIT_ID=id; PICK_COLOR=b.color||COLORS[0];
+    $('sheet-title').textContent='Edit / Review Job';
+    $('f-del').style.display='';
+    fillProjectSelect();
+    $('f-project').value=String(b.projectId);
+    $('f-start').value=b.start; $('f-end').value=b.end;
+    $('f-activity').value=b.activity||''; $('f-machine').value=b.machine||'';
+    $('f-sat').checked=!b.skipSat; $('f-sun').checked=!b.skipSun;
+    fillSwatches();
+    $('sheet-ov').classList.add('open');
+  };
+  window.closeSheet=function(){ $('sheet-ov').classList.remove('open'); };
+  window.openNotes=function(pid){
+    NOTES_PID=String(pid);
+    var p=PROJECTS.find(function(x){return String(x.id)===NOTES_PID;});
+    $('notes-proj').textContent = p ? ('Notes for '+(p.name||('Project '+p.id))) : 'Notes';
+    $('n-text').value = NOTES[NOTES_PID] || '';
+    $('notes-ov').classList.add('open');
+    setTimeout(function(){ try{ $('n-text').focus(); }catch(e){} }, 60);
+  };
+  window.closeNotes=function(){ $('notes-ov').classList.remove('open'); NOTES_PID=null; };
+  window.saveNotes=function(){
+    if(NOTES_PID==null) return;
+    var v=$('n-text').value;
+    if(v && v.trim()) NOTES[NOTES_PID]=v; else delete NOTES[NOTES_PID];
+    $('notes-ov').classList.remove('open');
+    if(VIEW==='list') renderProjects();
+    pushNotes(function(err){ if(err){ alert('Could not save notes to the cloud: '+err); } else { pull(function(){ if(VIEW==='list') renderProjects(); }); } });
+    NOTES_PID=null;
+  };
+
+  window.saveBooking=function(){
+    var pid=$('f-project').value;
+    if(!pid){ alert('You have no projects assigned to you. Ask the office to set you as Supervisor on a project.'); return; }
+    var start=$('f-start').value, end=$('f-end').value;
+    if(!start||!end){ alert('Please choose start and end dates.'); return; }
+    if(end<start){ var t=start; start=end; end=t; }
+    // safety: only your own projects
+    if(!myProjectIds()[String(pid)]){ alert('You can only book your own projects.'); return; }
+    var rec = {
+      projectId: isNaN(pid)? pid : +pid,
+      start:start, end:end,
+      activity:$('f-activity').value.trim(),
+      machine:$('f-machine').value.trim(),
+      color:PICK_COLOR,
+      skipSat: !$('f-sat').checked,
+      skipSun: !$('f-sun').checked,
+      bookedBy: ME? ME.name : 'Supervisor'
+    };
+    if(EDIT_ID){
+      var i=BOOKINGS.findIndex(function(x){return String(x.id)===String(EDIT_ID);});
+      if(i>=0) BOOKINGS[i]=Object.assign({}, BOOKINGS[i], rec);
+    } else {
+      rec.id = 'bk_'+Date.now()+'_'+Math.random().toString(36).slice(2,6);
+      rec.createdAt = new Date().toISOString();
+      BOOKINGS.push(rec);
+    }
+    closeSheet(); render();
+    pushBookings(function(err){ if(err){ alert('Could not save to the cloud: '+err); } else { pull(function(){ render(); }); } });
+  };
+  window.cancelBooking=function(){
+    if(!EDIT_ID) return;
+    if(!confirm('Cancel this job booking?')) return;
+    BOOKINGS = BOOKINGS.filter(function(x){ return String(x.id)!==String(EDIT_ID); });
+    EDIT_ID=null;
+    closeSheet(); render();
+    pushBookings(function(err){ if(err){ alert('Could not save to the cloud: '+err); } else { pull(function(){ render(); }); } });
+  };
+
+  // ---------- view + nav ----------
+  window.setView=function(v){
+    VIEW=v; OFFSET=0;
+    ['week','month'].forEach(function(k){ var b=$('m-'+k); if(b) b.classList.toggle('on', v===k); });
+    var tb=$('cal-toolbar'); if(tb) tb.style.display=(v==='week'||v==='month')?'':'none';
+    render();
+  };
+  function _showMain(){ var h=$('home'), m=$('main'); if(h) h.style.display='none'; if(m) m.style.display=''; }
+  window.goHome=function(){ var h=$('home'), m=$('main'); if(h) h.style.display=''; if(m) m.style.display='none'; };
+  window.goProjects=function(){ _showMain(); var sm=$('sched-menu'); if(sm) sm.style.display='none'; var tb=$('cal-toolbar'); if(tb) tb.style.display='none'; VIEW='list'; OFFSET=0; render(); };
+  window.goScheduled=function(){ _showMain(); var sm=$('sched-menu'); if(sm) sm.style.display=''; setView('week'); };
+  window.goAllNotes=function(){ _showMain(); var sm=$('sched-menu'); if(sm) sm.style.display='none'; var tb=$('cal-toolbar'); if(tb) tb.style.display='none'; VIEW='notes'; render(); };
+  window.shift=function(n){ OFFSET+=n; render(); };
+
+  // ---------- auth (app-level, against remc_supervisors) ----------
+  function tryLogin(user, pass){
+    var u=(user||'').trim().toLowerCase();
+    var found = SUPERS.find(function(s){ return String(s.username||'').trim().toLowerCase()===u && String(s.password||'')===String(pass||''); });
+    return found ? { username:found.username, name:found.name } : null;
+  }
+  function startApp(){
+    $('login').style.display='none'; $('app').style.display='';
+    $('who-name').textContent = ME.name;
+    try{ sessionStorage.setItem('remc_sup_me', JSON.stringify(ME)); }catch(e){}
+    var mine=myProjects();
+    $('warn').innerHTML = mine.length ? '' : '<div class="banner">No projects are assigned to you yet. Ask the office to set you as <b>Supervisor</b> on a project — the project\'s Supervisor must be your username (<b>'+esc(ME.username)+'</b>) or your name (<b>'+esc(ME.name)+'</b>).</div>';
+    subscribe();
+    goHome();
+  }
+  function doLogin(){
+    var msg=$('lg-msg'); msg.textContent='Signing in…';
+    pull(function(err){
+      if(err==='noconfig'){ msg.textContent='App not configured yet (missing key).'; return; }
+      if(err){ msg.textContent='Cannot read the database. Did you run the 3 "anon" SQL lines in Supabase? ('+err+')'; return; }
+      if(!SUPERS.length){
+        var hasKey = DATA && Object.prototype.hasOwnProperty.call(DATA,'remc_supervisors');
+        var nKeys = DATA ? Object.keys(DATA).length : 0;
+        msg.textContent = 'No supervisors found. [doc keys: '+nKeys+' · remc_supervisors present: '+(hasKey?'yes':'no')+' · workspace: '+WS+']. In the main software click "Sync supervisors to cloud now", then reload here.';
+        return;
+      }
+      var u=($('lg-user').value||'').trim().toLowerCase();
+      var byName = SUPERS.find(function(s){ return String(s.username||'').trim().toLowerCase()===u; });
+      if(!byName){ msg.textContent='Username "'+($('lg-user').value||'').trim()+'" not found ('+SUPERS.length+' supervisor(s) loaded).'; return; }
+      if(String(byName.password||'')!==String($('lg-pass').value||'')){ msg.textContent='Wrong password for '+byName.username+'.'; return; }
+      ME={username:byName.username, name:byName.name||byName.username}; msg.textContent=''; startApp();
+    });
+  }
+
+  // ---------- boot ----------
+  function boot(){
+    $('lg-btn').onclick=doLogin;
+    $('lg-pass').addEventListener('keydown', function(e){ if(e.key==='Enter') doLogin(); });
+    $('logout').onclick=function(){ try{ sessionStorage.removeItem('remc_sup_me'); }catch(e){}; location.reload(); };
+    $('sheet-ov').addEventListener('click', function(e){ if(e.target===this) closeSheet(); });
+    $('notes-ov').addEventListener('click', function(e){ if(e.target===this) closeNotes(); });
+    if(!ensureClient()){ $('lg-msg').textContent='Paste the anon key (same as the main app) into this file first.'; return; }
+    // try to resume a session
+    var saved=null; try{ saved=JSON.parse(sessionStorage.getItem('remc_sup_me')||'null'); }catch(e){}
+    pull(function(err){
+      if(err) return; // stay on login
+      var loginRequired = String((DATA && DATA['remc_sup_login_required']!=null) ? DATA['remc_sup_login_required'] : 'true') !== 'false';
+      if(!loginRequired){
+        ME = { username:'*', name:'Supervisor', openMode:true };
+        startApp();
+        return;
+      }
+      if(saved){ var still=SUPERS.find(function(s){return String(s.username)===String(saved.username);}); if(still){ ME={username:still.username,name:still.name}; startApp(); } }
+    });
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+})();
+</script>
+</body>
+</html>
