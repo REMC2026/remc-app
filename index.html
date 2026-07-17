@@ -10224,7 +10224,7 @@ function teamEditProjectBooking(pid){
   var WS = CFG.workspace || 'remc-main';
   var CLIENT_ID = Math.random().toString(36).slice(2);
   var sb = supabase.createClient(CFG.url, CFG.anonKey);
-  var _applying = false, _pushTimer = null;
+  var _applying = false, _pushTimer = null, _dirty = {};
 
   function collectState(){
     var out = { __client: CLIENT_ID };
@@ -10248,14 +10248,37 @@ function teamEditProjectBooking(pid){
     sb.from('remc_state').select('data').eq('id', WS).maybeSingle().then(function(res){
       if(res && !res.error && res.data && res.data.data){ applyState(res.data.data); }
       if(cb) cb();
+    }).catch(function(){
+      setStatus('error');
+      try{ ldSet(100,'Could not reach the cloud — showing saved data.'); ldHide(); }catch(e){}
+      if(cb) cb();
     });
   }
   function push(){
     setStatus('saving');
-    sb.from('remc_state').upsert({ id:WS, data:collectState(), updated_at:new Date().toISOString() }).then(function(res){
-      setStatus(res && res.error ? 'error' : 'saved');
-      if(!(res && res.error)) scheduleBackup();
-    });
+    // READ-MODIFY-WRITE: never blindly overwrite the shared doc.
+    // Take whatever is in the cloud right now and only apply the keys WE actually changed.
+    // This stops one device from wiping bookings/notes another device just created.
+    var dirty = Object.keys(_dirty);
+    sb.from('remc_state').select('data').eq('id', WS).maybeSingle().then(function(res){
+      var base = (res && !res.error && res.data && res.data.data) ? res.data.data : null;
+      if(!base || !Object.keys(base).length){ base = collectState(); }   // first ever write
+      else if(dirty.length){
+        dirty.forEach(function(k){
+          var v = null; try{ v = localStorage.getItem(k); }catch(e){}
+          if(v===null) delete base[k]; else base[k]=v;
+        });
+      } else {
+        base = collectState(); // nothing tracked (e.g. first sync) → send our snapshot
+      }
+      base.__client = CLIENT_ID;
+      sb.from('remc_state').upsert({ id:WS, data:base, updated_at:new Date().toISOString() }).then(function(r2){
+        if(r2 && r2.error){ setStatus('error'); return; }
+        _dirty = {};
+        setStatus('saved');
+        scheduleBackup();
+      });
+    }).catch(function(){ setStatus('error'); });
   }
   function schedulePush(){ if(_applying) return; setStatus('saving'); clearTimeout(_pushTimer); _pushTimer=setTimeout(push, 1200); }
 
@@ -10307,26 +10330,92 @@ function teamEditProjectBooking(pid){
 
   // Auto-sync: mirror any REMC save up to the cloud (debounced)
   var _set = localStorage.setItem.bind(localStorage);
-  localStorage.setItem = function(k,v){ _set(k,v); if(!_applying && k && k.indexOf('remc_')===0) schedulePush(); };
+  localStorage.setItem = function(k,v){ _set(k,v); if(!_applying && k && k.indexOf('remc_')===0){ _dirty[k]=1; schedulePush(); } };
   var _rem = localStorage.removeItem.bind(localStorage);
-  localStorage.removeItem = function(k){ _rem(k); if(!_applying && k && k.indexOf('remc_')===0) schedulePush(); };
+  localStorage.removeItem = function(k){ _rem(k); if(!_applying && k && k.indexOf('remc_')===0){ _dirty[k]=1; schedulePush(); } };
+
+  function applyRemoteAndRender(d){
+    applyState(d);
+    // Soft refresh: bring in the new data and re-render the CURRENT page — do NOT reload the whole app
+    try{
+      var _sp = JSON.parse(localStorage.getItem('remc_projects')||'null');
+      if(Array.isArray(_sp) && _sp.length && typeof PROJ_DATA!=='undefined' && Array.isArray(PROJ_DATA)){ PROJ_DATA.length=0; _sp.forEach(function(p){ PROJ_DATA.push(p); }); }
+    }catch(e){}
+    try{ if(typeof _currentPage!=='undefined' && typeof showPage==='function') showPage(_currentPage); }catch(e){}
+  }
 
   function subscribe(){
     sb.channel('remc_state_'+WS)
       .on('postgres_changes', { event:'*', schema:'public', table:'remc_state', filter:'id=eq.'+WS }, function(payload){
         var d = payload && payload.new && payload.new.data;
         if(!d || d.__client === CLIENT_ID) return; // ignore our own writes
-        applyState(d);
-        // Soft refresh: bring in the new data and re-render the CURRENT page — do NOT reload the whole app
-        try{
-          var _sp = JSON.parse(localStorage.getItem('remc_projects')||'null');
-          if(Array.isArray(_sp) && _sp.length && typeof PROJ_DATA!=='undefined' && Array.isArray(PROJ_DATA)){ PROJ_DATA.length=0; _sp.forEach(function(p){ PROJ_DATA.push(p); }); }
-        }catch(e){}
-        try{ if(typeof _currentPage!=='undefined' && typeof showPage==='function') showPage(_currentPage); }catch(e){}
+        applyRemoteAndRender(d);
         try{ scheduleBackup(); }catch(e){}
       }).subscribe();
+    startAutoRefresh();
   }
-  function onAuthed(){ pull(function(){
+
+  // ---- Safety net: realtime can drop (sleep, wifi change, background tab).
+  // Poll for changes and refresh whenever the window regains focus, so a device is never left with stale data.
+  var _lastSeen = '', _refreshTimer = null, _refreshing = false;
+  function refreshFromCloud(){
+    if(_refreshing || !sb) return;
+    _refreshing = true;
+    sb.from('remc_state').select('data,updated_at').eq('id', WS).maybeSingle().then(function(res){
+      _refreshing = false;
+      if(!res || res.error || !res.data || !res.data.data) return;
+      var stamp = String(res.data.updated_at||'');
+      if(stamp && stamp === _lastSeen) return;         // nothing new
+      _lastSeen = stamp;
+      var d = res.data.data;
+      if(d.__client === CLIENT_ID) return;             // our own write
+      applyRemoteAndRender(d);
+      setStatus('saved');
+    }).catch(function(){ _refreshing = false; });
+  }
+  function startAutoRefresh(){
+    if(_refreshTimer) return;
+    _refreshTimer = setInterval(function(){ if(!document.hidden) refreshFromCloud(); }, 20000);
+    document.addEventListener('visibilitychange', function(){ if(!document.hidden) refreshFromCloud(); });
+    window.addEventListener('focus', refreshFromCloud);
+    window.addEventListener('online', refreshFromCloud);
+  }
+  // ---- Loading overlay with progress ----
+  var _ldEl=null, _ldPct=0, _ldTimer=null;
+  function ldShow(){
+    if(_ldEl) return;
+    _ldEl=document.createElement('div'); _ldEl.id='remc-loading';
+    _ldEl.style.cssText='position:fixed;inset:0;z-index:99998;background:#0f1621;display:flex;align-items:center;justify-content:center;font-family:Barlow,sans-serif';
+    _ldEl.innerHTML='<div style="width:320px;max-width:88vw;text-align:center;color:#fff">'
+      +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:30px;font-weight:900;letter-spacing:1px;margin-bottom:6px"><span style="color:#e11d1d">R</span>EMC</div>'
+      +'<div id="remc-ld-msg" style="font-size:13px;color:#9aa5b8;margin-bottom:18px">Getting your data from the cloud…</div>'
+      +'<div style="height:8px;background:rgba(255,255,255,.12);border-radius:99px;overflow:hidden"><div id="remc-ld-bar" style="height:100%;width:0%;background:#e11d1d;border-radius:99px;transition:width .3s ease"></div></div>'
+      +'<div id="remc-ld-pct" style="font-family:\'Barlow Condensed\',sans-serif;font-size:22px;font-weight:800;margin-top:10px">0%</div>'
+      +'<div style="font-size:11px;color:#6b7686;margin-top:14px">First load on a new device can take a few seconds.</div>'
+      +'</div>';
+    document.body.appendChild(_ldEl);
+    _ldPct=0;
+    // creep slowly so the user sees movement while the network responds
+    _ldTimer=setInterval(function(){ if(_ldPct<90) ldSet(_ldPct+Math.max(1,(90-_ldPct)*0.06)); }, 300);
+  }
+  function ldSet(p, msg){
+    _ldPct=Math.min(100,Math.max(_ldPct,p));
+    var b=document.getElementById('remc-ld-bar'), t=document.getElementById('remc-ld-pct'), m=document.getElementById('remc-ld-msg');
+    if(b) b.style.width=_ldPct.toFixed(0)+'%';
+    if(t) t.textContent=_ldPct.toFixed(0)+'%';
+    if(msg && m) m.textContent=msg;
+  }
+  function ldHide(){
+    if(_ldTimer){ clearInterval(_ldTimer); _ldTimer=null; }
+    ldSet(100,'Ready');
+    var el=_ldEl; _ldEl=null;
+    if(el){ setTimeout(function(){ el.style.transition='opacity .25s'; el.style.opacity='0'; setTimeout(function(){ try{ el.remove(); }catch(e){} }, 260); }, 200); }
+  }
+
+  function onAuthed(){
+    ldShow(); ldSet(10,'Connecting to the cloud…');
+    pull(function(){
+    ldSet(70,'Loading projects and bookings…');
     setStatus('saved'); subscribe(); scheduleBackup();
     try{
       var _sp = JSON.parse(localStorage.getItem('remc_projects')||'null');
@@ -10335,9 +10424,11 @@ function teamEditProjectBooking(pid){
       }
     }catch(e){}
     window._remcCloudSynced = true;
+    ldSet(88,'Preparing your screen…');
     try{ if(typeof pRender==='function') pRender(); }catch(e){}
     try{ if(typeof renderOverview==='function') renderOverview(); }catch(e){}
     try{ if(typeof _currentPage!=='undefined' && typeof showPage==='function') showPage(_currentPage); }catch(e){}
+    ldHide();
   }); }
 
   function showLogin(){

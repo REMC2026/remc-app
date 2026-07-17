@@ -111,6 +111,32 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);-web
 .login button{width:100%;padding:14px;background:var(--red);color:#fff;border:none;border-radius:10px;font-family:inherit;font-size:16px;font-weight:800;cursor:pointer}
 .login-msg{font-size:13px;color:#dc2626;text-align:center;min-height:18px;margin-top:10px}
 .banner{background:#fff8e6;border:1px solid #f0d080;color:#7a5c00;font-size:12px;padding:8px 12px;border-radius:9px;margin-bottom:12px}
+/* ---- Full-screen calendar mode (Booked Jobs) ---- */
+body.cal-mode{overflow:hidden}
+body.cal-mode .wrap{max-width:1200px;height:100vh;display:flex;flex-direction:column;padding-bottom:12px}
+body.cal-mode #main{flex:1;min-height:0;display:flex;flex-direction:column}
+body.cal-mode #view{flex:1;min-height:0;display:flex;flex-direction:column}
+/* Week: 7 equal-height day cards, each scrolls on its own */
+.wk-grid{flex:1;min-height:0;display:flex;flex-direction:column;gap:7px;overflow-y:auto}
+.wk-grid .daycard{flex:1 1 0;min-height:96px;margin-bottom:0;display:flex;flex-direction:column;overflow:hidden}
+.wk-grid .dc-head{flex-shrink:0}
+.wk-grid .dc-body{flex:1;min-height:0;overflow-y:auto}
+.dc-count{margin-left:auto;font-size:10px;font-weight:800;color:var(--mid);background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:1px 8px}
+/* Month: 6 equal-height week rows, each cell scrolls on its own */
+body.cal-mode .mgrid{flex:1;min-height:0;display:flex;flex-direction:column}
+body.cal-mode .mrow-head{flex-shrink:0}
+body.cal-mode .mgrid .mrow:not(.mrow-head){flex:1 1 0;min-height:0}
+body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:2px}
+.mcell::-webkit-scrollbar,.dc-body::-webkit-scrollbar{width:3px}
+.mcell::-webkit-scrollbar-thumb,.dc-body::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.mnum{flex-shrink:0}
+.mbar{flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* Phones: keep cells tappable — grid scrolls if the screen is too short */
+@media (max-width:640px){
+  body.cal-mode .mgrid{overflow-y:auto}
+  body.cal-mode .mgrid .mrow:not(.mrow-head){min-height:76px}
+  .wk-grid .daycard{min-height:88px}
+}
 .wk-toggle{display:flex;gap:10px}
 .wk-day{flex:1;padding:11px 12px;border:1.5px solid var(--border);border-radius:12px;background:var(--surface2);color:var(--mid);font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;transition:all .15s;user-select:none}
 .wk-day:hover{border-color:var(--border2)}
@@ -274,6 +300,37 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);-web
     SUPERS   = j('remc_supervisors','[]'); if(!Array.isArray(SUPERS)) SUPERS=[];
     NOTES    = j('remc_project_notes','{}'); if(!NOTES || typeof NOTES!=='object' || Array.isArray(NOTES)) NOTES={};
   }
+  // ---- Loading overlay with progress ----
+  var _ldEl=null, _ldPct=0, _ldTimer=null;
+  function ldShow(){
+    if(_ldEl) return;
+    _ldEl=document.createElement('div'); _ldEl.id='sup-loading';
+    _ldEl.style.cssText='position:fixed;inset:0;z-index:99998;background:#0f1621;display:flex;align-items:center;justify-content:center;font-family:Barlow,sans-serif;padding:20px';
+    _ldEl.innerHTML='<div style="width:300px;max-width:88vw;text-align:center;color:#fff">'
+      +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:28px;font-weight:900;letter-spacing:1px;margin-bottom:4px"><span style="color:#e11d1d">R</span>EMC <span style="font-size:16px;color:#8b95a8">Supervisor</span></div>'
+      +'<div id="sup-ld-msg" style="font-size:13px;color:#9aa5b8;margin-bottom:18px">Getting your data from the cloud…</div>'
+      +'<div style="height:8px;background:rgba(255,255,255,.12);border-radius:99px;overflow:hidden"><div id="sup-ld-bar" style="height:100%;width:0%;background:#e11d1d;border-radius:99px;transition:width .3s ease"></div></div>'
+      +'<div id="sup-ld-pct" style="font-family:\'Barlow Condensed\',sans-serif;font-size:22px;font-weight:800;margin-top:10px">0%</div>'
+      +'<div style="font-size:11px;color:#6b7686;margin-top:14px">First load on a new phone can take a few seconds.</div>'
+      +'</div>';
+    document.body.appendChild(_ldEl);
+    _ldPct=0;
+    _ldTimer=setInterval(function(){ if(_ldPct<90) ldSet(_ldPct+Math.max(1,(90-_ldPct)*0.06)); }, 300);
+  }
+  function ldSet(p,msg){
+    _ldPct=Math.min(100,Math.max(_ldPct,p));
+    var b=document.getElementById('sup-ld-bar'), t=document.getElementById('sup-ld-pct'), m=document.getElementById('sup-ld-msg');
+    if(b) b.style.width=_ldPct.toFixed(0)+'%';
+    if(t) t.textContent=_ldPct.toFixed(0)+'%';
+    if(msg && m) m.textContent=msg;
+  }
+  function ldHide(){
+    if(_ldTimer){ clearInterval(_ldTimer); _ldTimer=null; }
+    ldSet(100,'Ready');
+    var el=_ldEl; _ldEl=null;
+    if(el){ setTimeout(function(){ el.style.transition='opacity .25s'; el.style.opacity='0'; setTimeout(function(){ try{ el.remove(); }catch(e){} }, 260); }, 200); }
+  }
+
   function pull(cb){
     if(!ensureClient()){ if(cb) cb('noconfig'); return; }
     setCloud('…','#eff6ff','#1d4ed8');
@@ -281,6 +338,9 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);-web
       if(res && res.error){ setCloud('offline','#fee2e2','#dc2626'); if(cb) cb(res.error.message||'error'); return; }
       DATA = (res && res.data && res.data.data) ? res.data.data : {};
       parseData(); connected=true; setCloud('☁︎','#dcfce7','#15803d'); if(cb) cb(null);
+    }).catch(function(e){
+      setCloud('offline','#fee2e2','#dc2626');
+      if(cb) cb((e && e.message) || 'network');
     });
   }
   function pushBookings(cb){
@@ -317,6 +377,33 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);-web
       if(!d || d.__client===CLIENT) return;
       DATA=d; parseData(); render();
     }).subscribe();
+    startAutoRefresh();
+  }
+
+  // ---- Safety net: realtime can drop (phone sleeps, wifi changes, app in background).
+  // Poll for changes and refresh whenever the app comes back to the foreground.
+  var _lastSeen='', _refreshTimer=null, _refreshing=false;
+  function refreshFromCloud(){
+    if(_refreshing || !sb || !ME) return;
+    _refreshing=true;
+    sb.from('remc_state').select('data,updated_at').eq('id',WS).maybeSingle().then(function(res){
+      _refreshing=false;
+      if(!res || res.error || !res.data || !res.data.data) return;
+      var stamp=String(res.data.updated_at||'');
+      if(stamp && stamp===_lastSeen) return;
+      _lastSeen=stamp;
+      var d=res.data.data;
+      if(d.__client===CLIENT) return;
+      DATA=d; parseData(); render();
+      setCloud('☁︎','#dcfce7','#15803d');
+    }).catch(function(){ _refreshing=false; });
+  }
+  function startAutoRefresh(){
+    if(_refreshTimer) return;
+    _refreshTimer=setInterval(function(){ if(!document.hidden) refreshFromCloud(); }, 20000);
+    document.addEventListener('visibilitychange', function(){ if(!document.hidden) refreshFromCloud(); });
+    window.addEventListener('focus', refreshFromCloud);
+    window.addEventListener('online', refreshFromCloud);
   }
 
   // ---------- helpers ----------
@@ -400,17 +487,20 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);-web
   function renderWeek(){
     var days=weekDays();
     $('range-lbl').textContent = days[0].getDate()+' '+MN[days[0].getMonth()].slice(0,3)+' – '+days[6].getDate()+' '+MN[days[6].getMonth()].slice(0,3);
-    var bks=myBookings(); var tk=todayKey(); var html='';
+    var bks=myBookings(); var tk=todayKey(); var html='<div class="wk-grid">';
     days.forEach(function(d){
       var dk=keyOf(d), w=d.getDay(), wknd=(w===0||w===6);
       var today=dk===tk;
       var todays=bks.filter(function(b){ return bookingCoversDay(b,dk); });
       html+='<div class="daycard'+(today?' today':'')+(wknd?' wknd':'')+'">'
-        +'<div class="dc-head"><span class="dc-dow">'+DOW[w]+'</span><span class="dc-date">'+d.getDate()+' '+MN[d.getMonth()].slice(0,3)+'</span></div>'
+        +'<div class="dc-head"><span class="dc-dow">'+DOW[w]+'</span><span class="dc-date">'+d.getDate()+' '+MN[d.getMonth()].slice(0,3)+'</span>'
+        + (todays.length? '<span class="dc-count">'+todays.length+'</span>' : '')
+        +'</div>'
         +'<div class="dc-body">'
         + (todays.length? todays.map(bkRow).join('') : '<div class="empty">No jobs</div>')
         +'</div></div>';
     });
+    html+='</div>';
     $('view').innerHTML=html;
   }
   function bkRow(b){
@@ -427,7 +517,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);-web
     $('range-lbl').textContent = MN[m]+' '+y;
     var first=new Date(y,m,1); var start=addDays(first, -(((first.getDay())+6)%7));
     var bks=myBookings(); var tk=todayKey();
-    var html='<div class="mgrid"><div class="mrow">'+['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(function(d){return '<div class="mhead">'+d+'</div>';}).join('')+'</div>';
+    var html='<div class="mgrid"><div class="mrow mrow-head">'+['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(function(d){return '<div class="mhead">'+d+'</div>';}).join('')+'</div>';
     for(var wk=0; wk<6; wk++){
       html+='<div class="mrow">';
       for(var c=0;c<7;c++){
@@ -435,8 +525,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);-web
         var todays=bks.filter(function(b){ return bookingCoversDay(b,dk); });
         html+='<div class="mcell'+(out?' out':'')+(today?' today':'')+'">'
           +'<div class="mnum">'+d.getDate()+'</div>'
-          + todays.slice(0,3).map(function(b){ return '<div class="mbar" style="background:'+(b.color||'#2563eb')+'" onclick="openEdit(\''+b.id+'\')">'+esc(projName(b.projectId))+'</div>'; }).join('')
-          + (todays.length>3?'<div style="font-size:9px;color:var(--muted)">+'+(todays.length-3)+'</div>':'')
+          + todays.map(function(b){ return '<div class="mbar" style="background:'+(b.color||'#2563eb')+'" title="'+esc(projName(b.projectId))+'" onclick="openEdit(\''+b.id+'\')">'+esc(projName(b.projectId))+'</div>'; }).join('')
           +'</div>';
       }
       html+='</div>';
@@ -557,13 +646,14 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);-web
     VIEW=v; OFFSET=0;
     ['week','month'].forEach(function(k){ var b=$('m-'+k); if(b) b.classList.toggle('on', v===k); });
     var tb=$('cal-toolbar'); if(tb) tb.style.display=(v==='week'||v==='month')?'':'none';
+    document.body.classList.toggle('cal-mode', v==='week'||v==='month');
     render();
   };
   function _showMain(){ var h=$('home'), m=$('main'); if(h) h.style.display='none'; if(m) m.style.display=''; }
-  window.goHome=function(){ var h=$('home'), m=$('main'); if(h) h.style.display=''; if(m) m.style.display='none'; };
-  window.goProjects=function(){ _showMain(); var sm=$('sched-menu'); if(sm) sm.style.display='none'; var tb=$('cal-toolbar'); if(tb) tb.style.display='none'; VIEW='list'; OFFSET=0; render(); };
+  window.goHome=function(){ var h=$('home'), m=$('main'); if(h) h.style.display=''; if(m) m.style.display='none'; document.body.classList.remove('cal-mode'); };
+  window.goProjects=function(){ _showMain(); var sm=$('sched-menu'); if(sm) sm.style.display='none'; var tb=$('cal-toolbar'); if(tb) tb.style.display='none'; document.body.classList.remove('cal-mode'); VIEW='list'; OFFSET=0; render(); };
   window.goScheduled=function(){ _showMain(); var sm=$('sched-menu'); if(sm) sm.style.display=''; setView('week'); };
-  window.goAllNotes=function(){ _showMain(); var sm=$('sched-menu'); if(sm) sm.style.display='none'; var tb=$('cal-toolbar'); if(tb) tb.style.display='none'; VIEW='notes'; render(); };
+  window.goAllNotes=function(){ _showMain(); var sm=$('sched-menu'); if(sm) sm.style.display='none'; var tb=$('cal-toolbar'); if(tb) tb.style.display='none'; document.body.classList.remove('cal-mode'); VIEW='notes'; render(); };
   window.shift=function(n){ OFFSET+=n; render(); };
 
   // ---------- auth (app-level, against remc_supervisors) ----------
@@ -623,20 +713,23 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);-web
     try{ if(remUser) $('lg-user').value=remUser; if(remPass) $('lg-pass').value=remPass; if($('lg-remember')) $('lg-remember').checked=remOn; }catch(e){}
     // try to resume a session
     var saved=null; try{ saved=JSON.parse(sessionStorage.getItem('remc_sup_me')||'null'); }catch(e){}
+    ldShow(); ldSet(12,'Connecting to the cloud…');
     pull(function(err){
-      if(err) return; // stay on login
+      if(err){ ldSet(100,'Could not reach the cloud.'); ldHide(); return; } // stay on login
+      ldSet(75,'Loading projects and bookings…');
       var loginRequired = String((DATA && DATA['remc_sup_login_required']!=null) ? DATA['remc_sup_login_required'] : 'true') !== 'false';
       if(!loginRequired){
         ME = { username:'*', name:'Supervisor', openMode:true };
-        startApp();
+        ldSet(90,'Preparing your screen…'); startApp(); ldHide();
         return;
       }
-      if(saved){ var still=SUPERS.find(function(s){return String(s.username)===String(saved.username);}); if(still){ ME={username:still.username,name:still.name}; startApp(); return; } }
+      if(saved){ var still=SUPERS.find(function(s){return String(s.username)===String(saved.username);}); if(still){ ME={username:still.username,name:still.name}; ldSet(90,'Preparing your screen…'); startApp(); ldHide(); return; } }
       // Auto sign-in from saved credentials on this device
       if(remOn && remUser && remPass){
         var m=SUPERS.find(function(s){ return String(s.username||'').trim().toLowerCase()===String(remUser).trim().toLowerCase(); });
-        if(m && String(m.password||'')===String(remPass)){ ME={username:m.username, name:m.name||m.username}; startApp(); return; }
+        if(m && String(m.password||'')===String(remPass)){ ME={username:m.username, name:m.name||m.username}; ldSet(90,'Preparing your screen…'); startApp(); ldHide(); return; }
       }
+      ldHide(); // no auto-login → show the login screen
     });
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', boot); else boot();
