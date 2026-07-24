@@ -210,7 +210,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
         <div class="ov-search-bar">
           <div class="ov-search-wrap">
             <svg class="ov-search-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="6.5" cy="6.5" r="4.5"/><path d="M10.5 10.5l3 3"/></svg>
-            <input class="ov-search-input" id="ov-com-search" placeholder="Search name, supervisor, address…" oninput="filterOverviewCol('com')">
+            <input class="ov-search-input" id="ov-com-search" placeholder="Search name, supervisor, address…" oninput="filterOverviewCol('com')" autocomplete="off" autocorrect="off" spellcheck="false">
             <button class="ov-search-clear" id="ov-com-clear" onclick="clearOverviewSearch('com')" style="display:none">✕</button>
           </div>
         </div>
@@ -237,7 +237,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
         <div class="ov-search-bar">
           <div class="ov-search-wrap">
             <svg class="ov-search-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="6.5" cy="6.5" r="4.5"/><path d="M10.5 10.5l3 3"/></svg>
-            <input class="ov-search-input" id="ov-res-search" placeholder="Search name, supervisor, address…" oninput="filterOverviewCol('res')">
+            <input class="ov-search-input" id="ov-res-search" placeholder="Search name, supervisor, address…" oninput="filterOverviewCol('res')" autocomplete="off" autocorrect="off" spellcheck="false">
             <button class="ov-search-clear" id="ov-res-clear" onclick="clearOverviewSearch('res')" style="display:none">✕</button>
           </div>
         </div>
@@ -453,7 +453,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
         </div>
         <div class="quot-search-wrap">
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="6.5" cy="6.5" r="4.5"/><path d="M10.5 10.5l3 3"/></svg>
-          <input type="text" id="quot-search" class="quot-search-input"
+          <input type="text" id="quot-search" class="quot-search-input" autocomplete="off" autocorrect="off" spellcheck="false"
             placeholder="Search project, client, REMC #, status, date…"
             oninput="renderQuotations()">
           <button id="quot-search-clear" onclick="document.getElementById('quot-search').value='';renderQuotations()" style="display:none;background:none;border:none;cursor:pointer;color:var(--muted);font-size:13px;padding:0 2px;line-height:1">✕</button>
@@ -636,7 +636,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
           </button>
           <input type="text" id="mat-search" placeholder="🔍 Filter locations or materials..."
             oninput="renderMaterials()"
-            style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:9px 16px;font-size:14px;font-family:'Barlow',sans-serif;color:var(--text);outline:none;width:250px;box-shadow:var(--shadow)">
+            style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:9px 16px;font-size:14px;font-family:'Barlow',sans-serif;color:var(--text);outline:none;width:250px;box-shadow:var(--shadow)" autocomplete="off" autocorrect="off" spellcheck="false">
           <div
             style="display:flex;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:4px;gap:2px;box-shadow:var(--shadow)">
             <button id="mt-all" onclick="matFilter('all')"
@@ -716,7 +716,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
                 <div class="pool-header" style="flex-shrink:0">
                   <span class="pool-title">👤 Staff — Drag to assign</span>
                 </div>
-                <input class="pool-search" id="staff-search" placeholder="🔍 Search staff..."
+                <input class="pool-search" id="staff-search" placeholder="🔍 Search staff..." autocomplete="off" autocorrect="off" spellcheck="false"
                   oninput="planRenderStaffPool()" style="flex-shrink:0">
                 <div class="pool-list" id="staff-pool-list" style="flex:1;overflow-y:auto;min-height:120px"></div>
               </div>
@@ -1723,12 +1723,28 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
                 <div><div class="map-lbl">Username</div><input id="acc-user" class="map-sel" placeholder="e.g. MDT"></div>
                 <div><div class="map-lbl">Password</div><input id="acc-pass" class="map-sel" placeholder="e.g. REMC123"></div>
                 <div><div class="map-lbl">Role</div>
-                  <select id="acc-role" class="map-sel">
+                  <select id="acc-role" class="map-sel" onchange="remcAccRoleChanged()">
                     <option value="office">Office</option>
                     <option value="supervisor">Site supervisor</option>
-                    <option value="admin">Admin</option>
+                    <option value="admin">Admin (full access)</option>
+                    <option value="master">Master (full access)</option>
                   </select>
                 </div>
+              </div>
+
+              <div style="border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px;background:var(--surface2)">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:4px;flex-wrap:wrap">
+                  <div>
+                    <div style="font-size:13px;font-weight:800">Pages this person can open</div>
+                    <div style="font-size:11px;color:var(--muted)">Tick the pages they are allowed to see in the top menu.</div>
+                  </div>
+                  <div style="display:flex;gap:6px">
+                    <button type="button" class="step-btn-sec" style="padding:5px 12px;font-size:12px" onclick="remcAccPagesAll(true)">Select all</button>
+                    <button type="button" class="step-btn-sec" style="padding:5px 12px;font-size:12px" onclick="remcAccPagesAll(false)">Clear</button>
+                  </div>
+                </div>
+                <div id="acc-pages-note" style="display:none;font-size:12px;color:#15803d;font-weight:700;margin:8px 0 0">✓ Full access — this profile can open every page.</div>
+                <div id="acc-pages" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px;margin-top:10px"></div>
               </div>
               <div id="acc-form-msg" style="font-size:12px;color:var(--red);margin-bottom:10px;min-height:16px"></div>
               <button class="step-btn-pri" id="acc-save-btn">Add user</button>
@@ -2069,6 +2085,24 @@ filterOverviewCol('com');
 filterOverviewCol('res');
 }
 
+// Browsers can restore whatever was typed into a search box last time (form restoration).
+// Always start with empty filters so the app never opens pre-filtered.
+function remcClearFilters(){
+  ['ov-com-search','ov-res-search','quot-search','mat-search','staff-search'].forEach(function(id){
+    var el=document.getElementById(id);
+    if(el && el.value){ el.value=''; }
+  });
+  try{ if(typeof filterOverviewCol==='function'){ filterOverviewCol('com'); filterOverviewCol('res'); } }catch(e){}
+  ['ov-com-clear','ov-res-clear','quot-search-clear'].forEach(function(id){ var b=document.getElementById(id); if(b) b.style.display='none'; });
+}
+document.addEventListener('DOMContentLoaded', function(){
+  remcClearFilters();
+  // run again after the browser finishes restoring the page (bfcache / soft reload)
+  setTimeout(remcClearFilters, 250);
+  setTimeout(remcClearFilters, 1200);
+});
+window.addEventListener('pageshow', function(e){ if(e.persisted) remcClearFilters(); });
+
 function applyResidentialVis(){
   var show=false; try{ show = localStorage.getItem('show_residential')==='1'; }catch(e){}
   if(document.body) document.body.classList.toggle('hide-residential', !show);
@@ -2088,6 +2122,13 @@ p.classList.toggle('active', p.id === 'stpanel-' + tab);
 }
 
 function showPage(name) {
+try{
+  var _allowed = (typeof window.remcAllowedPages==='function') ? window.remcAllowedPages() : null;
+  if(_allowed && name && !_allowed[name]){
+    alert('You do not have access to that page. Ask an administrator if you need it.');
+    name = 'overview';
+  }
+}catch(e){}
 _currentPage = name;
 const pg = document.getElementById('page-' + name);
 document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -5626,6 +5667,11 @@ var result = {};
 NAV_TABS.forEach(function(t) {
 result[t.key] = saved[t.key] !== undefined ? saved[t.key] : true;
 });
+// Hide anything this person is not allowed to open
+try{
+  var allowed = (typeof window.remcAllowedPages==='function') ? window.remcAllowedPages() : null;
+  if(allowed){ NAV_TABS.forEach(function(t){ if(!allowed[t.key]) result[t.key]=false; }); }
+}catch(e){}
 return result;
 } catch(e) { return {}; }
 }
@@ -10596,6 +10642,7 @@ function teamEditProjectBooking(pid){
     window._remcCloudSynced = true;
     try{ if(window.remcShowLogout) window.remcShowLogout(true); }catch(e){}
     try{ if(window.remcAccRender) window.remcAccRender(); }catch(e){}
+    try{ var _m=document.querySelector('.nav-menu'); if(_m) _m._lastVisKey=null; if(typeof applyNavVis==='function') applyNavVis(); }catch(e){}
     startLocalWatch();
     ldSet(88,'Preparing your screen…');
     try{ if(typeof pRender==='function') pRender(); }catch(e){}
@@ -10727,7 +10774,7 @@ function teamEditProjectBooking(pid){
     var list=load();
     if(list.length===0){ save([ADMIN_SEED]); return true; }
     // never leave the system without an admin to manage it
-    if(!list.some(function(u){ return u.role==='admin'; })){
+    if(!list.some(function(u){ return u.role==='admin' || u.role==='master'; })){
       list.push(Object.assign({}, ADMIN_SEED, { id:'u-adm-'+Date.now() }));
       save(list); return true;
     }
@@ -10758,7 +10805,59 @@ function teamEditProjectBooking(pid){
     var t=((a?a[0]:'')+(b?b[0]:'')).toUpperCase();
     return t || (u.username||'?').slice(0,2).toUpperCase();
   }
-  var ROLES = { office:'Office', supervisor:'Site supervisor', admin:'Admin' };
+  var ROLES = { master:'Master', office:'Office', supervisor:'Site supervisor', admin:'Admin' };
+  // The pages that can be switched on or off per person (must match NAV_TABS in the app)
+  var PAGES = [
+    { key:'overview',     label:'🏗️ Overview' },
+    { key:'material',     label:'⚖️ Material Balance' },
+    { key:'materials',    label:'🚚 Materials' },
+    { key:'quotations',   label:'📊 Quotations' },
+    { key:'team',         label:'👥 Team Planning' },
+    { key:'projects',     label:'📁 Projects' },
+    { key:'jobscheduler', label:'📅 Job Scheduler' },
+    { key:'settings',     label:'⚙️ Settings' }
+  ];
+  var FULL_ACCESS_ROLES = { master:1, admin:1 };
+  function hasFullAccess(u){ return !!(u && FULL_ACCESS_ROLES[u.role]); }
+
+  function buildPageBoxes(selected){
+    var host=$('acc-pages'); if(!host) return;
+    var sel = selected || {};
+    host.innerHTML = PAGES.map(function(p){
+      var on = sel[p.key] ? ' checked' : '';
+      return '<label style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--text);background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 10px;cursor:pointer;user-select:none">'
+        + '<input type="checkbox" class="acc-page-box" data-page="'+p.key+'"'+on+' style="width:16px;height:16px;cursor:pointer;accent-color:#16a34a">'
+        + esc(p.label) + '</label>';
+    }).join('');
+  }
+  function readPageBoxes(){
+    var out=[];
+    Array.prototype.forEach.call(document.querySelectorAll('.acc-page-box'), function(b){ if(b.checked) out.push(b.getAttribute('data-page')); });
+    return out;
+  }
+  window.remcAccPagesAll = function(on){
+    Array.prototype.forEach.call(document.querySelectorAll('.acc-page-box'), function(b){ b.checked = !!on; });
+  };
+  window.remcAccRoleChanged = function(){
+    var r=($('acc-role')||{}).value||'office';
+    var full = !!FULL_ACCESS_ROLES[r];
+    var note=$('acc-pages-note'), grid=$('acc-pages');
+    if(note) note.style.display = full ? '' : 'none';
+    if(grid) grid.style.display = full ? 'none' : 'grid';
+  };
+
+  // Which pages the person signed in right now may open (null = everything)
+  window.remcAllowedPages = function(){
+    var me = findMe();
+    // signed in with a cloud email account but not listed → full access (owner-level)
+    if(!me) return (!window.REMC_LOCAL_USER && myEmail().indexOf('@')>=0) ? null : null;
+    if(hasFullAccess(me)) return null;
+    var list = Array.isArray(me.pages) ? me.pages : [];
+    if(!list.length) return null;   // nothing configured yet → don't lock anyone out
+    var map={}; list.forEach(function(k){ map[k]=true; });
+    map.overview = true;            // always leave a landing page
+    return map;
+  };
 
   // ---- Who am I, and am I allowed to manage this list? ----
   function myEmail(){ return String(window.REMC_ME||'').trim().toLowerCase(); }
@@ -10769,7 +10868,7 @@ function teamEditProjectBooking(pid){
           || String(u.username||'').trim().toLowerCase()===em;
     }) || null;
   }
-  function anyAdmin(){ return load().some(function(u){ return u.role==='admin'; }); }
+  function anyAdmin(){ return load().some(function(u){ return u.role==='admin' || u.role==='master'; }); }
   // Who may add / edit / remove people:
   //  • nobody registered yet  → anyone signed in (so the first admin can be created)
   //  • listed in the access list → whatever role they were given
@@ -10779,7 +10878,7 @@ function teamEditProjectBooking(pid){
   function canManage(){
     if(!anyAdmin()) return true;
     var me=findMe();
-    if(me) return me.role==='admin';
+    if(me) return hasFullAccess(me);
     if(!window.REMC_LOCAL_USER && myEmail().indexOf('@')>=0) return true;
     return false;
   }
@@ -10822,7 +10921,8 @@ function teamEditProjectBooking(pid){
             + '<div style="width:36px;height:36px;border-radius:9px;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:var(--mid);flex-shrink:0">'+esc(initials(u))+'</div>'
             + '<div style="flex:1;min-width:0">'
             +   '<div style="font-size:14px;font-weight:800">'+esc(fullName(u))+' <span style="font-size:10px;font-weight:700;color:var(--blue);background:var(--blue-light);border:1px solid rgba(37,99,235,.2);padding:1px 7px;border-radius:5px;margin-left:4px">'+esc(ROLES[u.role]||'Office')+'</span></div>'
-            +   '<div style="font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(u.email||'no email')+' · Username: <b>'+esc(u.username||'—')+'</b></div>'
+            +   '<div style="font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(u.email||'no email')+' · Username: <b>'+esc(u.username||'—')+'</b> · '
+            +      (hasFullAccess(u) ? 'All pages' : ((Array.isArray(u.pages)&&u.pages.length) ? (u.pages.length+' page'+(u.pages.length>1?'s':'')) : 'All pages'))+'</div>'
             + '</div>'
             + (canManage() ? ('<button class="pt-btn" title="Edit" onclick="remcAccEdit(\''+esc(u.id)+'\')">✏️</button>'
             + '<button class="pt-btn del" title="Delete" onclick="remcAccDelete(\''+esc(u.id)+'\')">🗑</button>') : '')
@@ -10835,6 +10935,8 @@ function teamEditProjectBooking(pid){
     EDIT_ID=null;
     ['acc-first','acc-last','acc-email','acc-user','acc-pass'].forEach(function(id){ var el=$(id); if(el) el.value=''; });
     var r=$('acc-role'); if(r) r.value='office';
+    buildPageBoxes({ overview:true, projects:true, jobscheduler:true });
+    try{ window.remcAccRoleChanged(); }catch(e){}
     var m=$('acc-form-msg'); if(m) m.textContent='';
     var t=$('acc-form-title'); if(t) t.textContent='Add user';
     var n=$('acc-form-num'); if(n) n.textContent='+';
@@ -10852,6 +10954,9 @@ function teamEditProjectBooking(pid){
     if($('acc-user'))  $('acc-user').value=u.username||'';
     if($('acc-pass'))  $('acc-pass').value=u.password||'';
     if($('acc-role'))  $('acc-role').value=u.role||'office';
+    var selMap={}; (Array.isArray(u.pages)?u.pages:[]).forEach(function(k){ selMap[k]=true; });
+    buildPageBoxes(selMap);
+    try{ window.remcAccRoleChanged(); }catch(e){}
     var t=$('acc-form-title'); if(t) t.textContent='Edit user';
     var n=$('acc-form-num'); if(n) n.textContent='✎';
     var b=$('acc-save-btn'); if(b) b.textContent='Save changes';
@@ -10864,8 +10969,8 @@ function teamEditProjectBooking(pid){
     if(!canManage()){ alert('Only an Admin can remove people.'); return; }
     var list=load();
     var u=list.find(function(x){ return String(x.id)===String(id); }); if(!u) return;
-    if(u.role==='admin' && list.filter(function(x){ return x.role==='admin'; }).length<=1){
-      alert('This is the only Admin. Make someone else an Admin first, otherwise nobody could manage this list.');
+    if(hasFullAccess(u) && list.filter(function(x){ return hasFullAccess(x); }).length<=1){
+      alert('This is the only account with full access. Give someone else the Master or Admin role first, otherwise nobody could manage this list.');
       return;
     }
     if(!confirm('Remove '+fullName(u)+' from the access list?')) return;
@@ -10885,6 +10990,7 @@ function teamEditProjectBooking(pid){
     var user =($('acc-user').value||'').trim();
     var pass =($('acc-pass').value||'');
     var role =($('acc-role').value||'office');
+    var pages = FULL_ACCESS_ROLES[role] ? PAGES.map(function(p){ return p.key; }) : readPageBoxes();
 
     if(!first){ if(msg) msg.textContent='Please enter a first name.'; return; }
     if(!user){ if(msg) msg.textContent='Please enter a username.'; return; }
@@ -10898,16 +11004,16 @@ function teamEditProjectBooking(pid){
     if(clash){ if(msg) msg.textContent='That username is already used by '+fullName(clash)+'.'; return; }
 
     var meNow=findMe();
-    if(EDIT_ID && meNow && String(meNow.id)===String(EDIT_ID) && meNow.role==='admin' && role!=='admin'){
+    if(EDIT_ID && meNow && String(meNow.id)===String(EDIT_ID) && hasFullAccess(meNow) && !FULL_ACCESS_ROLES[role]){
       if(!confirm('You are removing your own Admin rights.\n\nYou will no longer be able to manage this list. Continue?')) return;
     }
     if(EDIT_ID){
       list=list.map(function(x){
         if(String(x.id)!==String(EDIT_ID)) return x;
-        return { id:x.id, firstName:first, lastName:last, email:email, username:user, password:pass, role:role, createdAt:x.createdAt||Date.now() };
+        return { id:x.id, firstName:first, lastName:last, email:email, username:user, password:pass, role:role, pages:pages, createdAt:x.createdAt||Date.now() };
       });
     } else {
-      list.push({ id:'u'+Date.now()+Math.random().toString(36).slice(2,6), firstName:first, lastName:last, email:email, username:user, password:pass, role:role, createdAt:Date.now() });
+      list.push({ id:'u'+Date.now()+Math.random().toString(36).slice(2,6), firstName:first, lastName:last, email:email, username:user, password:pass, role:role, pages:pages, createdAt:Date.now() });
     }
     var wasEdit = !!EDIT_ID;
     var shownName = (first+' '+last).trim() || user;
@@ -10971,6 +11077,7 @@ function teamEditProjectBooking(pid){
 
   function wire(){
     if(!$('acc-list')) return;
+    if($('acc-pages') && !$('acc-pages').innerHTML){ buildPageBoxes({ overview:true, projects:true, jobscheduler:true }); try{ window.remcAccRoleChanged(); }catch(e){} }
     var mb=$('acc-me-btn'); if(mb && !mb._wired){ mb._wired=1; mb.onclick=changeMyPassword; }
     ['acc-me-pass','acc-me-pass2'].forEach(function(id){
       var el=$(id); if(el && !el._wired){ el._wired=1; el.addEventListener('keydown', function(e){ if(e.key==='Enter') changeMyPassword(); }); }
