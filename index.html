@@ -122,7 +122,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
 
   <!-- TOP NAV -->
   <div class="topnav">
-    <div class="brand"><span class="brand-r">R</span><span class="brand-rest">EMC</span><span style="font-size:9px;color:#16a34a;font-weight:700;margin-left:6px;background:#dcfce7;padding:2px 6px;border-radius:4px" title="App version - if you see this, the new file loaded">BUILD 29/06 00:20</span></div>
+    <div class="brand"><span class="brand-r">R</span><span class="brand-rest">EMC</span><span id="remc-version" style="font-size:9px;color:#16a34a;font-weight:700;margin-left:6px;background:#dcfce7;padding:2px 6px;border-radius:4px" title="App version">v1.1</span></div>
     <div class="nav-menu">
       <div class="nav-item active" onclick="showPage('overview')">🏗️ Overview</div>
       <div class="nav-item" onclick="showPage('material')">⚖️ Material Balance</div>
@@ -137,7 +137,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
     </div>
     <div class="nav-right">
       <div class="nav-date" id="topdate">—</div>
-      <div class="nav-time" id="toptime">—</div>
+      <button id="remc-logout-btn" onclick="remcLogout()" title="Sign out of this device" style="font-family:Barlow,sans-serif;font-size:12px;font-weight:700;color:var(--mid);background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:5px 12px;cursor:pointer;display:none">Log out</button>
       <div class="nav-vis-btn" id="navVisBtn" onclick="toggleNavVisPanel()" title="Customize menu tabs">
         <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
           <circle cx="7.5" cy="7.5" r="2.2"/>
@@ -1267,6 +1267,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
         <div class="stab" onclick="showSettingsTab('storage')"           data-tab="storage">💾 Storage</div>
         <div class="stab" onclick="showSettingsTab('outlook')"           data-tab="outlook">📧 Email (Outlook)</div>
         <div class="stab" onclick="showSettingsTab('display')"           data-tab="display">🖥️ Display</div>
+        <div class="stab" onclick="showSettingsTab('backup')"            data-tab="backup">💾 Backup</div>
       </div>
 
       <!-- TAB: COMMERCIAL PROJECTS -->
@@ -1668,6 +1669,39 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
         </div>
       </div>
 
+      <div class="stab-panel" id="stpanel-backup">
+        <div class="stpanel-inner">
+          <div class="stpanel-desc">Download a copy of all your data, or restore it from a file you saved earlier.</div>
+          <div class="step-card">
+            <div class="step-head">
+              <div class="step-num">1</div>
+              <div>
+                <div class="step-title">Download a backup</div>
+                <div class="step-sub">Saves everything (projects, bookings, notes, supervisors) to your computer</div>
+              </div>
+            </div>
+            <div class="step-body">
+              <button onclick="remcExportBackup()" class="step-btn-pri">💾 Download backup now</button>
+              <div style="font-size:12px;color:var(--muted);margin-top:10px">You get an Excel file you can open, plus a data file used to restore.</div>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-head">
+              <div class="step-num">2</div>
+              <div>
+                <div class="step-title">Restore from a backup</div>
+                <div class="step-sub">Loads a backup file back into the system</div>
+              </div>
+            </div>
+            <div class="step-body">
+              <input type="file" id="bk-restore-input" accept=".json" onchange="importBackup(event)" style="display:none">
+              <button onclick="document.getElementById('bk-restore-input').click()" class="step-btn-sec">📂 Choose a backup file…</button>
+              <div style="font-size:12px;color:var(--red);margin-top:10px;font-weight:600">⚠ Restoring replaces the current data on this device and syncs it to everyone.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -1689,16 +1723,16 @@ function tick() {
 // One-time build check
 if (!window._buildChecked) {
   window._buildChecked = true;
-  console.log("%c REMC BUILD 29/06 00:20 loaded successfully ", "background:#16a34a;color:white;font-size:14px;padding:4px 8px;border-radius:4px");
+  console.log("%c REMC v1.1 loaded successfully ", "background:#16a34a;color:white;font-size:14px;padding:4px 8px;border-radius:4px");
 }
 
 const n = new Date();
 const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-document.getElementById('topdate').textContent = `${days[n.getDay()]}, ${n.getDate()} ${months[n.getMonth()]} ${n.getFullYear()}`;
-const h = n.getHours().toString().padStart(2, '0');
-const m = n.getMinutes().toString().padStart(2, '0');
-document.getElementById('toptime').textContent = `${h}:${m}`;
+var _td = document.getElementById('topdate');
+if (_td) _td.textContent = `${days[n.getDay()]}, ${n.getDate()} ${months[n.getMonth()]} ${n.getFullYear()}`;
+var _tt = document.getElementById('toptime');
+if (_tt) { const h = n.getHours().toString().padStart(2, '0'); const m = n.getMinutes().toString().padStart(2, '0'); _tt.textContent = `${h}:${m}`; }
 }
 tick(); setInterval(tick, 10000);
 
@@ -10209,7 +10243,28 @@ function teamEditProjectBooking(pid){
     } catch(e){ console.warn('Excel backup failed', e); }
   };
 
-  // Add a small "Backup" button + a Cloud status badge to the top nav
+  // Sign out of this device: clears the saved login and returns to the sign-in screen
+  window.remcLogout = function(){
+    if(!confirm('Log out of this device?\n\nSaved sign-in details will be removed. Your data stays safe in the cloud.')) return;
+    try{
+      localStorage.removeItem('login_saved_email');
+      localStorage.removeItem('login_saved_pass');
+      localStorage.setItem('login_remember','0');
+    }catch(e){}
+    try{
+      if(window.REMC_SB && window.REMC_SB.auth && window.REMC_SB.auth.signOut){
+        window.REMC_SB.auth.signOut().then(function(){ location.reload(); }).catch(function(){ location.reload(); });
+        return;
+      }
+    }catch(e){}
+    location.reload();
+  };
+  window.remcShowLogout = function(on){
+    var b = document.getElementById('remc-logout-btn');
+    if(b) b.style.display = on ? '' : 'none';
+  };
+
+  // Add the Cloud status badge to the top nav
   function inject(){
     var nr = document.querySelector('.nav-right'); if(!nr) return;
     if(!document.getElementById('remc-cloud-badge')){
@@ -10220,15 +10275,7 @@ function teamEditProjectBooking(pid){
       badge.textContent = 'Local';
       nr.insertBefore(badge, nr.firstChild);
     }
-    if(!document.getElementById('remc-backup-btn')){
-      var btn = document.createElement('button');
-      btn.id = 'remc-backup-btn';
-      btn.title = 'Download a backup (Excel + JSON)';
-      btn.textContent = '💾 Backup';
-      btn.style.cssText = 'font-family:Barlow,sans-serif;font-size:12px;font-weight:700;color:var(--mid);background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:5px 12px;cursor:pointer';
-      btn.onclick = window.remcExportBackup;
-      nr.insertBefore(btn, nr.firstChild);
-    }
+    // Backup now lives in Settings → 💾 Backup (no longer in the top bar)
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', inject); else inject();
 })();
@@ -10245,7 +10292,7 @@ function teamEditProjectBooking(pid){
 
   var WS = CFG.workspace || 'remc-main';
   var CLIENT_ID = Math.random().toString(36).slice(2);
-  var sb = supabase.createClient(CFG.url, CFG.anonKey);
+  var sb = supabase.createClient(CFG.url, CFG.anonKey); window.REMC_SB = sb;
   var _applying = false, _pushTimer = null, _dirty = {};
 
   function collectState(){
@@ -10257,7 +10304,7 @@ function teamEditProjectBooking(pid){
     if(!data) return;
     _applying = true;
     try { Object.keys(data).forEach(function(k){ if(k.indexOf('remc_')===0){ try{ localStorage.setItem(k, data[k]); }catch(e){} } }); }
-    finally { _applying = false; }
+    finally { _applying = false; try{ markSnapshotClean(); }catch(e){} }
   }
   function setStatus(state){
     var el = document.getElementById('remc-cloud-badge'); if(!el) return;
@@ -10297,6 +10344,7 @@ function teamEditProjectBooking(pid){
       sb.from('remc_state').upsert({ id:WS, data:base, updated_at:new Date().toISOString() }).then(function(r2){
         if(r2 && r2.error){ setStatus('error'); return; }
         _dirty = {};
+        try{ markSnapshotClean(); }catch(e){}
         setStatus('saved');
         scheduleBackup();
       });
@@ -10402,6 +10450,28 @@ function teamEditProjectBooking(pid){
     window.addEventListener('focus', refreshFromCloud);
     window.addEventListener('online', refreshFromCloud);
   }
+
+  // ---- Safety net #2: detect local changes even if the localStorage hook is unavailable.
+  // Some browsers / privacy modes refuse to let us wrap localStorage.setItem. Without this,
+  // a device would look "Synced" but never actually upload anything.
+  var _lastLocalSnap = null, _watchTimer = null;
+  function localSnapshot(){
+    var o = {};
+    try{ for(var i=0;i<localStorage.length;i++){ var k=localStorage.key(i); if(k && k.indexOf('remc_')===0) o[k]=localStorage.getItem(k); } }catch(e){}
+    return o;
+  }
+  function markSnapshotClean(){ _lastLocalSnap = localSnapshot(); }
+  function startLocalWatch(){
+    if(_watchTimer) return;
+    markSnapshotClean();
+    _watchTimer = setInterval(function(){
+      if(_applying || !window._remcCloudSynced) return;
+      var snap = localSnapshot(), changed = false;
+      Object.keys(snap).forEach(function(k){ if(!_lastLocalSnap || _lastLocalSnap[k] !== snap[k]){ _dirty[k]=1; changed=true; } });
+      if(_lastLocalSnap) Object.keys(_lastLocalSnap).forEach(function(k){ if(!(k in snap)){ _dirty[k]=1; changed=true; } });
+      if(changed){ _lastLocalSnap = snap; schedulePush(); }
+    }, 4000);
+  }
   // ---- Loading overlay with progress ----
   var _ldEl=null, _ldPct=0, _ldTimer=null;
   function ldShow(){
@@ -10446,6 +10516,8 @@ function teamEditProjectBooking(pid){
       }
     }catch(e){}
     window._remcCloudSynced = true;
+    try{ if(window.remcShowLogout) window.remcShowLogout(true); }catch(e){}
+    startLocalWatch();
     ldSet(88,'Preparing your screen…');
     try{ if(typeof pRender==='function') pRender(); }catch(e){}
     try{ if(typeof renderOverview==='function') renderOverview(); }catch(e){}
