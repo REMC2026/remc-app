@@ -5726,8 +5726,16 @@ function renderNavVisPanel() {
 var vis = getNavVis();
 var list = document.getElementById('nvpList');
 if (!list) return;
+// Only offer the pages this person is actually allowed to open
+var allowed = null;
+try { allowed = (typeof window.remcAllowedPages==='function') ? window.remcAllowedPages() : null; } catch(e) {}
+var tabs = allowed ? NAV_TABS.filter(function(t){ return !!allowed[t.key]; }) : NAV_TABS;
 list.innerHTML = '';
-NAV_TABS.forEach(function(t) {
+if (!tabs.length) {
+  list.innerHTML = '<div style="padding:14px;text-align:center;color:var(--muted);font-size:12px">No pages available.</div>';
+  return;
+}
+tabs.forEach(function(t) {
 var item = document.createElement('div');
 item.className = 'nvp-item';
 var isOn = vis[t.key] !== false;
@@ -5742,6 +5750,10 @@ list.appendChild(item);
 }
 
 function toggleTabVis(key) {
+try {
+  var _a = (typeof window.remcAllowedPages==='function') ? window.remcAllowedPages() : null;
+  if (_a && !_a[key]) return;   // no access → cannot be turned on
+} catch(e) {}
 var vis = getNavVis();
 
 var visibleCount = Object.values(vis).filter(Boolean).length;
@@ -5753,8 +5765,10 @@ applyNavVis();
 }
 
 function resetNavVis() {
+var allowed = null;
+try { allowed = (typeof window.remcAllowedPages==='function') ? window.remcAllowedPages() : null; } catch(e) {}
 var vis = {};
-NAV_TABS.forEach(function(t) { vis[t.key] = true; });
+NAV_TABS.forEach(function(t) { vis[t.key] = allowed ? !!allowed[t.key] : true; });
 saveNavVis(vis);
 renderNavVisPanel();
 applyNavVis();
