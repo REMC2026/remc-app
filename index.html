@@ -10770,11 +10770,18 @@ function teamEditProjectBooking(pid){
     }) || null;
   }
   function anyAdmin(){ return load().some(function(u){ return u.role==='admin'; }); }
-  // If nobody is an Admin yet, allow editing so the first Admin can be created.
+  // Who may add / edit / remove people:
+  //  • nobody registered yet  → anyone signed in (so the first admin can be created)
+  //  • listed in the access list → whatever role they were given
+  //  • signed in with a cloud email account but not listed → treated as Admin.
+  //    Those accounts can only be created from the Supabase dashboard, so the person
+  //    already has owner-level access. This also stops the owner locking themselves out.
   function canManage(){
     if(!anyAdmin()) return true;
     var me=findMe();
-    return !!(me && me.role==='admin');
+    if(me) return me.role==='admin';
+    if(!window.REMC_LOCAL_USER && myEmail().indexOf('@')>=0) return true;
+    return false;
   }
   window.remcAccCanManage = canManage;
 
@@ -10870,7 +10877,7 @@ function teamEditProjectBooking(pid){
   };
 
   function saveUser(){
-    var msg=$('acc-form-msg'); if(msg) msg.textContent='';
+    var msg=$('acc-form-msg'); if(msg){ msg.style.color='var(--red)'; msg.textContent=''; }
     if(!canManage()){ if(msg) msg.textContent='Only an Admin can add or change people.'; return; }
     var first=($('acc-first').value||'').trim();
     var last =($('acc-last').value||'').trim();
@@ -10890,6 +10897,10 @@ function teamEditProjectBooking(pid){
     });
     if(clash){ if(msg) msg.textContent='That username is already used by '+fullName(clash)+'.'; return; }
 
+    var meNow=findMe();
+    if(EDIT_ID && meNow && String(meNow.id)===String(EDIT_ID) && meNow.role==='admin' && role!=='admin'){
+      if(!confirm('You are removing your own Admin rights.\n\nYou will no longer be able to manage this list. Continue?')) return;
+    }
     if(EDIT_ID){
       list=list.map(function(x){
         if(String(x.id)!==String(EDIT_ID)) return x;
@@ -10898,10 +10909,14 @@ function teamEditProjectBooking(pid){
     } else {
       list.push({ id:'u'+Date.now()+Math.random().toString(36).slice(2,6), firstName:first, lastName:last, email:email, username:user, password:pass, role:role, createdAt:Date.now() });
     }
+    var wasEdit = !!EDIT_ID;
+    var shownName = (first+' '+last).trim() || user;
     save(list);
     try{ if(typeof window.remcCloudUpsertKey==='function') window.remcCloudUpsertKey(KEY, JSON.stringify(list)); }catch(e){}
     clearForm();
     render();
+    var m2=$('acc-form-msg');
+    if(m2){ m2.style.color='#15803d'; m2.textContent = '✓ ' + shownName + (wasEdit ? ' updated and saved.' : ' added and saved.'); setTimeout(function(){ if(m2.textContent.indexOf('✓')===0) m2.textContent=''; }, 4000); }
   }
 
   function syncNow(){
