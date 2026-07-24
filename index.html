@@ -1266,6 +1266,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
         <div class="stab" onclick="showSettingsTab('subcontractors')"    data-tab="subcontractors">🔨 Sub-contractors</div>
         <div class="stab" onclick="showSettingsTab('storage')"           data-tab="storage">💾 Storage</div>
         <div class="stab" onclick="showSettingsTab('outlook')"           data-tab="outlook">📧 Email (Outlook)</div>
+        <div class="stab" onclick="showSettingsTab('access')"            data-tab="access">🔑 Access</div>
         <div class="stab" onclick="showSettingsTab('display')"           data-tab="display">🖥️ Display</div>
         <div class="stab" onclick="showSettingsTab('backup')"            data-tab="backup">💾 Backup</div>
       </div>
@@ -1666,6 +1667,80 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
             </div>
           </div>
           <div style="font-size:12px;color:var(--muted);margin-top:4px">This setting is saved on this device only, so your phone and computer can be different.</div>
+        </div>
+      </div>
+
+      <div class="stab-panel" id="stpanel-access">
+        <div class="stpanel-inner">
+          <div class="stpanel-desc">Register everyone who is allowed to use the REMC system. This list is shared with every device.</div>
+
+          <div class="step-card" id="acc-me-card" style="display:none">
+            <div class="step-head">
+              <div class="step-num" style="background:#16a34a">👤</div>
+              <div>
+                <div class="step-title">My account</div>
+                <div class="step-sub" id="acc-me-sub">—</div>
+              </div>
+            </div>
+            <div class="step-body">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px">
+                <div><div class="map-lbl">New password</div><input id="acc-me-pass" class="map-sel" type="password" placeholder="At least 6 characters"></div>
+                <div><div class="map-lbl">Repeat new password</div><input id="acc-me-pass2" class="map-sel" type="password" placeholder="Type it again"></div>
+              </div>
+              <div id="acc-me-msg" style="font-size:12px;margin-bottom:10px;min-height:16px"></div>
+              <button class="step-btn-pri" id="acc-me-btn">🔒 Change my password</button>
+            </div>
+          </div>
+
+          <div id="acc-readonly-note" style="display:none;background:#fef3c7;border:1px solid rgba(217,119,6,.3);color:#92400e;border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:13px;font-weight:600">
+            🔒 Only an <b>Admin</b> can add, edit or remove people. You can still see the list and change your own password.
+          </div>
+
+          <div id="acc-bootstrap-note" style="display:none;background:var(--blue-light);border:1px solid rgba(37,99,235,.25);color:#1d4ed8;border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:13px;font-weight:600">
+            ℹ️ No Admin has been registered yet, so anyone signed in can edit this list. Add yourself with the role <b>Admin</b> to lock it down.
+          </div>
+
+          <div id="acc-list"></div>
+
+          <div style="margin:12px 0">
+            <button class="step-btn-pri" id="acc-cloud-btn" style="background:#2563eb">☁️ Sync users to cloud now</button>
+            <span id="acc-cloud-msg" style="font-size:12px;color:var(--muted);margin-left:8px"></span>
+          </div>
+
+          <div class="step-card">
+            <div class="step-head">
+              <div class="step-num" id="acc-form-num">+</div>
+              <div>
+                <div class="step-title" id="acc-form-title">Add user</div>
+                <div class="step-sub">First name, last name, email, username and password</div>
+              </div>
+            </div>
+            <div class="step-body">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+                <div><div class="map-lbl">First name</div><input id="acc-first" class="map-sel" placeholder="e.g. Michael"></div>
+                <div><div class="map-lbl">Last name</div><input id="acc-last" class="map-sel" placeholder="e.g. Di Trento"></div>
+                <div><div class="map-lbl">Email</div><input id="acc-email" class="map-sel" type="email" placeholder="e.g. michael@remc.com.au"></div>
+                <div><div class="map-lbl">Username</div><input id="acc-user" class="map-sel" placeholder="e.g. MDT"></div>
+                <div><div class="map-lbl">Password</div><input id="acc-pass" class="map-sel" placeholder="e.g. REMC123"></div>
+                <div><div class="map-lbl">Role</div>
+                  <select id="acc-role" class="map-sel">
+                    <option value="office">Office</option>
+                    <option value="supervisor">Site supervisor</option>
+                    <option value="admin">Admin</option>
+                  </select>
+                </div>
+              </div>
+              <div id="acc-form-msg" style="font-size:12px;color:var(--red);margin-bottom:10px;min-height:16px"></div>
+              <button class="step-btn-pri" id="acc-save-btn">Add user</button>
+              <button class="step-btn-sec" id="acc-cancel-btn" style="display:none;margin-left:8px">Cancel</button>
+            </div>
+          </div>
+
+          <div style="font-size:12px;color:var(--muted);margin-top:6px;line-height:1.6">
+            <b>Note:</b> this list records who is allowed to use the system and is shared across devices.
+            Signing in to the main software still uses the email accounts created in Supabase
+            (Authentication → Users), so add the person there too if they need to open this software.
+          </div>
         </div>
       </div>
 
@@ -10504,7 +10579,10 @@ function teamEditProjectBooking(pid){
     if(el){ setTimeout(function(){ el.style.transition='opacity .25s'; el.style.opacity='0'; setTimeout(function(){ try{ el.remove(); }catch(e){} }, 260); }, 200); }
   }
 
+  function rememberMe(em){ if(em){ window.REMC_ME = String(em).trim(); try{ localStorage.setItem('login_saved_email', window.REMC_ME); }catch(e){} try{ if(window.remcAccRender) window.remcAccRender(); }catch(e){} } }
   function onAuthed(){
+    try{ var _e=localStorage.getItem('login_saved_email'); if(_e && !window.REMC_ME) window.REMC_ME=_e; }catch(e){}
+    try{ sb.auth.getUser().then(function(r){ var em = r && r.data && r.data.user && r.data.user.email; if(em) rememberMe(em); }).catch(function(){}); }catch(e){}
     ldShow(); ldSet(10,'Connecting to the cloud…');
     pull(function(){
     ldSet(70,'Loading projects and bookings…');
@@ -10517,6 +10595,7 @@ function teamEditProjectBooking(pid){
     }catch(e){}
     window._remcCloudSynced = true;
     try{ if(window.remcShowLogout) window.remcShowLogout(true); }catch(e){}
+    try{ if(window.remcAccRender) window.remcAccRender(); }catch(e){}
     startLocalWatch();
     ldSet(88,'Preparing your screen…');
     try{ if(typeof pRender==='function') pRender(); }catch(e){}
@@ -10553,6 +10632,7 @@ function teamEditProjectBooking(pid){
             if(remember){ localStorage.setItem('login_saved_email',email); localStorage.setItem('login_saved_pass',pass); localStorage.setItem('login_remember','1'); }
             else { localStorage.removeItem('login_saved_email'); localStorage.removeItem('login_saved_pass'); localStorage.setItem('login_remember','0'); }
           }catch(e){}
+          try{ window.REMC_ME = email; }catch(e){}
           ov.remove(); onAuthed();
         }
       }).catch(function(){ msg.textContent='Cannot reach the server. Check your internet and open the hosted link (…github.io…), not a local file.'; });
@@ -10564,12 +10644,12 @@ function teamEditProjectBooking(pid){
   function boot(){
     setStatus('loading');
     sb.auth.getSession().then(function(r){
-      if(r && r.data && r.data.session){ onAuthed(); return; }
+      if(r && r.data && r.data.session){ try{ var _u=r.data.session.user; if(_u && _u.email) window.REMC_ME=_u.email; }catch(e){} onAuthed(); return; }
       var e2='', p2='', on=false;
       try{ e2=localStorage.getItem('login_saved_email')||''; p2=localStorage.getItem('login_saved_pass')||''; on=localStorage.getItem('login_remember')==='1'; }catch(e){}
       if(on && e2 && p2){
         sb.auth.signInWithPassword({ email:e2, password:p2 }).then(function(r2){
-          if(r2 && !r2.error){ onAuthed(); } else { showLogin(); }
+          if(r2 && !r2.error){ try{ window.REMC_ME = e2; }catch(e){} onAuthed(); } else { showLogin(); }
         }).catch(function(){ showLogin(); });
       } else { showLogin(); }
     });
@@ -10592,6 +10672,222 @@ function teamEditProjectBooking(pid){
   window.remcCloudActive = true;
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+})();
+</script>
+
+<!-- ══ ACCESS: people allowed to use the REMC system (Settings → Access) ══ -->
+<script>
+(function(){
+  var KEY = 'remc_users';
+  var EDIT_ID = null;
+
+  function load(){ try{ var a=JSON.parse(localStorage.getItem(KEY)||'[]'); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
+  function save(a){ try{ localStorage.setItem(KEY, JSON.stringify(a||[])); }catch(e){} }
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function $(id){ return document.getElementById(id); }
+  function fullName(u){ return ((u.firstName||'')+' '+(u.lastName||'')).trim() || (u.username||u.email||'—'); }
+  function initials(u){
+    var a=(u.firstName||'').trim(), b=(u.lastName||'').trim();
+    var t=((a?a[0]:'')+(b?b[0]:'')).toUpperCase();
+    return t || (u.username||'?').slice(0,2).toUpperCase();
+  }
+  var ROLES = { office:'Office', supervisor:'Site supervisor', admin:'Admin' };
+
+  // ---- Who am I, and am I allowed to manage this list? ----
+  function myEmail(){ return String(window.REMC_ME||'').trim().toLowerCase(); }
+  function findMe(){
+    var em=myEmail(); if(!em) return null;
+    return load().find(function(u){ return String(u.email||'').trim().toLowerCase()===em; }) || null;
+  }
+  function anyAdmin(){ return load().some(function(u){ return u.role==='admin'; }); }
+  // If nobody is an Admin yet, allow editing so the first Admin can be created.
+  function canManage(){
+    if(!anyAdmin()) return true;
+    var me=findMe();
+    return !!(me && me.role==='admin');
+  }
+  window.remcAccCanManage = canManage;
+
+  function applyPermissions(){
+    var manage=canManage(), bootstrap=!anyAdmin();
+    var form=document.querySelector('#stpanel-access .step-card:not(#acc-me-card)');
+    // the add/edit form is the last step-card in the panel
+    var cards=document.querySelectorAll('#stpanel-access .step-card');
+    var addCard=null;
+    for(var i=0;i<cards.length;i++){ if(cards[i].id!=='acc-me-card') addCard=cards[i]; }
+    if(addCard) addCard.style.display = manage ? '' : 'none';
+    var syncBtn=$('acc-cloud-btn'); if(syncBtn) syncBtn.parentNode.style.display = manage ? '' : 'none';
+    var ro=$('acc-readonly-note'); if(ro) ro.style.display = manage ? 'none' : '';
+    var bs=$('acc-bootstrap-note'); if(bs) bs.style.display = (manage && bootstrap) ? '' : 'none';
+    // My account card: visible whenever we know who is signed in
+    var me=$('acc-me-card');
+    if(me){
+      if(myEmail()){
+        me.style.display='';
+        var who=findMe();
+        var sub=$('acc-me-sub');
+        if(sub) sub.textContent = (who? fullName(who)+' · ' : '') + myEmail() + (who&&who.role==='admin' ? ' · Admin' : '');
+      } else { me.style.display='none'; }
+    }
+  }
+
+  function render(){
+    try{ applyPermissions(); }catch(e){}
+    var host=$('acc-list'); if(!host) return;
+    var list=load();
+    if(!list.length){
+      host.innerHTML='<div style="padding:26px;text-align:center;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:12px">No users registered yet. Add the first one below.</div>';
+      return;
+    }
+    host.innerHTML='<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--shadow)">'
+      + list.map(function(u,i){
+          return '<div style="display:flex;align-items:center;gap:12px;padding:12px 14px;'+(i?'border-top:1px solid var(--border);':'')+'">'
+            + '<div style="width:36px;height:36px;border-radius:9px;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:var(--mid);flex-shrink:0">'+esc(initials(u))+'</div>'
+            + '<div style="flex:1;min-width:0">'
+            +   '<div style="font-size:14px;font-weight:800">'+esc(fullName(u))+' <span style="font-size:10px;font-weight:700;color:var(--blue);background:var(--blue-light);border:1px solid rgba(37,99,235,.2);padding:1px 7px;border-radius:5px;margin-left:4px">'+esc(ROLES[u.role]||'Office')+'</span></div>'
+            +   '<div style="font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(u.email||'no email')+' · Username: <b>'+esc(u.username||'—')+'</b></div>'
+            + '</div>'
+            + (canManage() ? ('<button class="pt-btn" title="Edit" onclick="remcAccEdit(\''+esc(u.id)+'\')">✏️</button>'
+            + '<button class="pt-btn del" title="Delete" onclick="remcAccDelete(\''+esc(u.id)+'\')">🗑</button>') : '')
+            + '</div>';
+        }).join('')
+      + '</div>';
+  }
+
+  function clearForm(){
+    EDIT_ID=null;
+    ['acc-first','acc-last','acc-email','acc-user','acc-pass'].forEach(function(id){ var el=$(id); if(el) el.value=''; });
+    var r=$('acc-role'); if(r) r.value='office';
+    var m=$('acc-form-msg'); if(m) m.textContent='';
+    var t=$('acc-form-title'); if(t) t.textContent='Add user';
+    var n=$('acc-form-num'); if(n) n.textContent='+';
+    var b=$('acc-save-btn'); if(b) b.textContent='Add user';
+    var c=$('acc-cancel-btn'); if(c) c.style.display='none';
+  }
+
+  window.remcAccEdit = function(id){
+    if(!canManage()){ alert('Only an Admin can edit people.'); return; }
+    var u=load().find(function(x){ return String(x.id)===String(id); }); if(!u) return;
+    EDIT_ID=id;
+    if($('acc-first')) $('acc-first').value=u.firstName||'';
+    if($('acc-last'))  $('acc-last').value=u.lastName||'';
+    if($('acc-email')) $('acc-email').value=u.email||'';
+    if($('acc-user'))  $('acc-user').value=u.username||'';
+    if($('acc-pass'))  $('acc-pass').value=u.password||'';
+    if($('acc-role'))  $('acc-role').value=u.role||'office';
+    var t=$('acc-form-title'); if(t) t.textContent='Edit user';
+    var n=$('acc-form-num'); if(n) n.textContent='✎';
+    var b=$('acc-save-btn'); if(b) b.textContent='Save changes';
+    var c=$('acc-cancel-btn'); if(c) c.style.display='';
+    var m=$('acc-form-msg'); if(m) m.textContent='';
+    try{ $('acc-first').focus(); }catch(e){}
+  };
+
+  window.remcAccDelete = function(id){
+    if(!canManage()){ alert('Only an Admin can remove people.'); return; }
+    var list=load();
+    var u=list.find(function(x){ return String(x.id)===String(id); }); if(!u) return;
+    if(u.role==='admin' && list.filter(function(x){ return x.role==='admin'; }).length<=1){
+      alert('This is the only Admin. Make someone else an Admin first, otherwise nobody could manage this list.');
+      return;
+    }
+    if(!confirm('Remove '+fullName(u)+' from the access list?')) return;
+    save(list.filter(function(x){ return String(x.id)!==String(id); }));
+    if(String(EDIT_ID)===String(id)) clearForm();
+    render();
+  };
+
+  function saveUser(){
+    var msg=$('acc-form-msg'); if(msg) msg.textContent='';
+    if(!canManage()){ if(msg) msg.textContent='Only an Admin can add or change people.'; return; }
+    var first=($('acc-first').value||'').trim();
+    var last =($('acc-last').value||'').trim();
+    var email=($('acc-email').value||'').trim();
+    var user =($('acc-user').value||'').trim();
+    var pass =($('acc-pass').value||'');
+    var role =($('acc-role').value||'office');
+
+    if(!first){ if(msg) msg.textContent='Please enter a first name.'; return; }
+    if(!user){ if(msg) msg.textContent='Please enter a username.'; return; }
+    if(!pass){ if(msg) msg.textContent='Please enter a password.'; return; }
+    if(email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ if(msg) msg.textContent='That email address does not look valid.'; return; }
+
+    var list=load();
+    var clash=list.find(function(x){
+      return String(x.id)!==String(EDIT_ID) && String(x.username||'').trim().toLowerCase()===user.toLowerCase();
+    });
+    if(clash){ if(msg) msg.textContent='That username is already used by '+fullName(clash)+'.'; return; }
+
+    if(EDIT_ID){
+      list=list.map(function(x){
+        if(String(x.id)!==String(EDIT_ID)) return x;
+        return { id:x.id, firstName:first, lastName:last, email:email, username:user, password:pass, role:role, createdAt:x.createdAt||Date.now() };
+      });
+    } else {
+      list.push({ id:'u'+Date.now()+Math.random().toString(36).slice(2,6), firstName:first, lastName:last, email:email, username:user, password:pass, role:role, createdAt:Date.now() });
+    }
+    save(list);
+    clearForm();
+    render();
+  }
+
+  function syncNow(){
+    var msg=$('acc-cloud-msg'); var list=load();
+    if(typeof window.remcCloudUpsertKey!=='function'){
+      if(msg){ msg.style.color='#dc2626'; msg.textContent='Cloud not connected — sign in first.'; }
+      return;
+    }
+    if(msg){ msg.style.color='var(--muted)'; msg.textContent='Syncing…'; }
+    window.remcCloudUpsertKey(KEY, JSON.stringify(list), function(err){
+      if(!msg) return;
+      if(err){ msg.style.color='#dc2626'; msg.textContent='Failed: '+err; }
+      else { msg.style.color='#15803d'; msg.textContent='✓ '+list.length+' user(s) synced to the cloud.'; }
+    });
+  }
+
+  function changeMyPassword(){
+    var msg=$('acc-me-msg'); if(msg){ msg.style.color='var(--red)'; msg.textContent=''; }
+    var p1=($('acc-me-pass').value||''), p2=($('acc-me-pass2').value||'');
+    if(p1.length<6){ if(msg) msg.textContent='Password must be at least 6 characters.'; return; }
+    if(p1!==p2){ if(msg) msg.textContent='The two passwords do not match.'; return; }
+    var sb = window.REMC_SB;
+    if(!sb || !sb.auth || !sb.auth.updateUser){ if(msg) msg.textContent='Not connected to the cloud — sign in first.'; return; }
+    if(msg){ msg.style.color='var(--muted)'; msg.textContent='Changing password…'; }
+    sb.auth.updateUser({ password: p1 }).then(function(r){
+      if(r && r.error){ if(msg){ msg.style.color='var(--red)'; msg.textContent='Failed: '+r.error.message; } return; }
+      // keep the saved sign-in details working on this device
+      try{ if(localStorage.getItem('login_remember')==='1') localStorage.setItem('login_saved_pass', p1); }catch(e){}
+      // mirror it on the access record too
+      try{
+        var em=myEmail(), list=load(), changed=false;
+        list=list.map(function(u){ if(String(u.email||'').trim().toLowerCase()===em){ changed=true; return Object.assign({},u,{password:p1}); } return u; });
+        if(changed){ save(list); render(); }
+      }catch(e){}
+      $('acc-me-pass').value=''; $('acc-me-pass2').value='';
+      if(msg){ msg.style.color='#15803d'; msg.textContent='✓ Password changed. Use it next time you sign in.'; }
+    }).catch(function(){ if(msg){ msg.style.color='var(--red)'; msg.textContent='Could not reach the server. Check your internet.'; } });
+  }
+
+  function wire(){
+    if(!$('acc-list')) return;
+    var mb=$('acc-me-btn'); if(mb && !mb._wired){ mb._wired=1; mb.onclick=changeMyPassword; }
+    ['acc-me-pass','acc-me-pass2'].forEach(function(id){
+      var el=$(id); if(el && !el._wired){ el._wired=1; el.addEventListener('keydown', function(e){ if(e.key==='Enter') changeMyPassword(); }); }
+    });
+    var b=$('acc-save-btn'); if(b && !b._wired){ b._wired=1; b.onclick=saveUser; }
+    var c=$('acc-cancel-btn'); if(c && !c._wired){ c._wired=1; c.onclick=clearForm; }
+    var s=$('acc-cloud-btn'); if(s && !s._wired){ s._wired=1; s.onclick=syncNow; }
+    ['acc-first','acc-last','acc-email','acc-user','acc-pass'].forEach(function(id){
+      var el=$(id);
+      if(el && !el._wired){ el._wired=1; el.addEventListener('keydown', function(e){ if(e.key==='Enter') saveUser(); }); }
+    });
+    render();
+  }
+  window.remcAccRender = render;
+
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', wire); else wire();
+  // re-render when the cloud brings new data in
+  setInterval(function(){ try{ if(document.getElementById('stpanel-access') && document.getElementById('stpanel-access').classList.contains('active')) render(); }catch(e){} }, 5000);
 })();
 </script>
 
