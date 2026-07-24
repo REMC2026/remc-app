@@ -210,7 +210,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
         <div class="ov-search-bar">
           <div class="ov-search-wrap">
             <svg class="ov-search-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="6.5" cy="6.5" r="4.5"/><path d="M10.5 10.5l3 3"/></svg>
-            <input class="ov-search-input" id="ov-com-search" placeholder="Search name, supervisor, address…" oninput="filterOverviewCol('com')" autocomplete="off" autocorrect="off" spellcheck="false">
+            <input name="remcflt_ovcomsearch" type="search" class="ov-search-input" id="ov-com-search" placeholder="Search name, supervisor, address…" oninput="filterOverviewCol('com')" autocomplete="off" autocorrect="off" spellcheck="false" data-lpignore="true" data-1p-ignore data-form-type="other" aria-autocomplete="none">
             <button class="ov-search-clear" id="ov-com-clear" onclick="clearOverviewSearch('com')" style="display:none">✕</button>
           </div>
         </div>
@@ -237,7 +237,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
         <div class="ov-search-bar">
           <div class="ov-search-wrap">
             <svg class="ov-search-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="6.5" cy="6.5" r="4.5"/><path d="M10.5 10.5l3 3"/></svg>
-            <input class="ov-search-input" id="ov-res-search" placeholder="Search name, supervisor, address…" oninput="filterOverviewCol('res')" autocomplete="off" autocorrect="off" spellcheck="false">
+            <input name="remcflt_ovressearch" type="search" class="ov-search-input" id="ov-res-search" placeholder="Search name, supervisor, address…" oninput="filterOverviewCol('res')" autocomplete="off" autocorrect="off" spellcheck="false" data-lpignore="true" data-1p-ignore data-form-type="other" aria-autocomplete="none">
             <button class="ov-search-clear" id="ov-res-clear" onclick="clearOverviewSearch('res')" style="display:none">✕</button>
           </div>
         </div>
@@ -453,9 +453,9 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
         </div>
         <div class="quot-search-wrap">
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="6.5" cy="6.5" r="4.5"/><path d="M10.5 10.5l3 3"/></svg>
-          <input type="text" id="quot-search" class="quot-search-input" autocomplete="off" autocorrect="off" spellcheck="false"
+          <input name="remcflt_quotsearch" type="search" id="quot-search" class="quot-search-input" autocomplete="off" autocorrect="off" spellcheck="false"
             placeholder="Search project, client, REMC #, status, date…"
-            oninput="renderQuotations()">
+            oninput="renderQuotations()" data-lpignore="true" data-1p-ignore data-form-type="other" aria-autocomplete="none">
           <button id="quot-search-clear" onclick="document.getElementById('quot-search').value='';renderQuotations()" style="display:none;background:none;border:none;cursor:pointer;color:var(--muted);font-size:13px;padding:0 2px;line-height:1">✕</button>
         </div>
       </div>
@@ -634,9 +634,9 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
             <span id="mat-toggle-status">Module: Enabled</span>
             <div id="mat-toggle-dot" style="width:10px;height:10px;border-radius:50%;background:var(--green)"></div>
           </button>
-          <input type="text" id="mat-search" placeholder="🔍 Filter locations or materials..."
+          <input name="remcflt_matsearch" type="search" id="mat-search" placeholder="🔍 Filter locations or materials..."
             oninput="renderMaterials()"
-            style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:9px 16px;font-size:14px;font-family:'Barlow',sans-serif;color:var(--text);outline:none;width:250px;box-shadow:var(--shadow)" autocomplete="off" autocorrect="off" spellcheck="false">
+            style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:9px 16px;font-size:14px;font-family:'Barlow',sans-serif;color:var(--text);outline:none;width:250px;box-shadow:var(--shadow)" autocomplete="off" autocorrect="off" spellcheck="false" data-lpignore="true" data-1p-ignore data-form-type="other" aria-autocomplete="none">
           <div
             style="display:flex;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:4px;gap:2px;box-shadow:var(--shadow)">
             <button id="mt-all" onclick="matFilter('all')"
