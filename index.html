@@ -10604,6 +10604,19 @@ function teamEditProjectBooking(pid){
     ldHide();
   }); }
 
+  // Check the access list directly (no dependency on other scripts having loaded yet)
+  function accessListAuth(idOrEmail, pass){
+    var id=String(idOrEmail||'').trim().toLowerCase(); if(!id) return null;
+    var list=[]; try{ list=JSON.parse(localStorage.getItem('remc_users')||'[]'); if(!Array.isArray(list)) list=[]; }catch(e){ list=[]; }
+    // if nothing is stored yet, fall back to the built-in administrator
+    if(!list.length) list=[{ id:'u-adm', firstName:'Administrator', lastName:'', email:'', username:'adm', password:'REMC123', role:'admin' }];
+    var u=list.find(function(x){
+      return String(x.username||'').trim().toLowerCase()===id || String(x.email||'').trim().toLowerCase()===id;
+    });
+    if(!u) return null;
+    if(String(u.password||'')!==String(pass||'')) return null;
+    return u;
+  }
   function showLogin(){
     var savedEmail='', remOn=false, savedPass='';
     try{ savedEmail=localStorage.getItem('login_saved_email')||''; remOn=localStorage.getItem('login_remember')==='1'; if(remOn) savedPass=localStorage.getItem('login_saved_pass')||''; }catch(e){}
@@ -10612,7 +10625,7 @@ function teamEditProjectBooking(pid){
     ov.innerHTML='<div style="background:#fff;border-radius:16px;padding:28px;width:340px;max-width:92vw;box-shadow:0 20px 60px rgba(0,0,0,0.4)">'
       +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:26px;font-weight:900;margin-bottom:2px"><span style="color:#e11d1d">R</span>EMC</div>'
       +'<div style="font-size:13px;color:#8b95a8;margin-bottom:18px">Sign in to continue</div>'
-      +'<input id="remc-email" type="email" placeholder="Email" autocomplete="username" style="width:100%;padding:10px 12px;border:1.5px solid #e4e8ef;border-radius:8px;font-size:14px;margin-bottom:8px;box-sizing:border-box">'
+      +'<input id="remc-email" type="text" placeholder="Username or email" autocomplete="username" style="width:100%;padding:10px 12px;border:1.5px solid #e4e8ef;border-radius:8px;font-size:14px;margin-bottom:8px;box-sizing:border-box">'
       +'<input id="remc-pass" type="password" placeholder="Password" autocomplete="current-password" style="width:100%;padding:10px 12px;border:1.5px solid #e4e8ef;border-radius:8px;font-size:14px;margin-bottom:12px;box-sizing:border-box">'
       +'<label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#4b5666;margin:0 0 12px;cursor:pointer;user-select:none"><input id="remc-remember" type="checkbox" style="width:16px;height:16px;cursor:pointer">Keep me signed in (auto-login on this device)</label>'
       +'<button id="remc-login-btn" style="width:100%;padding:11px;background:#e11d1d;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer">Sign in</button>'
@@ -10625,16 +10638,28 @@ function teamEditProjectBooking(pid){
       var pass=document.getElementById('remc-pass').value||'';
       var remember=document.getElementById('remc-remember').checked;
       var msg=document.getElementById('remc-login-msg'); msg.textContent='Signing in…';
+      function finish(who){
+        try{
+          if(remember){ localStorage.setItem('login_saved_email',email); localStorage.setItem('login_saved_pass',pass); localStorage.setItem('login_remember','1'); }
+          else { localStorage.removeItem('login_saved_email'); localStorage.removeItem('login_saved_pass'); localStorage.setItem('login_remember','0'); }
+        }catch(e){}
+        try{ window.REMC_ME = who; }catch(e){}
+        ov.remove(); onAuthed();
+      }
+      // 1) An account from Settings → Access (sign in with a username, e.g. "adm")
+      try{
+        var lu = (typeof window.remcLocalAuth==='function') ? window.remcLocalAuth(email, pass) : accessListAuth(email, pass);
+        if(!lu) lu = accessListAuth(email, pass);
+        if(lu){ window.REMC_LOCAL_USER = true; finish(lu.username || lu.email || email); return; }
+      }catch(e){}
+      // 2) Otherwise fall back to the email accounts held in the cloud
+      if(email.indexOf('@')<0){
+        msg.textContent='Username or password is incorrect.';
+        return;
+      }
       sb.auth.signInWithPassword({ email:email, password:pass }).then(function(r){
         if(r.error){ msg.textContent = r.error.message; }
-        else {
-          try{
-            if(remember){ localStorage.setItem('login_saved_email',email); localStorage.setItem('login_saved_pass',pass); localStorage.setItem('login_remember','1'); }
-            else { localStorage.removeItem('login_saved_email'); localStorage.removeItem('login_saved_pass'); localStorage.setItem('login_remember','0'); }
-          }catch(e){}
-          try{ window.REMC_ME = email; }catch(e){}
-          ov.remove(); onAuthed();
-        }
+        else { window.REMC_LOCAL_USER = false; finish(email); }
       }).catch(function(){ msg.textContent='Cannot reach the server. Check your internet and open the hosted link (…github.io…), not a local file.'; });
     };
     document.getElementById('remc-login-btn').onclick = go;
@@ -10643,15 +10668,27 @@ function teamEditProjectBooking(pid){
 
   function boot(){
     setStatus('loading');
-    sb.auth.getSession().then(function(r){
+    // Load the shared data FIRST. Without this, a brand-new device would still be
+    // checking usernames against an empty list (so a changed password would be refused).
+    ldShow(); ldSet(8,'Getting your data from the cloud…');
+    pull(function(){
+      ldSet(45,'Checking your account…');
+      sb.auth.getSession().then(function(r){
       if(r && r.data && r.data.session){ try{ var _u=r.data.session.user; if(_u && _u.email) window.REMC_ME=_u.email; }catch(e){} onAuthed(); return; }
       var e2='', p2='', on=false;
       try{ e2=localStorage.getItem('login_saved_email')||''; p2=localStorage.getItem('login_saved_pass')||''; on=localStorage.getItem('login_remember')==='1'; }catch(e){}
       if(on && e2 && p2){
+        try{
+          var lu2 = (typeof window.remcLocalAuth==='function') ? window.remcLocalAuth(e2, p2) : accessListAuth(e2, p2);
+          if(!lu2) lu2 = accessListAuth(e2, p2);
+          if(lu2){ window.REMC_LOCAL_USER = true; window.REMC_ME = lu2.username || lu2.email || e2; onAuthed(); return; }
+        }catch(e){}
+        if(e2.indexOf('@')<0){ ldHide(); showLogin(); return; }
         sb.auth.signInWithPassword({ email:e2, password:p2 }).then(function(r2){
-          if(r2 && !r2.error){ try{ window.REMC_ME = e2; }catch(e){} onAuthed(); } else { showLogin(); }
-        }).catch(function(){ showLogin(); });
-      } else { showLogin(); }
+          if(r2 && !r2.error){ window.REMC_LOCAL_USER=false; try{ window.REMC_ME = e2; }catch(e){} onAuthed(); } else { ldHide(); showLogin(); }
+        }).catch(function(){ ldHide(); showLogin(); });
+      } else { ldHide(); showLogin(); }
+      }).catch(function(){ ldHide(); showLogin(); });
     });
   }
 
@@ -10683,6 +10720,36 @@ function teamEditProjectBooking(pid){
 
   function load(){ try{ var a=JSON.parse(localStorage.getItem(KEY)||'[]'); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
   function save(a){ try{ localStorage.setItem(KEY, JSON.stringify(a||[])); }catch(e){} }
+
+  // The built-in administrator account. Seeded only when the list is empty.
+  var ADMIN_SEED = { id:'u-adm', firstName:'Administrator', lastName:'', email:'', username:'adm', password:'REMC123', role:'admin', createdAt:Date.now() };
+  function ensureSeed(){
+    var list=load();
+    if(list.length===0){ save([ADMIN_SEED]); return true; }
+    // never leave the system without an admin to manage it
+    if(!list.some(function(u){ return u.role==='admin'; })){
+      list.push(Object.assign({}, ADMIN_SEED, { id:'u-adm-'+Date.now() }));
+      save(list); return true;
+    }
+    return false;
+  }
+  ensureSeed();
+  // the cloud pull can briefly clear local data on load, so re-check once it settles
+  setTimeout(function(){ if(ensureSeed()){ try{ render(); }catch(e){} } }, 2500);
+  setTimeout(function(){ if(ensureSeed()){ try{ render(); }catch(e){} } }, 7000);
+
+  // Check a username/email + password against the access list (used by the main sign-in screen)
+  window.remcLocalAuth = function(idOrEmail, pass){
+    var id=String(idOrEmail||'').trim().toLowerCase();
+    if(!id) return null;
+    var u=load().find(function(x){
+      return String(x.username||'').trim().toLowerCase()===id
+          || String(x.email||'').trim().toLowerCase()===id;
+    });
+    if(!u) return null;
+    if(String(u.password||'')!==String(pass||'')) return null;
+    return u;
+  };
   function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
   function $(id){ return document.getElementById(id); }
   function fullName(u){ return ((u.firstName||'')+' '+(u.lastName||'')).trim() || (u.username||u.email||'—'); }
@@ -10697,7 +10764,10 @@ function teamEditProjectBooking(pid){
   function myEmail(){ return String(window.REMC_ME||'').trim().toLowerCase(); }
   function findMe(){
     var em=myEmail(); if(!em) return null;
-    return load().find(function(u){ return String(u.email||'').trim().toLowerCase()===em; }) || null;
+    return load().find(function(u){
+      return String(u.email||'').trim().toLowerCase()===em
+          || String(u.username||'').trim().toLowerCase()===em;
+    }) || null;
   }
   function anyAdmin(){ return load().some(function(u){ return u.role==='admin'; }); }
   // If nobody is an Admin yet, allow editing so the first Admin can be created.
@@ -10792,7 +10862,9 @@ function teamEditProjectBooking(pid){
       return;
     }
     if(!confirm('Remove '+fullName(u)+' from the access list?')) return;
-    save(list.filter(function(x){ return String(x.id)!==String(id); }));
+    var _kept=list.filter(function(x){ return String(x.id)!==String(id); });
+    save(_kept);
+    try{ if(typeof window.remcCloudUpsertKey==='function') window.remcCloudUpsertKey(KEY, JSON.stringify(_kept)); }catch(e){}
     if(String(EDIT_ID)===String(id)) clearForm();
     render();
   };
@@ -10827,6 +10899,7 @@ function teamEditProjectBooking(pid){
       list.push({ id:'u'+Date.now()+Math.random().toString(36).slice(2,6), firstName:first, lastName:last, email:email, username:user, password:pass, role:role, createdAt:Date.now() });
     }
     save(list);
+    try{ if(typeof window.remcCloudUpsertKey==='function') window.remcCloudUpsertKey(KEY, JSON.stringify(list)); }catch(e){}
     clearForm();
     render();
   }
@@ -10850,6 +10923,19 @@ function teamEditProjectBooking(pid){
     var p1=($('acc-me-pass').value||''), p2=($('acc-me-pass2').value||'');
     if(p1.length<6){ if(msg) msg.textContent='Password must be at least 6 characters.'; return; }
     if(p1!==p2){ if(msg) msg.textContent='The two passwords do not match.'; return; }
+    // Accounts created in Settings → Access keep their password in the access list
+    if(window.REMC_LOCAL_USER){
+      var me0=findMe();
+      if(!me0){ if(msg) msg.textContent='Could not find your account in the list.'; return; }
+      var l0=load().map(function(u){ return String(u.id)===String(me0.id) ? Object.assign({},u,{password:p1}) : u; });
+      save(l0);
+      try{ if(typeof window.remcCloudUpsertKey==='function') window.remcCloudUpsertKey(KEY, JSON.stringify(l0)); }catch(e){}
+      try{ if(localStorage.getItem('login_remember')==='1') localStorage.setItem('login_saved_pass', p1); }catch(e){}
+      $('acc-me-pass').value=''; $('acc-me-pass2').value='';
+      render();
+      if(msg){ msg.style.color='#15803d'; msg.textContent='✓ Password changed. Use it next time you sign in.'; }
+      return;
+    }
     var sb = window.REMC_SB;
     if(!sb || !sb.auth || !sb.auth.updateUser){ if(msg) msg.textContent='Not connected to the cloud — sign in first.'; return; }
     if(msg){ msg.style.color='var(--muted)'; msg.textContent='Changing password…'; }
