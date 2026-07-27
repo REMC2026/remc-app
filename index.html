@@ -2085,23 +2085,56 @@ filterOverviewCol('com');
 filterOverviewCol('res');
 }
 
-// Browsers can restore whatever was typed into a search box last time (form restoration).
-// Always start with empty filters so the app never opens pre-filtered.
-function remcClearFilters(){
-  ['ov-com-search','ov-res-search','quot-search','mat-search','staff-search'].forEach(function(id){
-    var el=document.getElementById(id);
-    if(el && el.value){ el.value=''; }
+// Browsers can restore whatever was typed into a search box last time, and they do it
+// silently (no input event) and sometimes long after the page has loaded.
+// We keep clearing the filters until the person actually types something themselves.
+var REMC_FILTER_IDS = ['ov-com-search','ov-res-search','quot-search','mat-search','staff-search'];
+var _remcUserTyped = {};
+function remcClearFilters(force){
+  var touched = false;
+  REMC_FILTER_IDS.forEach(function(id){
+    var el = document.getElementById(id);
+    if(!el) return;
+    if(!force && _remcUserTyped[id]) return;                 // never wipe what the person typed
+    if(!force && document.activeElement === el) return;      // nor what they are typing right now
+    if(el.value){ el.value=''; touched = true; }
   });
-  try{ if(typeof filterOverviewCol==='function'){ filterOverviewCol('com'); filterOverviewCol('res'); } }catch(e){}
-  ['ov-com-clear','ov-res-clear','quot-search-clear'].forEach(function(id){ var b=document.getElementById(id); if(b) b.style.display='none'; });
+  if(touched){
+    try{ if(typeof filterOverviewCol==='function'){ filterOverviewCol('com'); filterOverviewCol('res'); } }catch(e){}
+    try{ if(typeof renderQuotations==='function') renderQuotations(); }catch(e){}
+  }
+  // keep the little ✕ buttons in step with the (now empty) boxes
+  [['ov-com-clear','ov-com-search'],['ov-res-clear','ov-res-search'],['quot-search-clear','quot-search']].forEach(function(p){
+    var b=document.getElementById(p[0]), i=document.getElementById(p[1]);
+    if(b && i) b.style.display = i.value ? '' : 'none';
+  });
 }
-document.addEventListener('DOMContentLoaded', function(){
-  remcClearFilters();
-  // run again after the browser finishes restoring the page (bfcache / soft reload)
-  setTimeout(remcClearFilters, 250);
-  setTimeout(remcClearFilters, 1200);
-});
-window.addEventListener('pageshow', function(e){ if(e.persisted) remcClearFilters(); });
+function remcWatchFilters(){
+  // remember when the person uses the box, so we stop clearing that one
+  REMC_FILTER_IDS.forEach(function(id){
+    var el = document.getElementById(id);
+    if(!el || el._remcWatched) return;
+    el._remcWatched = true;
+    // any of these means a person is using the box (restoration does none of them)
+    ['keydown','paste','focus'].forEach(function(ev){
+      el.addEventListener(ev, function(){ _remcUserTyped[id] = true; });
+    });
+    el.addEventListener('input', function(e){ if(e.isTrusted || document.activeElement===el) _remcUserTyped[id] = true; });
+  });
+}
+var _remcSweepTimer = null;
+function remcStartFilterSweep(){
+  if(_remcSweepTimer) return;          // only ever one sweep running
+  var t0 = Date.now();
+  _remcSweepTimer = setInterval(function(){
+    remcWatchFilters();
+    remcClearFilters();
+    if(Date.now() - t0 > 6000){ clearInterval(_remcSweepTimer); _remcSweepTimer = null; }
+  }, 200);
+}
+document.addEventListener('DOMContentLoaded', function(){ remcClearFilters(); remcWatchFilters(); remcStartFilterSweep(); });
+window.addEventListener('load', function(){ remcClearFilters(); remcWatchFilters(); remcStartFilterSweep(); });
+window.addEventListener('pageshow', function(){ _remcUserTyped = {}; remcClearFilters(); remcWatchFilters(); remcStartFilterSweep(); });
 
 function applyResidentialVis(){
   var show=false; try{ show = localStorage.getItem('show_residential')==='1'; }catch(e){}
