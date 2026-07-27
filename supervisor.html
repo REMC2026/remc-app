@@ -29,6 +29,13 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);-web
 .book-btn{background:var(--blue);color:#fff;border:none;border-radius:9px;padding:9px 16px;font-family:inherit;font-size:14px;font-weight:800;cursor:pointer;box-shadow:0 2px 10px rgba(37,99,235,.3)}
 .menu{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
 .home{display:flex;flex-direction:column;gap:14px;padding:8px 0}
+.note-acts{display:flex;gap:2px;flex-shrink:0}
+.note-ico{background:none;border:none;font-size:14px;cursor:pointer;padding:4px 6px;border-radius:6px;opacity:.55;transition:.12s;line-height:1}
+.note-ico:hover{opacity:1;background:var(--surface2)}
+.np-row{text-align:left;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;cursor:pointer;font-family:inherit;transition:.12s;width:100%}
+.np-row:hover{border-color:var(--border2);background:#fff}
+.np-n{font-size:14px;font-weight:800;color:var(--text)}
+.np-m{font-size:11px;color:var(--muted);margin-top:2px}
 .home-row{display:flex;gap:14px}
 .home-row .home-card{flex:1 1 0;min-width:0;padding:26px 12px;display:flex;flex-direction:column;justify-content:center}
 .home-row .hc-t{font-size:22px}
@@ -467,15 +474,58 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
   function renderAllNotes(){
     var mine=myProjects();
     var withNotes=mine.filter(function(p){ return NOTES[String(p.id)] && String(NOTES[String(p.id)]).trim(); });
-    if(!withNotes.length){ $('view').innerHTML='<div class="empty" style="padding:26px;text-align:center;color:var(--muted)">No notes yet. Open a project and tap <b>Notes</b> to add one.</div>'; return; }
-    $('view').innerHTML = withNotes.map(function(p){
+    var addBtn='<button class="btn btn-save" style="width:100%;margin-bottom:14px" onclick="newComment()">+ New comment</button>';
+    if(!withNotes.length){
+      $('view').innerHTML = addBtn + '<div class="empty" style="padding:26px;text-align:center;color:var(--muted)">No comments yet. Tap <b>+ New comment</b> to add one.</div>';
+      return;
+    }
+    $('view').innerHTML = addBtn + withNotes.map(function(p){
+      var pid=String(p.id);
       return '<div class="pcard">'
-        + '<div class="pn">'+esc(p.name||('Project '+p.id))+'</div>'
-        + '<div class="pm">'+esc([p.jobNumber,p.address].filter(Boolean).join(' · '))+'</div>'
-        + '<div class="note-body">'+esc(NOTES[String(p.id)])+'</div>'
+        + '<div style="display:flex;align-items:flex-start;gap:8px">'
+        +   '<div style="flex:1;min-width:0"><div class="pn">'+esc(p.name||('Project '+p.id))+'</div>'
+        +   '<div class="pm">'+esc([p.jobNumber,p.address].filter(Boolean).join(' · '))+'</div></div>'
+        +   '<div class="note-acts">'
+        +     '<button class="note-ico" title="Edit" onclick="openNotes(\''+pid+'\')">✏️</button>'
+        +     '<button class="note-ico" title="Delete" onclick="deleteNote(\''+pid+'\')">🗑️</button>'
+        +   '</div>'
+        + '</div>'
+        + '<div class="note-body">'+esc(NOTES[pid])+'</div>'
         + '</div>';
     }).join('');
   }
+  // "+ New comment" → pick which project to comment on
+  window.newComment=function(){
+    var mine=myProjects();
+    if(!mine.length){ alert('You have no projects assigned to you.'); return; }
+    var ov=document.getElementById('note-pick-ov'); if(ov) ov.remove();
+    ov=document.createElement('div'); ov.id='note-pick-ov'; ov.className='ov open';
+    ov.innerHTML='<div class="sheet"><div class="sheet-head"><div class="sheet-title">Choose a project</div><button class="x" onclick="closeNotePick()">&times;</button></div>'
+      +'<div class="sheet-body"><div style="display:flex;flex-direction:column;gap:8px">'
+      + mine.map(function(p){ var pid=String(p.id); var has=NOTES[pid]&&String(NOTES[pid]).trim();
+          return '<button class="np-row" onclick="pickNoteProject(\''+pid+'\')"><div class="np-n">'+esc(p.name||('Project '+p.id))+'</div>'
+            +'<div class="np-m">'+esc([p.jobNumber,p.address].filter(Boolean).join(' · '))+(has?' · <b style="color:#16a34a">has comment</b>':'')+'</div></button>';
+        }).join('')
+      +'</div></div></div>';
+    document.body.appendChild(ov);
+    var db=false;
+    ov.addEventListener('mousedown', function(e){ db=(e.target===this); });
+    ov.addEventListener('click', function(e){ if(e.target===this && db) closeNotePick(); db=false; });
+  };
+  window.closeNotePick=function(){ var ov=document.getElementById('note-pick-ov'); if(ov) ov.remove(); };
+  window.pickNoteProject=function(pid){ closeNotePick(); openNotes(pid); };
+  window.deleteNote=function(pid){
+    pid=String(pid);
+    if(!NOTES[pid]){ return; }
+    if(!confirm('Delete this note?\n\nThis cannot be undone.')) return;
+    delete NOTES[pid];
+    render();
+    supShowSaving('Deleting…');
+    pushNotes(function(err){
+      if(err){ supShowResult(false, 'Could not delete. Check your connection and try again.'); }
+      else { pull(function(){ render(); }); supShowResult(true, 'Note deleted'); }
+    });
+  };
   function renderProjects(){
     var mine=myProjects();
     if(!mine.length){
@@ -646,12 +696,22 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
   window.closeNotes=function(){ $('notes-ov').classList.remove('open'); NOTES_PID=null; };
   window.saveNotes=function(){
     if(NOTES_PID==null) return;
+    var pid=NOTES_PID;
+    var existed = !!(NOTES[pid] && String(NOTES[pid]).trim());
     var v=$('n-text').value;
-    if(v && v.trim()) NOTES[NOTES_PID]=v; else delete NOTES[NOTES_PID];
+    var hasText = !!(v && v.trim());
+    if(hasText) NOTES[pid]=v; else delete NOTES[pid];
     $('notes-ov').classList.remove('open');
-    if(VIEW==='list') renderProjects();
-    pushNotes(function(err){ if(err){ alert('Could not save notes to the cloud: '+err); } else { pull(function(){ if(VIEW==='list') renderProjects(); }); } });
     NOTES_PID=null;
+    render();
+    supShowSaving('Saving…');
+    pushNotes(function(err){
+      if(err){ supShowResult(false, 'Could not save. Check your connection and try again.'); }
+      else {
+        pull(function(){ render(); });
+        supShowResult(true, !hasText ? 'Note removed' : (existed ? 'Note updated' : 'Note added'));
+      }
+    });
   };
 
   // ---------- saving indicator ----------
