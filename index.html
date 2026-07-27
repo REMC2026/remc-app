@@ -9716,6 +9716,48 @@ function closeHiddenModal() {
 var SCH_KEY='remc_scheduler',_schOffset=0,_schView='week',_schDragId=null;
 function schLoadBookings(){try{var b=JSON.parse(localStorage.getItem(SCH_KEY)||'[]');b.forEach(function(x){if(x.skipSat===undefined)x.skipSat=false;if(x.skipSun===undefined)x.skipSun=false;});return b;}catch(e){return[]}}
 function schSaveBookings(b){try{localStorage.setItem(SCH_KEY,JSON.stringify(b))}catch(e){}}
+// ── Audit trail: who created / last edited a job, when, and from which app ──
+function schStampCreate(b){
+  var u=null; try{ u=(typeof window.remcCurrentUser==='function')?window.remcCurrentUser():null; }catch(e){}
+  b.au_by = u?u.name:(b.bookedBy||'Office');
+  b.au_user = u?u.username:'';
+  b.au_at = new Date().toISOString();
+  b.au_app = 'PC';
+  return b;
+}
+function schStampEdit(b){
+  var u=null; try{ u=(typeof window.remcCurrentUser==='function')?window.remcCurrentUser():null; }catch(e){}
+  b.au_eby = u?u.name:'Office';
+  b.au_euser = u?u.username:'';
+  b.au_eat = new Date().toISOString();
+  b.au_eapp = 'PC';
+  return b;
+}
+function schAuditFmt(iso){
+  if(!iso) return '';
+  try{ var d=new Date(iso); return d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})+' at '+d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}); }catch(e){ return iso; }
+}
+// Audit panel HTML — only rendered for Admin / Master
+function schAuditHtml(b){
+  var full=false; try{ full=(typeof window.remcIsFullAccess==='function')?window.remcIsFullAccess():false; }catch(e){}
+  if(!full) return '';
+  if(!b.au_by && !b.bookedBy && !b.au_at && !b.createdAt) return '';
+  var appLabel=function(a){ return a==='Mobile'?'📱 Mobile app':(a==='PC'?'🖥️ Office (PC)':(a||'')); };
+  var created = '<div style="font-size:12px;color:var(--text)"><b>'+(b.au_by? String(b.au_by).replace(/</g,'&lt;') : (b.bookedBy||'—'))+'</b>'
+    + (b.au_user? ' <span style="color:var(--muted)">('+String(b.au_user).replace(/</g,'&lt;')+')</span>':'')
+    + '</div><div style="font-size:11px;color:var(--muted)">'+schAuditFmt(b.au_at||b.createdAt)+(b.au_app? ' · '+appLabel(b.au_app):'')+'</div>';
+  var edited='';
+  if(b.au_eat){
+    edited = '<div style="margin-top:8px;padding-top:8px;border-top:1px dashed var(--border)"><div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:2px">Last edited</div>'
+      + '<div style="font-size:12px;color:var(--text)"><b>'+String(b.au_eby||'—').replace(/</g,'&lt;')+'</b>'
+      + (b.au_euser? ' <span style="color:var(--muted)">('+String(b.au_euser).replace(/</g,'&lt;')+')</span>':'')
+      + '</div><div style="font-size:11px;color:var(--muted)">'+schAuditFmt(b.au_eat)+(b.au_eapp? ' · '+appLabel(b.au_eapp):'')+'</div></div>';
+  }
+  return '<div style="margin:4px 0 16px;padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:10px">'
+    + '<div style="font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">🔒 Admin — booking record</div>'
+    + '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:2px">Booked by</div>'
+    + created + edited + '</div>';
+}
 function schSetView(v){_schView=v;['today','week','month'].forEach(function(k){var b=document.getElementById('sch-view-'+k);if(b){b.style.background=v===k?'var(--red)':'var(--surface)';b.style.color=v===k?'#fff':'var(--text)'}});schRender()}
 function schPrev(){_schOffset-=(_schView==='today'?1:_schView==='week'?7:30);schRender()}
 function schNext(){_schOffset+=(_schView==='today'?1:_schView==='week'?7:30);schRender()}
@@ -9827,7 +9869,7 @@ function schMoveBooking(b, newStartStr){
   var pn=proj?(proj.name+'\n\n'):'';
   if(!confirm('Move this job?\n\n'+pn+'New dates: '+schPretty(ns)+'  →  '+schPretty(tentEnd))){ schRender(); return; }
   b.start=schDateStr(ns); b.end=schDateStr(tentEnd);
-  bks[idx]=b; schSaveBookings(bks); schRender();
+  schStampEdit(b); bks[idx]=b; schSaveBookings(bks); schRender();
 }
 function schWeekendMoveDialog(b, ns, wd, hasSat, hasSun){
   var old=document.getElementById('sch-modal'); if(old) old.remove();
@@ -9863,6 +9905,7 @@ function schWeekendMoveDialog(b, ns, wd, hasSat, hasSun){
     var r=currentPlan();
     b.skipSat=!r.incSat; b.skipSun=!r.incSun;
     b.start=schDateStr(ns); b.end=schDateStr(r.end);
+    schStampEdit(b);
     var bks=schLoadBookings(); var idx=bks.findIndex(function(x){return x.id===b.id;});
     if(idx>=0) bks[idx]=b; else bks.push(b);
     schSaveBookings(bks); modal.remove(); schRender();
@@ -9983,6 +10026,7 @@ function schSaveNewBooking(){
     color:colEl?colEl.dataset.col:'#2563eb',
     skipSat:!incSat,skipSun:!incSun,
     createdAt:new Date().toISOString()});
+  schStampCreate(bks[bks.length-1]);
   schSaveBookings(bks);
   document.getElementById('sch-modal').remove();
   schRender();
@@ -10005,6 +10049,7 @@ function schEditBooking(id) {
   ct.style.cssText = 'background:var(--surface);border-radius:14px;padding:24px;width:480px;max-width:92vw;box-shadow:0 20px 60px rgba(0,0,0,0.3)';
   ct.innerHTML = '<div style="font-family:Barlow Condensed,sans-serif;font-size:20px;font-weight:800;text-transform:uppercase;margin-bottom:16px">Edit Booking</div>'
     + '<div style="font-size:14px;font-weight:700;margin-bottom:14px;color:var(--blue)">' + pN + '</div>'
+    + schAuditHtml(b)
     + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px"><div><label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:4px">Start</label><input type="date" id="sch-e-start" value="' + b.start + '" style="width:100%;padding:8px;border:1.5px solid var(--border);border-radius:8px;font-size:13px"></div><div><label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:4px">End</label><input type="date" id="sch-e-end" value="' + b.end + '" style="width:100%;padding:8px;border:1.5px solid var(--border);border-radius:8px;font-size:13px"></div></div>'
     + '<div style="margin-bottom:12px"><label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:4px">Activity</label><input id="sch-e-activity" value="' + (b.activity || '').replace(/"/g, '&quot;') + '" style="width:100%;padding:8px;border:1.5px solid var(--border);border-radius:8px;font-size:13px"></div>'
     + '<div style="margin-bottom:12px"><label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:4px">Machine</label><input id="sch-e-machine" value="' + (b.machine || '').replace(/"/g, '&quot;') + '" style="width:100%;padding:8px;border:1.5px solid var(--border);border-radius:8px;font-size:13px"></div>'
@@ -10047,6 +10092,7 @@ function schSaveEdit(id){
   bk.bookedBy=document.getElementById('sch-e-bookedby').value;
   bk.skipSat=!document.getElementById('sch-e-sat').checked;
   bk.skipSun=!document.getElementById('sch-e-sun').checked;
+  schStampEdit(bk);
   schSaveBookings(bks);
   document.getElementById('sch-modal').remove();
   schRender();
@@ -11013,6 +11059,21 @@ function teamEditProjectBooking(pid){
     var note=$('acc-pages-note'), grid=$('acc-pages');
     if(note) note.style.display = full ? '' : 'none';
     if(grid) grid.style.display = full ? 'none' : 'grid';
+  };
+
+  // Who is signed in right now (name + username), for audit stamps
+  window.remcCurrentUser = function(){
+    var me=findMe();
+    if(me){ var nm=((me.firstName||'')+' '+(me.lastName||'')).trim(); return { name: nm||me.username||me.email||'User', username: me.username||me.email||'' }; }
+    var em=myEmail();
+    if(em) return { name: em, username: em };
+    return null;
+  };
+  // True only for Admin / Master (or the cloud email owner) — controls who may SEE audit info
+  window.remcIsFullAccess = function(){
+    var me=findMe();
+    if(me) return hasFullAccess(me);
+    return (!window.REMC_LOCAL_USER && myEmail().indexOf('@')>=0);
   };
 
   // Which pages the person signed in right now may open (null = everything)

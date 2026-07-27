@@ -666,10 +666,13 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     }
     if(EDIT_ID){
       var i=BOOKINGS.findIndex(function(x){return String(x.id)===String(EDIT_ID);});
-      if(i>=0) BOOKINGS[i]=Object.assign({}, BOOKINGS[i], rec);
+      if(i>=0){ BOOKINGS[i]=Object.assign({}, BOOKINGS[i], rec);
+        BOOKINGS[i].au_eby = ME? ME.name : 'Supervisor'; BOOKINGS[i].au_euser = ME? (ME.username||'') : ''; BOOKINGS[i].au_eat = new Date().toISOString(); BOOKINGS[i].au_eapp = 'Mobile';
+      }
     } else {
       rec.id = 'bk_'+Date.now()+'_'+Math.random().toString(36).slice(2,6);
       rec.createdAt = new Date().toISOString();
+      rec.au_by = ME? ME.name : 'Supervisor'; rec.au_user = ME? (ME.username||'') : ''; rec.au_at = new Date().toISOString(); rec.au_app = 'Mobile';
       BOOKINGS.push(rec);
     }
     closeSheet(); render();
