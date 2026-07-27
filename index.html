@@ -2132,6 +2132,29 @@ function remcStartFilterSweep(){
     if(Date.now() - t0 > 6000){ clearInterval(_remcSweepTimer); _remcSweepTimer = null; }
   }, 200);
 }
+
+// ── Hard stop for Chrome autofill ──
+// Chrome ignores autocomplete="off" on fields it has decided are logins. The reliable
+// trick: make the field READ-ONLY until the person actually focuses it. Autofill cannot
+// write into a read-only field, and restoration never focuses it — but a real click does.
+function remcLockFilter(el){
+  if(!el || el._remcLocked) return;
+  el._remcLocked = true;
+  el.setAttribute('readonly', 'readonly');
+  var unlock = function(){ el.removeAttribute('readonly'); };
+  // the moment the person interacts, make it editable
+  el.addEventListener('focus', unlock);
+  el.addEventListener('mousedown', unlock);
+  el.addEventListener('touchstart', unlock);
+  el.addEventListener('pointerdown', unlock);
+  // if they leave it empty, lock it again so autofill can't sneak back in
+  el.addEventListener('blur', function(){ if(!el.value){ el.setAttribute('readonly','readonly'); } });
+}
+function remcLockAllFilters(){
+  REMC_FILTER_IDS.forEach(function(id){ remcLockFilter(document.getElementById(id)); });
+}
+document.addEventListener('DOMContentLoaded', remcLockAllFilters);
+window.addEventListener('load', remcLockAllFilters);
 document.addEventListener('DOMContentLoaded', function(){ remcClearFilters(); remcWatchFilters(); remcStartFilterSweep(); });
 window.addEventListener('load', function(){ remcClearFilters(); remcWatchFilters(); remcStartFilterSweep(); });
 window.addEventListener('pageshow', function(){ _remcUserTyped = {}; remcClearFilters(); remcWatchFilters(); remcStartFilterSweep(); });
@@ -10553,14 +10576,26 @@ function teamEditProjectBooking(pid){
   var _bkTimer=null;
   function uploadExcelBackup(){
     try{
+      if(!sb || !sb.storage){ return; }
       var wb = buildBackupWorkbook(); if(!wb) return;
       var out = XLSX.write(wb, { bookType:'xlsx', type:'array' });
       var blob = new Blob([out], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-      sb.storage.from('remc-backups').upload('remc-latest.xlsx', blob, { upsert:true, contentType:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }).then(function(res){
-        if(res && res.error){ console.warn('[REMC Backup] upload failed:', res.error.message); }
-        else { console.log('[REMC Backup] Excel backup uploaded to cloud.'); }
-      });
-    }catch(e){ console.warn('[REMC Backup] error', e); }
+      sb.storage.from('remc-backups').upload('remc-latest.xlsx', blob, { upsert:true, contentType:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+        .then(function(res){
+          // Only read primitive fields — never log the raw error object (it can hold a
+          // Headers object that the browser cannot clone through postMessage).
+          if(res && res.error){
+            var m = (res.error && (res.error.message || res.error.error || res.error.name)) || 'unknown error';
+            console.warn('[REMC Backup] upload skipped:', String(m));
+          } else {
+            console.log('[REMC Backup] Excel backup uploaded to cloud.');
+          }
+        })
+        .catch(function(err){
+          var m = (err && (err.message || err.name)) ? (err.message || err.name) : 'network error';
+          console.warn('[REMC Backup] upload skipped:', String(m));
+        });
+    }catch(e){ console.warn('[REMC Backup] skipped:', (e && e.message) ? e.message : String(e)); }
   }
   function scheduleBackup(){ clearTimeout(_bkTimer); _bkTimer=setTimeout(uploadExcelBackup, 2500); }
   window.remcUploadExcelBackup = uploadExcelBackup;
