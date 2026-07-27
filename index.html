@@ -5960,9 +5960,21 @@ function ovLoadWS(){try{return JSON.parse(localStorage.getItem(OV_WS_KEY)||'[]')
 function ovSaveWS(a){localStorage.setItem(OV_WS_KEY,JSON.stringify(a))}
 function ovLoadH(){try{return JSON.parse(localStorage.getItem(OV_H_KEY)||'[]')}catch(e){return[]}}
 function ovSaveH(a){localStorage.setItem(OV_H_KEY,JSON.stringify(a))}
+// Publish a simple list of machine names to a synced key so App 2 can show the same machines
+function publishMachineNames(data){
+  try{
+    var names=[];
+    (data||[]).forEach(function(m){ var n=String((m&&(m.name||m.machine))||'').trim(); if(n && names.indexOf(n)<0) names.push(n); });
+    var prev=null; try{ prev=localStorage.getItem('remc_machine_names'); }catch(e){}
+    var next=JSON.stringify(names);
+    if(prev!==next){ localStorage.setItem('remc_machine_names', next); }
+  }catch(e){}
+}
 function renderOverviewMachines(data){
-  var el=document.getElementById('ov-machines-list');if(!el)return;
+  var el=document.getElementById('ov-machines-list');
   window._ovMachineData=data||window._ovMachineData||[];data=window._ovMachineData;
+  publishMachineNames(data);
+  if(!el)return;
   if(!data||!data.length){el.innerHTML='<div style="font-size:12px;color:var(--muted);padding:8px 4px;text-align:center">No machines — upload Excel in Settings</div>';_ovRenderWS([]);_ovRenderH([]);return}
   function gi(t){t=(t||'').toLowerCase();var m={excavator:'x',truck:'x',roller:'x',bobcat:'x',tipper:'x',loader:'x',grader:'x',dozer:'x',compactor:'x'};return'xx'}
   var inWS=ovLoadWS(),inH=ovLoadH();

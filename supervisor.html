@@ -295,7 +295,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
   var COLORS = ['#2563eb','#16a34a','#9333ea','#ea580c','#0891b2','#be123c','#b45309','#059669'];
   var sb = null, connected = false;
   var DATA = {};           // full shared document
-  var PROJECTS = [], BOOKINGS = [], SUPERS = [], NOTES = {};
+  var PROJECTS = [], BOOKINGS = [], SUPERS = [], NOTES = {}, MACHINES = [];
   var ME = null;           // {username, name}
   var VIEW = 'list', OFFSET = 0, EDIT_ID = null, PICK_COLOR = COLORS[0], NOTES_PID = null;
 
@@ -316,6 +316,15 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     BOOKINGS = j('remc_scheduler','[]'); if(!Array.isArray(BOOKINGS)) BOOKINGS=[];
     SUPERS   = j('remc_supervisors','[]'); if(!Array.isArray(SUPERS)) SUPERS=[];
     NOTES    = j('remc_project_notes','{}'); if(!NOTES || typeof NOTES!=='object' || Array.isArray(NOTES)) NOTES={};
+    MACHINES = j('remc_machine_names','[]'); if(!Array.isArray(MACHINES)) MACHINES=[];
+    fillMachineList();
+  }
+  // Fill the Machine dropdown with the machines uploaded in App 1 (falls back to a default list)
+  function fillMachineList(){
+    var dl=$('mac-list'); if(!dl) return;
+    var list = (MACHINES && MACHINES.length) ? MACHINES
+      : ['5T Excavator','8T Excavator','13T Excavator','20T Excavator','30T Excavator','Loader','Dozer','Skid steer'];
+    dl.innerHTML = list.map(function(n){ return '<option value="'+String(n).replace(/"/g,'&quot;')+'">'; }).join('');
   }
   // ---- Loading overlay with progress ----
   var _ldEl=null, _ldPct=0, _ldTimer=null;
@@ -586,6 +595,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     $('sheet-title').textContent='Book Job';
     $('f-del').style.display='none';
     fillProjectSelect();
+    fillMachineList();
     // start empty so the user chooses; only preselect a project when one was passed in
     $('f-project').value = (pid!=null) ? String(pid) : '';
     $('f-start').value=''; $('f-end').value='';
