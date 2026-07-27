@@ -122,9 +122,9 @@ body.cal-mode #warn,body.cal-mode .back,body.cal-mode #sched-menu,body.cal-mode 
 body.cal-mode #view{flex:1;min-height:0;display:flex;flex-direction:column}
 /* Week: 7 equal-height day cards, each scrolls on its own */
 .wk-grid{flex:1;min-height:0;display:flex;flex-direction:column;gap:7px;overflow-y:auto}
-.wk-grid .daycard{flex:1 1 0;min-height:96px;margin-bottom:0;display:flex;flex-direction:column;overflow:hidden}
+.wk-grid .daycard{margin-bottom:0;display:flex;flex-direction:column}
 .wk-grid .dc-head{flex-shrink:0}
-.wk-grid .dc-body{flex:1;min-height:0;overflow-y:auto}
+.wk-grid .dc-body{overflow:visible}
 .dc-count{margin-left:auto;font-size:10px;font-weight:800;color:var(--mid);background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:1px 8px}
 /* Month: 6 equal-height week rows, each cell scrolls on its own */
 body.cal-mode .mgrid{flex:1;min-height:0;display:flex;flex-direction:column}
@@ -139,7 +139,6 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
 @media (max-width:640px){
   body.cal-mode .mgrid{overflow-y:auto}
   body.cal-mode .mgrid .mrow:not(.mrow-head){min-height:76px}
-  .wk-grid .daycard{min-height:88px}
 }
 .wk-toggle{display:flex;gap:10px}
 .wk-day{flex:1;padding:11px 12px;border:1.5px solid var(--border);border-radius:12px;background:var(--surface2);color:var(--mid);font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;transition:all .15s;user-select:none}
@@ -147,6 +146,14 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
 .wk-day .wk-check{width:20px;height:20px;border-radius:6px;border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:transparent;transition:all .15s;flex-shrink:0}
 .wk-day.on{border-color:var(--green);background:#e9f9f0;color:#0f7a43}
 .wk-day.on .wk-check{background:var(--green);border-color:var(--green);color:#fff}
+#sup-toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);z-index:5000;min-width:240px;max-width:88vw;padding:14px 20px;border-radius:14px;font-family:inherit;font-size:14px;font-weight:700;color:#fff;box-shadow:0 12px 40px rgba(0,0,0,0.28);display:flex;align-items:center;gap:12px;opacity:0;pointer-events:none;transition:opacity .25s, transform .25s}
+#sup-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#sup-toast.saving{background:#334155}
+#sup-toast.ok{background:#16a34a}
+#sup-toast.err{background:#dc2626}
+#sup-toast .sp{width:18px;height:18px;border:2.5px solid rgba(255,255,255,0.35);border-top-color:#fff;border-radius:50%;animation:supspin .7s linear infinite;flex-shrink:0}
+@keyframes supspin{to{transform:rotate(360deg)}}
+#sup-toast .tick{font-size:18px;flex-shrink:0}
 </style>
 </head>
 <body>
@@ -209,6 +216,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
       <button class="back" onclick="goHome()">‹ Menu</button>
       <div id="warn"></div>
       <div class="menu" id="sched-menu" style="display:none">
+        <button class="mbtn" id="m-day" onclick="setView('day')">Day</button>
         <button class="mbtn on" id="m-week" onclick="setView('week')">Week</button>
         <button class="mbtn" id="m-month" onclick="setView('month')">Month</button>
       </div>
@@ -436,7 +444,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
   var DOW=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
   // ---------- render ----------
-  function render(){ try{ updateWarn(); }catch(e){} if(VIEW==='notes') renderAllNotes(); else if(VIEW==='list') renderProjects(); else if(VIEW==='week') renderWeek(); else renderMonth(); }
+  function render(){ try{ updateWarn(); }catch(e){} if(VIEW==='notes') renderAllNotes(); else if(VIEW==='list') renderProjects(); else if(VIEW==='day') renderDay(); else if(VIEW==='week') renderWeek(); else renderMonth(); }
   function renderAllNotes(){
     var mine=myProjects();
     var withNotes=mine.filter(function(p){ return NOTES[String(p.id)] && String(NOTES[String(p.id)]).trim(); });
@@ -487,6 +495,20 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     var mon=addDays(base, dow===0?-6:1-dow); var out=[];
     for(var i=0;i<7;i++) out.push(addDays(mon,i));
     return out;
+  }
+  function renderDay(){
+    var d=addDays(new Date(), OFFSET); var dk=keyOf(d);
+    $('range-lbl').textContent = DOW[d.getDay()]+', '+d.getDate()+' '+MN[d.getMonth()].slice(0,3)+' '+d.getFullYear();
+    var bks=myBookings(); var tk=todayKey(); var today=dk===tk; var w=d.getDay(), wknd=(w===0||w===6);
+    var todays=bks.filter(function(b){ return bookingCoversDay(b,dk); });
+    var html='<div class="wk-grid"><div class="daycard'+(today?' today':'')+(wknd?' wknd':'')+'">'
+      +'<div class="dc-head"><span class="dc-dow">'+DOW[w]+'</span><span class="dc-date">'+d.getDate()+' '+MN[d.getMonth()].slice(0,3)+'</span>'
+      + (todays.length? '<span class="dc-count">'+todays.length+'</span>' : '')
+      +'</div>'
+      +'<div class="dc-body">'
+      + (todays.length? todays.map(bkRow).join('') : '<div class="empty">No jobs</div>')
+      +'</div></div></div>';
+    $('view').innerHTML=html;
   }
   function renderWeek(){
     var days=weekDays();
@@ -597,6 +619,22 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     NOTES_PID=null;
   };
 
+  // ---------- saving indicator ----------
+  var _toastTimer=null;
+  function supShowSaving(msg){
+    var t=$('sup-toast'); if(!t) return;
+    clearTimeout(_toastTimer);
+    t.className='saving show';
+    t.innerHTML='<span class="sp"></span><span>'+esc(msg||'Saving…')+'</span>';
+  }
+  function supShowResult(ok, msg){
+    var t=$('sup-toast'); if(!t){ if(!ok) alert(msg); return; }
+    clearTimeout(_toastTimer);
+    t.className=(ok?'ok':'err')+' show';
+    t.innerHTML='<span class="tick">'+(ok?'✓':'⚠')+'</span><span>'+esc(msg)+'</span>';
+    _toastTimer=setTimeout(function(){ t.className=t.className.replace(' show',''); }, ok?2600:4200);
+  }
+
   window.saveBooking=function(){
     var pid=$('f-project').value;
     if(!pid){ alert('You have no projects assigned to you. Ask the office to set you as Supervisor on a project.'); return; }
@@ -615,6 +653,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
       skipSun: !$('f-sun').checked,
       bookedBy: ME? ME.name : 'Supervisor'
     };
+    var isNew = !EDIT_ID;
     if(!EDIT_ID){
       var _p = PROJECTS.find(function(x){ return String(x.id)===String(rec.projectId); });
       var _pn = _p ? (_p.name || ('#'+rec.projectId)) : ('#'+rec.projectId);
@@ -634,7 +673,12 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
       BOOKINGS.push(rec);
     }
     closeSheet(); render();
-    pushBookings(function(err){ if(err){ alert('Could not save to the cloud: '+err); } else { pull(function(){ render(); }); } });
+    // show the saving bar; report success only once it is really saved to the system
+    supShowSaving('Saving to the system…');
+    pushBookings(function(err){
+      if(err){ supShowResult(false, 'Could not save. Check your connection and try again.'); }
+      else { pull(function(){ render(); }); supShowResult(true, isNew ? 'Job registered successfully' : 'Changes saved'); }
+    });
   };
   window.cancelBooking=function(){
     if(!EDIT_ID) return;
@@ -648,9 +692,9 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
   // ---------- view + nav ----------
   window.setView=function(v){
     VIEW=v; OFFSET=0;
-    ['week','month'].forEach(function(k){ var b=$('m-'+k); if(b) b.classList.toggle('on', v===k); });
-    var tb=$('cal-toolbar'); if(tb) tb.style.display=(v==='week'||v==='month')?'':'none';
-    document.body.classList.toggle('cal-mode', v==='week'||v==='month');
+    ['day','week','month'].forEach(function(k){ var b=$('m-'+k); if(b) b.classList.toggle('on', v===k); });
+    var tb=$('cal-toolbar'); if(tb) tb.style.display=(v==='day'||v==='week'||v==='month')?'':'none';
+    document.body.classList.toggle('cal-mode', v==='day'||v==='week'||v==='month');
     render();
   };
   function _showMain(){ var h=$('home'), m=$('main'); if(h) h.style.display='none'; if(m) m.style.display=''; }
@@ -739,5 +783,6 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 })();
 </script>
+<div id="sup-toast"></div>
 </body>
 </html>
