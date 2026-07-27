@@ -6830,6 +6830,13 @@ function wkDrop(e) {
         var _bks = schLoadBookings();
         var _b = _bks.find(function(x){ return x.id === _bid; });
         if (_b) {
+          var _dropDow = new Date(_toDate+'T00:00:00').getDay(); // 0=Sun, 6=Sat
+          if (_dropDow===6 || _dropDow===0) {
+            var _dn = _dropDow===6 ? 'Saturday' : 'Sunday';
+            if (!confirm('You are moving this job to a '+_dn+'.\n\nDo you want to schedule it on '+_dn+'?\n\nOK = schedule it on '+_dn+'\nCancel = leave it where it was')) { schRender(); return; }
+            // include that weekend day so it lands there (this also stops the skip-forward below)
+            if (_dropDow===6) _b.skipSat=false; else _b.skipSun=false;
+          }
           var _oldStartStr = _b.start, _oldEndStr = _b.end;
           var _os = new Date(_oldStartStr+'T00:00:00'), _oe = new Date(_oldEndStr+'T00:00:00');
           var _wd = 0, _cc = new Date(_os);
@@ -9787,15 +9794,23 @@ function schDropOnDay(e,nds){
   var bks=schLoadBookings();
   var b=bks.find(function(x){return x.id===_schDragId});
   if(!b){_schDragId=null;return}
+  _schDragId=null;
   var oS=new Date(b.start+'T00:00:00'),oE=new Date(b.end+'T00:00:00');
   var duration=Math.round((oE-oS)/86400000);
   var nS=new Date(nds+'T00:00:00');
+  var dow=nS.getDay(); // 0=Sunday, 6=Saturday
+  // Dropping onto a weekend day: ask first, so the job never silently vanishes.
+  if(dow===6 || dow===0){
+    var dayName = dow===6 ? 'Saturday' : 'Sunday';
+    var okw = confirm('You are moving this job to a '+dayName+'.\n\nDo you want to schedule it on '+dayName+'?\n\nOK = schedule it on '+dayName+'\nCancel = leave it where it was');
+    if(!okw){ schRender(); return; }        // declined → snap back, nothing changes
+    if(dow===6) b.skipSat=false; else b.skipSun=false;   // include that day so it shows
+  }
   var nE=new Date(nS);nE.setDate(nS.getDate()+duration);
   b.start=schDateStr(nS);b.end=schDateStr(nE);
   var idx2=bks.findIndex(function(x){return x.id===b.id;});
   if(idx2>=0)bks[idx2]=b;
   schSaveBookings(bks);
-  _schDragId=null;
   schRender();
 }
 
