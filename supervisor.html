@@ -29,6 +29,9 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);-web
 .book-btn{background:var(--blue);color:#fff;border:none;border-radius:9px;padding:9px 16px;font-family:inherit;font-size:14px;font-weight:800;cursor:pointer;box-shadow:0 2px 10px rgba(37,99,235,.3)}
 .menu{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
 .home{display:flex;flex-direction:column;gap:14px;padding:8px 0}
+.home-row{display:flex;gap:14px}
+.home-row .home-card{flex:1 1 0;min-width:0;padding:26px 12px;display:flex;flex-direction:column;justify-content:center}
+.home-row .hc-t{font-size:22px}
 .notes-link{align-self:center;margin-top:-6px;background:none;border:none;color:var(--muted);font-family:inherit;font-size:13px;font-weight:800;cursor:pointer;padding:2px 10px}
 .notes-link:active{opacity:.6}
 .home-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:26px 20px;box-shadow:var(--shadow);cursor:pointer;text-align:center;transition:.12s}
@@ -206,13 +209,15 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
         <div class="hc-s">View your projects</div>
       </div>
       <button class="notes-link" onclick="goAllNotes()">📝 View all notes</button>
-      <div class="home-card" onclick="goScheduled()">
-        <div class="hc-t">Booked Jobs</div>
-        <div class="hc-s">See what's scheduled</div>
-      </div>
-      <div class="home-card home-book" onclick="openBook()">
-        <div class="hc-t">Book Job</div>
-        <div class="hc-s">Schedule a new job</div>
+      <div class="home-row">
+        <div class="home-card" onclick="goScheduled()">
+          <div class="hc-t">Booked Jobs</div>
+          <div class="hc-s">See what's scheduled</div>
+        </div>
+        <div class="home-card home-book" onclick="openBook()">
+          <div class="hc-t">Book Job</div>
+          <div class="hc-s">Schedule a new job</div>
+        </div>
       </div>
     </div>
 
