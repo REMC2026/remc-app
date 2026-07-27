@@ -10574,28 +10574,40 @@ function teamEditProjectBooking(pid){
     return wb;
   }
   var _bkTimer=null;
+  var _bkWarned = false;
   function uploadExcelBackup(){
     try{
-      if(!sb || !sb.storage){ return; }
+      if(!CFG || !CFG.url || !CFG.anonKey) return;
       var wb = buildBackupWorkbook(); if(!wb) return;
       var out = XLSX.write(wb, { bookType:'xlsx', type:'array' });
       var blob = new Blob([out], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-      sb.storage.from('remc-backups').upload('remc-latest.xlsx', blob, { upsert:true, contentType:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
-        .then(function(res){
-          // Only read primitive fields — never log the raw error object (it can hold a
-          // Headers object that the browser cannot clone through postMessage).
-          if(res && res.error){
-            var m = (res.error && (res.error.message || res.error.error || res.error.name)) || 'unknown error';
-            console.warn('[REMC Backup] upload skipped:', String(m));
-          } else {
-            console.log('[REMC Backup] Excel backup uploaded to cloud.');
-          }
-        })
-        .catch(function(err){
-          var m = (err && (err.message || err.name)) ? (err.message || err.name) : 'network error';
-          console.warn('[REMC Backup] upload skipped:', String(m));
-        });
-    }catch(e){ console.warn('[REMC Backup] skipped:', (e && e.message) ? e.message : String(e)); }
+      // Upload with a plain fetch straight to the Storage REST endpoint.
+      // (The Supabase storage client can trigger a "Headers could not be cloned"
+      //  postMessage error in some browsers / with certain extensions.)
+      var endpoint = String(CFG.url).replace(/\/$/,'') + '/storage/v1/object/remc-backups/remc-latest.xlsx';
+      fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + CFG.anonKey,
+          'apikey': CFG.anonKey,
+          'x-upsert': 'true',
+          'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          'Cache-Control': '3600'
+        },
+        body: blob
+      }).then(function(r){
+        if(r && r.ok){ console.log('[REMC Backup] Excel backup uploaded to cloud.'); _bkWarned=false; }
+        else if(!_bkWarned){
+          _bkWarned = true;
+          console.log('[REMC Backup] Cloud backup not saved (status ' + (r?r.status:'?') + '). This is optional — you can still download a backup in Settings → Backup. To enable it, create a public Storage bucket named "remc-backups".');
+        }
+      }).catch(function(){
+        if(!_bkWarned){
+          _bkWarned = true;
+          console.log('[REMC Backup] Cloud backup not saved (offline or bucket not set up). This is optional — download a backup any time in Settings → Backup.');
+        }
+      });
+    }catch(e){ /* backup is best-effort; never disturb the app */ }
   }
   function scheduleBackup(){ clearTimeout(_bkTimer); _bkTimer=setTimeout(uploadExcelBackup, 2500); }
   window.remcUploadExcelBackup = uploadExcelBackup;
