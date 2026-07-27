@@ -38,7 +38,9 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);-web
 .home-book{background:var(--blue);border-color:var(--blue)}
 .home-book .hc-t{color:#fff}
 .home-book .hc-s{color:rgba(255,255,255,.88)}
-.back{background:none;border:none;color:var(--blue);font-family:inherit;font-size:14px;font-weight:800;cursor:pointer;padding:6px 2px;margin-bottom:6px}
+.back{display:inline-flex;align-items:center;gap:4px;background:var(--blue-light,#eff6ff);border:1.5px solid rgba(37,99,235,0.25);color:var(--blue);font-family:inherit;font-size:17px;font-weight:800;cursor:pointer;padding:11px 20px;margin-bottom:10px;border-radius:12px;transition:all 0.15s;-webkit-tap-highlight-color:transparent}
+.back:hover{background:#dbeafe;border-color:rgba(37,99,235,0.4)}
+.back:active{transform:scale(0.97)}
 .mbtn{flex:1;min-width:78px;background:var(--surface);color:var(--mid);border:1px solid var(--border);border-radius:10px;padding:11px 8px;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer;transition:.12s}
 .mbtn.on{background:var(--red);color:#fff;border-color:var(--red)}
 .mbtn.mbook{background:var(--blue);color:#fff;border-color:var(--blue);flex:1.25}
@@ -99,6 +101,9 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);-web
 .sheet-foot{display:flex;gap:10px;padding:14px 18px;border-top:1px solid var(--border);position:sticky;bottom:0;background:var(--surface)}
 .btn{flex:1;border:none;border-radius:10px;padding:13px;font-family:inherit;font-size:15px;font-weight:800;cursor:pointer}
 .btn-save{background:var(--blue);color:#fff}
+.btn-save:disabled,.btn-save.disabled{background:#cbd5e1;color:#eef2f7;cursor:not-allowed;box-shadow:none}
+.req{color:#dc2626;font-weight:900}
+.opt{color:var(--muted);font-weight:600;text-transform:none;letter-spacing:0;font-size:10px}
 .btn-del{background:#fee2e2;color:#dc2626;flex:0 0 auto;padding:13px 18px}
 .btn-cancel{background:var(--surface2);color:var(--mid);border:1px solid var(--border)}
 /* Login */
@@ -240,13 +245,13 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
       <button class="x" onclick="closeSheet()">&times;</button>
     </div>
     <div class="sheet-body">
-      <div class="fld"><label>Project</label><select id="f-project"></select></div>
+      <div class="fld"><label>Project <span class="req">*</span></label><select id="f-project" onchange="updateSaveState()"></select></div>
       <div class="row2">
-        <div class="fld"><label>Start date</label><input id="f-start" type="date"></div>
-        <div class="fld"><label>End date</label><input id="f-end" type="date"></div>
+        <div class="fld"><label>Start date <span class="req">*</span></label><input id="f-start" type="date" oninput="updateSaveState()" onchange="updateSaveState()"></div>
+        <div class="fld"><label>Finish date <span class="req">*</span></label><input id="f-end" type="date" oninput="updateSaveState()" onchange="updateSaveState()"></div>
       </div>
-      <div class="fld"><label>Activity</label><input id="f-activity" list="act-list" placeholder="e.g. Bulk earthworks"><datalist id="act-list"><option value="Bulk earthworks"><option value="Detailed excavation"><option value="Site cut"><option value="Trenching"><option value="Backfill"><option value="Level & compact"><option value="Load out"></datalist></div>
-      <div class="fld"><label>Machine</label><input id="f-machine" list="mac-list" placeholder="e.g. 20T Excavator"><datalist id="mac-list"><option value="5T Excavator"><option value="8T Excavator"><option value="13T Excavator"><option value="20T Excavator"><option value="30T Excavator"><option value="Loader"><option value="Dozer"><option value="Skid steer"></datalist></div>
+      <div class="fld"><label>Activity <span class="opt">(optional)</span></label><input id="f-activity" list="act-list" placeholder="e.g. Bulk earthworks"><datalist id="act-list"><option value="Bulk earthworks"><option value="Detailed excavation"><option value="Site cut"><option value="Trenching"><option value="Backfill"><option value="Level & compact"><option value="Load out"></datalist></div>
+      <div class="fld"><label>Machine <span class="opt">(optional)</span></label><input id="f-machine" list="mac-list" placeholder="e.g. 20T Excavator"><datalist id="mac-list"><option value="5T Excavator"><option value="8T Excavator"><option value="13T Excavator"><option value="20T Excavator"><option value="30T Excavator"><option value="Loader"><option value="Dozer"><option value="Skid steer"></datalist></div>
       <div class="fld"><label>Include weekend days</label>
         <div class="wk-toggle">
           <button type="button" class="wk-day" id="wk-sat" onclick="toggleWk('sat')"><span class="wk-check">✓</span>Saturdays</button>
@@ -258,7 +263,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     <div class="sheet-foot">
       <button class="btn btn-del" id="f-del" style="display:none" onclick="cancelBooking()">Cancel job</button>
       <button class="btn btn-cancel" onclick="closeSheet()">Close</button>
-      <button class="btn btn-save" onclick="saveBooking()">Save</button>
+      <button class="btn btn-save" id="f-save" onclick="saveBooking()">Save</button>
     </div>
   </div>
 </div>
@@ -565,7 +570,8 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
   // ---------- booking sheet ----------
   function fillProjectSelect(){
     var sel=$('f-project'); var mine=myProjects();
-    sel.innerHTML = mine.length ? mine.map(function(p){ return '<option value="'+esc(p.id)+'">'+esc(p.name||('#'+p.id))+(p.jobNumber?' ('+esc(p.jobNumber)+')':'')+'</option>'; }).join('')
+    sel.innerHTML = mine.length
+      ? '<option value="">Choose a project…</option>' + mine.map(function(p){ return '<option value="'+esc(p.id)+'">'+esc(p.name||('#'+p.id))+(p.jobNumber?' ('+esc(p.jobNumber)+')':'')+'</option>'; }).join('')
       : '<option value="">No projects assigned to you</option>';
   }
   function fillSwatches(){
@@ -580,10 +586,12 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     $('sheet-title').textContent='Book Job';
     $('f-del').style.display='none';
     fillProjectSelect();
-    if(pid!=null){ var _s=$('f-project'); if(_s) _s.value=String(pid); }
-    var t=todayKey(); $('f-start').value=t; $('f-end').value=t;
+    // start empty so the user chooses; only preselect a project when one was passed in
+    $('f-project').value = (pid!=null) ? String(pid) : '';
+    $('f-start').value=''; $('f-end').value='';
     $('f-activity').value=''; $('f-machine').value=''; $('f-sat').checked=false; $('f-sun').checked=false; syncWk();
     fillSwatches();
+    updateSaveState();
     $('sheet-ov').classList.add('open');
   };
   window.openEdit=function(id){
@@ -597,7 +605,19 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     $('f-activity').value=b.activity||''; $('f-machine').value=b.machine||'';
     $('f-sat').checked=!b.skipSat; $('f-sun').checked=!b.skipSun; syncWk();
     fillSwatches();
+    updateSaveState();
     $('sheet-ov').classList.add('open');
+  };
+  // Save is only enabled when Project + Start + Finish date are all filled in
+  window.updateSaveState=function(){
+    var btn=$('f-save'); if(!btn) return;
+    var pid=($('f-project')||{}).value||'';
+    var st=($('f-start')||{}).value||'';
+    var en=($('f-end')||{}).value||'';
+    var okAll = !!pid && !!st && !!en;
+    btn.disabled = !okAll;
+    btn.classList.toggle('disabled', !okAll);
+    btn.title = okAll ? '' : 'Choose a project and both dates first';
   };
   window.closeSheet=function(){ $('sheet-ov').classList.remove('open'); };
   window.openNotes=function(pid){
