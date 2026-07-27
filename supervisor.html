@@ -121,8 +121,8 @@ body.cal-mode #main{flex:1;min-height:0;display:flex;flex-direction:column}
 body.cal-mode #warn,body.cal-mode .back,body.cal-mode #sched-menu,body.cal-mode #cal-toolbar{flex-shrink:0}
 body.cal-mode #view{flex:1;min-height:0;display:flex;flex-direction:column}
 /* Week: 7 equal-height day cards, each scrolls on its own */
-.wk-grid{flex:1;min-height:0;display:flex;flex-direction:column;gap:7px;overflow-y:auto}
-.wk-grid .daycard{margin-bottom:0;display:flex;flex-direction:column}
+.wk-grid{flex:1;min-height:0;display:flex;flex-direction:column;gap:7px;overflow-y:auto;padding-bottom:6px}
+.wk-grid .daycard{margin-bottom:0;flex:0 0 auto;overflow:visible}
 .wk-grid .dc-head{flex-shrink:0}
 .wk-grid .dc-body{overflow:visible}
 .dc-count{margin-left:auto;font-size:10px;font-weight:800;color:var(--mid);background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:1px 8px}
