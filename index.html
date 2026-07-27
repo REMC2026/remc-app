@@ -9787,31 +9787,91 @@ function schRender(){var container=document.getElementById('sch-gantt-content');
       })});h+='</div></div>'}h+='</div>';container.innerHTML=h}}
 function schDragStart(e,id){_schDragId=id;e.dataTransfer.setData('text/plain',id);e.dataTransfer.effectAllowed='move';e.stopPropagation()}
 function schWeekDrop(e){e.preventDefault();if(!_schDragId)return;var ct=document.getElementById('sch-week-container');if(!ct)ct=e.currentTarget;var rect=ct.getBoundingClientRect();var x=e.clientX-rect.left;var col=Math.min(6,Math.max(0,Math.floor(x/(rect.width/7))));var today=new Date();today.setDate(today.getDate()+_schOffset);var dow=today.getDay();var mon=new Date(today);mon.setDate(today.getDate()-((dow+6)%7));var td=new Date(mon);td.setDate(mon.getDate()+col);schDropOnDay(e,schDateStr(td))}
+function schWorkingDays(b){
+  var s=new Date(b.start+'T00:00:00'), e=new Date(b.end+'T00:00:00'), c=0, d=new Date(s);
+  while(d<=e){ var w=d.getDay(); if(!((w===6&&b.skipSat)||(w===0&&b.skipSun))) c++; d.setDate(d.getDate()+1); }
+  return Math.max(1,c);
+}
+function schPretty(d){
+  var DN=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'], MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return DN[d.getDay()]+' '+d.getDate()+' '+MN[d.getMonth()];
+}
 function schDropOnDay(e,nds){
   e.preventDefault();e.stopPropagation();
   if(e.currentTarget)e.currentTarget.style.background='';
   if(!_schDragId)return;
+  var id=_schDragId; _schDragId=null;
   var bks=schLoadBookings();
-  var b=bks.find(function(x){return x.id===_schDragId});
-  if(!b){_schDragId=null;return}
-  _schDragId=null;
-  var oS=new Date(b.start+'T00:00:00'),oE=new Date(b.end+'T00:00:00');
-  var duration=Math.round((oE-oS)/86400000);
-  var nS=new Date(nds+'T00:00:00');
-  var dow=nS.getDay(); // 0=Sunday, 6=Saturday
-  // Dropping onto a weekend day: ask first, so the job never silently vanishes.
-  if(dow===6 || dow===0){
-    var dayName = dow===6 ? 'Saturday' : 'Sunday';
-    var okw = confirm('You are moving this job to a '+dayName+'.\n\nDo you want to schedule it on '+dayName+'?\n\nOK = schedule it on '+dayName+'\nCancel = leave it where it was');
-    if(!okw){ schRender(); return; }        // declined → snap back, nothing changes
-    if(dow===6) b.skipSat=false; else b.skipSun=false;   // include that day so it shows
+  var b=bks.find(function(x){return x.id===id;});
+  if(!b)return;
+  schMoveBooking(b, nds);
+}
+function schMoveBooking(b, newStartStr){
+  var bks=schLoadBookings();
+  var idx=bks.findIndex(function(x){return x.id===b.id;});
+  if(idx<0)return;
+  if(String(b.start)===String(newStartStr)){ return; }   // dropped on the same start → nothing to do
+  var wd=schWorkingDays(b);
+  var ns=new Date(newStartStr+'T00:00:00');
+  // tentative finish using the current weekend rules
+  var tentEnd=schCalcEnd(ns, wd, !b.skipSat, !b.skipSun);
+  // does the span touch a weekend?
+  var touchesSat=false, touchesSun=false, d=new Date(ns);
+  while(d<=tentEnd){ var w=d.getDay(); if(w===6)touchesSat=true; if(w===0)touchesSun=true; d.setDate(d.getDate()+1); }
+  if(touchesSat||touchesSun){
+    schWeekendMoveDialog(b, ns, wd, touchesSat, touchesSun);
+    return;
   }
-  var nE=new Date(nS);nE.setDate(nS.getDate()+duration);
-  b.start=schDateStr(nS);b.end=schDateStr(nE);
-  var idx2=bks.findIndex(function(x){return x.id===b.id;});
-  if(idx2>=0)bks[idx2]=b;
-  schSaveBookings(bks);
-  schRender();
+  // any other move → simple confirmation
+  var proj=(typeof PROJ_DATA!=='undefined'?PROJ_DATA:[]).find(function(x){return x.id==b.projectId;});
+  var pn=proj?(proj.name+'\n\n'):'';
+  if(!confirm('Move this job?\n\n'+pn+'New dates: '+schPretty(ns)+'  →  '+schPretty(tentEnd))){ schRender(); return; }
+  b.start=schDateStr(ns); b.end=schDateStr(tentEnd);
+  bks[idx]=b; schSaveBookings(bks); schRender();
+}
+function schWeekendMoveDialog(b, ns, wd, hasSat, hasSun){
+  var old=document.getElementById('sch-modal'); if(old) old.remove();
+  var proj=(typeof PROJ_DATA!=='undefined'?PROJ_DATA:[]).find(function(x){return x.id==b.projectId;});
+  var pName=(proj?proj.name:'this job'); pName=String(pName).replace(/</g,'&lt;');
+  var modal=document.createElement('div'); modal.id='sch-modal';
+  modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:2000;display:flex;align-items:center;justify-content:center;font-family:Barlow,sans-serif';
+  var ct=document.createElement('div');
+  ct.style.cssText='background:var(--surface);border-radius:14px;padding:24px;width:440px;max-width:92vw;box-shadow:0 20px 60px rgba(0,0,0,0.3)';
+  var satRow=hasSat?'<label style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;margin-bottom:8px;cursor:pointer;font-size:14px;font-weight:700"><input type="checkbox" id="sch-wk-sat" '+(!b.skipSat?'checked':'')+' style="width:18px;height:18px;cursor:pointer;accent-color:#16a34a"> Work on Saturday</label>':'';
+  var sunRow=hasSun?'<label style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;cursor:pointer;font-size:14px;font-weight:700"><input type="checkbox" id="sch-wk-sun" '+(!b.skipSun?'checked':'')+' style="width:18px;height:18px;cursor:pointer;accent-color:#16a34a"> Work on Sunday</label>':'';
+  ct.innerHTML='<div style="font-family:Barlow Condensed,sans-serif;font-size:22px;font-weight:800;text-transform:uppercase;margin-bottom:6px">Weekend work</div>'
+    +'<div style="font-size:13px;color:var(--mid);margin-bottom:16px">Moving <b>'+pName+'</b> to start '+schPretty(ns)+' makes it run across the weekend.<br>Choose which weekend days to work on:</div>'
+    +'<div style="margin-bottom:14px">'+satRow+sunRow+'</div>'
+    +'<div id="sch-wk-preview" style="font-size:12px;color:var(--mid);margin-bottom:16px;padding:10px 12px;background:#eff6ff;border-radius:8px;font-weight:600"></div>';
+  var btnRow=document.createElement('div'); btnRow.style.cssText='display:flex;gap:8px;justify-content:flex-end';
+  var cancelBtn=document.createElement('button'); cancelBtn.textContent='Cancel';
+  cancelBtn.style.cssText='padding:9px 20px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;font-size:13px;font-weight:700;cursor:pointer';
+  cancelBtn.onclick=function(){ modal.remove(); schRender(); };
+  var confirmBtn=document.createElement('button'); confirmBtn.textContent='Confirm move';
+  confirmBtn.style.cssText='padding:9px 20px;background:var(--blue);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer';
+  function currentPlan(){
+    var incSat=hasSat?(document.getElementById('sch-wk-sat').checked):!b.skipSat;
+    var incSun=hasSun?(document.getElementById('sch-wk-sun').checked):!b.skipSun;
+    return { incSat:incSat, incSun:incSun, end:schCalcEnd(ns, wd, incSat, incSun) };
+  }
+  function refreshPreview(){
+    var r=currentPlan();
+    var skipped=(hasSat&&!r.incSat)||(hasSun&&!r.incSun);
+    document.getElementById('sch-wk-preview').innerHTML='Runs '+schPretty(ns)+'  →  '+schPretty(r.end)+'  ('+wd+' working day'+(wd>1?'s':'')+').'+(skipped?'<br>Skipped weekend days push the finish to the next working day.':'');
+  }
+  confirmBtn.onclick=function(){
+    var r=currentPlan();
+    b.skipSat=!r.incSat; b.skipSun=!r.incSun;
+    b.start=schDateStr(ns); b.end=schDateStr(r.end);
+    var bks=schLoadBookings(); var idx=bks.findIndex(function(x){return x.id===b.id;});
+    if(idx>=0) bks[idx]=b; else bks.push(b);
+    schSaveBookings(bks); modal.remove(); schRender();
+  };
+  btnRow.appendChild(cancelBtn); btnRow.appendChild(confirmBtn);
+  ct.appendChild(btnRow); modal.appendChild(ct); document.body.appendChild(modal);
+  modal.onclick=function(ev){ if(ev.target===modal){ modal.remove(); schRender(); } };
+  ['sch-wk-sat','sch-wk-sun'].forEach(function(id){ var el=document.getElementById(id); if(el) el.addEventListener('change', refreshPreview); });
+  refreshPreview();
 }
 
 function schShowWeekendDialog(booking,hasSat,hasSun,isNew){
