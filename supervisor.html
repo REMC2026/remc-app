@@ -785,8 +785,14 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     $('lg-btn').onclick=doLogin;
     $('lg-pass').addEventListener('keydown', function(e){ if(e.key==='Enter') doLogin(); });
     $('logout').onclick=function(){ try{ sessionStorage.removeItem('remc_sup_me'); localStorage.removeItem('sup_saved_user'); localStorage.removeItem('sup_saved_pass'); localStorage.setItem('sup_remember','0'); }catch(e){}; location.reload(); };
-    $('sheet-ov').addEventListener('click', function(e){ if(e.target===this) closeSheet(); });
-    $('notes-ov').addEventListener('click', function(e){ if(e.target===this) closeNotes(); });
+    // Close on backdrop click — but ONLY if the click STARTED on the backdrop.
+    // (Selecting text inside a field and releasing the mouse over the backdrop
+    //  used to fire a click on the overlay and wrongly close the sheet.)
+    var _sheetDownBk=false, _notesDownBk=false;
+    $('sheet-ov').addEventListener('mousedown', function(e){ _sheetDownBk=(e.target===this); });
+    $('sheet-ov').addEventListener('click', function(e){ if(e.target===this && _sheetDownBk) closeSheet(); _sheetDownBk=false; });
+    $('notes-ov').addEventListener('mousedown', function(e){ _notesDownBk=(e.target===this); });
+    $('notes-ov').addEventListener('click', function(e){ if(e.target===this && _notesDownBk) closeNotes(); _notesDownBk=false; });
     if(!ensureClient()){ $('lg-msg').textContent='Paste the anon key (same as the main app) into this file first.'; return; }
     // Pre-fill the login form from saved credentials on this device
     var remUser='', remPass='', remOn=false;
