@@ -9160,6 +9160,9 @@ function pdSaveDocs(o) { try { localStorage.setItem(PD_DOCS_KEY, JSON.stringify(
 
 // Predefined plan slots per category
 var PD_DOC_SLOTS = {
+  allowances: [
+    { key:'allowance',      label:'Project Allowances (PDF)', icon:'\ud83d\udccb' }
+  ],
   civil: [
     { key:'drainage',       label:'Drainage Plan',       icon:'\ud83d\udca7' },
     { key:'existing_levels', label:'Existing Levels',     icon:'\ud83d\udccf' },
@@ -9178,24 +9181,38 @@ var PD_DOC_SLOTS = {
 var _pdDocPendingCat = null;
 var _pdDocPendingSlot = null;
 var _pdDocReplaceIdx = null;
+var _pdDocCustomLabel = null;
 
 function pdRenderDocs(id) {
   var store = pdLoadDocs();
   var proj  = store[id] || {};
 
   // Render each category
-  ['civil','architect','landscape'].forEach(function(cat) {
+  ['allowances','civil','architect','landscape'].forEach(function(cat) {
     var el = document.getElementById('pd-docs-' + cat);
     if (!el) return;
     var slots = PD_DOC_SLOTS[cat] || [];
-    el.innerHTML = slots.map(function(slot) {
-      var doc = (proj[cat] || {})[slot.key];
+    var slotKeys = slots.map(function(s){ return s.key; });
+    var catObj = proj[cat] || {};
+    var html = slots.map(function(slot) {
+      var doc = catObj[slot.key];
       if (doc && doc.name) {
         return pdDocRow(id, cat, slot.key, slot.icon, slot.label, doc);
       } else {
         return pdDocEmptyRow(id, cat, slot.key, slot.icon, slot.label);
       }
     }).join('');
+    // Manually-added (custom) items for this sector
+    Object.keys(catObj).forEach(function(k){
+      if (slotKeys.indexOf(k) >= 0) return;
+      var doc = catObj[k];
+      if (doc && (doc.name || doc.label)) html += pdDocRow(id, cat, k, '\ud83d\udcc4', doc.label || doc.name || 'File', doc);
+    });
+    // "+ Add plan" button lets you create a named item + attach a file (not for the single Allowances slot)
+    if (cat !== 'allowances') {
+      html += '<div style="margin-top:6px"><button onclick="pdDocAddCustom(\'' + id + '\',\'' + cat + '\')" style="padding:4px 12px;background:var(--surface2);border:1px dashed var(--border2);border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;color:var(--blue);font-family:\'Barlow\',sans-serif">+ Add plan</button></div>';
+    }
+    el.innerHTML = html;
   });
 
   // Other files (dynamic list)
@@ -9216,7 +9233,7 @@ function pdDocEmptyRow(id, cat, slotKey, icon, label) {
   return '<div style="display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;min-height:32px">'
     + '<span style="font-size:13px;opacity:0.5">' + icon + '</span>'
     + '<span style="font-size:12px;color:var(--muted);flex:1">' + label + '</span>'
-    + '<button onclick="_pdDocReplaceIdx=null;pdDocAttach(\'' + id + '\',\'' + cat + '\',\'' + slotKey + '\')" '
+    + '<button onclick="_pdDocReplaceIdx=null;_pdDocCustomLabel=null;pdDocAttach(\'' + id + '\',\'' + cat + '\',\'' + slotKey + '\')" '
     + 'style="padding:3px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:5px;font-size:10px;font-weight:700;cursor:pointer;color:var(--blue);font-family:\'Barlow\',sans-serif">+ Attach</button>'
     + '</div>';
 }
@@ -9231,7 +9248,7 @@ function pdDocRow(id, cat, slotKey, icon, label, doc) {
   return '<div style="display:flex;align-items:center;gap:6px;padding:6px 8px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px">'
     + '<span style="font-size:13px">' + icon + '</span>'
     + '<div style="flex:1;min-width:0">'
-    + '<div style="font-size:12px;font-weight:700;color:#15803d;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + (doc.name || label) + '</div>'
+    + '<div style="font-size:12px;font-weight:700;color:#15803d;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + (doc.label || doc.name || label) + '</div>'
     + '<div style="font-size:10px;color:#16a34a">' + (isLink ? '🔗 Link' : '📄 File') + (doc.size ? ' · ' + doc.size : '') + '</div>'
     + '</div>'
     + '<button onclick="' + openAction + '" title="' + primaryLabel + '" style="padding:3px 9px;background:#dcfce7;border:1px solid #bbf7d0;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer;color:#15803d">' + primaryLabel + '</button>'
@@ -9296,9 +9313,12 @@ function pdDocAttachLink() {
     }
   } else {
     if (!store[id][_pdDocPendingCat]) store[id][_pdDocPendingCat] = {};
-    store[id][_pdDocPendingCat][_pdDocPendingSlot] = { name:name, src:url, type:'link' };
+    var linkEntry = { name:name, src:url, type:'link' };
+    if (_pdDocCustomLabel) linkEntry.label = _pdDocCustomLabel;
+    store[id][_pdDocPendingCat][_pdDocPendingSlot] = linkEntry;
   }
   _pdDocReplaceIdx = null;
+  _pdDocCustomLabel = null;
   pdSaveDocs(store);
   pdRenderDocs(id);
 }
@@ -9318,6 +9338,7 @@ function pdDocFileChosen(e) {
     var store = pdLoadDocs();
     if (!store[id]) store[id] = {};
     var entry = { name:file.name, src:ev.target.result, type:'file', size:(file.size/1024).toFixed(0)+' KB' };
+    if (_pdDocCustomLabel) entry.label = _pdDocCustomLabel;
     if (_pdDocPendingCat === 'other') {
       if (!store[id].other) store[id].other = [];
       if (_pdDocReplaceIdx != null && _pdDocReplaceIdx >= 0 && _pdDocReplaceIdx < store[id].other.length) {
@@ -9330,6 +9351,7 @@ function pdDocFileChosen(e) {
       store[id][_pdDocPendingCat][_pdDocPendingSlot] = entry;
     }
     _pdDocReplaceIdx = null;
+    _pdDocCustomLabel = null;
     pdSaveDocs(store);
     pdRenderDocs(id);
   };
@@ -9382,14 +9404,36 @@ function pdDocAdd(cat) {
   _pdDocPendingCat = cat;
   _pdDocPendingSlot = null;
   _pdDocReplaceIdx = null;
+  _pdDocCustomLabel = null;
   pdDocAttach(window._pdCurrentId, cat, Date.now().toString());
 }
 
 // Change / replace an existing document (re-opens the attach chooser for that slot)
 function pdDocChange(id, cat, slotKey) {
   _pdDocReplaceIdx = (cat === 'other') ? parseInt(slotKey, 10) : null;
+  // preserve the custom name (if this is a manually-added item)
+  _pdDocCustomLabel = null;
+  try {
+    var store = pdLoadDocs(); var proj = store[id] || {};
+    var doc = (cat === 'other') ? (proj.other || [])[parseInt(slotKey, 10)] : (proj[cat] || {})[slotKey];
+    if (doc && doc.label) _pdDocCustomLabel = doc.label;
+  } catch(e){}
   pdDocAttach(id, cat, slotKey);
 }
+
+// Manually add a named plan to a sector (Civil / Architect / Landscape), then attach a file
+function pdDocAddCustom(id, cat) {
+  var name = prompt('Name for this plan (e.g. Drainage Plan, Existing Levels, Proposed Levels):');
+  if (name === null) return;
+  name = name.trim();
+  if (!name) return;
+  _pdDocPendingCat = cat;
+  _pdDocPendingSlot = 'custom_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+  _pdDocReplaceIdx = null;
+  _pdDocCustomLabel = name;
+  pdDocAttach(id, cat, _pdDocPendingSlot);
+}
+window.pdDocAddCustom = pdDocAddCustom;
 
 // In-app viewer (lightbox) for images and PDFs
 function pdDocView(id, cat, slotKey) {
@@ -11327,6 +11371,8 @@ function teamEditProjectBooking(pid){
 
     <!-- Q4 BOTTOM-RIGHT: Project Plans & Documents -->
     <div style="background:var(--surface);overflow-y:auto;padding:16px 18px">
+      <div style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;color:var(--blue);margin-bottom:10px">&#128203; Project Allowances</div>
+      <div id="pd-docs-allowances" style="margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border)"></div>
       <div style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;color:var(--blue);margin-bottom:14px">&#128194; Project Plans & Documents</div>
       <div style="margin-bottom:14px">
         <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--text);padding:6px 10px;background:var(--surface2);border-radius:6px;margin-bottom:8px;display:flex;align-items:center;gap:6px"><span style="font-size:14px">&#127959;</span> Civil Plans</div>
