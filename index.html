@@ -1499,7 +1499,9 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
         <div class="stab" onclick="showSettingsTab('materials')"         data-tab="materials"      data-cat="data">🚚 Materials</div>
         <div class="stab" onclick="showSettingsTab('quotations')"        data-tab="quotations"     data-cat="data">📊 Quotations</div>
         <div class="stab" onclick="showSettingsTab('subcontractors')"    data-tab="subcontractors" data-cat="data">🔨 Sub-contractors</div>
-        <div class="stab" onclick="showSettingsTab('access')"            data-tab="access"         data-cat="control">🔑 Access</div>
+        <div class="stab" onclick="showSettingsTab('access')"            data-tab="access"         data-cat="control">🔑 Office Access</div>
+        <div class="stab" onclick="showSettingsTab('mypassword')"        data-tab="mypassword"     data-cat="control">🔒 My Password</div>
+        <div class="stab" onclick="showSettingsTab('empaccess')"         data-tab="empaccess"      data-cat="control">👷 General Employee Access</div>
         <div class="stab" onclick="showSettingsTab('storage')"           data-tab="storage"        data-cat="system">💾 Storage</div>
         <div class="stab" onclick="showSettingsTab('backup')"            data-tab="backup"         data-cat="system">🗃️ Backup</div>
         <div class="stab" onclick="showSettingsTab('outlook')"           data-tab="outlook"        data-cat="system">📧 Email (Outlook)</div>
@@ -2005,25 +2007,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
 
       <div class="stab-panel" id="stpanel-access">
         <div class="stpanel-inner">
-          <div class="stpanel-desc">Register everyone who is allowed to use the REMC system. This list is shared with every device.</div>
-
-          <div class="step-card" id="acc-me-card" style="display:none">
-            <div class="step-head">
-              <div class="step-num" style="background:#16a34a">👤</div>
-              <div>
-                <div class="step-title">My account</div>
-                <div class="step-sub" id="acc-me-sub">—</div>
-              </div>
-            </div>
-            <div class="step-body">
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px">
-                <div><div class="map-lbl">New password</div><input id="acc-me-pass" class="map-sel" type="password" placeholder="At least 6 characters"></div>
-                <div><div class="map-lbl">Repeat new password</div><input id="acc-me-pass2" class="map-sel" type="password" placeholder="Type it again"></div>
-              </div>
-              <div id="acc-me-msg" style="font-size:12px;margin-bottom:10px;min-height:16px"></div>
-              <button class="step-btn-pri" id="acc-me-btn">🔒 Change my password</button>
-            </div>
-          </div>
+          <div class="stpanel-desc">Register everyone in the <b>office</b> who is allowed to use the REMC system. This list is shared with every device.</div>
 
           <div id="acc-readonly-note" style="display:none;background:#fef3c7;border:1px solid rgba(217,119,6,.3);color:#92400e;border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:13px;font-weight:600">
             🔒 Only an <b>Admin</b> can add, edit or remove people. You can still see the list and change your own password.
@@ -2031,13 +2015,6 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
 
           <div id="acc-bootstrap-note" style="display:none;background:var(--blue-light);border:1px solid rgba(37,99,235,.25);color:#1d4ed8;border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:13px;font-weight:600">
             ℹ️ No Admin has been registered yet, so anyone signed in can edit this list. Add yourself with the role <b>Admin</b> to lock it down.
-          </div>
-
-          <div id="acc-list"></div>
-
-          <div style="margin:12px 0">
-            <button class="step-btn-pri" id="acc-cloud-btn" style="background:#2563eb">☁️ Sync users to cloud now</button>
-            <span id="acc-cloud-msg" style="font-size:12px;color:var(--muted);margin-left:8px"></span>
           </div>
 
           <div class="step-card">
@@ -2085,6 +2062,10 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
             </div>
           </div>
 
+          <div id="acc-list"></div>
+
+          <div style="font-size:11px;color:var(--muted);margin:2px 0 14px;display:flex;align-items:center;gap:6px"><span style="color:#16a34a">☁️</span> Users are saved and kept in sync automatically.</div>
+
           <div style="font-size:12px;color:var(--muted);margin-top:6px;line-height:1.6">
             <b>Note:</b> this list records who is allowed to use the system and is shared across devices.
             Signing in to the main software still uses the email accounts created in Supabase
@@ -2093,9 +2074,102 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
         </div>
       </div>
 
+      <!-- TAB: MY PASSWORD -->
+      <div class="stab-panel" id="stpanel-mypassword">
+        <div class="stpanel-inner">
+          <div class="stpanel-desc">Change the password for the account you are signed in with.</div>
+          <div class="step-card" id="acc-me-card" style="display:none">
+            <div class="step-head">
+              <div class="step-num" style="background:#16a34a">👤</div>
+              <div>
+                <div class="step-title">My account</div>
+                <div class="step-sub" id="acc-me-sub">—</div>
+              </div>
+            </div>
+            <div class="step-body">
+              <!-- Step 0: discreet padlock -->
+              <div id="acc-pw-step0">
+                <button class="step-btn-sec" id="acc-pw-start">🔒 Change password</button>
+              </div>
+              <!-- Step 1: confirm current password -->
+              <div id="acc-pw-step1" style="display:none">
+                <div style="max-width:340px"><div class="map-lbl">Current password</div><input id="acc-me-current" class="map-sel" type="password" placeholder="Enter your current password"></div>
+                <div id="acc-me-msg1" style="font-size:12px;color:var(--red);margin:8px 0;min-height:16px"></div>
+                <button class="step-btn-pri" id="acc-pw-verify">Continue</button>
+                <button class="step-btn-sec" id="acc-pw-cancel1" style="margin-left:8px">Cancel</button>
+              </div>
+              <!-- Step 2: set a new password -->
+              <div id="acc-pw-step2" style="display:none">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px;max-width:520px">
+                  <div><div class="map-lbl">New password</div><input id="acc-me-pass" class="map-sel" type="password" placeholder="At least 6 characters"></div>
+                  <div><div class="map-lbl">Repeat new password</div><input id="acc-me-pass2" class="map-sel" type="password" placeholder="Type it again"></div>
+                </div>
+                <div id="acc-me-msg" style="font-size:12px;margin-bottom:10px;min-height:16px"></div>
+                <button class="step-btn-pri" id="acc-me-btn">🔒 Save new password</button>
+                <button class="step-btn-sec" id="acc-pw-cancel2" style="margin-left:8px">Cancel</button>
+              </div>
+            </div>
+          </div>
+          <div id="acc-me-empty" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px;font-size:13px;color:var(--muted)">Sign in to change your password.</div>
+        </div>
+      </div>
+
+      <!-- TAB: GENERAL EMPLOYEE ACCESS (future project) -->
+      <div class="stab-panel" id="stpanel-empaccess">
+        <div class="stpanel-inner">
+          <div class="stpanel-desc">Manage what general employees can access in the system.</div>
+          <div style="text-align:center;padding:56px 24px;background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow)">
+            <div style="font-size:44px;margin-bottom:12px">👷</div>
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">General Employee Access</div>
+            <div style="display:inline-block;font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--amber);background:var(--amber-light);border:1px solid rgba(217,119,6,.3);border-radius:20px;padding:4px 14px;margin-bottom:14px">Coming soon</div>
+            <div style="font-size:13px;color:var(--muted);max-width:460px;margin:0 auto;line-height:1.6">This area is a future project. It will let you control access for general employees — separate from the office logins above.</div>
+          </div>
+        </div>
+      </div>
+
       <div class="stab-panel" id="stpanel-backup">
         <div class="stpanel-inner">
           <div class="stpanel-desc">Download a copy of all your data, or restore it from a file you saved earlier.</div>
+
+          <div class="step-card">
+            <div class="step-head">
+              <div class="step-num" style="background:#0ea5e9">⏱️</div>
+              <div>
+                <div class="step-title">Automatic backup to a folder</div>
+                <div class="step-sub">Saves an Excel copy to a folder on this computer, on a schedule — no clicking needed</div>
+              </div>
+            </div>
+            <div class="step-body">
+              <div style="margin-bottom:14px">
+                <div class="map-lbl">How often</div>
+                <select id="bk-freq" class="map-sel" style="max-width:280px" onchange="remcBkSetFreq(this.value)">
+                  <option value="off">Off</option>
+                  <option value="1h">Every 1 hour</option>
+                  <option value="5h">Every 5 hours</option>
+                  <option value="1d">Every day</option>
+                  <option value="2d">Every 2 days</option>
+                  <option value="1w">Every week</option>
+                </select>
+              </div>
+              <div style="margin-bottom:14px">
+                <div class="map-lbl">Save folder (required)</div>
+                <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                  <button class="step-btn-pri" onclick="remcBkPickFolder()">📁 Choose folder</button>
+                  <span id="bk-folder-name" style="font-size:13px;font-weight:700;color:var(--mid)">No folder chosen</span>
+                  <button class="step-btn-sec" id="bk-folder-clear" onclick="remcBkClearFolder()" style="display:none">Remove</button>
+                </div>
+              </div>
+              <div>
+                <button class="step-btn-sec" onclick="remcBkNow()">💾 Back up now</button>
+                <div id="bk-status" style="font-size:12px;margin-top:10px;min-height:16px"></div>
+                <div id="bk-schedule" style="font-size:11px;color:var(--muted);margin-top:2px"></div>
+              </div>
+              <div style="font-size:11px;color:var(--muted);margin-top:12px;line-height:1.6;border-top:1px solid var(--border);padding-top:10px">
+                Works in <b>Chrome</b> and <b>Edge</b>. The file is an Excel workbook with a sheet for every part of the system: Projects, Quotations, Bookings, Employees, Departments, Supervisors, Notes and Machines. Automatic backups run while this app stays open; after a browser restart, click <b>Back up now</b> once to reconnect the folder.
+              </div>
+            </div>
+          </div>
+
           <div class="step-card">
             <div class="step-head">
               <div class="step-num">1</div>
@@ -2532,6 +2606,8 @@ p.classList.toggle('active', p.id === 'stpanel-' + tab);
 if(tab==='projects'){ try{ if(typeof window.remcReloadProjData==='function') window.remcReloadProjData(); if(typeof remcRenderCommercialModeUI==='function') remcRenderCommercialModeUI(); }catch(e){} }
 if(tab==='quotations'){ try{ if(typeof remcRenderQuotModeUI==='function') remcRenderQuotModeUI(); }catch(e){} }
 if(tab==='supervisors'){ try{ if(typeof window.remcRenderSupers==='function') window.remcRenderSupers(); }catch(e){} }
+if(tab==='mypassword' || tab==='access'){ try{ if(typeof window.remcAccRender==='function') window.remcAccRender(); }catch(e){} }
+if(tab==='backup'){ try{ if(typeof window.remcBkRenderStatus==='function') window.remcBkRenderStatus(); }catch(e){} }
 }
 
 function showPage(name) {
@@ -11641,17 +11717,18 @@ function teamEditProjectBooking(pid){
   var EDIT_ID = null;
 
   function load(){ try{ var a=JSON.parse(localStorage.getItem(KEY)||'[]'); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
-  function save(a){ try{ localStorage.setItem(KEY, JSON.stringify(a||[])); }catch(e){} }
+  function saveLocal(a){ try{ localStorage.setItem(KEY, JSON.stringify(a||[])); }catch(e){} }
+  function save(a){ saveLocal(a); try{ if(typeof window.remcCloudUpsertKey==='function') window.remcCloudUpsertKey(KEY, JSON.stringify(a||[])); }catch(e){} }
 
   // The built-in administrator account. Seeded only when the list is empty.
   var ADMIN_SEED = { id:'u-adm', firstName:'Administrator', lastName:'', email:'', username:'adm', password:'REMC123', role:'admin', createdAt:Date.now() };
   function ensureSeed(){
     var list=load();
-    if(list.length===0){ save([ADMIN_SEED]); return true; }
+    if(list.length===0){ saveLocal([ADMIN_SEED]); return true; }
     // never leave the system without an admin to manage it
     if(!list.some(function(u){ return u.role==='admin' || u.role==='master'; })){
       list.push(Object.assign({}, ADMIN_SEED, { id:'u-adm-'+Date.now() }));
-      save(list); return true;
+      saveLocal(list); return true;
     }
     return false;
   }
@@ -11790,12 +11867,14 @@ function teamEditProjectBooking(pid){
     // My account card: visible whenever we know who is signed in
     var me=$('acc-me-card');
     if(me){
+      var empty=$('acc-me-empty');
       if(myEmail()){
         me.style.display='';
+        if(empty) empty.style.display='none';
         var who=findMe();
         var sub=$('acc-me-sub');
         if(sub) sub.textContent = (who? fullName(who)+' · ' : '') + myEmail() + (who&&who.role==='admin' ? ' · Admin' : '');
-      } else { me.style.display='none'; }
+      } else { me.style.display='none'; if(empty) empty.style.display=''; }
     }
   }
 
@@ -11931,6 +12010,33 @@ function teamEditProjectBooking(pid){
     });
   }
 
+  function accPwShow(step){
+    var s0=$('acc-pw-step0'), s1=$('acc-pw-step1'), s2=$('acc-pw-step2');
+    if(s0) s0.style.display = step===0 ? '' : 'none';
+    if(s1) s1.style.display = step===1 ? '' : 'none';
+    if(s2) s2.style.display = step===2 ? '' : 'none';
+  }
+  window.accPwCancel=function(){
+    ['acc-me-current','acc-me-pass','acc-me-pass2'].forEach(function(id){ var el=$(id); if(el) el.value=''; });
+    var m1=$('acc-me-msg1'); if(m1) m1.textContent='';
+    var m=$('acc-me-msg'); if(m) m.textContent='';
+    accPwShow(0);
+  };
+  function accPwStart(){ window.accPwCancel(); accPwShow(1); var el=$('acc-me-current'); if(el) el.focus(); }
+  function accPwVerify(){
+    var msg=$('acc-me-msg1'); if(msg){ msg.style.color='var(--red)'; msg.textContent=''; }
+    var cur=($('acc-me-current')?$('acc-me-current').value:'')||'';
+    if(!cur){ if(msg) msg.textContent='Enter your current password.'; return; }
+    var me=(typeof findMe==='function')?findMe():null;
+    var stored = me ? String(me.password||'') : '';
+    var ok;
+    if(stored){ ok = (cur===stored); }
+    else { var sp=''; try{ sp=localStorage.getItem('login_saved_pass')||''; }catch(e){} ok = sp ? (cur===sp) : (cur.length>0); }
+    if(!ok){ if(msg) msg.textContent='Current password is incorrect.'; return; }
+    accPwShow(2); var np=$('acc-me-pass'); if(np) np.focus();
+  }
+  window.accPwStart=accPwStart; window.accPwVerify=accPwVerify;
+
   function changeMyPassword(){
     var msg=$('acc-me-msg'); if(msg){ msg.style.color='var(--red)'; msg.textContent=''; }
     var p1=($('acc-me-pass').value||''), p2=($('acc-me-pass2').value||'');
@@ -11946,6 +12052,7 @@ function teamEditProjectBooking(pid){
       try{ if(localStorage.getItem('login_remember')==='1') localStorage.setItem('login_saved_pass', p1); }catch(e){}
       $('acc-me-pass').value=''; $('acc-me-pass2').value='';
       render();
+      accPwShow(0);
       if(msg){ msg.style.color='#15803d'; msg.textContent='✓ Password changed. Use it next time you sign in.'; }
       return;
     }
@@ -11963,6 +12070,7 @@ function teamEditProjectBooking(pid){
         if(changed){ save(list); render(); }
       }catch(e){}
       $('acc-me-pass').value=''; $('acc-me-pass2').value='';
+      accPwShow(0);
       if(msg){ msg.style.color='#15803d'; msg.textContent='✓ Password changed. Use it next time you sign in.'; }
     }).catch(function(){ if(msg){ msg.style.color='var(--red)'; msg.textContent='Could not reach the server. Check your internet.'; } });
   }
@@ -11971,12 +12079,16 @@ function teamEditProjectBooking(pid){
     if(!$('acc-list')) return;
     if($('acc-pages') && !$('acc-pages').innerHTML){ buildPageBoxes({ overview:true, projects:true, jobscheduler:true }); try{ window.remcAccRoleChanged(); }catch(e){} }
     var mb=$('acc-me-btn'); if(mb && !mb._wired){ mb._wired=1; mb.onclick=changeMyPassword; }
+    var ps=$('acc-pw-start'); if(ps && !ps._wired){ ps._wired=1; ps.onclick=accPwStart; }
+    var pv=$('acc-pw-verify'); if(pv && !pv._wired){ pv._wired=1; pv.onclick=accPwVerify; }
+    var pc1=$('acc-pw-cancel1'); if(pc1 && !pc1._wired){ pc1._wired=1; pc1.onclick=window.accPwCancel; }
+    var pc2=$('acc-pw-cancel2'); if(pc2 && !pc2._wired){ pc2._wired=1; pc2.onclick=window.accPwCancel; }
+    var curEl=$('acc-me-current'); if(curEl && !curEl._wired){ curEl._wired=1; curEl.addEventListener('keydown', function(e){ if(e.key==='Enter') accPwVerify(); }); }
     ['acc-me-pass','acc-me-pass2'].forEach(function(id){
       var el=$(id); if(el && !el._wired){ el._wired=1; el.addEventListener('keydown', function(e){ if(e.key==='Enter') changeMyPassword(); }); }
     });
     var b=$('acc-save-btn'); if(b && !b._wired){ b._wired=1; b.onclick=saveUser; }
     var c=$('acc-cancel-btn'); if(c && !c._wired){ c._wired=1; c.onclick=clearForm; }
-    var s=$('acc-cloud-btn'); if(s && !s._wired){ s._wired=1; s.onclick=syncNow; }
     ['acc-first','acc-last','acc-email','acc-user','acc-pass'].forEach(function(id){
       var el=$(id);
       if(el && !el._wired){ el._wired=1; el.addEventListener('keydown', function(e){ if(e.key==='Enter') saveUser(); }); }
@@ -11987,7 +12099,7 @@ function teamEditProjectBooking(pid){
 
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', wire); else wire();
   // re-render when the cloud brings new data in
-  setInterval(function(){ try{ if(document.getElementById('stpanel-access') && document.getElementById('stpanel-access').classList.contains('active')) render(); }catch(e){} }, 5000);
+  setInterval(function(){ try{ var a=document.getElementById('stpanel-access'), mp=document.getElementById('stpanel-mypassword'); if((a&&a.classList.contains('active'))||(mp&&mp.classList.contains('active'))) render(); }catch(e){} }, 5000);
 })();
 </script>
 
@@ -12491,6 +12603,194 @@ function teamEditProjectBooking(pid){
   }
   window.remcEmpInit=empInit;
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', empInit); else empInit();
+})();
+</script>
+
+<script>
+/* ══════════ LOCAL FOLDER AUTO-BACKUP (Excel) ══════════ */
+(function(){
+  var FREQ_KEY='remc_backup_freq', LAST_KEY='remc_backup_last', FOLDER_KEY='remc_backup_folder_name';
+  var BK_MS={ '1h':3600000, '5h':18000000, '1d':86400000, '2d':172800000, '1w':604800000 };
+  var FREQ_TXT={ off:'Off', '1h':'every 1 hour', '5h':'every 5 hours', '1d':'every day', '2d':'every 2 days', '1w':'every week' };
+  var _dir=null;
+  function pad(n){ return (n<10?'0':'')+n; }
+  function bkJSON(k, def){ try{ var v=JSON.parse(localStorage.getItem(k)||def); return v; }catch(e){ try{ return JSON.parse(def); }catch(_){ return null; } } }
+
+  // ---- IndexedDB (own store, separate from any other app on the page) ----
+  var IDB='remc_bk_idb', STORE='handles', HKEY='dir';
+  function openIDB(){ return new Promise(function(res,rej){ var r=indexedDB.open(IDB,1); r.onupgradeneeded=function(e){ e.target.result.createObjectStore(STORE); }; r.onsuccess=function(e){ res(e.target.result); }; r.onerror=function(e){ rej(e); }; }); }
+  function idbGet(){ return openIDB().then(function(db){ return new Promise(function(res,rej){ var tx=db.transaction(STORE,'readonly'); var rq=tx.objectStore(STORE).get(HKEY); rq.onsuccess=function(){ res(rq.result); }; rq.onerror=function(){ rej(rq.error); }; }); }); }
+  function idbSet(v){ return openIDB().then(function(db){ return new Promise(function(res,rej){ var tx=db.transaction(STORE,'readwrite'); tx.objectStore(STORE).put(v,HKEY); tx.oncomplete=function(){ res(); }; tx.onerror=function(){ rej(tx.error); }; }); }); }
+  function idbDel(){ return openIDB().then(function(db){ return new Promise(function(res,rej){ var tx=db.transaction(STORE,'readwrite'); tx.objectStore(STORE).delete(HKEY); tx.oncomplete=function(){ res(); }; tx.onerror=function(){ rej(tx.error); }; }); }); }
+
+  // ---- Gather every section of the system into rows (pure — no Excel here, so it's testable) ----
+  window.remcBkBuildRows=function(){
+    var projects = (typeof PROJ_DATA!=='undefined' && Array.isArray(PROJ_DATA)) ? PROJ_DATA : (bkJSON('remc_projects','[]')||[]);
+    var quotes   = bkJSON('remc_quotations','[]')||[];
+    var bookings = bkJSON('remc_scheduler','[]')||[];
+    var staff    = bkJSON('remc_staff','[]')||[];
+    var depts    = bkJSON('remc_departments','[]')||[];
+    var supers   = bkJSON('remc_supervisors','[]')||[];
+    var notes    = bkJSON('remc_project_notes','{}')||{}; if(typeof notes!=='object'||Array.isArray(notes)) notes={};
+    var machines = bkJSON('remc_machine_names','[]')||[];
+    if(!Array.isArray(projects)) projects=[]; if(!Array.isArray(quotes)) quotes=[]; if(!Array.isArray(bookings)) bookings=[];
+    if(!Array.isArray(staff)) staff=[]; if(!Array.isArray(depts)) depts=[]; if(!Array.isArray(supers)) supers=[]; if(!Array.isArray(machines)) machines=[];
+    function projById(id){ for(var i=0;i<projects.length;i++){ if(String(projects[i].id)===String(id)) return projects[i]; } return null; }
+    var out={};
+    out['Projects'] = projects.map(function(p){
+      return { 'Job #':p.jobNumber||'', 'Name':p.name||'', 'Type':p.type||'', 'Builder':p.builder||'',
+        'Supervisor':p.supervisor||'', 'Address':p.address||'', 'Status':p.status||'', 'Date':p.date||'',
+        'Contact':p.cName||p.cname||'', 'Phone':p.cPhone||p.phone||'', 'Email':p.cEmail||p.email||'',
+        'Notes':(notes[String(p.id)]||'') };
+    });
+    out['Quotations'] = quotes.map(function(q){
+      return { 'Quote #':q.quoteNumber||'', 'Project':q.projectName||'', 'Client':q.client||'',
+        'Status':q.status||'', 'Value':q.value||'', 'Submitted':q.submissionDate||'' };
+    });
+    out['Bookings'] = bookings.map(function(b){
+      var p=projById(b.projectId)||{};
+      return { 'Project':p.name||('#'+b.projectId), 'Job #':p.jobNumber||'', 'Start':b.start||'', 'Finish':b.end||b.finish||'',
+        'Activity':b.activity||'', 'Machine':b.machine||'', 'Supervisor':b.supervisor||'', 'Booked By':b.bookedBy||'' };
+    });
+    out['Employees'] = staff.map(function(e){
+      return { 'Employee #':e.empNumber||'', 'Name':e.name||'', 'Job Title':e.jobTitle||e.position||'', 'Company':e.company||'',
+        'Role':e.role||'', 'Department':e.department||'', 'Contract':e.contract||'', 'Email':e.email||'', 'Email 2':e.email2||'',
+        'Mobile':e.mobile||'', 'Phone':e.phone||'', 'Phone 2':e.phone2||'', 'Website':e.website||'',
+        'Car Licence':e.car?'Yes':'', 'Truck Licence':e.truck?'Yes':'',
+        'DOB':e.dob||'', 'Commencement':e.commencement||'', 'Probation':e.probation||'', 'Termination':e.termination||'',
+        'Student #':e.studentNumber||'', 'Street':e.street||'', 'City':e.city||'', 'State':e.state||'', 'Zipcode':e.zip||'', 'Country':e.country||'',
+        'Emergency Name':e.ecName||'', 'Relationship':e.ecRelationship||'', 'Emergency Number':e.ecNumber||'', 'Notes':e.notes||'' };
+    });
+    out['Departments'] = depts.map(function(d){ return { 'Department':(typeof d==='string'?d:(d&&d.name)||'') }; });
+    out['Supervisors'] = supers.map(function(s){ return { 'Username':s.username||'', 'Name':s.name||'' }; });
+    out['Notes'] = Object.keys(notes).map(function(pid){ var p=projById(pid)||{}; return { 'Project':p.name||('#'+pid), 'Job #':p.jobNumber||'', 'Note':notes[pid] }; })
+      .filter(function(r){ return r.Note && String(r.Note).trim(); });
+    out['Machines'] = machines.map(function(m){ return { 'Machine':(typeof m==='string'?m:(m&&m.name)||'') }; });
+    return out;
+  };
+  var SHEET_ORDER=['Projects','Quotations','Bookings','Employees','Departments','Supervisors','Notes','Machines'];
+
+  function buildWorkbook(){
+    if(typeof XLSX==='undefined') return null;
+    var rows=window.remcBkBuildRows();
+    var wb=XLSX.utils.book_new();
+    SHEET_ORDER.forEach(function(name){
+      var data=rows[name]||[];
+      if(!data.length) data=[{ 'Info':'(none yet)' }];
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(data), name);
+    });
+    return wb;
+  }
+
+  function bkStatus(kind, msg){
+    var el=document.getElementById('bk-status'); if(!el) return;
+    el.style.color = kind==='ok'?'#15803d':kind==='err'?'#dc2626':kind==='warn'?'#b45309':'var(--muted)';
+    el.textContent = msg||'';
+  }
+  function renderStatus(){
+    var freq=localStorage.getItem(FREQ_KEY)||'off';
+    var sel=document.getElementById('bk-freq'); if(sel && sel.value!==freq) sel.value=freq;
+    var folderName=localStorage.getItem(FOLDER_KEY)||'';
+    var fn=document.getElementById('bk-folder-name'); if(fn) fn.textContent = folderName ? ('📁 '+folderName) : 'No folder chosen';
+    var cl=document.getElementById('bk-folder-clear'); if(cl) cl.style.display = folderName ? '' : 'none';
+    var sch=document.getElementById('bk-schedule');
+    if(sch){
+      var last=localStorage.getItem(LAST_KEY);
+      var lastTxt = last ? new Date(last).toLocaleString() : 'never';
+      sch.textContent = 'Schedule: '+(FREQ_TXT[freq]||freq)+' · Last backup: '+lastTxt;
+    }
+  }
+  window.remcBkRenderStatus=renderStatus;
+
+  function ensurePerm(){
+    if(!_dir) return Promise.resolve(false);
+    try{
+      return _dir.queryPermission({mode:'readwrite'}).then(function(p){
+        if(p==='granted') return true;
+        return _dir.requestPermission({mode:'readwrite'}).then(function(r){ return r==='granted'; });
+      }).catch(function(){ return false; });
+    }catch(e){ return Promise.resolve(false); }
+  }
+
+  function writeBackup(silent){
+    if(!_dir){ if(!silent) bkStatus('warn','Choose a folder first.'); return Promise.resolve(false); }
+    return ensurePerm().then(function(ok){
+      if(!ok){ if(!silent) bkStatus('warn','Folder permission needed — click “Choose folder” again and allow access.'); return false; }
+      var wb=buildWorkbook();
+      if(!wb){ if(!silent) bkStatus('err','Excel engine not available.'); return false; }
+      var out=XLSX.write(wb, { bookType:'xlsx', type:'array' });
+      var d=new Date();
+      var name='REMC-backup-'+d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+'.xlsx';
+      return _dir.getFileHandle(name, {create:true}).then(function(fh){
+        return fh.createWritable();
+      }).then(function(wr){
+        return wr.write(out).then(function(){ return wr.close(); });
+      }).then(function(){
+        try{ localStorage.setItem(LAST_KEY, d.toISOString()); }catch(e){}
+        renderStatus();
+        if(!silent) bkStatus('ok','✓ Saved '+name+' at '+d.toLocaleTimeString());
+        return true;
+      }).catch(function(err){ bkStatus('err','Backup failed: '+((err&&err.message)||err)); return false; });
+    });
+  }
+
+  window.remcBkSetFreq=function(v){
+    try{ localStorage.setItem(FREQ_KEY, v); }catch(e){}
+    renderStatus();
+    if(v!=='off'){ bkStatus('', 'Automatic backup set to '+(FREQ_TXT[v]||v)+(localStorage.getItem(FOLDER_KEY)?'':'. Choose a folder to start.')); setTimeout(tick, 400); }
+    else { bkStatus('', 'Automatic backup turned off.'); }
+  };
+  window.remcBkPickFolder=function(){
+    if(!window.showDirectoryPicker){ bkStatus('err','Your browser does not support folder access. Use Chrome or Edge.'); return; }
+    window.showDirectoryPicker({mode:'readwrite', id:'remc-backup'}).then(function(h){
+      _dir=h;
+      return idbSet(h).then(function(){
+        try{ localStorage.setItem(FOLDER_KEY, h.name); }catch(e){}
+        renderStatus(); bkStatus('ok','✓ Folder selected: '+h.name);
+        return writeBackup(false);
+      });
+    }).catch(function(e){ if(e && e.name!=='AbortError') bkStatus('err','Could not access folder: '+((e&&e.message)||e)); });
+  };
+  window.remcBkClearFolder=function(){
+    _dir=null; idbDel().catch(function(){});
+    try{ localStorage.removeItem(FOLDER_KEY); }catch(e){}
+    renderStatus(); bkStatus('warn','Folder removed. Automatic backups paused until you choose a folder.');
+  };
+  window.remcBkNow=function(){ return writeBackup(false); };
+
+  function tick(){
+    var freq=localStorage.getItem(FREQ_KEY)||'off';
+    if(freq==='off' || !BK_MS[freq]) return;
+    if(!_dir) return;
+    try{
+      _dir.queryPermission({mode:'readwrite'}).then(function(p){
+        if(p!=='granted') return;
+        var last=+new Date(localStorage.getItem(LAST_KEY)||0)||0;
+        if(Date.now()-last >= BK_MS[freq]) writeBackup(true);
+      }).catch(function(){});
+    }catch(e){}
+  }
+  window.remcBkTick=tick;
+
+  function restore(){
+    try{
+      idbGet().then(function(h){
+        if(!h) return;
+        _dir=h;
+        renderStatus();
+        try{
+          h.queryPermission({mode:'readwrite'}).then(function(p){
+            if(p!=='granted'){ bkStatus('warn','Folder saved but needs reconnecting after restart — click “Back up now” once to allow access.'); }
+            else { setTimeout(tick, 1500); }
+          }).catch(function(){});
+        }catch(e){}
+      }).catch(function(){});
+    }catch(e){}
+  }
+
+  function init(){ renderStatus(); restore(); }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', init); else init();
+  setInterval(tick, 60000);
 })();
 </script>
 
