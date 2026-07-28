@@ -88,6 +88,84 @@ body.hide-residential .overview-layout{grid-template-columns:200px 1fr 180px}
 .disp-slider:before{content:'';position:absolute;width:20px;height:20px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
 #disp-res-toggle:checked + .disp-slider{background:var(--green)}
 #disp-res-toggle:checked + .disp-slider:before{transform:translateX(20px)}
+.emp-page{padding:20px 24px;max-width:1500px;margin:0 auto;height:calc(100vh - 56px);overflow-y:auto}
+.emp-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px;gap:12px;flex-wrap:wrap}
+.emp-title{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px}
+.emp-sub{font-size:13px;color:var(--muted);margin-top:2px}
+.emp-toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.emp-search{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 13px;font-size:13px;font-family:'Barlow',sans-serif;color:var(--text);outline:none;width:220px}
+.emp-search:focus{border-color:var(--red)}
+.emp-filter{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 11px;font-size:13px;font-family:'Barlow',sans-serif;color:var(--text);outline:none}
+.emp-viewtoggle{display:flex;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:3px;gap:2px}
+.emp-vt{padding:6px 13px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;border:none;background:none;color:var(--muted);transition:all 0.15s;font-family:'Barlow',sans-serif}
+.emp-vt.active{background:var(--red);color:#fff;box-shadow:0 2px 8px rgba(225,29,29,0.3)}
+.emp-add-btn{padding:8px 18px;background:var(--red);color:#fff;border:none;border-radius:8px;font-family:'Barlow',sans-serif;font-size:13px;font-weight:700;cursor:pointer;margin-left:auto}
+.emp-add-btn:hover{background:#c81a1a}
+.emp-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:18px}
+.emp-stat{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:13px 16px;box-shadow:var(--shadow)}
+.emp-stat-lbl{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:4px}
+.emp-stat-val{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:800;line-height:1}
+.emp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+.emp-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);transition:all 0.15s}
+.emp-card:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:0 6px 22px rgba(0,0,0,0.1)}
+.emp-card-top{display:flex;align-items:center;gap:12px;padding:16px 16px 12px}
+.emp-photo{width:56px;height:56px;border-radius:12px;object-fit:cover;background:var(--surface2);border:1px solid var(--border);flex-shrink:0}
+.emp-photo-ph{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,#eef2ff,#e0e7ff);color:#4338ca;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;flex-shrink:0;border:1px solid var(--border)}
+.emp-card-name{font-size:15px;font-weight:800;color:var(--text);line-height:1.2}
+.emp-card-pos{font-size:12px;color:var(--mid);font-weight:600;margin-top:2px}
+.emp-card-body{padding:0 16px 14px;display:flex;flex-direction:column;gap:7px}
+.emp-chip-row{display:flex;gap:5px;flex-wrap:wrap}
+.emp-chip{font-size:10px;font-weight:700;padding:3px 9px;border-radius:5px;border:1px solid}
+.emp-chip-dept{background:var(--blue-light);color:var(--blue);border-color:rgba(37,99,235,0.2)}
+.emp-chip-ft{background:var(--green-light);color:var(--green);border-color:rgba(22,163,74,0.25)}
+.emp-chip-pt{background:var(--amber-light);color:var(--amber);border-color:rgba(217,119,6,0.25)}
+.emp-chip-casual{background:#f3e8ff;color:#7c3aed;border-color:rgba(124,58,237,0.2)}
+.emp-chip-lic{background:var(--surface2);color:var(--mid);border-color:var(--border)}
+.emp-card-actions{display:flex;gap:6px;border-top:1px solid var(--border);padding:10px 16px;background:var(--surface2)}
+.emp-card-actions button{flex:1;padding:6px 0;font-size:12px;font-weight:700;border-radius:7px;cursor:pointer;font-family:'Barlow',sans-serif;border:1px solid var(--border);background:var(--surface);color:var(--mid);transition:all 0.12s}
+.emp-card-actions button:hover{border-color:var(--border2);color:var(--text)}
+.emp-card-actions button.del:hover{background:#fee2e2;border-color:#fecaca;color:var(--red)}
+.emp-table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--shadow);overflow-x:auto}
+.emp-table{width:100%;border-collapse:collapse;min-width:900px}
+.emp-table thead th{background:var(--surface2);border-bottom:2px solid var(--border2);padding:10px 14px;text-align:left;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted);white-space:nowrap}
+.emp-table tbody tr{border-bottom:1px solid var(--border);transition:background 0.12s}
+.emp-table tbody tr:last-child{border-bottom:none}
+.emp-table tbody tr:hover{background:var(--surface2)}
+.emp-table tbody td{padding:9px 14px;font-size:13px;vertical-align:middle}
+.emp-tbl-photo{width:38px;height:38px;border-radius:8px;object-fit:cover;background:var(--surface2);border:1px solid var(--border)}
+.emp-tbl-photo-ph{width:38px;height:38px;border-radius:8px;background:linear-gradient(135deg,#eef2ff,#e0e7ff);color:#4338ca;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;border:1px solid var(--border)}
+.emp-tbl-actions{display:flex;gap:5px}
+.emp-tbl-btn{width:28px;height:28px;border:1px solid var(--border);background:var(--surface);border-radius:6px;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;transition:all 0.12s}
+.emp-tbl-btn:hover{background:var(--surface2);border-color:var(--border2)}
+.emp-tbl-btn.del:hover{background:#fee2e2;border-color:#fecaca;color:var(--red)}
+.emp-empty{padding:60px 20px;text-align:center;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow)}
+.emp-modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:1000;align-items:center;justify-content:center;padding:16px}
+.emp-modal-ov.open{display:flex}
+.emp-modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;width:620px;max-width:100%;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.25)}
+.emp-modal-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--surface);z-index:2}
+.emp-modal-head span{font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:800;text-transform:uppercase}
+.emp-modal-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted);padding:2px 6px;border-radius:4px}
+.emp-modal-close:hover{background:var(--surface2);color:var(--text)}
+.emp-modal-body{padding:20px}
+.emp-photo-edit{display:flex;align-items:center;gap:16px;margin-bottom:18px}
+.emp-photo-preview{width:88px;height:88px;border-radius:14px;object-fit:cover;background:var(--surface2);border:1px solid var(--border)}
+.emp-photo-preview-ph{width:88px;height:88px;border-radius:14px;background:linear-gradient(135deg,#eef2ff,#e0e7ff);color:#4338ca;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:26px;border:1px solid var(--border)}
+.emp-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.emp-fg{display:flex;flex-direction:column;gap:5px}
+.emp-fg.full{grid-column:1 / -1}
+.emp-fg label{font-size:11px;font-weight:800;color:var(--mid);text-transform:uppercase;letter-spacing:0.5px}
+.emp-fg .req{color:var(--red)}
+.emp-fg input,.emp-fg select,.emp-fg textarea{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 11px;font-size:13px;font-family:'Barlow',sans-serif;color:var(--text);outline:none;width:100%;box-sizing:border-box}
+.emp-fg input:focus,.emp-fg select:focus,.emp-fg textarea:focus{border-color:var(--red)}
+.emp-dept-row{display:flex;gap:8px}
+.emp-dept-row select{flex:1}
+.emp-lic-row{display:flex;gap:18px;flex-wrap:wrap}
+.emp-lic-check{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--text);cursor:pointer;user-select:none}
+.emp-lic-check input{width:18px;height:18px;accent-color:#16a34a;cursor:pointer}
+.emp-modal-foot{padding:14px 20px;border-top:1px solid var(--border);display:flex;justify-content:space-between;gap:10px;position:sticky;bottom:0;background:var(--surface)}
+.emp-modal-cancel{padding:9px 18px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;font-family:'Barlow',sans-serif;font-size:13px;font-weight:700;color:var(--mid);cursor:pointer}
+.emp-modal-save{padding:9px 22px;background:var(--red);color:#fff;border:none;border-radius:8px;font-family:'Barlow',sans-serif;font-size:13px;font-weight:700;cursor:pointer}
+.emp-modal-save:hover{background:#c81a1a}
 </style>
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -131,6 +209,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
       <div class="nav-item" onclick="showPage('materials')">🚚 Materials</div>
       <div class="nav-item" onclick="showPage('quotations')">📊 Quotations</div>
       <div class="nav-item" onclick="showPage('team')">👥 Team Planning</div>
+      <div class="nav-item" onclick="showPage('employees')">👷 Employees</div>
       <div class="nav-item" onclick="showPage('projects')">📁 Projects</div>
       <div class="nav-item" onclick="showPage('scheduler')">📅 Quote Scheduler</div>
       <div class="nav-item" onclick="showPage('settings')">⚙️ Settings</div>
@@ -1034,6 +1113,80 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
 
 
 
+  <!-- ══ PAGE: EMPLOYEES (Funcionários) ══ -->
+  <div class="page" id="page-employees">
+    <div class="emp-page">
+      <div class="emp-head">
+        <div>
+          <div class="emp-title">👷 Employees</div>
+          <div class="emp-sub">Your team registry — photo, position, department, contract type and licences.</div>
+        </div>
+        <button class="emp-add-btn" onclick="empOpenModal(null)">+ Add employee</button>
+      </div>
+      <div class="emp-stats" id="emp-stats"></div>
+      <div class="emp-toolbar">
+        <input class="emp-search" id="emp-search" placeholder="Search name, position…" oninput="renderEmployees()">
+        <select class="emp-filter" id="emp-filter-dept" onchange="renderEmployees()"><option value="">All departments</option></select>
+        <select class="emp-filter" id="emp-filter-contract" onchange="renderEmployees()">
+          <option value="">All contracts</option>
+          <option value="Full time">Full time</option>
+          <option value="Part time">Part time</option>
+          <option value="Casual">Casual</option>
+        </select>
+        <div class="emp-viewtoggle" style="margin-left:auto">
+          <button class="emp-vt active" id="emp-vt-cards" onclick="empSetView('cards')">▦ Cards</button>
+          <button class="emp-vt" id="emp-vt-table" onclick="empSetView('table')">☰ Table</button>
+        </div>
+      </div>
+      <div id="emp-list"></div>
+    </div>
+  </div>
+
+  <!-- Employee add/edit modal -->
+  <div class="emp-modal-ov" id="emp-modal">
+    <div class="emp-modal">
+      <div class="emp-modal-head"><span id="emp-modal-title">Add employee</span><button class="emp-modal-close" onclick="empCloseModal()">&times;</button></div>
+      <div class="emp-modal-body">
+        <div class="emp-photo-edit">
+          <div id="emp-photo-wrap"></div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <input type="file" id="emp-photo-file" accept="image/*" style="display:none" onchange="empPhotoChosen(this)">
+            <button class="step-btn-sec" onclick="document.getElementById('emp-photo-file').click()">📷 Choose photo</button>
+            <button class="step-btn-sec" id="emp-photo-remove" onclick="empPhotoRemove()" style="display:none">Remove photo</button>
+            <div style="font-size:10px;color:var(--muted)">Photos are resized automatically to keep things fast.</div>
+          </div>
+        </div>
+        <div class="emp-form-grid">
+          <div class="emp-fg full"><label>Full name <span class="req">*</span></label><input id="emp-f-name" placeholder="e.g. John Smith"></div>
+          <div class="emp-fg"><label>Position <span class="req">*</span></label><input id="emp-f-position" placeholder="e.g. Excavator Operator"></div>
+          <div class="emp-fg"><label>Department <span class="req">*</span></label>
+            <div class="emp-dept-row">
+              <select id="emp-f-dept"></select>
+              <button class="step-btn-sec" onclick="empAddDepartment()" title="Add a new department">+ New</button>
+            </div>
+          </div>
+          <div class="emp-fg"><label>Contract type</label>
+            <select id="emp-f-contract"><option value="Full time">Full time</option><option value="Part time">Part time</option><option value="Casual">Casual</option></select>
+          </div>
+          <div class="emp-fg"><label>Licences (extra)</label>
+            <div class="emp-lic-row" style="padding-top:6px">
+              <label class="emp-lic-check"><input type="checkbox" id="emp-f-car"> 🚗 Car licence</label>
+              <label class="emp-lic-check"><input type="checkbox" id="emp-f-truck"> 🚛 Truck licence</label>
+            </div>
+          </div>
+          <div class="emp-fg full"><label>Notes</label><textarea id="emp-f-notes" rows="3" placeholder="Anything else worth noting…"></textarea></div>
+        </div>
+      </div>
+      <div class="emp-modal-foot">
+        <button class="emp-modal-cancel" id="emp-modal-del" onclick="empDeleteFromModal()" style="border-color:#fecaca;color:var(--red)">Delete</button>
+        <div style="display:flex;gap:10px;margin-left:auto">
+          <button class="emp-modal-cancel" onclick="empCloseModal()">Cancel</button>
+          <button class="emp-modal-save" onclick="empSave()">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ══ PAGE: PROJECTS ══ -->
   <div class="page" id="page-projects">
     <div style="padding:20px 24px;max-width:1600px;margin:0 auto">
@@ -1364,6 +1517,28 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
               </div>
               <div id="cm-import-note" style="font-size:11px;color:var(--muted);margin-top:8px">Pick an Excel file to bring its projects into the system. You can then edit them on the Projects page.</div>
             </div>
+
+            <!-- Column mapping (shown after a file is chosen) -->
+            <div id="cm-map-box" style="display:none">
+              <div class="step-card">
+                <div class="step-head"><span class="step-num">1</span><div><div class="step-title">Match your columns</div><div class="step-sub" id="cm-map-file">—</div></div></div>
+                <div class="step-body">
+                  <div id="cm-cols-preview" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px"></div>
+                  <div class="mapping-grid" id="cm-map-grid"></div>
+                </div>
+              </div>
+              <div class="step-card">
+                <div class="step-head"><span class="step-num">2</span><div><div class="step-title">Preview &amp; import</div><div class="step-sub">Check the first rows, then import into the system.</div></div></div>
+                <div class="step-body">
+                  <div id="cm-preview-table" style="overflow-x:auto;margin-bottom:14px"></div>
+                  <div style="display:flex;align-items:center;gap:12px">
+                    <button class="step-btn-pri" onclick="cmSysConfirmImport()">✔ Import into system</button>
+                    <button class="step-btn-sec" onclick="cmSysCancel()">Cancel</button>
+                    <span id="cm-map-msg" style="font-size:12px;font-weight:700;color:var(--green);display:none"></span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
         </div>
@@ -1517,12 +1692,26 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
       <!-- TAB: QUOTATIONS -->
       <div class="stab-panel" id="stpanel-quotations">
         <div class="stpanel-inner">
-          <div class="stpanel-desc">Upload your quotations spreadsheet. Data appears in the Quotations page with status tracking.</div>
+          <div class="stpanel-desc">Choose how quotations are managed: read them live from a spreadsheet, or keep them inside the system.</div>
           <div id="qt-current-config" class="linked-banner" style="display:none">
             <span style="font-size:20px">✅</span>
             <div style="flex:1"><div style="font-size:13px;font-weight:700;color:var(--green)">Quotations linked</div><div id="qt-current-path" style="font-size:12px;color:#15803d;margin-top:2px"></div></div>
             <button onclick="qtClear()" class="linked-clear-btn">✕ Clear</button>
           </div>
+
+          <!-- Data source mode: file vs system -->
+          <div style="display:flex;gap:10px;margin-bottom:16px">
+            <button type="button" id="qm-btn-file" class="cm-opt active" onclick="remcSetQuotMode('file')">
+              <div style="font-size:14px;font-weight:800">📎 Attach file</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:2px;font-weight:600">Read quotations from a spreadsheet</div>
+            </button>
+            <button type="button" id="qm-btn-system" class="cm-opt" onclick="remcSetQuotMode('system')">
+              <div style="font-size:14px;font-weight:800">🗄️ System data</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:2px;font-weight:600">Keep quotations inside the app</div>
+            </button>
+          </div>
+
+          <div id="qt-mode-file">
           <div class="step-card">
             <div class="step-head"><span class="step-num">1</span><div><div class="step-title">Upload Excel File</div></div></div>
             <div class="step-body">
@@ -1560,6 +1749,40 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
               </div>
             </div>
           </div>
+          </div><!-- /qt-mode-file -->
+
+          <!-- SYSTEM DATA mode -->
+          <div id="qt-mode-system" style="display:none">
+            <div class="stpanel-desc">In <b>System data</b> mode, quotations live inside the app and are saved &amp; backed up automatically. Attach an Excel file to bring quotations in (choose the sheet and match the columns), then they stay in the system.</div>
+            <div id="qm-import-row" style="margin-bottom:12px;padding:14px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:10px">
+              <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+                <input type="file" id="qm-sys-file" accept=".xlsx,.xls" style="display:none" onchange="qmSysFileChosen(this)">
+                <button class="step-btn-pri" onclick="document.getElementById('qm-sys-file').click()">📂 Attach Excel &amp; import</button>
+                <button class="step-btn-sec" onclick="remcImportQuotFileToSystem()">📥 Re-import last file</button>
+              </div>
+              <div id="qm-import-note" style="font-size:11px;color:var(--muted);margin-top:8px">Pick an Excel file to bring its quotations into the system.</div>
+            </div>
+            <div id="qm-map-box" style="display:none">
+              <div class="step-card">
+                <div class="step-head"><span class="step-num">1</span><div><div class="step-title">Match your columns</div><div class="step-sub" id="qm-map-file">—</div></div></div>
+                <div class="step-body">
+                  <div id="qm-cols-preview" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px"></div>
+                  <div class="mapping-grid" id="qm-map-grid"></div>
+                </div>
+              </div>
+              <div class="step-card">
+                <div class="step-head"><span class="step-num">2</span><div><div class="step-title">Preview &amp; import</div><div class="step-sub">Check the first rows, then import into the system.</div></div></div>
+                <div class="step-body">
+                  <div id="qm-preview-table" style="overflow-x:auto;margin-bottom:14px"></div>
+                  <div style="display:flex;align-items:center;gap:12px">
+                    <button class="step-btn-pri" onclick="qmSysConfirmImport()">✔ Import into system</button>
+                    <button class="step-btn-sec" onclick="qmSysCancel()">Cancel</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
 
@@ -2231,6 +2454,7 @@ document.querySelectorAll('.stab-panel').forEach(function(p) {
 p.classList.toggle('active', p.id === 'stpanel-' + tab);
 });
 if(tab==='projects'){ try{ if(typeof window.remcReloadProjData==='function') window.remcReloadProjData(); if(typeof remcRenderCommercialModeUI==='function') remcRenderCommercialModeUI(); }catch(e){} }
+if(tab==='quotations'){ try{ if(typeof remcRenderQuotModeUI==='function') remcRenderQuotModeUI(); }catch(e){} }
 }
 
 function showPage(name) {
@@ -2248,6 +2472,7 @@ if (pg) pg.classList.add('active');
 if (typeof applyNavVis === 'function') applyNavVis();
 
 if (name === 'overview') { renderOverview(); }
+if (name === 'employees') { try{ if(typeof renderEmployees==='function'){ if(typeof window.empFillDeptSelects==='function') window.empFillDeptSelects(); renderEmployees(); } }catch(e){} }
 if (name === 'jobscheduler') { setTimeout(function(){ if(typeof schRender==='function') schRender(); }, 100); }
 if (name === 'material') {
 setTimeout(function () {
@@ -2956,6 +3181,10 @@ var ipEmptyEl = document.getElementById('quot-inprogress-empty');
 if (!listEl) return;
 
 if (!QUOT_DATA || QUOT_DATA.length === 0) {
+var _qmMode=(function(){ try{ return localStorage.getItem('remc_quotations_mode')==='system'?'system':'file'; }catch(e){ return 'file'; } })();
+if (_qmMode==='system') {
+  try{ var _rq=JSON.parse(localStorage.getItem('remc_quotations')||'null'); if(Array.isArray(_rq)){ QUOT_DATA=_rq; } }catch(e){}
+} else {
 var saved = getSettings().quotationsExcel;
 if (saved && saved.data && saved.data.length) {
 QUOT_DATA = saved.data.map(function(r) {
@@ -2969,6 +3198,7 @@ submissionDate: r.submissionDate || '',
 notes:          r.notes || ''
 };
 });
+}
 }
 }
 
@@ -4771,7 +5001,9 @@ window.remcRenderSystemProjects = remcRenderSystemProjects;
 window.remcAddSystemProject=function(){ pOpenModal(null); var t=document.getElementById('pm-type'); if(t) t.value='commercial'; };
 window.remcEditSystemProject=function(id){ pOpenModal(id); };
 window.remcDeleteSystemProject=function(id){ pDelete(id); setTimeout(remcRenderSystemProjects, 80); };
-// Attach an Excel file directly in System-data mode and import it into the system
+// Attach an Excel file directly in System-data mode → choose sheet + map columns, then import
+var CM_ROWS=null, CM_COLS=[], CM_FILE='';
+var CM_FIELD_LABELS={ jobnum:'Job Number', name:'Project Name *', builder:'Builder / Account', supervisor:'Supervisor', address:'Address', status:'Status', date:'Start Date', cname:'Contact Name', phone:'Contact Phone', email:'Contact Email' };
 async function cmSysFileChosen(input){
   if(!input.files || !input.files[0]) return;
   var file=input.files[0];
@@ -4780,33 +5012,201 @@ async function cmSysFileChosen(input){
   readXlsxFile(file, function(err, rows){
     if(err){ if(note) note.textContent='✘ Could not read file.'; alert('Could not read the file: '+(err && err.message ? err.message : err)); input.value=''; return; }
     if(!rows || rows.length<2){ if(note) note.textContent='✘ File appears empty.'; alert('The file appears to be empty.'); input.value=''; return; }
-    var cols=rows[0].map(function(h){ return String(h).trim(); }).filter(Boolean);
-    var mapping=autoGuessMapping(cols, SM_GUESSES);
-    if(!mapping.name){ if(note) note.textContent='Could not detect the Project Name column.'; alert('Could not detect the "Project Name" column automatically.\n\nUse the “Attach file” mode to map the columns manually, then come back and press “Re-import last file”.'); input.value=''; return; }
-    var parsed=parseRowsWithMapping(rows, mapping);
-    var projects=parsed.map(function(row,i){
-      var status=(row.status||'').toLowerCase();
-      var s=status.indexOf('active')>=0?'active':status.indexOf('delay')>=0?'delayed':(status.indexOf('hold')>=0||status.indexOf('standby')>=0||status.indexOf('pending')>=0)?'standby':'active';
-      return { id:i+100, jobNumber:row.jobnum||'', name:row.name||'', type:'commercial', builder:row.builder||'', dateStart:row.date||'', address:row.address||'', supervisor:row.supervisor||'', cName:row.cname||'', cPhone:row.phone||'', cEmail:row.email||'', status:s, _source:'excel' };
-    });
-    // remember the file so both modes reflect it and "Re-import" works later
-    try{ var st=getSettings(); st.commercialProjects=projects; st.commercialMapping=mapping; st.commercialFileName=file.name; saveSettings(st); }catch(e){}
-    // import into the system (editable records, deduped by job number + name)
-    var existing={}; (typeof PROJ_DATA!=='undefined'?PROJ_DATA:[]).forEach(function(p){ if(p.type==='commercial'){ existing[String(p.jobNumber||'')+'|'+String(p.name||'')]=true; } });
-    var maxId=(PROJ_DATA.length?Math.max.apply(null,PROJ_DATA.map(function(x){return x.id||0;})):0);
-    var added=0;
-    projects.forEach(function(p){ var k=String(p.jobNumber||'')+'|'+String(p.name||''); if(existing[k]) return; maxId++; PROJ_DATA.push(Object.assign({}, p, { id:maxId, type:'commercial', _source:'system' })); added++; });
-    try{ localStorage.setItem('remc_projects', JSON.stringify(PROJ_DATA)); }catch(e){}
-    try{ if(typeof publishProjects==='function') publishProjects(); }catch(e){}
-    try{ renderOverview(); }catch(e){}
-    try{ pRender(); }catch(e){}
-    try{ remcRenderCommercialModeUI(); }catch(e){}
-    if(note) note.textContent='✔ Imported '+added+' new project(s) from '+file.name+' — edit them on the Projects page.';
-    try{ showToast('✔ Imported '+added+' project(s) from '+file.name); }catch(e){}
+    CM_ROWS=rows;
+    CM_COLS=rows[0].map(function(h){ return String(h).trim(); }).filter(Boolean);
+    CM_FILE=file.name;
+    if(note) note.textContent='✔ Read '+(rows.length-1)+' rows · '+CM_COLS.length+' columns — match the columns below.';
+    cmSysBuildMapping();
+    var box=document.getElementById('cm-map-box'); if(box) box.style.display='';
     input.value='';
   });
 }
 window.cmSysFileChosen=cmSysFileChosen;
+function cmSysBuildMapping(){
+  var fileLbl=document.getElementById('cm-map-file'); if(fileLbl) fileLbl.textContent=CM_FILE+' · '+CM_COLS.length+' columns';
+  var prev=document.getElementById('cm-cols-preview');
+  if(prev) prev.innerHTML=CM_COLS.map(function(c){ return '<span style="background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:3px 10px;font-size:11px;font-weight:700;color:var(--mid)">'+escCM(c)+'</span>'; }).join('');
+  var guessed=autoGuessMapping(CM_COLS, SM_GUESSES);
+  var blank='<option value="">— Not mapped —</option>';
+  var opts=blank+CM_COLS.map(function(c){ return '<option value="'+escCM(c)+'">'+escCM(c)+'</option>'; }).join('');
+  var grid=document.getElementById('cm-map-grid');
+  if(grid){
+    grid.innerHTML=SM_FIELDS.map(function(fl){
+      return '<div class="map-row"><label class="map-lbl">'+(CM_FIELD_LABELS[fl]||fl)+'</label>'
+        + '<select class="map-sel" id="cmsm-'+fl+'" onchange="cmSysPreview()">'+opts+'</select></div>';
+    }).join('');
+    SM_FIELDS.forEach(function(fl){ var sel=document.getElementById('cmsm-'+fl); if(sel && guessed[fl]) sel.value=guessed[fl]; });
+  }
+  cmSysPreview();
+}
+function cmSysGetMapping(){
+  var m={}; SM_FIELDS.forEach(function(fl){ var sel=document.getElementById('cmsm-'+fl); if(sel && sel.value) m[fl]=sel.value; }); return m;
+}
+function cmSysPreview(){
+  var tbl=document.getElementById('cm-preview-table'); if(!tbl || !CM_ROWS) return;
+  var mapping=cmSysGetMapping();
+  var parsed=parseRowsWithMapping(CM_ROWS, mapping);
+  var show=parsed.slice(0,5);
+  if(!show.length){ tbl.innerHTML='<div style="font-size:12px;color:var(--muted)">Map at least the Project Name column to see a preview.</div>'; return; }
+  var cols=['name','jobnum','supervisor','address','status'];
+  var head='<tr>'+cols.map(function(c){ return '<th style="text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);padding:6px 10px;border-bottom:1px solid var(--border);white-space:nowrap">'+(CM_FIELD_LABELS[c]||c).replace(' *','')+'</th>'; }).join('')+'</tr>';
+  var body=show.map(function(r){ return '<tr>'+cols.map(function(c){ return '<td style="font-size:12px;padding:6px 10px;border-bottom:1px solid var(--surface2);white-space:nowrap">'+escCM(r[c]||'—')+'</td>'; }).join('')+'</tr>'; }).join('');
+  tbl.innerHTML='<table style="border-collapse:collapse;width:100%;min-width:520px">'+head+body+'</table>'
+    + '<div style="font-size:11px;color:var(--muted);margin-top:6px">Showing '+show.length+' of '+parsed.length+' rows.</div>';
+}
+window.cmSysPreview=cmSysPreview;
+window.cmSysCancel=function(){ var box=document.getElementById('cm-map-box'); if(box) box.style.display='none'; CM_ROWS=null; CM_COLS=[]; try{ if(typeof remcRenderCommercialModeUI==='function') remcRenderCommercialModeUI(); }catch(e){} };
+window.cmSysConfirmImport=function(){
+  if(!CM_ROWS){ return; }
+  var mapping=cmSysGetMapping();
+  if(!mapping.name){ alert('Please map the "Project Name" column first.'); return; }
+  var parsed=parseRowsWithMapping(CM_ROWS, mapping);
+  var projects=parsed.map(function(row,i){
+    var status=(row.status||'').toLowerCase();
+    var s=status.indexOf('active')>=0?'active':status.indexOf('delay')>=0?'delayed':(status.indexOf('hold')>=0||status.indexOf('standby')>=0||status.indexOf('pending')>=0)?'standby':'active';
+    return { id:i+100, jobNumber:row.jobnum||'', name:row.name||'', type:'commercial', builder:row.builder||'', dateStart:row.date||'', address:row.address||'', supervisor:row.supervisor||'', cName:row.cname||'', cPhone:row.phone||'', cEmail:row.email||'', status:s, _source:'excel' };
+  });
+  try{ var st=getSettings(); st.commercialProjects=projects; st.commercialMapping=mapping; st.commercialFileName=CM_FILE; saveSettings(st); }catch(e){}
+  var existing={}; (typeof PROJ_DATA!=='undefined'?PROJ_DATA:[]).forEach(function(p){ if(p.type==='commercial'){ existing[String(p.jobNumber||'')+'|'+String(p.name||'')]=true; } });
+  var maxId=(PROJ_DATA.length?Math.max.apply(null,PROJ_DATA.map(function(x){return x.id||0;})):0);
+  var added=0;
+  projects.forEach(function(p){ var k=String(p.jobNumber||'')+'|'+String(p.name||''); if(existing[k]) return; maxId++; PROJ_DATA.push(Object.assign({}, p, { id:maxId, type:'commercial', _source:'system' })); added++; });
+  try{ localStorage.setItem('remc_projects', JSON.stringify(PROJ_DATA)); }catch(e){}
+  try{ if(typeof publishProjects==='function') publishProjects(); }catch(e){}
+  try{ renderOverview(); }catch(e){}
+  try{ pRender(); }catch(e){}
+  var box=document.getElementById('cm-map-box'); if(box) box.style.display='none';
+  CM_ROWS=null;
+  try{ remcRenderCommercialModeUI(); }catch(e){}
+  var note=document.getElementById('cm-import-note'); if(note) note.textContent='✔ Imported '+added+' new project(s) from '+CM_FILE+' — edit them on the Projects page.';
+  try{ showToast('✔ Imported '+added+' project(s) from '+CM_FILE); }catch(e){}
+};
+// ===== QUOTATIONS: file vs system data mode =====
+var QM_FIELDS=['projectName','client','quoteNumber','status','value','submissionDate'];
+var QM_LABELS={ projectName:'Project Name *', client:'Client', quoteNumber:'Quote #', status:'Status', value:'Value', submissionDate:'Date' };
+var QM_GUESSES={
+  projectName:['project name','project','name','job name'],
+  client:['client','customer','account'],
+  quoteNumber:['ric quote number','quote #','quote number','quotation number','quote no'],
+  status:['status','quotation status'],
+  value:['quotation value','value','amount','price'],
+  submissionDate:['quotation submission date','date','submitted','submission date']
+};
+var QM_ROWS=null, QM_COLS=[], QM_FILE='';
+function remcQuotMode(){ try{ return localStorage.getItem('remc_quotations_mode')==='system' ? 'system' : 'file'; }catch(e){ return 'file'; } }
+window.remcSetQuotMode=function(mode){
+  mode=(mode==='system')?'system':'file';
+  var prev=remcQuotMode();
+  if(mode===prev){ remcRenderQuotModeUI(); return; }
+  if(mode==='file' && prev==='system'){
+    if(!confirm('Switch to file mode?\n\nQuotations will be read from the uploaded spreadsheet. Quotations you imported into the system stay saved, but this screen will show the spreadsheet\'s quotations.')){ remcRenderQuotModeUI(); return; }
+  }
+  if(mode==='system' && prev!=='system'){
+    try{ if(typeof QUOT_DATA!=='undefined' && QUOT_DATA.length){ QUOT_DATA.forEach(function(q){ q._source='system'; }); localStorage.setItem('remc_quotations', JSON.stringify(QUOT_DATA)); if(typeof window.remcCloudUpsertKey==='function'){ window.remcCloudUpsertKey('remc_quotations', JSON.stringify(QUOT_DATA)); } } }catch(e){}
+  }
+  try{ localStorage.setItem('remc_quotations_mode', mode); }catch(e){}
+  try{ if(typeof window.remcCloudUpsertKey==='function') window.remcCloudUpsertKey('remc_quotations_mode', mode); }catch(e){}
+  remcRenderQuotModeUI();
+  try{ showToast(mode==='system' ? 'Quotations: system data mode' : 'Quotations: file mode'); }catch(e){}
+};
+function remcRenderQuotModeUI(){
+  var mode=remcQuotMode();
+  var f=document.getElementById('qt-mode-file'), sy=document.getElementById('qt-mode-system');
+  if(f) f.style.display=(mode==='file')?'':'none';
+  if(sy) sy.style.display=(mode==='system')?'':'none';
+  var bf=document.getElementById('qm-btn-file'), bs=document.getElementById('qm-btn-system');
+  if(bf) bf.classList.toggle('active', mode==='file');
+  if(bs) bs.classList.toggle('active', mode==='system');
+  var banner=document.getElementById('qt-current-config');
+  if(banner && mode==='system') banner.style.display='none';
+  var note=document.getElementById('qm-import-note');
+  if(note){ var s=getSettings(); note.textContent=(s.quotationsExcel && s.quotationsExcel.fileName)
+      ? ('Last file: '+s.quotationsExcel.fileName+'. Pick a new file above, or “Re-import last file”.')
+      : 'Pick an Excel file to bring its quotations into the system.'; }
+}
+window.remcRenderQuotModeUI=remcRenderQuotModeUI;
+async function qmSysFileChosen(input){
+  if(!input.files || !input.files[0]) return;
+  var file=input.files[0];
+  var note=document.getElementById('qm-import-note');
+  if(note) note.textContent='⏳ Reading '+file.name+'…';
+  readXlsxFile(file, function(err, rows){
+    if(err){ if(note) note.textContent='✘ Could not read file.'; alert('Could not read the file: '+(err && err.message ? err.message : err)); input.value=''; return; }
+    if(!rows || rows.length<2){ if(note) note.textContent='✘ File appears empty.'; alert('The file appears to be empty.'); input.value=''; return; }
+    QM_ROWS=rows; QM_COLS=rows[0].map(function(h){ return String(h).trim(); }).filter(Boolean); QM_FILE=file.name;
+    if(note) note.textContent='✔ Read '+(rows.length-1)+' rows · '+QM_COLS.length+' columns — match the columns below.';
+    qmSysBuildMapping();
+    var box=document.getElementById('qm-map-box'); if(box) box.style.display='';
+    input.value='';
+  });
+}
+window.qmSysFileChosen=qmSysFileChosen;
+function qmSysBuildMapping(){
+  var fileLbl=document.getElementById('qm-map-file'); if(fileLbl) fileLbl.textContent=QM_FILE+' · '+QM_COLS.length+' columns';
+  var prev=document.getElementById('qm-cols-preview');
+  if(prev) prev.innerHTML=QM_COLS.map(function(c){ return '<span style="background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:3px 10px;font-size:11px;font-weight:700;color:var(--mid)">'+escCM(c)+'</span>'; }).join('');
+  var guessed=autoGuessMapping(QM_COLS, QM_GUESSES);
+  var blank='<option value="">— Not mapped —</option>';
+  var opts=blank+QM_COLS.map(function(c){ return '<option value="'+escCM(c)+'">'+escCM(c)+'</option>'; }).join('');
+  var grid=document.getElementById('qm-map-grid');
+  if(grid){
+    grid.innerHTML=QM_FIELDS.map(function(fl){ return '<div class="map-row"><label class="map-lbl">'+(QM_LABELS[fl]||fl)+'</label><select class="map-sel" id="qmsm-'+fl+'" onchange="qmSysPreview()">'+opts+'</select></div>'; }).join('');
+    QM_FIELDS.forEach(function(fl){ var sel=document.getElementById('qmsm-'+fl); if(sel && guessed[fl]) sel.value=guessed[fl]; });
+  }
+  qmSysPreview();
+}
+function qmSysGetMapping(){ var m={}; QM_FIELDS.forEach(function(fl){ var sel=document.getElementById('qmsm-'+fl); if(sel && sel.value) m[fl]=sel.value; }); return m; }
+function qmSysPreview(){
+  var tbl=document.getElementById('qm-preview-table'); if(!tbl || !QM_ROWS) return;
+  var parsed=parseRowsWithMapping(QM_ROWS, qmSysGetMapping());
+  var show=parsed.slice(0,5);
+  if(!show.length){ tbl.innerHTML='<div style="font-size:12px;color:var(--muted)">Map at least the Project Name column to see a preview.</div>'; return; }
+  var cols=['projectName','client','quoteNumber','status','value'];
+  var head='<tr>'+cols.map(function(c){ return '<th style="text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);padding:6px 10px;border-bottom:1px solid var(--border);white-space:nowrap">'+(QM_LABELS[c]||c).replace(' *','')+'</th>'; }).join('')+'</tr>';
+  var body=show.map(function(r){ return '<tr>'+cols.map(function(c){ return '<td style="font-size:12px;padding:6px 10px;border-bottom:1px solid var(--surface2);white-space:nowrap">'+escCM(r[c]||'—')+'</td>'; }).join('')+'</tr>'; }).join('');
+  tbl.innerHTML='<table style="border-collapse:collapse;width:100%;min-width:520px">'+head+body+'</table><div style="font-size:11px;color:var(--muted);margin-top:6px">Showing '+show.length+' of '+parsed.length+' rows.</div>';
+}
+window.qmSysPreview=qmSysPreview;
+window.qmSysCancel=function(){ var box=document.getElementById('qm-map-box'); if(box) box.style.display='none'; QM_ROWS=null; QM_COLS=[]; try{ remcRenderQuotModeUI(); }catch(e){} };
+function qmBuildQuotes(parsed){
+  return parsed.map(function(r,i){
+    return { id:'qd_'+i+'_'+String(r.quoteNumber||'').replace(/[^a-z0-9]/gi,''), projectName:r.projectName||r.name||'', client:r.client||'', quoteNumber:r.quoteNumber||'', status:r.status||'', value:parseFloat(String(r.value||'').replace(/[^0-9.]/g,''))||0, submissionDate:r.submissionDate||'', notes:r.notes||'', _source:'system' };
+  }).filter(function(q){ return q.projectName || q.quoteNumber; });
+}
+function qmPersistSystem(added){
+  try{ localStorage.setItem('remc_quotations', JSON.stringify(QUOT_DATA)); }catch(e){}
+  try{ if(typeof window.remcCloudUpsertKey==='function') window.remcCloudUpsertKey('remc_quotations', JSON.stringify(QUOT_DATA)); }catch(e){}
+  try{ if(typeof renderQuotations==='function') renderQuotations(); }catch(e){}
+  var box=document.getElementById('qm-map-box'); if(box) box.style.display='none';
+  var note=document.getElementById('qm-import-note'); if(note) note.textContent='✔ Imported '+added+' quotation(s) into the system.';
+  try{ showToast('✔ Imported '+added+' quotation(s)'); }catch(e){}
+}
+window.qmSysConfirmImport=function(){
+  if(!QM_ROWS) return;
+  var mapping=qmSysGetMapping();
+  if(!mapping.projectName){ alert('Please map the "Project Name" column first.'); return; }
+  var parsedFull=parseRowsWithMapping(QM_ROWS, mapping);
+  var quotes=qmBuildQuotes(parsedFull);
+  try{ var st=getSettings(); st.quotationsExcel={ data:parsedFull, mapping:mapping, fileName:QM_FILE }; saveSettings(st); }catch(e){}
+  if(typeof QUOT_DATA==='undefined'){ window.QUOT_DATA=[]; }
+  var existing={}; QUOT_DATA.forEach(function(q){ existing[String(q.quoteNumber||'')+'|'+String(q.projectName||'')]=true; });
+  var added=0;
+  quotes.forEach(function(q){ var k=String(q.quoteNumber||'')+'|'+String(q.projectName||''); if(existing[k]) return; QUOT_DATA.push(q); added++; });
+  QM_ROWS=null;
+  qmPersistSystem(added);
+};
+window.remcImportQuotFileToSystem=function(){
+  var s=getSettings();
+  if(!(s.quotationsExcel && s.quotationsExcel.data && s.quotationsExcel.data.length)){ alert('No spreadsheet quotations to import. Attach a file first.'); return; }
+  if(!confirm('Import '+s.quotationsExcel.data.length+' quotation(s) from the spreadsheet into the system?')) return;
+  var quotes=qmBuildQuotes(s.quotationsExcel.data);
+  if(typeof QUOT_DATA==='undefined'){ window.QUOT_DATA=[]; }
+  var existing={}; QUOT_DATA.forEach(function(q){ existing[String(q.quoteNumber||'')+'|'+String(q.projectName||'')]=true; });
+  var added=0;
+  quotes.forEach(function(q){ var k=String(q.quoteNumber||'')+'|'+String(q.projectName||''); if(existing[k]) return; QUOT_DATA.push(q); added++; });
+  qmPersistSystem(added);
+};
+
 window.remcImportFileToSystem=function(){
   var s=getSettings();
   if(!(s.commercialProjects && s.commercialProjects.length)){ alert('No spreadsheet projects to import. Attach a file first (File mode).'); return; }
@@ -4913,6 +5313,7 @@ if (s.employeesData && s.employeesData.length) {
 renderOverviewStaff(s.employeesData);
 }
 try{ if(typeof remcRenderCommercialModeUI==='function') remcRenderCommercialModeUI(); }catch(e){}
+try{ if(typeof remcRenderQuotModeUI==='function') remcRenderQuotModeUI(); }catch(e){}
 })();
 
 function olShowMsg(type, msg) {
@@ -5875,6 +6276,7 @@ var NAV_TABS = [
 { key: 'materials',   label: 'Materials',         icon: '🚚', onclick: "showPage('materials')" },
 { key: 'quotations',  label: 'Quotations',        icon: '📊', onclick: "showPage('quotations')" },
 { key: 'team',        label: 'Team Planning',     icon: '👥', onclick: "showPage('team')" },
+{ key: 'employees',   label: 'Employees',         icon: '👷', onclick: "showPage('employees')" },
 { key: 'projects',    label: 'Projects',          icon: '📁', onclick: "showPage('projects')" },
 { key: 'jobscheduler', label: 'Job Scheduler', icon: '', onclick: "showPage('jobscheduler')" },
 { key: 'settings',    label: 'Settings',          icon: '⚙️',  onclick: "showPage('settings')" },
@@ -11207,6 +11609,7 @@ function teamEditProjectBooking(pid){
     { key:'materials',    label:'🚚 Materials' },
     { key:'quotations',   label:'📊 Quotations' },
     { key:'team',         label:'👥 Team Planning' },
+    { key:'employees',    label:'👷 Employees' },
     { key:'projects',     label:'📁 Projects' },
     { key:'jobscheduler', label:'📅 Job Scheduler' },
     { key:'settings',     label:'⚙️ Settings' }
@@ -11512,7 +11915,7 @@ function teamEditProjectBooking(pid){
 <script>
 (function(){
   function loadSupers(){ try{ var a=JSON.parse(localStorage.getItem('remc_supervisors')||'[]'); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
-  function saveSupers(a){ localStorage.setItem('remc_supervisors', JSON.stringify(a||[])); }
+  function saveSupers(a){ localStorage.setItem('remc_supervisors', JSON.stringify(a||[])); try{ if(typeof window.remcCloudUpsertKey==='function') window.remcCloudUpsertKey('remc_supervisors', JSON.stringify(a||[])); }catch(e){} }
   // Seed the two initial supervisors only if the list is empty
   if(loadSupers().length===0){
     saveSupers([
@@ -11567,8 +11970,6 @@ function teamEditProjectBooking(pid){
       +   '<div style="font-size:11px;color:var(--muted)">When OFF, the Supervisor app opens directly (no username/password) and shows all projects.</div></div>'
       +   '<label style="position:relative;display:inline-block;width:46px;height:26px"><input type="checkbox" id="sup-login-toggle" style="opacity:0;width:0;height:0" onchange="remcSetSupLogin(this.checked)"><span id="sup-login-track" style="position:absolute;inset:0;background:#cbd5e1;border-radius:26px;transition:.2s;cursor:pointer"></span><span id="sup-login-knob" style="position:absolute;top:3px;left:3px;width:20px;height:20px;background:#fff;border-radius:50%;transition:.2s"></span></label>'
       + '</div>'
-      + '<div id="sup-list"></div>'
-      + '<div style="margin:10px 0"><button class="step-btn-pri" id="sup-cloud-btn" style="background:#2563eb">☁️ Sync supervisors to cloud now</button> <span id="sup-cloud-msg" style="font-size:12px;color:var(--muted);margin-left:8px"></span></div>'
       + '<div class="step-card"><div class="step-head"><div class="step-num">+</div><div><div class="step-title">Add supervisor</div><div class="step-sub">Username, supervisor name and password</div></div></div>'
       + '<div class="step-body"><div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">'
       +   '<div style="flex:1;min-width:120px"><div class="map-lbl">Username</div><input id="sup-add-user" class="map-sel" placeholder="e.g. MDT"></div>'
@@ -11576,6 +11977,8 @@ function teamEditProjectBooking(pid){
       +   '<div style="flex:1;min-width:120px"><div class="map-lbl">Password</div><input id="sup-add-pass" class="map-sel" value="REMC123"></div>'
       +   '<button class="step-btn-pri" id="sup-add-btn">Add</button>'
       + '</div></div></div>'
+      + '<div style="font-size:11px;color:var(--muted);margin:2px 0 12px;display:flex;align-items:center;gap:6px"><span style="color:#16a34a">☁️</span> Supervisors are saved and kept in sync automatically.</div>'
+      + '<div id="sup-list"></div>'
       + '</div>';
     empPanel.parentNode.insertBefore(panel, empPanel.nextSibling);
     document.getElementById('sup-add-btn').onclick = addSup;
@@ -11588,17 +11991,6 @@ function teamEditProjectBooking(pid){
       if(tr) tr.style.background = req ? '#16a34a' : '#cbd5e1';
       if(kn) kn.style.left = req ? '23px' : '3px';
     }
-    var cb=document.getElementById('sup-cloud-btn');
-    if(cb) cb.onclick = function(){
-      ensureSeed();
-      var list = loadSupers();
-      var msg = document.getElementById('sup-cloud-msg');
-      if(typeof window.remcCloudUpsertKey !== 'function'){ if(msg){ msg.style.color='#dc2626'; msg.textContent='Cloud not connected — sign in first.'; } return; }
-      if(msg){ msg.style.color='var(--muted)'; msg.textContent='Syncing…'; }
-      window.remcCloudUpsertKey('remc_supervisors', JSON.stringify(list), function(err){
-        if(msg){ if(err){ msg.style.color='#dc2626'; msg.textContent='Failed: '+err; } else { msg.style.color='#15803d'; msg.textContent='✓ '+list.length+' supervisor(s) synced to the cloud.'; } }
-      });
-    };
     renderSupers();
   }
   window.remcSetSupLogin = function(enabled){
@@ -11610,22 +12002,48 @@ function teamEditProjectBooking(pid){
       if(typeof window.remcCloudUpsertKey==='function') window.remcCloudUpsertKey('remc_sup_login_required', enabled ? 'true' : 'false');
     }catch(e){}
   };
+  var _supEditIdx = -1;
   function renderSupers(){
     var host=document.getElementById('sup-list'); if(!host) return;
     var dl=document.getElementById('sup-name-list'); if(dl){ dl.innerHTML = projectSupervisorNames().map(function(n){return '<option value="'+esc(n)+'">';}).join(''); }
     var list=loadSupers();
-    if(!list.length){ host.innerHTML='<div class="stpanel-desc">No supervisors yet.</div>'; return; }
+    if(!list.length){ host.innerHTML='<div class="stpanel-desc">No supervisors yet. Add one above.</div>'; return; }
     host.innerHTML = '<div class="step-card"><div style="padding:4px 0">'
       + list.map(function(s,i){
+        if(i===_supEditIdx){
+          // ── edit mode: username, name and password are editable ──
+          return '<div style="padding:12px 16px;border-bottom:1px solid var(--border);background:var(--surface2)">'
+            + '<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">'
+            +   '<div style="flex:1;min-width:110px"><div class="map-lbl">Username</div><input id="sup-ed-user" class="map-sel" value="'+esc(s.username||'')+'"></div>'
+            +   '<div style="flex:1.4;min-width:150px"><div class="map-lbl">Supervisor name</div><input id="sup-ed-name" class="map-sel" list="sup-name-list" value="'+esc(s.name||'')+'"></div>'
+            +   '<div style="flex:1;min-width:110px"><div class="map-lbl">Password</div><input id="sup-ed-pass" class="map-sel" value="'+esc(s.password||'')+'"></div>'
+            +   '<button class="step-btn-pri" onclick="remcSupSaveEdit('+i+')">Save</button>'
+            +   '<button class="step-btn-sec" onclick="remcSupCancelEdit()">Cancel</button>'
+            + '</div></div>';
+        }
         return '<div style="display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--border)">'
           + '<div style="width:34px;height:34px;border-radius:8px;background:#eef2ff;color:#3730a3;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px">'+esc((s.username||'?').slice(0,3).toUpperCase())+'</div>'
-          + '<div style="flex:1;min-width:0"><div style="font-weight:700;font-size:13px">'+esc(s.name||'')+'</div><div style="font-size:11px;color:var(--muted)">Username: <b>'+esc(s.username||'')+'</b></div></div>'
-          + '<input class="map-sel" style="width:120px" value="'+esc(s.password||'')+'" onchange="remcSupSetPass('+i+',this.value)" title="Password">'
+          + '<div style="flex:1;min-width:0"><div style="font-weight:700;font-size:13px">'+esc(s.name||'')+'</div><div style="font-size:11px;color:var(--muted)">Username: <b>'+esc(s.username||'')+'</b> · Password: <b>'+esc(s.password||'')+'</b></div></div>'
+          + '<button class="step-btn-sec" onclick="remcSupEdit('+i+')">✏️ Edit</button>'
           + '<button class="step-btn-sec" onclick="remcSupDelete('+i+')" style="border-color:#fecaca;color:#dc2626">Delete</button>'
           + '</div>';
       }).join('')
       + '</div></div>';
   }
+  window.remcSupEdit=function(i){ _supEditIdx=i; renderSupers(); };
+  window.remcSupCancelEdit=function(){ _supEditIdx=-1; renderSupers(); };
+  window.remcSupSaveEdit=function(i){
+    var list=loadSupers(); if(!list[i]) return;
+    var u=(document.getElementById('sup-ed-user').value||'').trim();
+    var n=(document.getElementById('sup-ed-name').value||'').trim();
+    var p=(document.getElementById('sup-ed-pass').value||'').trim();
+    if(!u||!n||!p){ alert('Please fill username, supervisor name and password.'); return; }
+    if(list.some(function(s,idx){ return idx!==i && (s.username||'').toLowerCase()===u.toLowerCase(); })){ alert('That username already exists.'); return; }
+    list[i].username=u; list[i].name=n; list[i].password=p;
+    saveSupers(list);
+    _supEditIdx=-1; renderSupers();
+    try{ showToast('✔ Supervisor updated'); }catch(e){}
+  };
   function addSup(){
     var u=(document.getElementById('sup-add-user').value||'').trim();
     var n=(document.getElementById('sup-add-name').value||'').trim();
@@ -11641,6 +12059,229 @@ function teamEditProjectBooking(pid){
   window.remcSupSetPass=function(i,v){ var list=loadSupers(); if(!list[i])return; list[i].password=(v||'').trim(); saveSupers(list); };
 
   if (document.readyState==='loading') document.addEventListener('DOMContentLoaded', inject); else inject();
+})();
+</script>
+
+<script>
+/* ══════════ EMPLOYEES (Funcionários) page ══════════ */
+(function(){
+  var EMP_KEY='remc_staff', DEPT_KEY='remc_departments';
+  var DEFAULT_DEPTS=['Operations','Earthworks','Administration','Workshop','Management'];
+  var _empView='cards';
+  var _empPhoto=null;      // temp photo (base64) held while the modal is open
+  var _empEditId=null;
+
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function empLoad(){ try{ var a=JSON.parse(localStorage.getItem(EMP_KEY)||'[]'); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
+  function empStore(list){
+    try{ localStorage.setItem(EMP_KEY, JSON.stringify(list||[])); }catch(e){}
+    try{ if(typeof window.remcCloudUpsertKey==='function') window.remcCloudUpsertKey(EMP_KEY, JSON.stringify(list||[])); }catch(e){}
+  }
+  function deptLoad(){ try{ var a=JSON.parse(localStorage.getItem(DEPT_KEY)||'null'); return Array.isArray(a)&&a.length?a:DEFAULT_DEPTS.slice(); }catch(e){ return DEFAULT_DEPTS.slice(); } }
+  function deptStore(list){
+    try{ localStorage.setItem(DEPT_KEY, JSON.stringify(list||[])); }catch(e){}
+    try{ if(typeof window.remcCloudUpsertKey==='function') window.remcCloudUpsertKey(DEPT_KEY, JSON.stringify(list||[])); }catch(e){}
+  }
+  function initials(name){ var p=String(name||'').trim().split(/\s+/); return ((p[0]||'?')[0]+(p[1]?p[1][0]:'')).toUpperCase(); }
+  function contractClass(c){ return c==='Part time'?'emp-chip-pt':c==='Casual'?'emp-chip-casual':'emp-chip-ft'; }
+
+  window.empFillDeptSelects=function(selected){
+    var depts=deptLoad();
+    var sel=document.getElementById('emp-f-dept');
+    if(sel){ var cur=selected!=null?selected:sel.value; sel.innerHTML=depts.map(function(d){return '<option value="'+esc(d)+'">'+esc(d)+'</option>';}).join(''); if(cur) sel.value=cur; }
+    var f=document.getElementById('emp-filter-dept');
+    if(f){ var fv=f.value; f.innerHTML='<option value="">All departments</option>'+depts.map(function(d){return '<option value="'+esc(d)+'">'+esc(d)+'</option>';}).join(''); f.value=fv; }
+  };
+
+  window.empSetView=function(v){
+    _empView=(v==='table')?'table':'cards';
+    var c=document.getElementById('emp-vt-cards'), t=document.getElementById('emp-vt-table');
+    if(c) c.classList.toggle('active', _empView==='cards');
+    if(t) t.classList.toggle('active', _empView==='table');
+    renderEmployees();
+  };
+
+  function empPhotoCell(e, phCls, imgCls){
+    return e.photo ? '<img class="'+imgCls+'" src="'+e.photo+'" alt="">' : '<div class="'+phCls+'">'+esc(initials(e.name))+'</div>';
+  }
+
+  window.renderEmployees=function(){
+    var host=document.getElementById('emp-list'); if(!host) return;
+    var all=empLoad();
+    var statsEl=document.getElementById('emp-stats');
+    if(statsEl){
+      var ft=all.filter(function(e){return e.contract==='Full time';}).length;
+      var pt=all.filter(function(e){return e.contract==='Part time';}).length;
+      var cas=all.filter(function(e){return e.contract==='Casual';}).length;
+      statsEl.innerHTML =
+        '<div class="emp-stat"><div class="emp-stat-lbl">Total</div><div class="emp-stat-val">'+all.length+'</div></div>'
+        + '<div class="emp-stat"><div class="emp-stat-lbl">Full time</div><div class="emp-stat-val" style="color:var(--green)">'+ft+'</div></div>'
+        + '<div class="emp-stat"><div class="emp-stat-lbl">Part time</div><div class="emp-stat-val" style="color:var(--amber)">'+pt+'</div></div>'
+        + '<div class="emp-stat"><div class="emp-stat-lbl">Casual</div><div class="emp-stat-val" style="color:#7c3aed">'+cas+'</div></div>';
+    }
+    var q=(document.getElementById('emp-search')?document.getElementById('emp-search').value:'').trim().toLowerCase();
+    var fd=document.getElementById('emp-filter-dept')?document.getElementById('emp-filter-dept').value:'';
+    var fc=document.getElementById('emp-filter-contract')?document.getElementById('emp-filter-contract').value:'';
+    var list=all.filter(function(e){
+      if(fd && e.department!==fd) return false;
+      if(fc && e.contract!==fc) return false;
+      if(q){ var hay=[e.name,e.position,e.department,e.contract,e.notes].filter(Boolean).join(' ').toLowerCase(); if(hay.indexOf(q)<0) return false; }
+      return true;
+    });
+    if(!all.length){ host.innerHTML='<div class="emp-empty">No employees yet. Tap <b>+ Add employee</b> to create your first one.</div>'; return; }
+    if(!list.length){ host.innerHTML='<div class="emp-empty">No employees match your search or filters.</div>'; return; }
+
+    if(_empView==='cards'){
+      host.innerHTML='<div class="emp-grid">'+list.map(function(e){
+        var lic=[]; if(e.car) lic.push('<span class="emp-chip emp-chip-lic">🚗 Car</span>'); if(e.truck) lic.push('<span class="emp-chip emp-chip-lic">🚛 Truck</span>');
+        return '<div class="emp-card">'
+          + '<div class="emp-card-top">'+empPhotoCell(e,'emp-photo-ph','emp-photo')
+          +   '<div style="min-width:0"><div class="emp-card-name">'+esc(e.name)+'</div><div class="emp-card-pos">'+esc(e.position||'—')+'</div></div></div>'
+          + '<div class="emp-card-body">'
+          +   '<div class="emp-chip-row"><span class="emp-chip emp-chip-dept">'+esc(e.department||'—')+'</span>'
+          +     '<span class="emp-chip '+contractClass(e.contract)+'">'+esc(e.contract||'—')+'</span></div>'
+          +   (lic.length?'<div class="emp-chip-row">'+lic.join('')+'</div>':'')
+          +   (e.notes?'<div style="font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(e.notes)+'</div>':'')
+          + '</div>'
+          + '<div class="emp-card-actions"><button onclick="empOpenModal('+JSON.stringify(e.id)+')">✏️ Edit</button><button class="del" onclick="empDelete('+JSON.stringify(e.id)+')">🗑️ Delete</button></div>'
+          + '</div>';
+      }).join('')+'</div>';
+    } else {
+      host.innerHTML='<div class="emp-table-wrap"><table class="emp-table"><thead><tr>'
+        + '<th></th><th>Name</th><th>Position</th><th>Department</th><th>Contract</th><th>Licences</th><th>Notes</th><th></th>'
+        + '</tr></thead><tbody>'
+        + list.map(function(e){
+          var lic=[]; if(e.car) lic.push('🚗'); if(e.truck) lic.push('🚛');
+          return '<tr>'
+            + '<td>'+empPhotoCell(e,'emp-tbl-photo-ph','emp-tbl-photo')+'</td>'
+            + '<td style="font-weight:700">'+esc(e.name)+'</td>'
+            + '<td>'+esc(e.position||'—')+'</td>'
+            + '<td><span class="emp-chip emp-chip-dept">'+esc(e.department||'—')+'</span></td>'
+            + '<td><span class="emp-chip '+contractClass(e.contract)+'">'+esc(e.contract||'—')+'</span></td>'
+            + '<td style="font-size:15px">'+(lic.join(' ')||'—')+'</td>'
+            + '<td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--muted)">'+esc(e.notes||'—')+'</td>'
+            + '<td><div class="emp-tbl-actions"><button class="emp-tbl-btn" onclick="empOpenModal('+JSON.stringify(e.id)+')" title="Edit">✏️</button><button class="emp-tbl-btn del" onclick="empDelete('+JSON.stringify(e.id)+')" title="Delete">🗑️</button></div></td>'
+            + '</tr>';
+        }).join('')
+        + '</tbody></table></div>';
+    }
+  };
+
+  function renderPhotoPreview(){
+    var wrap=document.getElementById('emp-photo-wrap'); if(!wrap) return;
+    var nm=document.getElementById('emp-f-name'); var name=nm?nm.value:'';
+    wrap.innerHTML = _empPhoto ? '<img class="emp-photo-preview" src="'+_empPhoto+'" alt="">' : '<div class="emp-photo-preview-ph">'+esc(initials(name)||'👤')+'</div>';
+    var rm=document.getElementById('emp-photo-remove'); if(rm) rm.style.display=_empPhoto?'':'none';
+  }
+
+  window.empOpenModal=function(id){
+    _empEditId=(id!=null)?id:null;
+    var all=empLoad();
+    var e=(_empEditId!=null)?all.find(function(x){return x.id===_empEditId;}):null;
+    document.getElementById('emp-modal-title').textContent = e?'Edit employee':'Add employee';
+    _empPhoto = e?(e.photo||null):null;
+    empFillDeptSelects(e?e.department:'');
+    document.getElementById('emp-f-name').value = e?(e.name||''):'';
+    document.getElementById('emp-f-position').value = e?(e.position||''):'';
+    var ds=document.getElementById('emp-f-dept'); if(ds && e && e.department) ds.value=e.department;
+    document.getElementById('emp-f-contract').value = e?(e.contract||'Full time'):'Full time';
+    document.getElementById('emp-f-car').checked = e?!!e.car:false;
+    document.getElementById('emp-f-truck').checked = e?!!e.truck:false;
+    document.getElementById('emp-f-notes').value = e?(e.notes||''):'';
+    document.getElementById('emp-modal-del').style.display = e?'':'none';
+    renderPhotoPreview();
+    document.getElementById('emp-modal').classList.add('open');
+  };
+  window.empCloseModal=function(){ document.getElementById('emp-modal').classList.remove('open'); _empPhoto=null; _empEditId=null; };
+
+  window.empAddDepartment=function(){
+    var name=prompt('New department name:'); if(name===null) return;
+    name=name.trim(); if(!name) return;
+    var depts=deptLoad();
+    if(depts.some(function(d){return d.toLowerCase()===name.toLowerCase();})){ alert('That department already exists.'); var sel=document.getElementById('emp-f-dept'); if(sel){ var m=depts.filter(function(d){return d.toLowerCase()===name.toLowerCase();})[0]; if(m) sel.value=m; } return; }
+    depts.push(name); deptStore(depts);
+    empFillDeptSelects(name);
+    try{ showToast('✔ Department added'); }catch(e){}
+  };
+
+  window.empPhotoChosen=function(input){
+    if(!input.files || !input.files[0]) return;
+    var file=input.files[0];
+    var reader=new FileReader();
+    reader.onload=function(ev){
+      var img=new Image();
+      img.onload=function(){
+        try{
+          var max=256, w=img.width, h=img.height;
+          if(w>h){ if(w>max){ h=Math.round(h*max/w); w=max; } } else { if(h>max){ w=Math.round(w*max/h); h=max; } }
+          var cv=document.createElement('canvas'); cv.width=w; cv.height=h;
+          var ctx=cv.getContext('2d'); ctx.drawImage(img,0,0,w,h);
+          _empPhoto=cv.toDataURL('image/jpeg',0.72);
+        }catch(err){ _empPhoto=ev.target.result; }
+        renderPhotoPreview();
+      };
+      img.onerror=function(){ _empPhoto=ev.target.result; renderPhotoPreview(); };
+      img.src=ev.target.result;
+    };
+    reader.readAsDataURL(file);
+    input.value='';
+  };
+  window.empPhotoRemove=function(){ _empPhoto=null; renderPhotoPreview(); };
+
+  window.empSave=function(){
+    var name=(document.getElementById('emp-f-name').value||'').trim();
+    var position=(document.getElementById('emp-f-position').value||'').trim();
+    var department=(document.getElementById('emp-f-dept').value||'').trim();
+    if(!name){ alert('Full name is required.'); return; }
+    if(!position){ alert('Position is required.'); return; }
+    if(!department){ alert('Department is required.'); return; }
+    var rec={
+      name:name, position:position, department:department,
+      contract:document.getElementById('emp-f-contract').value||'Full time',
+      car:document.getElementById('emp-f-car').checked,
+      truck:document.getElementById('emp-f-truck').checked,
+      notes:(document.getElementById('emp-f-notes').value||'').trim(),
+      photo:_empPhoto||''
+    };
+    var all=empLoad();
+    if(_empEditId!=null){
+      var idx=all.findIndex(function(x){return x.id===_empEditId;});
+      if(idx>=0) all[idx]=Object.assign({}, all[idx], rec);
+    } else {
+      rec.id='emp_'+Date.now()+'_'+Math.floor(Math.random()*1000);
+      all.push(rec);
+    }
+    empStore(all);
+    empCloseModal();
+    renderEmployees();
+    try{ showToast('✔ Employee saved'); }catch(e){}
+  };
+
+  window.empDeleteFromModal=function(){ if(_empEditId!=null){ var id=_empEditId; empCloseModal(); window.empDelete(id); } };
+  window.empDelete=function(id){
+    var all=empLoad(); var e=all.find(function(x){return x.id===id;}); if(!e) return;
+    if(!confirm('Delete employee "'+(e.name||'')+'"?')) return;
+    all=all.filter(function(x){return x.id!==id;});
+    empStore(all);
+    renderEmployees();
+    try{ showToast('Employee deleted'); }catch(e){}
+  };
+
+  document.addEventListener('input', function(ev){ if(ev.target && ev.target.id==='emp-f-name'){ renderPhotoPreview(); } });
+  var _empDown=false;
+  var ov=document.getElementById('emp-modal');
+  if(ov){
+    ov.addEventListener('mousedown', function(e){ _empDown = (e.target===ov); });
+    ov.addEventListener('click', function(e){ if(_empDown && e.target===ov) empCloseModal(); });
+  }
+
+  function empInit(){
+    try{ if(!localStorage.getItem(DEPT_KEY)) deptStore(DEFAULT_DEPTS.slice()); }catch(e){}
+    empFillDeptSelects();
+    renderEmployees();
+  }
+  window.remcEmpInit=empInit;
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', empInit); else empInit();
 })();
 </script>
 
