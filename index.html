@@ -9177,6 +9177,7 @@ var PD_DOC_SLOTS = {
 
 var _pdDocPendingCat = null;
 var _pdDocPendingSlot = null;
+var _pdDocReplaceIdx = null;
 
 function pdRenderDocs(id) {
   var store = pdLoadDocs();
@@ -9215,24 +9216,27 @@ function pdDocEmptyRow(id, cat, slotKey, icon, label) {
   return '<div style="display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;min-height:32px">'
     + '<span style="font-size:13px;opacity:0.5">' + icon + '</span>'
     + '<span style="font-size:12px;color:var(--muted);flex:1">' + label + '</span>'
-    + '<button onclick="pdDocAttach(\'' + id + '\',\'' + cat + '\',\'' + slotKey + '\')" '
+    + '<button onclick="_pdDocReplaceIdx=null;pdDocAttach(\'' + id + '\',\'' + cat + '\',\'' + slotKey + '\')" '
     + 'style="padding:3px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:5px;font-size:10px;font-weight:700;cursor:pointer;color:var(--blue);font-family:\'Barlow\',sans-serif">+ Attach</button>'
     + '</div>';
 }
 
 function pdDocRow(id, cat, slotKey, icon, label, doc) {
   var isLink = doc.type === 'link';
+  var a = "'" + id + "','" + cat + "','" + slotKey + "'";
   var openAction = isLink
     ? 'window.open(\'' + (doc.src||'').replace(/'/g, "\\'") + '\',\'_blank\')'
-    : 'pdDocOpenFile(\'' + id + '\',\'' + cat + '\',\'' + slotKey + '\')';
-  return '<div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px">'
+    : 'pdDocView(' + a + ')';
+  var primaryLabel = isLink ? 'Open' : 'View';
+  return '<div style="display:flex;align-items:center;gap:6px;padding:6px 8px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px">'
     + '<span style="font-size:13px">' + icon + '</span>'
     + '<div style="flex:1;min-width:0">'
     + '<div style="font-size:12px;font-weight:700;color:#15803d;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + (doc.name || label) + '</div>'
-    + '<div style="font-size:10px;color:#16a34a">' + (isLink ? '\ud83d\udd17 Link' : '\ud83d\udcc4 File') + (doc.size ? ' \u00b7 ' + doc.size : '') + '</div>'
+    + '<div style="font-size:10px;color:#16a34a">' + (isLink ? '🔗 Link' : '📄 File') + (doc.size ? ' · ' + doc.size : '') + '</div>'
     + '</div>'
-    + '<button onclick="' + openAction + '" title="Open" style="padding:3px 8px;background:#dcfce7;border:1px solid #bbf7d0;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer;color:#15803d">Open</button>'
-    + '<button onclick="pdDocRemove(\'' + id + '\',\'' + cat + '\',\'' + slotKey + '\')" title="Remove" style="background:none;border:none;cursor:pointer;color:#dc2626;font-size:13px;padding:2px 4px">\u2715</button>'
+    + '<button onclick="' + openAction + '" title="' + primaryLabel + '" style="padding:3px 9px;background:#dcfce7;border:1px solid #bbf7d0;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer;color:#15803d">' + primaryLabel + '</button>'
+    + '<button onclick="pdDocChange(' + a + ')" title="Change / replace file" style="padding:3px 9px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer;color:#1d4ed8">Change</button>'
+    + '<button onclick="pdDocRemove(' + a + ')" title="Delete" style="background:none;border:none;cursor:pointer;color:#dc2626;font-size:14px;padding:2px 4px">🗑️</button>'
     + '</div>';
 }
 
@@ -9285,11 +9289,16 @@ function pdDocAttachLink() {
 
   if (_pdDocPendingCat === 'other') {
     if (!store[id].other) store[id].other = [];
-    store[id].other.push({ name:name, src:url, type:'link' });
+    if (_pdDocReplaceIdx != null && _pdDocReplaceIdx >= 0 && _pdDocReplaceIdx < store[id].other.length) {
+      store[id].other[_pdDocReplaceIdx] = { name:name, src:url, type:'link' };
+    } else {
+      store[id].other.push({ name:name, src:url, type:'link' });
+    }
   } else {
     if (!store[id][_pdDocPendingCat]) store[id][_pdDocPendingCat] = {};
     store[id][_pdDocPendingCat][_pdDocPendingSlot] = { name:name, src:url, type:'link' };
   }
+  _pdDocReplaceIdx = null;
   pdSaveDocs(store);
   pdRenderDocs(id);
 }
@@ -9311,11 +9320,16 @@ function pdDocFileChosen(e) {
     var entry = { name:file.name, src:ev.target.result, type:'file', size:(file.size/1024).toFixed(0)+' KB' };
     if (_pdDocPendingCat === 'other') {
       if (!store[id].other) store[id].other = [];
-      store[id].other.push(entry);
+      if (_pdDocReplaceIdx != null && _pdDocReplaceIdx >= 0 && _pdDocReplaceIdx < store[id].other.length) {
+        store[id].other[_pdDocReplaceIdx] = entry;
+      } else {
+        store[id].other.push(entry);
+      }
     } else {
       if (!store[id][_pdDocPendingCat]) store[id][_pdDocPendingCat] = {};
       store[id][_pdDocPendingCat][_pdDocPendingSlot] = entry;
     }
+    _pdDocReplaceIdx = null;
     pdSaveDocs(store);
     pdRenderDocs(id);
   };
@@ -9367,8 +9381,79 @@ function pdDocRemove(id, cat, slotKey) {
 function pdDocAdd(cat) {
   _pdDocPendingCat = cat;
   _pdDocPendingSlot = null;
+  _pdDocReplaceIdx = null;
   pdDocAttach(window._pdCurrentId, cat, Date.now().toString());
 }
+
+// Change / replace an existing document (re-opens the attach chooser for that slot)
+function pdDocChange(id, cat, slotKey) {
+  _pdDocReplaceIdx = (cat === 'other') ? parseInt(slotKey, 10) : null;
+  pdDocAttach(id, cat, slotKey);
+}
+
+// In-app viewer (lightbox) for images and PDFs
+function pdDocView(id, cat, slotKey) {
+  var store = pdLoadDocs();
+  var proj = store[id] || {};
+  var doc = (cat === 'other') ? (proj.other || [])[parseInt(slotKey, 10)] : (proj[cat] || {})[slotKey];
+  if (!doc || !doc.src) return;
+  if (doc.type === 'link') { window.open(doc.src, '_blank'); return; }
+  var name = doc.name || 'File';
+  var isPdf = doc.src.indexOf('data:application/pdf') === 0 || /\.pdf$/i.test(name);
+  var isImg = doc.src.indexOf('data:image') === 0 || /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(name);
+
+  var old = document.getElementById('pd-doc-view-modal'); if (old) old.remove();
+  var ov = document.createElement('div');
+  ov.id = 'pd-doc-view-modal';
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.82);z-index:3000;display:flex;flex-direction:column;padding:18px';
+
+  var bar = document.createElement('div');
+  bar.style.cssText = 'display:flex;align-items:center;gap:10px;margin-bottom:12px;color:#fff';
+  var title = document.createElement('div');
+  title.style.cssText = 'font-size:14px;font-weight:700;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
+  title.textContent = name;
+  bar.appendChild(title);
+  function mkBtn(lbl, fn) {
+    var b = document.createElement('button');
+    b.textContent = lbl;
+    b.style.cssText = 'padding:7px 14px;background:rgba(255,255,255,0.14);border:1px solid rgba(255,255,255,0.32);border-radius:8px;color:#fff;font-family:\'Barlow\',sans-serif;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap';
+    b.onclick = fn;
+    return b;
+  }
+  bar.appendChild(mkBtn('Open in new tab', function () {
+    var w = window.open('', '_blank'); if (!w) return;
+    if (isPdf) { w.document.write('<html><head><title>' + name + '</title></head><body style="margin:0"><embed src="' + doc.src + '" width="100%" height="100%" type="application/pdf"></body></html>'); }
+    else if (isImg) { w.document.write('<html><head><title>' + name + '</title></head><body style="margin:0;background:#1e293b;display:flex;align-items:center;justify-content:center;min-height:100vh"><img src="' + doc.src + '" style="max-width:100%;max-height:100vh"></body></html>'); }
+    else { var a = w.document.createElement('a'); a.href = doc.src; a.download = name; w.document.body.appendChild(a); a.click(); w.close(); }
+  }));
+  bar.appendChild(mkBtn('Download', function () { var a = document.createElement('a'); a.href = doc.src; a.download = name; document.body.appendChild(a); a.click(); a.remove(); }));
+  bar.appendChild(mkBtn('✕ Close', function () { ov.remove(); }));
+
+  var body = document.createElement('div');
+  body.style.cssText = 'flex:1;min-height:0;display:flex;align-items:center;justify-content:center;overflow:auto';
+  if (isImg) {
+    var img = document.createElement('img');
+    img.src = doc.src;
+    img.style.cssText = 'max-width:100%;max-height:100%;border-radius:8px;box-shadow:0 8px 40px rgba(0,0,0,0.5)';
+    body.appendChild(img);
+  } else if (isPdf) {
+    var fr = document.createElement('iframe');
+    fr.src = doc.src;
+    fr.style.cssText = 'width:100%;height:100%;border:none;border-radius:8px;background:#fff';
+    body.appendChild(fr);
+  } else {
+    var d = document.createElement('div');
+    d.style.cssText = 'color:#cbd5e1;font-size:14px;text-align:center;padding:40px';
+    d.textContent = 'This file type can\'t be previewed here. Use Download or Open in new tab.';
+    body.appendChild(d);
+  }
+
+  ov.appendChild(bar); ov.appendChild(body);
+  ov.onclick = function (e) { if (e.target === ov) ov.remove(); };
+  document.body.appendChild(ov);
+}
+window.pdDocView = pdDocView;
+window.pdDocChange = pdDocChange;
 
 // ── Quotation Detail Modal ───────────────────────────────────────────────────
 var _qdCurrentId = null;
@@ -11262,7 +11347,7 @@ function teamEditProjectBooking(pid){
         </div>
         <div id="pd-docs-other"></div>
       </div>
-      <input type="file" id="pd-doc-file-input" accept="application/pdf,image/*,.xlsx,.xls,.doc,.docx,.dwg,.dxf" style="display:none">
+      <input type="file" id="pd-doc-file-input" accept="application/pdf,image/*,.xlsx,.xls,.doc,.docx,.dwg,.dxf" style="display:none" onchange="pdDocFileChosen(event)">
     </div>
   </div><!-- end grid -->
 
