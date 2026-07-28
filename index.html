@@ -233,7 +233,6 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
       <div class="nav-item" onclick="showPage('quotations')">📊 Quotations</div>
       <div class="nav-item" onclick="showPage('team')">👥 Team Planning</div>
       <div class="nav-item" onclick="showPage('employees')">👷 Employees</div>
-      <div class="nav-item" onclick="showPage('departments')">🏷️ Departments</div>
       <div class="nav-item" onclick="showPage('projects')">📁 Projects</div>
       <div class="nav-item" onclick="showPage('scheduler')">📅 Quote Scheduler</div>
       <div class="nav-item" onclick="showPage('settings')">⚙️ Settings</div>
@@ -1247,22 +1246,6 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
   </div>
 
   <!-- ══ PAGE: DEPARTMENTS ══ -->
-  <div class="page" id="page-departments">
-    <div class="dep-page">
-      <div class="dep-head">
-        <div>
-          <div class="dep-title">🏷️ Departments</div>
-          <div class="dep-sub">Add, rename or remove the departments used across the Employees page.</div>
-        </div>
-      </div>
-      <div class="dep-add">
-        <input id="dep-add-input" placeholder="New department name…" onkeydown="if(event.key==='Enter')depAdd()">
-        <button class="dep-btn pri" onclick="depAdd()">+ Add department</button>
-      </div>
-      <div id="dep-list" class="dep-list"></div>
-    </div>
-  </div>
-
   <!-- ══ PAGE: PROJECTS ══ -->
   <div class="page" id="page-projects">
     <div style="padding:20px 24px;max-width:1600px;margin:0 auto">
@@ -1501,6 +1484,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
         <div class="stab" onclick="showSettingsTab('subcontractors')"    data-tab="subcontractors" data-cat="data">🔨 Sub-contractors</div>
         <div class="stab" onclick="showSettingsTab('access')"            data-tab="access"         data-cat="control">🔑 Office Access</div>
         <div class="stab" onclick="showSettingsTab('mypassword')"        data-tab="mypassword"     data-cat="control">🔒 My Password</div>
+        <div class="stab" onclick="showSettingsTab('departments')"       data-tab="departments"    data-cat="control">🏷️ Departments</div>
         <div class="stab" onclick="showSettingsTab('empaccess')"         data-tab="empaccess"      data-cat="control">👷 General Employee Access</div>
         <div class="stab" onclick="showSettingsTab('storage')"           data-tab="storage"        data-cat="system">💾 Storage</div>
         <div class="stab" onclick="showSettingsTab('backup')"            data-tab="backup"         data-cat="system">🗃️ Backup</div>
@@ -2114,6 +2098,18 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
         </div>
       </div>
 
+      <!-- TAB: DEPARTMENTS -->
+      <div class="stab-panel" id="stpanel-departments">
+        <div class="stpanel-inner">
+          <div class="stpanel-desc">Add, rename or remove the departments used across the Employees page.</div>
+          <div class="dep-add">
+            <input id="dep-add-input" placeholder="New department name…" onkeydown="if(event.key==='Enter')depAdd()">
+            <button class="dep-btn pri" onclick="depAdd()">+ Add department</button>
+          </div>
+          <div id="dep-list" class="dep-list"></div>
+        </div>
+      </div>
+
       <!-- TAB: GENERAL EMPLOYEE ACCESS (future project) -->
       <div class="stab-panel" id="stpanel-empaccess">
         <div class="stpanel-inner">
@@ -2606,6 +2602,7 @@ p.classList.toggle('active', p.id === 'stpanel-' + tab);
 if(tab==='projects'){ try{ if(typeof window.remcReloadProjData==='function') window.remcReloadProjData(); if(typeof remcRenderCommercialModeUI==='function') remcRenderCommercialModeUI(); }catch(e){} }
 if(tab==='quotations'){ try{ if(typeof remcRenderQuotModeUI==='function') remcRenderQuotModeUI(); }catch(e){} }
 if(tab==='supervisors'){ try{ if(typeof window.remcRenderSupers==='function') window.remcRenderSupers(); }catch(e){} }
+if(tab==='departments'){ try{ if(typeof window.renderDepartments==='function') window.renderDepartments(); }catch(e){} }
 if(tab==='mypassword' || tab==='access'){ try{ if(typeof window.remcAccRender==='function') window.remcAccRender(); }catch(e){} }
 if(tab==='backup'){ try{ if(typeof window.remcBkRenderStatus==='function') window.remcBkRenderStatus(); }catch(e){} }
 }
@@ -2626,7 +2623,6 @@ if (typeof applyNavVis === 'function') applyNavVis();
 
 if (name === 'overview') { renderOverview(); }
 if (name === 'employees') { try{ if(typeof renderEmployees==='function'){ if(typeof window.empFillDeptSelects==='function') window.empFillDeptSelects(); renderEmployees(); } }catch(e){} }
-if (name === 'departments') { try{ if(typeof window.renderDepartments==='function') window.renderDepartments(); }catch(e){} }
 if (name === 'jobscheduler') { setTimeout(function(){ if(typeof schRender==='function') schRender(); }, 100); }
 if (name === 'material') {
 setTimeout(function () {
@@ -6431,7 +6427,6 @@ var NAV_TABS = [
 { key: 'quotations',  label: 'Quotations',        icon: '📊', onclick: "showPage('quotations')" },
 { key: 'team',        label: 'Team Planning',     icon: '👥', onclick: "showPage('team')" },
 { key: 'employees',   label: 'Employees',         icon: '👷', onclick: "showPage('employees')" },
-{ key: 'departments', label: 'Departments',       icon: '🏷️', onclick: "showPage('departments')" },
 { key: 'projects',    label: 'Projects',          icon: '📁', onclick: "showPage('projects')" },
 { key: 'jobscheduler', label: 'Job Scheduler', icon: '', onclick: "showPage('jobscheduler')" },
 { key: 'settings',    label: 'Settings',          icon: '⚙️',  onclick: "showPage('settings')" },
@@ -11766,7 +11761,6 @@ function teamEditProjectBooking(pid){
     { key:'quotations',   label:'📊 Quotations' },
     { key:'team',         label:'👥 Team Planning' },
     { key:'employees',    label:'👷 Employees' },
-    { key:'departments',  label:'🏷️ Departments' },
     { key:'projects',     label:'📁 Projects' },
     { key:'jobscheduler', label:'📅 Job Scheduler' },
     { key:'settings',     label:'⚙️ Settings' }
