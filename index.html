@@ -2165,7 +2165,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
                 <div id="bk-schedule" style="font-size:11px;color:var(--muted);margin-top:2px"></div>
               </div>
               <div style="font-size:11px;color:var(--muted);margin-top:12px;line-height:1.6;border-top:1px solid var(--border);padding-top:10px">
-                Works in <b>Chrome</b> and <b>Edge</b>. The file is an Excel workbook with a sheet for every part of the system: Projects, Quotations, Bookings, Employees, Departments, Supervisors, Notes and Machines. Automatic backups run while this app stays open; after a browser restart, click <b>Back up now</b> once to reconnect the folder.
+                Works in <b>Chrome</b> and <b>Edge</b>. The file is an Excel workbook with a separate sheet for every part of the system: Projects, Quotations, Bookings, Employees, Departments, Supervisors, Materials, Sub-contractors, Team Planning, Office Access, Notes and Machines. Automatic backups run while this app stays open; after a browser restart, click <b>Back up now</b> once to reconnect the folder.
               </div>
             </div>
           </div>
@@ -12663,12 +12663,53 @@ function teamEditProjectBooking(pid){
     });
     out['Departments'] = depts.map(function(d){ return { 'Department':(typeof d==='string'?d:(d&&d.name)||'') }; });
     out['Supervisors'] = supers.map(function(s){ return { 'Username':s.username||'', 'Name':s.name||'' }; });
+
+    // Materials (from Settings → Materials; large data lives under remc_xl_)
+    var settings = bkJSON('remc_settings_v2','{}')||{};
+    (function(){ if(settings.materialsExcel && settings.materialsExcel._ext){ var raw=localStorage.getItem('remc_xl_materialsExcel'); if(raw){ try{ settings.materialsExcel.data=JSON.parse(raw); }catch(e){} } } })();
+    var materials = (settings.materialsExcel && Array.isArray(settings.materialsExcel.data)) ? settings.materialsExcel.data : [];
+    out['Materials'] = materials.map(function(m){
+      var t=(m.type||''); t = (t==='compra'||t==='purchase')?'Purchase':(t==='descarte'||t==='discard'||t==='disposal')?'Disposal':t;
+      return { 'Name':m.name||'', 'Type':t, 'Address':m.address||'', 'Notes':m.notes||'' };
+    });
+
+    // Sub-contractors (remc_proj_subs: projectId -> [ {trade, company, date, status} ])
+    var subStore = bkJSON('remc_proj_subs','{}')||{}; if(typeof subStore!=='object'||Array.isArray(subStore)) subStore={};
+    var subRows=[];
+    Object.keys(subStore).forEach(function(pid){
+      var p=projById(pid)||{};
+      (Array.isArray(subStore[pid])?subStore[pid]:[]).forEach(function(s){
+        subRows.push({ 'Project':p.name||('#'+pid), 'Job #':p.jobNumber||'', 'Trade / Work':s.trade||'', 'Company':s.company||'', 'Date':s.date||'', 'Status':s.status||'' });
+      });
+    });
+    out['Sub-contractors'] = subRows;
+
+    // Team Planning (remc_plan_assignments: "date|projectId" -> [ staffId ])
+    var assign = bkJSON('remc_plan_assignments','{}')||{}; if(typeof assign!=='object'||Array.isArray(assign)) assign={};
+    function staffName(id){ for(var i=0;i<staff.length;i++){ if(String(staff[i].id)===String(id)) return staff[i].name||id; } return id; }
+    var planRows=[];
+    Object.keys(assign).forEach(function(key){
+      var parts=key.split('|'); var date=parts[0], pid=parts[1]; var p=projById(pid)||{};
+      (Array.isArray(assign[key])?assign[key]:[]).forEach(function(sid){
+        planRows.push({ 'Date':date, 'Project':p.name||('#'+pid), 'Job #':p.jobNumber||'', 'Staff':staffName(sid) });
+      });
+    });
+    out['Team Planning'] = planRows;
+
+    // Office Access (users) — login list; password included for a complete restore
+    var users = bkJSON('remc_users','[]')||[]; if(!Array.isArray(users)) users=[];
+    out['Office Access'] = users.map(function(u){
+      var name=((u.firstName||'')+' '+(u.lastName||'')).trim()||(u.username||'');
+      var pages = Array.isArray(u.pages) ? ((u.role==='admin'||u.role==='master')?'All pages':u.pages.join(', ')) : ((u.role==='admin'||u.role==='master')?'All pages':'');
+      return { 'Username':u.username||'', 'Name':name, 'Email':u.email||'', 'Role':u.role||'', 'Pages':pages, 'Password':u.password||'' };
+    });
+
     out['Notes'] = Object.keys(notes).map(function(pid){ var p=projById(pid)||{}; return { 'Project':p.name||('#'+pid), 'Job #':p.jobNumber||'', 'Note':notes[pid] }; })
       .filter(function(r){ return r.Note && String(r.Note).trim(); });
     out['Machines'] = machines.map(function(m){ return { 'Machine':(typeof m==='string'?m:(m&&m.name)||'') }; });
     return out;
   };
-  var SHEET_ORDER=['Projects','Quotations','Bookings','Employees','Departments','Supervisors','Notes','Machines'];
+  var SHEET_ORDER=['Projects','Quotations','Bookings','Employees','Departments','Supervisors','Materials','Sub-contractors','Team Planning','Office Access','Notes','Machines'];
 
   function buildWorkbook(){
     if(typeof XLSX==='undefined') return null;
