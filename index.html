@@ -166,6 +166,8 @@ body.hide-residential .overview-layout{grid-template-columns:200px 1fr 180px}
 .emp-modal-cancel{padding:9px 18px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;font-family:'Barlow',sans-serif;font-size:13px;font-weight:700;color:var(--mid);cursor:pointer}
 .emp-modal-save{padding:9px 22px;background:var(--red);color:#fff;border:none;border-radius:8px;font-family:'Barlow',sans-serif;font-size:13px;font-weight:700;cursor:pointer}
 .emp-modal-save:hover{background:#c81a1a}
+.emp-section-title{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:0.8px;color:var(--red);margin:22px 0 12px;padding-bottom:6px;border-bottom:2px solid var(--border)}
+.emp-section-title:first-of-type{margin-top:4px}
 .dep-page{padding:20px 24px;max-width:820px;margin:0 auto;height:calc(100vh - 56px);overflow-y:auto}
 .dep-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px;gap:12px;flex-wrap:wrap}
 .dep-title{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px}
@@ -1156,8 +1158,8 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
           <option value="Casual">Casual</option>
         </select>
         <div class="emp-viewtoggle" style="margin-left:auto">
-          <button class="emp-vt active" id="emp-vt-cards" onclick="empSetView('cards')">▦ Cards</button>
-          <button class="emp-vt" id="emp-vt-table" onclick="empSetView('table')">☰ Table</button>
+          <button class="emp-vt" id="emp-vt-cards" onclick="empSetView('cards')">▦ Cards</button>
+          <button class="emp-vt active" id="emp-vt-table" onclick="empSetView('table')">☰ Table</button>
         </div>
       </div>
       <div id="emp-list"></div>
@@ -1178,25 +1180,60 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
             <div style="font-size:10px;color:var(--muted)">Photos are resized automatically to keep things fast.</div>
           </div>
         </div>
+
+        <div class="emp-section-title">Identity</div>
         <div class="emp-form-grid">
-          <div class="emp-fg full"><label>Full name <span class="req">*</span></label><input id="emp-f-name" placeholder="e.g. John Smith"></div>
-          <div class="emp-fg"><label>Position <span class="req">*</span></label><input id="emp-f-position" placeholder="e.g. Excavator Operator"></div>
-          <div class="emp-fg"><label>Department <span class="req">*</span></label>
-            <div class="emp-dept-row">
-              <select id="emp-f-dept"></select>
-              <button class="step-btn-sec" onclick="empAddDepartment()" title="Add a new department">+ New</button>
-            </div>
-          </div>
+          <div class="emp-fg"><label>Employee number</label><input id="emp-f-empnum" placeholder="e.g. E-1024"></div>
+          <div class="emp-fg"><label>Full name <span class="req">*</span></label><input id="emp-f-name" placeholder="e.g. Adrian Zanardo"></div>
+          <div class="emp-fg"><label>Job title <span class="req">*</span></label><input id="emp-f-jobtitle" placeholder="e.g. Excavator Operator"></div>
+          <div class="emp-fg"><label>Company</label><input id="emp-f-company" placeholder="Company"></div>
+          <div class="emp-fg"><label>Role</label><input id="emp-f-role" placeholder="Role"></div>
+          <div class="emp-fg"><label>Department <span class="req">*</span></label><select id="emp-f-dept"></select></div>
           <div class="emp-fg"><label>Contract type</label>
             <select id="emp-f-contract"><option value="Full time">Full time</option><option value="Part time">Part time</option><option value="Casual">Casual</option></select>
           </div>
-          <div class="emp-fg"><label>Licences (extra)</label>
+          <div class="emp-fg"><label>Email</label><input id="emp-f-email" type="email" placeholder="name@company.com"></div>
+          <div class="emp-fg"><label>Email 2</label><input id="emp-f-email2" type="email" placeholder="Secondary email"></div>
+          <div class="emp-fg"><label>Mobile</label><input id="emp-f-mobile" placeholder="Mobile"></div>
+          <div class="emp-fg"><label>Phone</label><input id="emp-f-phone" placeholder="Phone"></div>
+          <div class="emp-fg"><label>Phone 2</label><input id="emp-f-phone2" placeholder="Secondary phone"></div>
+          <div class="emp-fg"><label>Website</label><input id="emp-f-website" placeholder="https://"></div>
+          <div class="emp-fg full"><label>Licences (extra)</label>
             <div class="emp-lic-row" style="padding-top:6px">
               <label class="emp-lic-check"><input type="checkbox" id="emp-f-car"> 🚗 Car licence</label>
               <label class="emp-lic-check"><input type="checkbox" id="emp-f-truck"> 🚛 Truck licence</label>
             </div>
           </div>
-          <div class="emp-fg full"><label>Notes</label><textarea id="emp-f-notes" rows="3" placeholder="Anything else worth noting…"></textarea></div>
+        </div>
+
+        <div class="emp-section-title">Personal Details</div>
+        <div class="emp-form-grid">
+          <div class="emp-fg"><label>Date of birth</label><input id="emp-f-dob" type="date"></div>
+          <div class="emp-fg"><label>Date of commencement</label><input id="emp-f-commence" type="date"></div>
+          <div class="emp-fg"><label>Date of probation</label><input id="emp-f-probation" type="date"></div>
+          <div class="emp-fg"><label>Date of termination</label><input id="emp-f-termination" type="date"></div>
+          <div class="emp-fg"><label>Student number</label><input id="emp-f-student" placeholder="Student number"></div>
+        </div>
+
+        <div class="emp-section-title">Address</div>
+        <div class="emp-form-grid">
+          <div class="emp-fg full"><label>Street</label><input id="emp-f-street" placeholder="Street address"></div>
+          <div class="emp-fg"><label>City</label><input id="emp-f-city" placeholder="City"></div>
+          <div class="emp-fg"><label>State</label><input id="emp-f-state" placeholder="State"></div>
+          <div class="emp-fg"><label>Zipcode</label><input id="emp-f-zip" placeholder="Zipcode"></div>
+          <div class="emp-fg"><label>Country</label><input id="emp-f-country" placeholder="Country"></div>
+        </div>
+
+        <div class="emp-section-title">Emergency Contact</div>
+        <div class="emp-form-grid">
+          <div class="emp-fg"><label>Emergency contact name</label><input id="emp-f-ecname" placeholder="Contact name"></div>
+          <div class="emp-fg"><label>Relationship to person</label><input id="emp-f-ecrel" placeholder="e.g. Spouse"></div>
+          <div class="emp-fg"><label>Emergency contact number</label><input id="emp-f-ecnum" placeholder="Contact number"></div>
+        </div>
+
+        <div class="emp-section-title">Notes</div>
+        <div class="emp-form-grid">
+          <div class="emp-fg full"><textarea id="emp-f-notes" rows="3" placeholder="Anything else worth noting…"></textarea></div>
         </div>
       </div>
       <div class="emp-modal-foot">
@@ -2494,6 +2531,7 @@ p.classList.toggle('active', p.id === 'stpanel-' + tab);
 });
 if(tab==='projects'){ try{ if(typeof window.remcReloadProjData==='function') window.remcReloadProjData(); if(typeof remcRenderCommercialModeUI==='function') remcRenderCommercialModeUI(); }catch(e){} }
 if(tab==='quotations'){ try{ if(typeof remcRenderQuotModeUI==='function') remcRenderQuotModeUI(); }catch(e){} }
+if(tab==='supervisors'){ try{ if(typeof window.remcRenderSupers==='function') window.remcRenderSupers(); }catch(e){} }
 }
 
 function showPage(name) {
@@ -11989,6 +12027,32 @@ function teamEditProjectBooking(pid){
   ['pSave','pDelete'].forEach(function(fn){ if(typeof window[fn]==='function'){ var _o=window[fn]; window[fn]=function(){ var r=_o.apply(this,arguments); setTimeout(publishProjects,50); return r; }; } });
 
   function projectSupervisorNames(){ var set={}; try{ (typeof PROJ_DATA!=='undefined'?PROJ_DATA:[]).forEach(function(p){ if(p.supervisor) set[p.supervisor]=true; }); }catch(e){} return Object.keys(set).sort(); }
+  // Employees registry (remc_staff) — used to link supervisor names and auto-build logins
+  function staffList(){ try{ var a=JSON.parse(localStorage.getItem('remc_staff')||'[]'); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
+  function staffNames(){ return staffList().map(function(e){ return (e.name||'').trim(); }).filter(Boolean).sort(function(a,b){ return a.localeCompare(b, undefined, {sensitivity:'base'}); }); }
+  function supUsernameFrom(name){
+    var parts=String(name||'').trim().split(/\s+/).filter(Boolean);
+    if(!parts.length) return '';
+    var first=parts[0];
+    var surnameInitial = parts.length>1 ? parts[parts.length-1].charAt(0).toUpperCase() : '';
+    return first + surnameInitial;
+  }
+  function supBirthYearFor(name){
+    var n=String(name||'').trim().toLowerCase();
+    var emp=staffList().filter(function(e){ return (e.name||'').trim().toLowerCase()===n; })[0];
+    if(emp && emp.dob){ var m=String(emp.dob).match(/\d{4}/); if(m) return m[0]; }
+    return '';
+  }
+  window.supAutofillFromName=function(){
+    var nameEl=document.getElementById('sup-add-name'); if(!nameEl) return;
+    var name=nameEl.value.trim();
+    var uEl=document.getElementById('sup-add-user'), pEl=document.getElementById('sup-add-pass');
+    if(!name){ if(uEl) uEl.value=''; if(pEl) pEl.value='REMC123'; return; }
+    var uname=supUsernameFrom(name);
+    var year=supBirthYearFor(name);
+    if(uEl) uEl.value=uname;
+    if(pEl) pEl.value=uname + (year||'');
+  };
   function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
 
   function inject(){
@@ -12015,7 +12079,7 @@ function teamEditProjectBooking(pid){
       + '<div class="step-card"><div class="step-head"><div class="step-num">+</div><div><div class="step-title">Add supervisor</div><div class="step-sub">Username, supervisor name and password</div></div></div>'
       + '<div class="step-body"><div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">'
       +   '<div style="flex:1;min-width:120px"><div class="map-lbl">Username</div><input id="sup-add-user" class="map-sel" placeholder="e.g. MDT"></div>'
-      +   '<div style="flex:1.4;min-width:170px"><div class="map-lbl">Supervisor name</div><input id="sup-add-name" class="map-sel" list="sup-name-list" placeholder="e.g. Michael Di Trento"><datalist id="sup-name-list"></datalist></div>'
+      +   '<div style="flex:1.4;min-width:170px"><div class="map-lbl">Supervisor name</div><input id="sup-add-name" class="map-sel" list="sup-name-list" placeholder="Pick an employee…" oninput="supAutofillFromName()"><datalist id="sup-name-list"></datalist></div>'
       +   '<div style="flex:1;min-width:120px"><div class="map-lbl">Password</div><input id="sup-add-pass" class="map-sel" value="REMC123"></div>'
       +   '<button class="step-btn-pri" id="sup-add-btn">Add</button>'
       + '</div></div></div>'
@@ -12047,7 +12111,7 @@ function teamEditProjectBooking(pid){
   var _supEditIdx = -1;
   function renderSupers(){
     var host=document.getElementById('sup-list'); if(!host) return;
-    var dl=document.getElementById('sup-name-list'); if(dl){ dl.innerHTML = projectSupervisorNames().map(function(n){return '<option value="'+esc(n)+'">';}).join(''); }
+    var dl=document.getElementById('sup-name-list'); if(dl){ var seen={}, opts=[]; staffNames().concat(projectSupervisorNames()).forEach(function(n){ var k=n.toLowerCase(); if(n && !seen[k]){ seen[k]=1; opts.push('<option value="'+esc(n)+'">'); } }); dl.innerHTML=opts.join(''); }
     var list=loadSupers();
     if(!list.length){ host.innerHTML='<div class="stpanel-desc">No supervisors yet. Add one above.</div>'; return; }
     host.innerHTML = '<div class="step-card"><div style="padding:4px 0">'
@@ -12100,6 +12164,7 @@ function teamEditProjectBooking(pid){
   window.remcSupDelete=function(i){ var list=loadSupers(); if(!list[i])return; if(!confirm('Delete supervisor "'+(list[i].name||list[i].username)+'"?'))return; list.splice(i,1); saveSupers(list); renderSupers(); };
   window.remcSupSetPass=function(i,v){ var list=loadSupers(); if(!list[i])return; list[i].password=(v||'').trim(); saveSupers(list); };
 
+  window.remcRenderSupers = renderSupers;
   if (document.readyState==='loading') document.addEventListener('DOMContentLoaded', inject); else inject();
 })();
 </script>
@@ -12109,7 +12174,7 @@ function teamEditProjectBooking(pid){
 (function(){
   var EMP_KEY='remc_staff', DEPT_KEY='remc_departments';
   var DEFAULT_DEPTS=['Operations','Earthworks','Administration','Workshop','Management'];
-  var _empView='cards';
+  var _empView='table';
   var _empPhoto=null;      // temp photo (base64) held while the modal is open
   var _empEditId=null;
 
@@ -12170,6 +12235,8 @@ function teamEditProjectBooking(pid){
       if(q){ var hay=[e.name,e.position,e.department,e.contract,e.notes].filter(Boolean).join(' ').toLowerCase(); if(hay.indexOf(q)<0) return false; }
       return true;
     });
+    // always show A→Z by full name (case-insensitive, locale-aware)
+    list.sort(function(a,b){ return String(a.name||'').localeCompare(String(b.name||''), undefined, {sensitivity:'base'}); });
     if(!all.length){ host.innerHTML='<div class="emp-empty">No employees yet. Tap <b>+ Add employee</b> to create your first one.</div>'; return; }
     if(!list.length){ host.innerHTML='<div class="emp-empty">No employees match your search or filters.</div>'; return; }
 
@@ -12178,14 +12245,14 @@ function teamEditProjectBooking(pid){
         var lic=[]; if(e.car) lic.push('<span class="emp-chip emp-chip-lic">🚗 Car</span>'); if(e.truck) lic.push('<span class="emp-chip emp-chip-lic">🚛 Truck</span>');
         return '<div class="emp-card">'
           + '<div class="emp-card-top">'+empPhotoCell(e,'emp-photo-ph','emp-photo')
-          +   '<div style="min-width:0"><div class="emp-card-name">'+esc(e.name)+'</div><div class="emp-card-pos">'+esc(e.position||'—')+'</div></div></div>'
+          +   '<div style="min-width:0"><div class="emp-card-name">'+esc(e.name)+'</div><div class="emp-card-pos">'+esc(e.jobTitle||e.position||'—')+'</div>'+((e.mobile||e.email)?'<div style="font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px">'+esc(e.mobile||e.email)+'</div>':'')+'</div></div>'
           + '<div class="emp-card-body">'
           +   '<div class="emp-chip-row"><span class="emp-chip emp-chip-dept">'+esc(e.department||'—')+'</span>'
           +     '<span class="emp-chip '+contractClass(e.contract)+'">'+esc(e.contract||'—')+'</span></div>'
           +   (lic.length?'<div class="emp-chip-row">'+lic.join('')+'</div>':'')
           +   (e.notes?'<div style="font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(e.notes)+'</div>':'')
           + '</div>'
-          + '<div class="emp-card-actions"><button onclick="empOpenModal('+JSON.stringify(e.id)+')">✏️ Edit</button><button class="del" onclick="empDelete('+JSON.stringify(e.id)+')">🗑️ Delete</button></div>'
+          + '<div class="emp-card-actions"><button onclick="empOpenModal(\''+e.id+'\')">✏️ Edit</button><button class="del" onclick="empDelete(\''+e.id+'\')">🗑️ Delete</button></div>'
           + '</div>';
       }).join('')+'</div>';
     } else {
@@ -12197,12 +12264,12 @@ function teamEditProjectBooking(pid){
           return '<tr>'
             + '<td>'+empPhotoCell(e,'emp-tbl-photo-ph','emp-tbl-photo')+'</td>'
             + '<td style="font-weight:700">'+esc(e.name)+'</td>'
-            + '<td>'+esc(e.position||'—')+'</td>'
+            + '<td>'+esc(e.jobTitle||e.position||'—')+'</td>'
             + '<td><span class="emp-chip emp-chip-dept">'+esc(e.department||'—')+'</span></td>'
             + '<td><span class="emp-chip '+contractClass(e.contract)+'">'+esc(e.contract||'—')+'</span></td>'
             + '<td style="font-size:15px">'+(lic.join(' ')||'—')+'</td>'
             + '<td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--muted)">'+esc(e.notes||'—')+'</td>'
-            + '<td><div class="emp-tbl-actions"><button class="emp-tbl-btn" onclick="empOpenModal('+JSON.stringify(e.id)+')" title="Edit">✏️</button><button class="emp-tbl-btn del" onclick="empDelete('+JSON.stringify(e.id)+')" title="Delete">🗑️</button></div></td>'
+            + '<td><div class="emp-tbl-actions"><button class="emp-tbl-btn" onclick="empOpenModal(\''+e.id+'\')" title="Edit">✏️</button><button class="emp-tbl-btn del" onclick="empDelete(\''+e.id+'\')" title="Delete">🗑️</button></div></td>'
             + '</tr>';
         }).join('')
         + '</tbody></table></div>';
@@ -12216,6 +12283,20 @@ function teamEditProjectBooking(pid){
     var rm=document.getElementById('emp-photo-remove'); if(rm) rm.style.display=_empPhoto?'':'none';
   }
 
+  // simple text/date fields: [elementId, recordKey]
+  var EMP_TEXT_FIELDS=[
+    ['emp-f-empnum','empNumber'],['emp-f-name','name'],['emp-f-jobtitle','jobTitle'],
+    ['emp-f-company','company'],['emp-f-role','role'],
+    ['emp-f-email','email'],['emp-f-email2','email2'],
+    ['emp-f-mobile','mobile'],['emp-f-phone','phone'],['emp-f-phone2','phone2'],['emp-f-website','website'],
+    ['emp-f-dob','dob'],['emp-f-commence','commencement'],['emp-f-probation','probation'],['emp-f-termination','termination'],['emp-f-student','studentNumber'],
+    ['emp-f-street','street'],['emp-f-city','city'],['emp-f-state','state'],['emp-f-zip','zip'],['emp-f-country','country'],
+    ['emp-f-ecname','ecName'],['emp-f-ecrel','ecRelationship'],['emp-f-ecnum','ecNumber'],
+    ['emp-f-notes','notes']
+  ];
+  function _setVal(id,v){ var el=document.getElementById(id); if(el) el.value=(v==null?'':v); }
+  function _getVal(id){ var el=document.getElementById(id); return el?(el.value||'').trim():''; }
+
   window.empOpenModal=function(id){
     _empEditId=(id!=null)?id:null;
     var all=empLoad();
@@ -12223,15 +12304,18 @@ function teamEditProjectBooking(pid){
     document.getElementById('emp-modal-title').textContent = e?'Edit employee':'Add employee';
     _empPhoto = e?(e.photo||null):null;
     empFillDeptSelects(e?e.department:'');
-    document.getElementById('emp-f-name').value = e?(e.name||''):'';
-    document.getElementById('emp-f-position').value = e?(e.position||''):'';
+    // fill all simple fields (jobTitle falls back to legacy 'position')
+    EMP_TEXT_FIELDS.forEach(function(f){
+      var val = e ? (e[f[1]]!=null ? e[f[1]] : (f[1]==='jobTitle' ? (e.position||'') : '')) : '';
+      _setVal(f[0], val);
+    });
     var ds=document.getElementById('emp-f-dept'); if(ds && e && e.department) ds.value=e.department;
     document.getElementById('emp-f-contract').value = e?(e.contract||'Full time'):'Full time';
     document.getElementById('emp-f-car').checked = e?!!e.car:false;
     document.getElementById('emp-f-truck').checked = e?!!e.truck:false;
-    document.getElementById('emp-f-notes').value = e?(e.notes||''):'';
     document.getElementById('emp-modal-del').style.display = e?'':'none';
     renderPhotoPreview();
+    var mb=document.querySelector('#emp-modal .emp-modal-body'); if(mb) mb.scrollTop=0;
     document.getElementById('emp-modal').classList.add('open');
   };
   window.empCloseModal=function(){ document.getElementById('emp-modal').classList.remove('open'); _empPhoto=null; _empEditId=null; };
@@ -12271,20 +12355,20 @@ function teamEditProjectBooking(pid){
   window.empPhotoRemove=function(){ _empPhoto=null; renderPhotoPreview(); };
 
   window.empSave=function(){
-    var name=(document.getElementById('emp-f-name').value||'').trim();
-    var position=(document.getElementById('emp-f-position').value||'').trim();
+    var name=_getVal('emp-f-name');
+    var jobTitle=_getVal('emp-f-jobtitle');
     var department=(document.getElementById('emp-f-dept').value||'').trim();
     if(!name){ alert('Full name is required.'); return; }
-    if(!position){ alert('Position is required.'); return; }
+    if(!jobTitle){ alert('Job title is required.'); return; }
     if(!department){ alert('Department is required.'); return; }
-    var rec={
-      name:name, position:position, department:department,
-      contract:document.getElementById('emp-f-contract').value||'Full time',
-      car:document.getElementById('emp-f-car').checked,
-      truck:document.getElementById('emp-f-truck').checked,
-      notes:(document.getElementById('emp-f-notes').value||'').trim(),
-      photo:_empPhoto||''
-    };
+    var rec={};
+    EMP_TEXT_FIELDS.forEach(function(f){ rec[f[1]]=_getVal(f[0]); });
+    rec.position=jobTitle; // keep legacy field in sync for older views
+    rec.department=department;
+    rec.contract=document.getElementById('emp-f-contract').value||'Full time';
+    rec.car=document.getElementById('emp-f-car').checked;
+    rec.truck=document.getElementById('emp-f-truck').checked;
+    rec.photo=_empPhoto||'';
     var all=empLoad();
     if(_empEditId!=null){
       var idx=all.findIndex(function(x){return x.id===_empEditId;});
