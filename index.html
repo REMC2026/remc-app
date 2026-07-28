@@ -12030,6 +12030,14 @@ function teamEditProjectBooking(pid){
   // Employees registry (remc_staff) — used to link supervisor names and auto-build logins
   function staffList(){ try{ var a=JSON.parse(localStorage.getItem('remc_staff')||'[]'); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
   function staffNames(){ return staffList().map(function(e){ return (e.name||'').trim(); }).filter(Boolean).sort(function(a,b){ return a.localeCompare(b, undefined, {sensitivity:'base'}); }); }
+  // only employees whose Job Title / Position is a Supervisor role
+  function supervisorEmployeeNames(){
+    return staffList()
+      .filter(function(e){ return String(e.jobTitle||e.position||'').toLowerCase().indexOf('supervisor')>=0; })
+      .map(function(e){ return (e.name||'').trim(); })
+      .filter(Boolean)
+      .sort(function(a,b){ return a.localeCompare(b, undefined, {sensitivity:'base'}); });
+  }
   function supUsernameFrom(name){
     var parts=String(name||'').trim().split(/\s+/).filter(Boolean);
     if(!parts.length) return '';
@@ -12079,7 +12087,7 @@ function teamEditProjectBooking(pid){
       + '<div class="step-card"><div class="step-head"><div class="step-num">+</div><div><div class="step-title">Add supervisor</div><div class="step-sub">Username, supervisor name and password</div></div></div>'
       + '<div class="step-body"><div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">'
       +   '<div style="flex:1;min-width:120px"><div class="map-lbl">Username</div><input id="sup-add-user" class="map-sel" placeholder="e.g. MDT"></div>'
-      +   '<div style="flex:1.4;min-width:170px"><div class="map-lbl">Supervisor name</div><input id="sup-add-name" class="map-sel" list="sup-name-list" placeholder="Pick an employee…" oninput="supAutofillFromName()"><datalist id="sup-name-list"></datalist></div>'
+      +   '<div style="flex:1.4;min-width:170px"><div class="map-lbl">Supervisor name</div><input id="sup-add-name" class="map-sel" list="sup-name-list" placeholder="Employee with Supervisor role…" oninput="supAutofillFromName()"><datalist id="sup-name-list"></datalist></div>'
       +   '<div style="flex:1;min-width:120px"><div class="map-lbl">Password</div><input id="sup-add-pass" class="map-sel" value="REMC123"></div>'
       +   '<button class="step-btn-pri" id="sup-add-btn">Add</button>'
       + '</div></div></div>'
@@ -12111,7 +12119,7 @@ function teamEditProjectBooking(pid){
   var _supEditIdx = -1;
   function renderSupers(){
     var host=document.getElementById('sup-list'); if(!host) return;
-    var dl=document.getElementById('sup-name-list'); if(dl){ var seen={}, opts=[]; staffNames().concat(projectSupervisorNames()).forEach(function(n){ var k=n.toLowerCase(); if(n && !seen[k]){ seen[k]=1; opts.push('<option value="'+esc(n)+'">'); } }); dl.innerHTML=opts.join(''); }
+    var dl=document.getElementById('sup-name-list'); if(dl){ dl.innerHTML = supervisorEmployeeNames().map(function(n){return '<option value="'+esc(n)+'">';}).join(''); }
     var list=loadSupers();
     if(!list.length){ host.innerHTML='<div class="stpanel-desc">No supervisors yet. Add one above.</div>'; return; }
     host.innerHTML = '<div class="step-card"><div style="padding:4px 0">'
