@@ -10592,7 +10592,7 @@ function closeHiddenModal() {
 
 var SCH_KEY='remc_scheduler',_schOffset=0,_schView='week',_schDragId=null;
 function schLoadBookings(){try{var b=JSON.parse(localStorage.getItem(SCH_KEY)||'[]');b.forEach(function(x){if(x.skipSat===undefined)x.skipSat=false;if(x.skipSun===undefined)x.skipSun=false;});return b;}catch(e){return[]}}
-function schSaveBookings(b){try{localStorage.setItem(SCH_KEY,JSON.stringify(b))}catch(e){}}
+function schSaveBookings(b){try{localStorage.setItem(SCH_KEY,JSON.stringify(b))}catch(e){} try{ if(typeof window.remcCloudUpsertKey==='function') window.remcCloudUpsertKey(SCH_KEY, JSON.stringify(b)); }catch(e){}}
 // ── Audit trail: who created / last edited a job, when, and from which app ──
 function schStampCreate(b){
   var u=null; try{ u=(typeof window.remcCurrentUser==='function')?window.remcCurrentUser():null; }catch(e){}
