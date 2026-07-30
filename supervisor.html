@@ -101,6 +101,19 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);-web
 .pcard .psub{background:#f0fdfa;color:#0f766e;border:1px solid #99f6e4;border-radius:8px;padding:8px 12px;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer}
 .pcard .pallow{background:#fefce8;color:#a16207;border:1px solid #fde68a;border-radius:8px;padding:8px 12px;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer}
 .v-file-view{background:#eff6ff;border:1px solid #bfdbfe;color:#1d4ed8;border-radius:7px;padding:5px 12px;font-family:inherit;font-size:12px;font-weight:800;cursor:pointer;flex:0 0 auto}
+.pcard .phist{background:#f8fafc;color:#475569;border:1px solid #e2e8f0;border-radius:8px;padding:8px 12px;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer}
+.hist-item{display:flex;gap:11px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);padding:11px 13px;margin-bottom:9px}
+.hist-item.del{background:#fff5f5;border-color:#fecaca}
+.hist-ic{flex:0 0 auto;width:30px;height:30px;border-radius:8px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:15px}
+.hist-body{flex:1;min-width:0}
+.hist-t{font-size:14px;font-weight:800;color:var(--text)}
+.hist-d{font-size:13px;color:var(--mid);margin-top:2px;word-break:break-word}
+.hist-m{font-size:11px;color:var(--muted);margin-top:5px;font-weight:600}
+.notif-btn{position:relative;background:var(--surface2);border:1px solid var(--border);border-radius:10px;width:40px;height:40px;font-size:18px;cursor:pointer;flex:0 0 auto;line-height:1}
+.notif-badge{position:absolute;top:-6px;right:-6px;min-width:18px;height:18px;padding:0 4px;border-radius:9px;background:#e11d1d;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;line-height:1;box-shadow:0 0 0 2px var(--surface)}
+.notif-hint{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.5}
+.notif-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#e11d1d;margin-left:6px;vertical-align:middle}
+.hist-item.unread{border-color:#93c5fd;box-shadow:0 0 0 1px #93c5fd}
 /* ---- Subcontractor horizontal timeline ---- */
 .sub-timeline-h{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--mid);margin:4px 0 2px}
 .sub-track{display:flex;overflow-x:auto;padding:22px 4px 14px;-webkit-overflow-scrolling:touch}
@@ -298,6 +311,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
       <div class="who-name" id="who-name"></div>
       <div class="who-sub">Supervisor</div>
     </div>
+    <button class="notif-btn" id="notif-btn" onclick="openNotif()" title="Notifications">🔔<span class="notif-badge" id="notif-badge" style="display:none">0</span></button>
     <button class="logout" id="logout">Log out</button>
   </div>
 
@@ -505,6 +519,29 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
   </div>
 </div>
 
+<div class="test-ov" id="hist-ov">
+  <div class="projcal-top">
+    <button class="back" onclick="closeHistory()">‹ Close</button>
+    <div class="projcal-title" id="hist-title">History</div>
+  </div>
+  <div class="test-body">
+    <div class="sub-intro">Everything done on this job — bookings, tests, transfers, variations and subcontractor requests — with date, time and who did it.</div>
+    <div id="hist-list" style="margin-top:12px"></div>
+  </div>
+</div>
+
+<div class="test-ov" id="notif-ov">
+  <div class="projcal-top">
+    <button class="back" onclick="closeNotif()">‹ Close</button>
+    <div class="projcal-title">Notifications</div>
+  </div>
+  <div class="test-body">
+    <div class="sub-intro">Updates on your jobs — new bookings, subcontractor changes, machine transfers and cancellations made by the office or the team.</div>
+    <div id="notif-enable-wrap"></div>
+    <div id="notif-list" style="margin-top:12px"></div>
+  </div>
+</div>
+
 <div class="ov" id="sub-act-ov" onclick="if(event.target===this) closeSubAct()">
   <div class="sheet">
     <div class="sheet-head">
@@ -541,6 +578,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
   var VARIATIONS = {}, VAR_PID = null, _varPhotos = [], _varDockets = [], _varSaving = false, VAR_EDIT_ID = null;
   var SUBCONS = {}, SUB_PID = null, SUB_STATUS = 'booked', SUB_ACT = { pid:null, id:null };
   var PROJDOCS = {}, ALLOW_PID = null;
+  var ACTIVITY = [], HIST_PID = null;
 
   function $(id){ return document.getElementById(id); }
   function setCloud(t,bg,c){ var e=$('cloud'); if(!e)return; e.textContent=t; e.style.background=bg||'#f1f5f9'; e.style.color=c||'#64748b'; }
@@ -565,6 +603,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     VARIATIONS= j('remc_variations','{}'); if(!VARIATIONS || typeof VARIATIONS!=='object' || Array.isArray(VARIATIONS)) VARIATIONS={};
     SUBCONS  = j('remc_sub_bookings','{}'); if(!SUBCONS || typeof SUBCONS!=='object' || Array.isArray(SUBCONS)) SUBCONS={};
     PROJDOCS = j('remc_proj_docs','{}'); if(!PROJDOCS || typeof PROJDOCS!=='object' || Array.isArray(PROJDOCS)) PROJDOCS={};
+    ACTIVITY = j('remc_activity_log','[]'); if(!Array.isArray(ACTIVITY)) ACTIVITY=[];
     fillMachineList();
   }
   // Fill the Machine dropdown with the machines uploaded in App 1 (falls back to a default list)
@@ -696,12 +735,34 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
       });
     });
   }
+  function pushActivity(cb){
+    if(!ensureClient()){ if(cb) cb('noconfig'); return; }
+    sb.from('remc_state').select('data').eq('id',WS).maybeSingle().then(function(res){
+      var d = (res && res.data && res.data.data) ? res.data.data : {};
+      d['remc_activity_log'] = JSON.stringify(ACTIVITY);
+      d['__client'] = CLIENT;
+      sb.from('remc_state').upsert({ id:WS, data:d, updated_at:new Date().toISOString() }).then(function(r2){
+        if(r2 && r2.error){ if(cb) cb(r2.error.message); } else { DATA=d; if(cb) cb(null); }
+      });
+    }).catch(function(e){ if(cb) cb((e&&e.message)||'network'); });
+  }
+  // Record a destructive / request action so it shows in History (creations & edits are derived from the data itself)
+  function logActivity(kind, action, pid, detail){
+    try{
+      if(!Array.isArray(ACTIVITY)) ACTIVITY=[];
+      var p=PROJECTS.find(function(x){return String(x.id)===String(pid);});
+      ACTIVITY.push({ id:'log_'+Date.now()+'_'+Math.random().toString(36).slice(2,6), at:new Date().toISOString(), by: ME? ME.name : 'Supervisor', user: ME? (ME.username||'') : '', app:'Mobile', projectId:String(pid), projectName: p?(p.name||('Project '+pid)):('Project '+pid), kind:kind, action:action, detail:detail||'' });
+      if(ACTIVITY.length>2000) ACTIVITY=ACTIVITY.slice(-2000);
+      pushActivity();
+    }catch(e){}
+  }
   function subscribe(){
     if(!sb) return;
     sb.channel('sup_'+WS).on('postgres_changes', {event:'*',schema:'public',table:'remc_state',filter:'id=eq.'+WS}, function(payload){
       var d = payload && payload.new && payload.new.data;
       if(!d || d.__client===CLIENT) return;
       DATA=d; parseData(); render();
+      try{ updateNotifBadge(); notifCheckAndFire(); }catch(e){}
     }).subscribe();
     startAutoRefresh();
   }
@@ -768,7 +829,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
   var DOW=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
   // ---------- render ----------
-  function render(){ try{ updateWarn(); }catch(e){} if(VIEW==='notes') renderAllNotes(); else if(VIEW==='list') renderProjects(); else if(VIEW==='day') renderDay(); else if(VIEW==='week') renderWeek(); else renderMonth(); try{ if(typeof renderProjCal==='function' && $('projcal-ov') && $('projcal-ov').classList.contains('open') && PROJCAL_PID!=null) renderProjCal(); }catch(e){} }
+  function render(){ try{ updateWarn(); }catch(e){} if(VIEW==='notes') renderAllNotes(); else if(VIEW==='list') renderProjects(); else if(VIEW==='day') renderDay(); else if(VIEW==='week') renderWeek(); else renderMonth(); try{ if(typeof renderProjCal==='function' && $('projcal-ov') && $('projcal-ov').classList.contains('open') && PROJCAL_PID!=null) renderProjCal(); }catch(e){} try{ updateNotifBadge(); }catch(e){} }
   function renderAllNotes(){
     var mine=myProjects();
     var withNotes=mine.filter(function(p){ return NOTES[String(p.id)] && String(NOTES[String(p.id)]).trim(); });
@@ -857,6 +918,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
         +   '<button class="pvar" onclick="openVariation(\''+esc(p.id)+'\')">🔧 Variation</button>'
         +   '<button class="psub" onclick="openSubs(\''+esc(p.id)+'\')">👷 Subs</button>'
         +   '<button class="pallow" onclick="openAllow(\''+esc(p.id)+'\')">📋 Allowances</button>'
+        +   '<button class="phist" onclick="openHistory(\''+esc(p.id)+'\')">🕘 History</button>'
         +   '<span class="pcount">'+cnt+' booking'+(cnt===1?'':'s')+'</span>'
         + '</div>'
         + '</div>';
@@ -1121,6 +1183,8 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
   };
   window.deleteTest=function(pid, id){
     if(!confirm('Remove this compaction test?')) return;
+    var _t=(TESTS[String(pid)]||[]).find(function(x){return String(x.id)===String(id);});
+    if(_t){ try{ logActivity('test','deleted', pid, (_t.type||'Test')+' · '+pcFmtRange(_t.date,_t.date)); }catch(e){} }
     TESTS[String(pid)] = (TESTS[String(pid)]||[]).filter(function(t){ return String(t.id)!==String(id); });
     renderTests();
     supShowSaving('Saving…');
@@ -1234,6 +1298,8 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
   };
   window.deleteTransfer=function(pid, id){
     if(!confirm('Remove this request?')) return;
+    var _r=(TRANSFERS[String(pid)]||[]).find(function(x){return String(x.id)===String(id);});
+    if(_r){ try{ logActivity('transfer','deleted', pid, (_r.machine||'Machine')+(_r.action==='transfer'?(' → '+(_r.toName||'')):' (remove)')); }catch(e){} }
     TRANSFERS[String(pid)] = (TRANSFERS[String(pid)]||[]).filter(function(t){ return String(t.id)!==String(id); });
     renderTransfers();
     supShowSaving('Saving…');
@@ -1444,6 +1510,8 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
   };
   window.deleteVariation=function(pid, id){
     if(!confirm('Remove this variation?')) return;
+    var _v=(VARIATIONS[String(pid)]||[]).find(function(x){return String(x.id)===String(id);});
+    if(_v){ try{ logActivity('variation','deleted', pid, String(_v.description||'').slice(0,60)); }catch(e){} }
     VARIATIONS[String(pid)] = (VARIATIONS[String(pid)]||[]).filter(function(v){ return String(v.id)!==String(id); });
     renderVariations();
     supShowSaving('Saving…');
@@ -1520,6 +1588,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     if(!nd){ alert('Please choose the suggested new date.'); return; }
     var s=(SUBCONS[String(pid)]||[]).find(function(x){return String(x.id)===String(id);}); if(!s) return;
     s.req={ type:'postpone', date:nd, by: ME? ME.name : 'Supervisor', user: ME? (ME.username||'') : '', at:new Date().toISOString() };
+    try{ logActivity('sub','postpone_requested', pid, (s.product||'')+' · '+(s.name||'')+' → '+pcFmtRange(nd,nd)); }catch(e){}
     closeSubAct(); _subSaveReq('Postpone requested');
   };
   window.subReqCancel=function(){
@@ -1527,12 +1596,14 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     if(!confirm('Ask the office to cancel this subcontractor?')) return;
     var s=(SUBCONS[String(pid)]||[]).find(function(x){return String(x.id)===String(id);}); if(!s) return;
     s.req={ type:'cancel', by: ME? ME.name : 'Supervisor', user: ME? (ME.username||'') : '', at:new Date().toISOString() };
+    try{ logActivity('sub','cancel_requested', pid, (s.product||'')+' · '+(s.name||'')); }catch(e){}
     closeSubAct(); _subSaveReq('Cancel requested');
   };
   window.subReqClear=function(){
     var pid=SUB_ACT.pid, id=SUB_ACT.id; if(pid==null) return;
     var s=(SUBCONS[String(pid)]||[]).find(function(x){return String(x.id)===String(id);}); if(!s) return;
     delete s.req;
+    try{ logActivity('sub','request_cleared', pid, (s.product||'')+' · '+(s.name||'')); }catch(e){}
     _subSaveReq('Request cleared');
   };
 
@@ -1566,6 +1637,158 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     if(d.type==='link'){ window.open(d.src,'_blank'); return; }
     _openFile(d.src, d.name);
   };
+
+  // ---------- history (activity log per project) ----------
+  function _bkDetail(b){
+    var d=bookingRanges(b).filter(function(r){return r.start&&r.end;}).map(function(r){ return pcFmtRange(r.start,r.end); }).join(', ');
+    return d + (b.activity?(' · '+b.activity):'') + (b.machine?(' · '+b.machine):'');
+  }
+  function _fmtWhen(at){ if(!at) return ''; try{ var d=new Date(at); return d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})+', '+d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}); }catch(e){ return String(at); } }
+  function _evLabel(kind, action){
+    var m={
+      'booking|created':['📅','Job booked'], 'booking|updated':['✏️','Job updated'], 'booking|deleted':['❌','Job cancelled'],
+      'test|created':['🧪','Compaction test booked'], 'test|deleted':['🗑️','Test removed'],
+      'transfer|transfer_requested':['🚚','Machine transfer requested'], 'transfer|removal_requested':['🚚','Machine removal requested'], 'transfer|deleted':['🗑️','Transfer request removed'],
+      'variation|created':['🔧','Variation added'], 'variation|updated':['🔧','Variation updated'], 'variation|deleted':['🗑️','Variation removed'],
+      'sub|scheduled':['👷','Subcontractor scheduled'], 'sub|postpone_requested':['👷','Subcontractor postpone requested'], 'sub|cancel_requested':['👷','Subcontractor cancel requested'], 'sub|request_cleared':['👷','Subcontractor request cleared']
+    };
+    return m[kind+'|'+action] || ['•', action];
+  }
+  function buildHistory(pid){
+    var pidS=String(pid); var evs=[];
+    (BOOKINGS||[]).filter(function(b){return String(b.projectId)===pidS;}).forEach(function(b){
+      evs.push({ at:(b.au_at||b.createdAt||''), by:(b.au_by||b.bookedBy||''), user:(b.au_user||''), app:(b.au_app||''), kind:'booking', action:'created', detail:_bkDetail(b) });
+      if(b.au_eat){ evs.push({ at:b.au_eat, by:(b.au_eby||''), user:(b.au_euser||''), app:(b.au_eapp||''), kind:'booking', action:'updated', detail:_bkDetail(b) }); }
+    });
+    ((TESTS[pidS])||[]).forEach(function(t){ evs.push({ at:(t.createdAt||''), by:(t.bookedBy||''), user:(t.au_user||''), app:(t.au_app||''), kind:'test', action:'created', detail:(t.type||'Test')+(t.date?(' · '+pcFmtRange(t.date,t.date)):'') }); });
+    ((TRANSFERS[pidS])||[]).forEach(function(t){ evs.push({ at:(t.createdAt||''), by:(t.bookedBy||''), user:(t.au_user||''), app:(t.au_app||''), kind:'transfer', action:(t.action==='transfer'?'transfer_requested':'removal_requested'), detail:(t.machine||'Machine')+(t.action==='transfer'?(' → '+(t.toName||'')):' (remove / pick up)') }); });
+    ((VARIATIONS[pidS])||[]).forEach(function(v){
+      evs.push({ at:(v.createdAt||''), by:(v.bookedBy||''), user:(v.au_user||''), app:(v.au_app||''), kind:'variation', action:'created', detail:String(v.description||'').slice(0,70) });
+      if(v.au_eat){ evs.push({ at:v.au_eat, by:(v.au_eby||''), user:'', app:(v.au_eapp||''), kind:'variation', action:'updated', detail:String(v.description||'').slice(0,70) }); }
+    });
+    ((SUBCONS[pidS])||[]).forEach(function(s){ if(s.createdAt) evs.push({ at:s.createdAt, by:(s.bookedBy||'Office'), user:'', app:(s.au_app||'PC'), kind:'sub', action:'scheduled', detail:(s.product||'')+' · '+(s.name||'')+(s.date?(' · '+pcFmtRange(s.date,s.date)):'') }); });
+    (ACTIVITY||[]).filter(function(e){return String(e.projectId)===pidS;}).forEach(function(e){ evs.push({ at:(e.at||''), by:(e.by||''), user:(e.user||''), app:(e.app||''), kind:e.kind, action:e.action, detail:(e.detail||'') }); });
+    evs.sort(function(a,b){ return (a.at<b.at)?1:((a.at>b.at)?-1:0); });
+    return evs;
+  }
+  window.openHistory=function(pid){
+    HIST_PID=String(pid);
+    var p=PROJECTS.find(function(x){return String(x.id)===String(pid);});
+    $('hist-title').textContent = p ? (p.name||('Project '+pid)) : 'History';
+    renderHistory();
+    $('hist-ov').classList.add('open');
+  };
+  window.closeHistory=function(){ $('hist-ov').classList.remove('open'); HIST_PID=null; };
+  function renderHistory(){
+    var pid=HIST_PID; if(pid==null) return;
+    var evs=buildHistory(pid);
+    var host=$('hist-list'); if(!host) return;
+    if(!evs.length){ host.innerHTML='<div class="pc-empty" style="padding:26px 16px;text-align:center;color:var(--muted)">No activity recorded for this job yet.</div>'; return; }
+    host.innerHTML='<div class="pc-list-h">Activity ('+evs.length+')</div>' + evs.map(function(e){
+      var L=_evLabel(e.kind, e.action);
+      var who = e.by ? (esc(e.by)+(e.user?(' ('+esc(e.user)+')'):'')) : 'Unknown';
+      var appTag = e.app ? (' · '+(e.app==='PC'?'Office':'Mobile')) : '';
+      var isDel = /deleted|cancel/.test(e.action);
+      return '<div class="hist-item'+(isDel?' del':'')+'">'
+        + '<div class="hist-ic">'+L[0]+'</div>'
+        + '<div class="hist-body">'
+        +   '<div class="hist-t">'+esc(L[1])+'</div>'
+        +   (e.detail ? '<div class="hist-d">'+esc(e.detail)+'</div>' : '')
+        +   '<div class="hist-m">'+esc(_fmtWhen(e.at))+' · '+who+appTag+'</div>'
+        + '</div>'
+        + '</div>';
+    }).join('');
+  }
+
+  // ---------- notifications (updates across the supervisor's jobs) ----------
+  var _appStart = new Date().toISOString();
+  function _lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+  function _lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+  function _notifSeenKey(){ return 'remc_sup_notif_seen_'+((ME&&ME.username)||'x'); }
+  function _notifFiredKey(){ return 'remc_sup_notif_fired_'+((ME&&ME.username)||'x'); }
+  function _isMine(e){ return e && e.app==='Mobile' && String(e.user||'')===String((ME&&ME.username)||''); }
+  function buildNotifications(){
+    var evs=[];
+    (myProjects()||[]).forEach(function(p){
+      var pid=String(p.id);
+      buildHistory(pid).forEach(function(e){ e.projectId=pid; e.projectName=(p.name||('Project '+pid)); evs.push(e); });
+    });
+    evs.sort(function(a,b){ return (a.at<b.at)?1:((a.at>b.at)?-1:0); });
+    return evs;
+  }
+  function updateNotifBadge(){
+    var badge=$('notif-badge'); if(!badge) return;
+    var seen=_lsGet(_notifSeenKey())||'';
+    var evs=buildNotifications();
+    var unread=evs.filter(function(e){ return e.at && e.at>seen && !_isMine(e); }).length;
+    if(unread>0){ badge.textContent = unread>99?'99+':String(unread); badge.style.display=''; }
+    else { badge.style.display='none'; }
+  }
+  function renderNotif(){
+    var ew=$('notif-enable-wrap');
+    if(ew){
+      var supported=(typeof Notification!=='undefined');
+      var perm=supported?Notification.permission:'unsupported';
+      if(supported && perm!=='granted'){ ew.innerHTML='<button type="button" class="btn btn-save" onclick="enableNotif()">🔔 Turn on phone notifications</button>'+(perm==='denied'?'<div class="notif-hint">Notifications are blocked. Turn them on for this site in your browser settings.</div>':'<div class="notif-hint">Get alerted on your phone while the app is open.</div>'); }
+      else if(supported && perm==='granted'){ ew.innerHTML='<div class="notif-hint">✅ Phone notifications are on (while the app is open in your browser).</div>'; }
+      else { ew.innerHTML='<div class="notif-hint">Your browser does not support phone notifications.</div>'; }
+    }
+    var evs=buildNotifications();
+    var seen=_lsGet(_notifSeenKey())||'';
+    var host=$('notif-list'); if(!host) return;
+    if(!evs.length){ host.innerHTML='<div class="pc-empty" style="padding:26px 16px;text-align:center;color:var(--muted)">No notifications yet.<br>You will see updates on your jobs here.</div>'; return; }
+    host.innerHTML = evs.slice(0,60).map(function(e){
+      var L=_evLabel(e.kind, e.action);
+      var who = e.by ? (esc(e.by)+(e.user?(' ('+esc(e.user)+')'):'')) : 'Unknown';
+      var appTag = e.app ? (' · '+(e.app==='PC'?'Office':'Mobile')) : '';
+      var isDel=/deleted|cancel/.test(e.action);
+      var unread = e.at && e.at>seen && !_isMine(e);
+      return '<div class="hist-item'+(isDel?' del':'')+(unread?' unread':'')+'">'
+        + '<div class="hist-ic">'+L[0]+'</div>'
+        + '<div class="hist-body">'
+        +   '<div class="hist-t">'+esc(L[1])+(unread?' <span class="notif-dot"></span>':'')+'</div>'
+        +   '<div class="hist-d">'+esc(e.projectName||'')+(e.detail?(' — '+esc(e.detail)):'')+'</div>'
+        +   '<div class="hist-m">'+esc(_fmtWhen(e.at))+' · '+who+appTag+'</div>'
+        + '</div>'
+        + '</div>';
+    }).join('');
+  }
+  window.openNotif=function(){
+    renderNotif();
+    $('notif-ov').classList.add('open');
+    var evs=buildNotifications();
+    var newest=evs.length?evs[0].at:'';
+    var nowIso=new Date().toISOString();
+    _lsSet(_notifSeenKey(), (newest && newest>nowIso)?newest:nowIso);
+    updateNotifBadge();
+  };
+  window.closeNotif=function(){ $('notif-ov').classList.remove('open'); };
+  window.enableNotif=function(){
+    try{
+      if(typeof Notification==='undefined'){ alert('Your browser does not support phone notifications.'); return; }
+      var r=Notification.requestPermission();
+      if(r && typeof r.then==='function'){ r.then(function(p){ renderNotif(); if(p==='granted'){ try{ new Notification('REMC Supervisor', {body:'Notifications are on. You will be alerted about updates on your jobs.'}); }catch(e){} } }); }
+      else { renderNotif(); }
+    }catch(e){}
+  };
+  function notifCheckAndFire(){
+    try{
+      if(typeof Notification==='undefined' || Notification.permission!=='granted') return;
+      var lastFired=_lsGet(_notifFiredKey())||'';
+      var floor = (lastFired>_appStart)?lastFired:_appStart;
+      var evs=buildNotifications();
+      var fresh=evs.filter(function(e){ return e.at && e.at>floor && !_isMine(e); });
+      if(!fresh.length) return;
+      var newest=fresh[0];
+      var L=_evLabel(newest.kind, newest.action);
+      var body = (fresh.length===1) ? (L[1]+' — '+(newest.projectName||'')) : (fresh.length+' new updates on your jobs');
+      try{ new Notification('REMC Supervisor', {body:body}); }catch(e){}
+      _lsSet(_notifFiredKey(), newest.at);
+      updateNotifBadge();
+    }catch(e){}
+  }
+  window.updateNotifBadge=updateNotifBadge;
+  window.notifCheckAndFire=notifCheckAndFire;
   function renderProjCal(){
     var pid=PROJCAL_PID; if(pid==null) return;
     var p=PROJECTS.find(function(x){return String(x.id)===String(pid);});
@@ -1704,6 +1927,8 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
   window.cancelBooking=function(){
     if(!EDIT_ID) return;
     if(!confirm('Cancel this job booking?')) return;
+    var _b=BOOKINGS.find(function(x){return String(x.id)===String(EDIT_ID);});
+    if(_b){ try{ logActivity('booking','deleted', _b.projectId, _bkDetail(_b)); }catch(e){} }
     BOOKINGS = BOOKINGS.filter(function(x){ return String(x.id)!==String(EDIT_ID); });
     EDIT_ID=null;
     closeSheet(); render();
@@ -1740,9 +1965,11 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     $('login').style.display='none'; $('app').style.display='';
     $('who-name').textContent = ME.name;
     try{ sessionStorage.setItem('remc_sup_me', JSON.stringify(ME)); }catch(e){}
+    try{ if(!_lsGet(_notifSeenKey())) _lsSet(_notifSeenKey(), new Date().toISOString()); }catch(e){}
     updateWarn();
     subscribe();
     goHome();
+    try{ updateNotifBadge(); }catch(e){}
   }
   function doLogin(){
     var msg=$('lg-msg'); msg.textContent='Signing in…';
