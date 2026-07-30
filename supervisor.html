@@ -835,7 +835,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
   var DOW=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
   // ---------- render ----------
-  function render(){ try{ updateWarn(); }catch(e){} if(VIEW==='notes') renderAllNotes(); else if(VIEW==='list') renderProjects(); else if(VIEW==='day') renderDay(); else if(VIEW==='week') renderWeek(); else renderMonth(); try{ if(typeof renderProjCal==='function' && $('projcal-ov') && $('projcal-ov').classList.contains('open') && PROJCAL_PID!=null) renderProjCal(); }catch(e){} try{ updateNotifBadge(); }catch(e){} }
+  function render(){ try{ updateWarn(); }catch(e){} try{ _detectChanges(); }catch(e){} if(VIEW==='notes') renderAllNotes(); else if(VIEW==='list') renderProjects(); else if(VIEW==='day') renderDay(); else if(VIEW==='week') renderWeek(); else renderMonth(); try{ if(typeof renderProjCal==='function' && $('projcal-ov') && $('projcal-ov').classList.contains('open') && PROJCAL_PID!=null) renderProjCal(); }catch(e){} try{ updateNotifBadge(); }catch(e){} }
   function renderAllNotes(){
     var mine=myProjects();
     var withNotes=mine.filter(function(p){ return NOTES[String(p.id)] && String(NOTES[String(p.id)]).trim(); });
@@ -1679,6 +1679,44 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
       return '<div class="chg-row"><span class="chg-lbl">'+esc(c.label)+'</span><span class="chg-from">'+esc(String(c.from))+'</span><span class="chg-arrow">→</span><span class="chg-to">'+esc(String(c.to))+'</span></div>';
     }).join('')+'</div>';
   }
+  // Detect changes to bookings (including ones made by the office in App 1) by comparing to the
+  // last state this device saw. Lets History/Notifications show what changed even without App 1 help.
+  function _bkSig(b){ return JSON.stringify({ r:_rangesTxt(bookingRanges(b)), a:String(b.activity||''), m:String(b.machine||''), n:String(b.notes||'') }); }
+  function _sigChanges(o, n){
+    var ch=[];
+    if(o.r!==n.r) ch.push({label:'Dates', from:o.r||'—', to:n.r||'—'});
+    if(o.a!==n.a) ch.push({label:'Description', from:o.a||'—', to:n.a||'—'});
+    if(o.m!==n.m) ch.push({label:'Machine', from:o.m||'—', to:n.m||'—'});
+    if(o.n!==n.n) ch.push({label:'Notes', from:o.n||'—', to:n.n||'—'});
+    return ch;
+  }
+  function _snapKey(){ return 'remc_sup_snap_'+((ME&&ME.username)||'x'); }
+  function _obsKey(){ return 'remc_sup_obs_'+((ME&&ME.username)||'x'); }
+  function _getObs(){ try{ return JSON.parse((typeof _lsGet==='function'?_lsGet(_obsKey()):localStorage.getItem(_obsKey()))||'{}')||{}; }catch(e){ return {}; } }
+  function _detectChanges(){
+    try{
+      if(!ME) return;
+      var snap={}, obs={};
+      try{ snap=JSON.parse(_lsGet(_snapKey())||'{}')||{}; }catch(e){ snap={}; }
+      try{ obs=JSON.parse(_lsGet(_obsKey())||'{}')||{}; }catch(e){ obs={}; }
+      var mine=myProjectIds();
+      var newSnap={};
+      (BOOKINGS||[]).forEach(function(b){
+        if(!mine[String(b.projectId)]) return;
+        var id=String(b.id); var sig=_bkSig(b); newSnap[id]=sig;
+        if(snap[id]!==undefined && snap[id]!==sig){
+          var o={}, n={};
+          try{ o=JSON.parse(snap[id]); }catch(e){}
+          try{ n=JSON.parse(sig); }catch(e){}
+          var ch=_sigChanges(o,n);
+          if(ch.length){ obs[id]={ at:new Date().toISOString(), changes:ch, by:(b.au_eby||'Office'), user:(b.au_euser||''), app:(b.au_eapp||'PC'), projectId:String(b.projectId) }; }
+        }
+      });
+      var pruned={}; Object.keys(obs).forEach(function(id){ if(newSnap[id]!==undefined) pruned[id]=obs[id]; });
+      _lsSet(_snapKey(), JSON.stringify(newSnap));
+      _lsSet(_obsKey(), JSON.stringify(pruned));
+    }catch(e){}
+  }
   function _fmtWhen(at){ if(!at) return ''; try{ var d=new Date(at); return d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})+', '+d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}); }catch(e){ return String(at); } }
   function _evLabel(kind, action){
     var m={
@@ -1691,10 +1729,11 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     return m[kind+'|'+action] || ['•', action];
   }
   function buildHistory(pid){
-    var pidS=String(pid); var evs=[];
+    var pidS=String(pid); var evs=[]; var _obs=_getObs();
     (BOOKINGS||[]).filter(function(b){return String(b.projectId)===pidS;}).forEach(function(b){
       evs.push({ at:(b.au_at||b.createdAt||''), by:(b.au_by||b.bookedBy||''), user:(b.au_user||''), app:(b.au_app||''), kind:'booking', action:'created', detail:_bkDetail(b) });
-      if(b.au_eat){ evs.push({ at:b.au_eat, by:(b.au_eby||''), user:(b.au_euser||''), app:(b.au_eapp||''), kind:'booking', action:'updated', detail:_bkDetail(b), changes:(b.au_changes||null) }); }
+      var _o=_obs[String(b.id)];
+      if(_o && _o.changes && _o.changes.length){ evs.push({ at:_o.at, by:(_o.by||'Office'), user:(_o.user||''), app:(_o.app||'PC'), kind:'booking', action:'updated', detail:_bkDetail(b), changes:_o.changes }); }
     });
     ((TESTS[pidS])||[]).forEach(function(t){ evs.push({ at:(t.createdAt||''), by:(t.bookedBy||''), user:(t.au_user||''), app:(t.au_app||''), kind:'test', action:'created', detail:(t.type||'Test')+(t.date?(' · '+pcFmtRange(t.date,t.date)):'') }); });
     ((TRANSFERS[pidS])||[]).forEach(function(t){ evs.push({ at:(t.createdAt||''), by:(t.bookedBy||''), user:(t.au_user||''), app:(t.au_app||''), kind:'transfer', action:(t.action==='transfer'?'transfer_requested':'removal_requested'), detail:(t.machine||'Machine')+(t.action==='transfer'?(' → '+(t.toName||'')):' (remove / pick up)') }); });
@@ -2011,6 +2050,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     updateWarn();
     subscribe();
     goHome();
+    try{ _detectChanges(); }catch(e){}
     try{ updateNotifBadge(); }catch(e){}
   }
   function doLogin(){
