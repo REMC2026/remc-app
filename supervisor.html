@@ -588,6 +588,16 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
 
   function $(id){ return document.getElementById(id); }
   function setCloud(t,bg,c){ var e=$('cloud'); if(!e)return; e.textContent=t; e.style.background=bg||'#f1f5f9'; e.style.color=c||'#64748b'; }
+  var _cloudFailN=0, _reconnTimer=null;
+  function _cloudOk(){ _cloudFailN=0; connected=true; if(_reconnTimer){ clearTimeout(_reconnTimer); _reconnTimer=null; } setCloud('☁︎','#dcfce7','#15803d'); }
+  function _cloudFail(){
+    _cloudFailN++;
+    var reallyOffline = (typeof navigator!=='undefined' && navigator.onLine===false);
+    if(reallyOffline) setCloud('offline','#fee2e2','#dc2626');
+    else setCloud('reconnecting…','#fef3c7','#92400e');
+    // keep retrying while it fails; _cloudOk() clears this once a request succeeds
+    if(!_reconnTimer){ _reconnTimer=setTimeout(function(){ _reconnTimer=null; try{ refreshFromCloud(); }catch(e){} }, 4000); }
+  }
 
   // ---------- Supabase ----------
   function ensureClient(){
@@ -654,11 +664,11 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     if(!ensureClient()){ if(cb) cb('noconfig'); return; }
     setCloud('…','#eff6ff','#1d4ed8');
     sb.from('remc_state').select('data').eq('id',WS).maybeSingle().then(function(res){
-      if(res && res.error){ setCloud('offline','#fee2e2','#dc2626'); if(cb) cb(res.error.message||'error'); return; }
+      if(res && res.error){ _cloudFail(); if(cb) cb(res.error.message||'error'); return; }
       DATA = (res && res.data && res.data.data) ? res.data.data : {};
-      parseData(); connected=true; setCloud('☁︎','#dcfce7','#15803d'); if(cb) cb(null);
+      parseData(); connected=true; _cloudOk(); if(cb) cb(null);
     }).catch(function(e){
-      setCloud('offline','#fee2e2','#dc2626');
+      _cloudFail();
       if(cb) cb((e && e.message) || 'network');
     });
   }
@@ -671,8 +681,8 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
       d['remc_scheduler'] = JSON.stringify(BOOKINGS);
       d['__client'] = CLIENT;
       sb.from('remc_state').upsert({ id:WS, data:d, updated_at:new Date().toISOString() }).then(function(r2){
-        if(r2 && r2.error){ setCloud('offline','#fee2e2','#dc2626'); if(cb) cb(r2.error.message); }
-        else { DATA=d; setCloud('☁︎','#dcfce7','#15803d'); if(cb) cb(null); }
+        if(r2 && r2.error){ _cloudFail(); if(cb) cb(r2.error.message); }
+        else { DATA=d; _cloudOk(); if(cb) cb(null); }
       });
     });
   }
@@ -684,8 +694,8 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
       d['remc_project_notes'] = JSON.stringify(NOTES);
       d['__client'] = CLIENT;
       sb.from('remc_state').upsert({ id:WS, data:d, updated_at:new Date().toISOString() }).then(function(r2){
-        if(r2 && r2.error){ setCloud('offline','#fee2e2','#dc2626'); if(cb) cb(r2.error.message); }
-        else { DATA=d; setCloud('☁︎','#dcfce7','#15803d'); if(cb) cb(null); }
+        if(r2 && r2.error){ _cloudFail(); if(cb) cb(r2.error.message); }
+        else { DATA=d; _cloudOk(); if(cb) cb(null); }
       });
     });
   }
@@ -697,8 +707,8 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
       d['remc_compaction_tests'] = JSON.stringify(TESTS);
       d['__client'] = CLIENT;
       sb.from('remc_state').upsert({ id:WS, data:d, updated_at:new Date().toISOString() }).then(function(r2){
-        if(r2 && r2.error){ setCloud('offline','#fee2e2','#dc2626'); if(cb) cb(r2.error.message); }
-        else { DATA=d; setCloud('☁︎','#dcfce7','#15803d'); if(cb) cb(null); }
+        if(r2 && r2.error){ _cloudFail(); if(cb) cb(r2.error.message); }
+        else { DATA=d; _cloudOk(); if(cb) cb(null); }
       });
     });
   }
@@ -710,8 +720,8 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
       d['remc_machine_transfers'] = JSON.stringify(TRANSFERS);
       d['__client'] = CLIENT;
       sb.from('remc_state').upsert({ id:WS, data:d, updated_at:new Date().toISOString() }).then(function(r2){
-        if(r2 && r2.error){ setCloud('offline','#fee2e2','#dc2626'); if(cb) cb(r2.error.message); }
-        else { DATA=d; setCloud('☁︎','#dcfce7','#15803d'); if(cb) cb(null); }
+        if(r2 && r2.error){ _cloudFail(); if(cb) cb(r2.error.message); }
+        else { DATA=d; _cloudOk(); if(cb) cb(null); }
       });
     });
   }
@@ -723,8 +733,8 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
       d['remc_variations'] = JSON.stringify(VARIATIONS);
       d['__client'] = CLIENT;
       sb.from('remc_state').upsert({ id:WS, data:d, updated_at:new Date().toISOString() }).then(function(r2){
-        if(r2 && r2.error){ setCloud('offline','#fee2e2','#dc2626'); if(cb) cb(r2.error.message); }
-        else { DATA=d; setCloud('☁︎','#dcfce7','#15803d'); if(cb) cb(null); }
+        if(r2 && r2.error){ _cloudFail(); if(cb) cb(r2.error.message); }
+        else { DATA=d; _cloudOk(); if(cb) cb(null); }
       });
     });
   }
@@ -736,8 +746,8 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
       d['remc_sub_bookings'] = JSON.stringify(SUBCONS);
       d['__client'] = CLIENT;
       sb.from('remc_state').upsert({ id:WS, data:d, updated_at:new Date().toISOString() }).then(function(r2){
-        if(r2 && r2.error){ setCloud('offline','#fee2e2','#dc2626'); if(cb) cb(r2.error.message); }
-        else { DATA=d; setCloud('☁︎','#dcfce7','#15803d'); if(cb) cb(null); }
+        if(r2 && r2.error){ _cloudFail(); if(cb) cb(r2.error.message); }
+        else { DATA=d; _cloudOk(); if(cb) cb(null); }
       });
     });
   }
@@ -781,15 +791,16 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     _refreshing=true;
     sb.from('remc_state').select('data,updated_at').eq('id',WS).maybeSingle().then(function(res){
       _refreshing=false;
-      if(!res || res.error || !res.data || !res.data.data) return;
+      if(!res || res.error){ _cloudFail(); return; }
+      _cloudOk(); // reached the cloud → healthy, clear any stale offline
+      if(!res.data || !res.data.data) return;
       var stamp=String(res.data.updated_at||'');
       if(stamp && stamp===_lastSeen) return;
       _lastSeen=stamp;
       var d=res.data.data;
       if(d.__client===CLIENT) return;
       DATA=d; parseData(); render();
-      setCloud('☁︎','#dcfce7','#15803d');
-    }).catch(function(){ _refreshing=false; });
+    }).catch(function(){ _refreshing=false; _cloudFail(); });
   }
   function startAutoRefresh(){
     if(_refreshTimer) return;
