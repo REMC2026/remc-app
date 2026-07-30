@@ -61,12 +61,70 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);-web
 .pcard .pi{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--mid)}
 .pcard .pi-ic{width:16px;text-align:center;flex-shrink:0;opacity:.8}
 .pcard .pi a{color:var(--blue);text-decoration:none;font-weight:700}
-.pcard .pf{display:flex;align-items:center;gap:10px;margin-top:10px}
+.pcard .pf{display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap}
 .pcard .pbook{background:var(--blue);color:#fff;border:none;border-radius:8px;padding:8px 14px;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer}
 .pcard .pnotes{background:var(--surface2);color:var(--mid);border:1px solid var(--border2);border-radius:8px;padding:8px 12px;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer}
 .pcard .ndot{color:var(--red);font-size:13px;line-height:1}
 .note-body{margin-top:9px;font-size:14px;color:var(--text);white-space:pre-wrap;line-height:1.5;background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:10px 12px}
 .pcard .pcount{font-size:12px;color:var(--muted)}
+.pcard .pcal{background:#eef2ff;color:#4338ca;border:1px solid #c7d2fe;border-radius:8px;padding:8px 12px;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer}
+.pcard .ptest{background:#f5f3ff;color:#6d28d9;border:1px solid #ddd6fe;border-radius:8px;padding:8px 12px;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer}
+/* ---- Compaction test view ---- */
+.test-ov{display:none;position:fixed;inset:0;background:var(--bg);z-index:92;flex-direction:column}
+.test-ov.open{display:flex}
+.test-body{flex:1;overflow-y:auto;padding:16px;max-width:640px;margin:0 auto;width:100%;box-sizing:border-box}
+.test-form{background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);padding:16px;margin-bottom:18px}
+.test-form .th{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--text);margin-bottom:12px}
+.test-form .btn-save{width:100%;margin-top:4px}
+.t-del{margin-left:auto;background:#fee2e2;border:1px solid #fecaca;color:#dc2626;border-radius:7px;width:28px;height:28px;cursor:pointer;font-size:13px;font-weight:700;flex:0 0 auto}
+.t-edit{background:#eff6ff;border:1px solid #bfdbfe;color:#1d4ed8;border-radius:7px;width:28px;height:28px;cursor:pointer;font-size:13px;font-weight:700;flex:0 0 auto}
+.pcard .ptransfer{background:#ecfeff;color:#0e7490;border:1px solid #a5f3fc;border-radius:8px;padding:8px 12px;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer}
+.tr-fixed{padding:11px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:9px;font-size:15px;font-weight:700;color:var(--text)}
+.tr-addr{font-size:12px;color:var(--muted);font-weight:600;margin-top:4px}
+.tr-actions{display:flex;gap:8px;flex-wrap:wrap}
+.tr-act{flex:1 1 0;min-width:130px;padding:11px 10px;border:1.5px solid var(--border2);background:var(--surface2);border-radius:10px;font-family:inherit;font-size:13px;font-weight:800;color:var(--mid);cursor:pointer}
+.tr-act.on{border-color:var(--blue);background:#eff6ff;color:var(--blue)}
+.pcard .pvar{background:#fff7ed;color:#c2410c;border:1px solid #fed7aa;border-radius:8px;padding:8px 12px;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer}
+.v-attach{background:var(--surface2);border:1.5px dashed var(--border2);color:var(--blue);border-radius:9px;padding:9px 12px;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer;width:100%}
+.v-thumbs{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.v-thumb{position:relative;width:74px;height:74px;border-radius:9px;overflow:hidden;border:1px solid var(--border)}
+.v-thumb img{width:100%;height:100%;object-fit:cover;cursor:pointer;display:block}
+.v-thumb-x{position:absolute;top:2px;right:2px;width:20px;height:20px;border:none;border-radius:50%;background:rgba(220,38,38,.92);color:#fff;font-size:11px;font-weight:700;cursor:pointer;line-height:1}
+.v-files{margin-top:8px;display:flex;flex-direction:column;gap:6px}
+.v-file{display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-size:12px;font-weight:700;color:var(--text)}
+.v-file-n{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;color:var(--blue)}
+.v-file-x{background:#fee2e2;border:1px solid #fecaca;color:#dc2626;border-radius:6px;width:24px;height:24px;cursor:pointer;font-size:12px;font-weight:700;flex:0 0 auto}
+.v-item-photos{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.v-item-photos img{width:60px;height:60px;object-fit:cover;border-radius:7px;border:1px solid var(--border);cursor:pointer}
+.v-periods{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.v-period{font-size:11px;font-weight:700;color:var(--mid);background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:2px 9px}
+/* ---- Per-project calendar view ---- */
+.projcal-ov{display:none;position:fixed;inset:0;background:var(--bg);z-index:90;flex-direction:column}
+.projcal-ov.open{display:flex}
+.projcal-top{position:sticky;top:0;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;padding:12px 14px;box-shadow:0 1px 8px rgba(0,0,0,.06);z-index:2}
+.projcal-title{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;text-transform:uppercase;letter-spacing:.5px;color:var(--text);min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.projcal-body{flex:1;overflow-y:auto;display:flex;gap:16px;flex-wrap:wrap;padding:16px;align-items:flex-start}
+.projcal-cal{flex:1 1 320px;min-width:290px;background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);padding:12px}
+.projcal-navrow{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.projcal-navrow>div{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;letter-spacing:.5px}
+.projcal-navrow button{width:36px;height:36px;border:1px solid var(--border2);background:var(--surface2);border-radius:9px;font-size:18px;cursor:pointer;color:var(--text)}
+.pc-mgrid{display:flex;flex-direction:column;gap:4px}
+.pc-mrow{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.pc-mrow.pc-head>div{text-align:center;font-size:10px;font-weight:800;color:var(--muted);padding:2px 0}
+.pc-cell{aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;font-size:13px;border-radius:8px;background:var(--surface2);color:var(--text)}
+.pc-cell.out{color:var(--muted);opacity:.45}
+.pc-cell.today{outline:2px solid var(--blue);outline-offset:-2px;font-weight:800}
+.pc-cell.has{background:var(--blue);color:#fff;font-weight:800}
+.projcal-list{flex:1 1 300px;min-width:280px}
+.pc-list-h{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--mid);margin-bottom:10px}
+.pc-item{background:var(--surface);border:1px solid var(--border);border-left:4px solid var(--blue);border-radius:12px;box-shadow:var(--shadow);padding:12px 14px;margin-bottom:10px}
+.pc-item.past{opacity:.62}
+.pc-item-date{font-size:14px;font-weight:800;color:var(--text);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.pc-past{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:1px 8px}
+.pc-upcoming{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#15803d;background:#dcfce7;border:1px solid #bbf7d0;border-radius:20px;padding:1px 8px}
+.pc-item-desc{font-size:13px;color:var(--mid);font-weight:600;margin-top:4px}
+.pc-item-notes{font-size:12px;color:var(--muted);margin-top:6px;background:var(--surface2);border-radius:8px;padding:7px 9px;line-height:1.45;white-space:pre-wrap}
+.pc-empty{padding:30px 16px;text-align:center;color:var(--muted)}
 .daycard{background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:8px;overflow:hidden;box-shadow:var(--shadow)}
 .daycard.today{border-color:var(--red)}
 .daycard.wknd{background:var(--surface2)}
@@ -101,8 +159,14 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);-web
 .sheet-body{padding:16px 18px}
 .fld{margin-bottom:12px}
 .fld label{display:block;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--mid);margin-bottom:5px}
-.fld input,.fld select{width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:9px;padding:11px 12px;font-family:inherit;font-size:15px;color:var(--text);outline:none}
-.fld input:focus,.fld select:focus{border-color:var(--blue)}
+.fld input,.fld select,.fld textarea{width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:9px;padding:11px 12px;font-family:inherit;font-size:15px;color:var(--text);outline:none}
+.fld textarea{resize:vertical;min-height:64px;line-height:1.4}
+.fld input:focus,.fld select:focus,.fld textarea:focus{border-color:var(--blue)}
+.add-range-btn{background:none;border:1.5px dashed var(--border2);color:var(--blue);border-radius:9px;padding:9px 12px;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer;width:100%;margin:-4px 0 4px}
+.add-range-btn:active{transform:scale(.99)}
+.f-range-row{display:flex;gap:10px;align-items:flex-end;margin-bottom:12px}
+.f-range-row .fld{flex:1;margin-bottom:0}
+.f-range-row .rr-x{flex:0 0 auto;background:#fee2e2;border:1px solid #fecaca;color:#dc2626;border-radius:9px;width:40px;height:44px;cursor:pointer;font-size:15px;font-weight:700}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .chk{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--mid)}
 .swatches{display:flex;gap:8px;flex-wrap:wrap}
@@ -216,15 +280,9 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
         <div class="hc-s">View your projects</div>
       </div>
       <button class="notes-link" onclick="goAllNotes()">📝 View all notes</button>
-      <div class="home-row">
-        <div class="home-card" onclick="goScheduled()">
-          <div class="hc-t">Booked Jobs</div>
-          <div class="hc-s">See what's scheduled</div>
-        </div>
-        <div class="home-card home-book" onclick="openBook()">
-          <div class="hc-t">Book Job</div>
-          <div class="hc-s">Schedule a new job</div>
-        </div>
+      <div class="home-card" onclick="goScheduled()">
+        <div class="hc-t">Booked Jobs</div>
+        <div class="hc-s">See what's scheduled</div>
       </div>
     </div>
 
@@ -257,13 +315,16 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
       <button class="x" onclick="closeSheet()">&times;</button>
     </div>
     <div class="sheet-body">
-      <div class="fld"><label>Project <span class="req">*</span></label><select id="f-project" onchange="updateSaveState()"></select></div>
+      <div class="fld"><label>Project <span class="req">*</span></label><select id="f-project" onchange="updateSaveState()"></select><div id="f-project-fixed" style="display:none;padding:11px 13px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;font-size:15px;font-weight:700;color:var(--text)"></div></div>
       <div class="row2">
         <div class="fld"><label>Start date <span class="req">*</span></label><input id="f-start" type="date" oninput="updateSaveState()" onchange="updateSaveState()"></div>
         <div class="fld"><label>Finish date <span class="req">*</span></label><input id="f-end" type="date" oninput="updateSaveState()" onchange="updateSaveState()"></div>
       </div>
+      <div id="f-extra-ranges"></div>
+      <button type="button" class="add-range-btn" id="f-add-range" onclick="bkAddRange()">+ Add another period</button>
       <div class="fld"><label>Activity <span class="opt">(optional)</span></label><input id="f-activity" list="act-list" placeholder="e.g. Bulk earthworks"><datalist id="act-list"><option value="Bulk earthworks"><option value="Detailed excavation"><option value="Site cut"><option value="Trenching"><option value="Backfill"><option value="Level & compact"><option value="Load out"></datalist></div>
       <div class="fld"><label>Machine <span class="opt">(optional)</span></label><input id="f-machine" list="mac-list" placeholder="e.g. 20T Excavator"><datalist id="mac-list"><option value="5T Excavator"><option value="8T Excavator"><option value="13T Excavator"><option value="20T Excavator"><option value="30T Excavator"><option value="Loader"><option value="Dozer"><option value="Skid steer"></datalist></div>
+      <div class="fld"><label>Notes <span class="opt">(optional)</span></label><textarea id="f-notes" rows="3" placeholder="Any extra info for this booking…"></textarea></div>
       <div class="fld"><label>Include weekend days</label>
         <div class="wk-toggle">
           <button type="button" class="wk-day" id="wk-sat" onclick="toggleWk('sat')"><span class="wk-check">✓</span>Saturdays</button>
@@ -299,6 +360,99 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
   </div>
 </div>
 
+<div class="projcal-ov" id="projcal-ov">
+  <div class="projcal-top">
+    <button class="back" onclick="closeProjCal()">‹ Close</button>
+    <div class="projcal-title" id="projcal-title">Project</div>
+  </div>
+  <div class="projcal-body">
+    <div class="projcal-cal">
+      <div class="projcal-navrow">
+        <button type="button" onclick="projCalShift(-1)">‹</button>
+        <div id="projcal-month">—</div>
+        <button type="button" onclick="projCalShift(1)">›</button>
+      </div>
+      <div id="projcal-grid"></div>
+    </div>
+    <div class="projcal-list" id="projcal-list"></div>
+  </div>
+</div>
+
+<div class="test-ov" id="test-ov">
+  <div class="projcal-top">
+    <button class="back" onclick="closeTest()">‹ Close</button>
+    <div class="projcal-title" id="test-title">Compaction Tests</div>
+  </div>
+  <div class="test-body">
+    <div class="test-form">
+      <div class="th">🧪 Book a compaction test</div>
+      <div class="fld"><label>Date <span class="req">*</span></label><input id="t-date" type="date" oninput="updateTestSave()" onchange="updateTestSave()"></div>
+      <div class="fld"><label>Test type <span class="req">*</span></label><input id="t-type" list="test-type-list" placeholder="e.g. Sand Replacement, Nuclear Density…" oninput="updateTestSave()"><datalist id="test-type-list"><option value="Sand Replacement Test"><option value="Nuclear Density Test"><option value="Field Density Test"><option value="Standard Proctor"><option value="Modified Proctor"><option value="CBR (California Bearing Ratio)"><option value="Plate Load Test"><option value="Dynamic Cone Penetrometer (DCP)"><option value="Compaction Test"></datalist></div>
+      <div class="fld"><label>Notes <span class="opt">(optional)</span></label><textarea id="t-notes" rows="2" placeholder="Any extra info for the tester…"></textarea></div>
+      <button class="btn btn-save" id="t-save" onclick="saveTest()">+ Add test</button>
+    </div>
+    <div class="test-list" id="test-list"></div>
+  </div>
+</div>
+
+<div class="test-ov" id="transfer-ov">
+  <div class="projcal-top">
+    <button class="back" onclick="closeTransfer()">‹ Close</button>
+    <div class="projcal-title" id="tr-title">Machine Transfer</div>
+  </div>
+  <div class="test-body">
+    <div class="test-form">
+      <div class="th">🚚 Machine transfer / removal</div>
+      <div class="fld"><label>From (current site)</label><div id="tr-from" class="tr-fixed"></div></div>
+      <div class="fld"><label>Machine <span class="req">*</span></label><input id="tr-machine" list="mac-list" placeholder="e.g. 20T Excavator" oninput="updateTrSave()"></div>
+      <div class="fld"><label>What needs to happen? <span class="req">*</span></label>
+        <div class="tr-actions">
+          <button type="button" class="tr-act" id="tr-act-remove" onclick="trSetAction('remove')">📤 Remove / pick up</button>
+          <button type="button" class="tr-act" id="tr-act-transfer" onclick="trSetAction('transfer')">🔄 Transfer to another site</button>
+        </div>
+      </div>
+      <div class="fld" id="tr-dest-wrap" style="display:none"><label>Transfer to <span class="req">*</span></label><select id="tr-dest" onchange="trDestChanged()"></select><div id="tr-dest-addr" class="tr-addr"></div></div>
+      <div class="fld"><label>Date needed <span class="opt">(optional)</span></label><input id="tr-date" type="date"></div>
+      <div class="fld"><label>Notes <span class="opt">(optional)</span></label><textarea id="tr-notes" rows="2" placeholder="Any details for the office…"></textarea></div>
+      <button class="btn btn-save" id="tr-save" onclick="saveTransfer()">+ Send request</button>
+    </div>
+    <div class="test-list" id="tr-list"></div>
+  </div>
+</div>
+
+<div class="test-ov" id="variation-ov">
+  <div class="projcal-top">
+    <button class="back" id="var-close-btn" onclick="closeVariation()">‹ Close</button>
+    <div class="projcal-title" id="var-title">Variations</div>
+  </div>
+  <div class="test-body">
+    <div class="test-form">
+      <div class="th">🔧 Add a variation</div>
+      <div class="fld"><label>Description <span class="req">*</span></label><textarea id="v-desc" rows="3" placeholder="What is the variation? e.g. Extra rock excavation in north corner…" oninput="updateVarSave()"></textarea></div>
+      <div class="row2">
+        <div class="fld"><label>Start date <span class="req">*</span></label><input id="v-start" type="date" oninput="updateVarSave()" onchange="updateVarSave()"></div>
+        <div class="fld"><label>Finish date <span class="req">*</span></label><input id="v-end" type="date" oninput="updateVarSave()" onchange="updateVarSave()"></div>
+      </div>
+      <div id="v-extra-ranges"></div>
+      <button type="button" class="add-range-btn" id="v-add-range" onclick="varAddRange()">+ Add another period</button>
+      <div class="fld"><label>Machine needed <span class="opt">(optional)</span></label><input id="v-machine" list="mac-list" placeholder="e.g. 20T Excavator"></div>
+      <div class="fld"><label>Comments <span class="opt">(optional)</span></label><textarea id="v-comments" rows="2" placeholder="Any comments about this variation…"></textarea></div>
+      <div class="fld"><label>Photos <span class="opt">(optional)</span></label>
+        <input type="file" id="v-photo-input" accept="image/*" multiple style="display:none" onchange="varPhotoChosen(event)">
+        <button type="button" class="v-attach" onclick="document.getElementById('v-photo-input').click()">📷 Add photos</button>
+        <div id="v-photos" class="v-thumbs"></div>
+      </div>
+      <div class="fld"><label>Docket(s) <span class="opt">(optional — one or more files)</span></label>
+        <input type="file" id="v-docket-input" accept="application/pdf,image/*,.doc,.docx,.xls,.xlsx" multiple style="display:none" onchange="varDocketChosen(event)">
+        <button type="button" class="v-attach" onclick="document.getElementById('v-docket-input').click()">📎 Attach docket</button>
+        <div id="v-dockets" class="v-files"></div>
+      </div>
+      <button class="btn btn-save" id="v-save" onclick="saveVariation()">+ Add variation</button>
+    </div>
+    <div class="test-list" id="var-list"></div>
+  </div>
+</div>
+
 <script>
 (function(){
   var CFG = window.REMC_SUP_CLOUD || {};
@@ -310,6 +464,9 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
   var PROJECTS = [], BOOKINGS = [], SUPERS = [], NOTES = {}, MACHINES = [];
   var ME = null;           // {username, name}
   var VIEW = 'list', OFFSET = 0, EDIT_ID = null, PICK_COLOR = COLORS[0], NOTES_PID = null;
+  var TESTS = {}, TEST_PID = null;
+  var TRANSFERS = {}, TR_PID = null, TR_ACTION = '';
+  var VARIATIONS = {}, VAR_PID = null, _varPhotos = [], _varDockets = [], _varSaving = false, VAR_EDIT_ID = null;
 
   function $(id){ return document.getElementById(id); }
   function setCloud(t,bg,c){ var e=$('cloud'); if(!e)return; e.textContent=t; e.style.background=bg||'#f1f5f9'; e.style.color=c||'#64748b'; }
@@ -329,6 +486,9 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     SUPERS   = j('remc_supervisors','[]'); if(!Array.isArray(SUPERS)) SUPERS=[];
     NOTES    = j('remc_project_notes','{}'); if(!NOTES || typeof NOTES!=='object' || Array.isArray(NOTES)) NOTES={};
     MACHINES = j('remc_machine_names','[]'); if(!Array.isArray(MACHINES)) MACHINES=[];
+    TESTS    = j('remc_compaction_tests','{}'); if(!TESTS || typeof TESTS!=='object' || Array.isArray(TESTS)) TESTS={};
+    TRANSFERS= j('remc_machine_transfers','{}'); if(!TRANSFERS || typeof TRANSFERS!=='object' || Array.isArray(TRANSFERS)) TRANSFERS={};
+    VARIATIONS= j('remc_variations','{}'); if(!VARIATIONS || typeof VARIATIONS!=='object' || Array.isArray(VARIATIONS)) VARIATIONS={};
     fillMachineList();
   }
   // Fill the Machine dropdown with the machines uploaded in App 1 (falls back to a default list)
@@ -408,6 +568,45 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
       });
     });
   }
+  function pushTests(cb){
+    if(!ensureClient()){ if(cb) cb('noconfig'); return; }
+    setCloud('saving…','#fef3c7','#92400e');
+    sb.from('remc_state').select('data').eq('id',WS).maybeSingle().then(function(res){
+      var d = (res && res.data && res.data.data) ? res.data.data : {};
+      d['remc_compaction_tests'] = JSON.stringify(TESTS);
+      d['__client'] = CLIENT;
+      sb.from('remc_state').upsert({ id:WS, data:d, updated_at:new Date().toISOString() }).then(function(r2){
+        if(r2 && r2.error){ setCloud('offline','#fee2e2','#dc2626'); if(cb) cb(r2.error.message); }
+        else { DATA=d; setCloud('☁︎','#dcfce7','#15803d'); if(cb) cb(null); }
+      });
+    });
+  }
+  function pushTransfers(cb){
+    if(!ensureClient()){ if(cb) cb('noconfig'); return; }
+    setCloud('saving…','#fef3c7','#92400e');
+    sb.from('remc_state').select('data').eq('id',WS).maybeSingle().then(function(res){
+      var d = (res && res.data && res.data.data) ? res.data.data : {};
+      d['remc_machine_transfers'] = JSON.stringify(TRANSFERS);
+      d['__client'] = CLIENT;
+      sb.from('remc_state').upsert({ id:WS, data:d, updated_at:new Date().toISOString() }).then(function(r2){
+        if(r2 && r2.error){ setCloud('offline','#fee2e2','#dc2626'); if(cb) cb(r2.error.message); }
+        else { DATA=d; setCloud('☁︎','#dcfce7','#15803d'); if(cb) cb(null); }
+      });
+    });
+  }
+  function pushVariations(cb){
+    if(!ensureClient()){ if(cb) cb('noconfig'); return; }
+    setCloud('saving…','#fef3c7','#92400e');
+    sb.from('remc_state').select('data').eq('id',WS).maybeSingle().then(function(res){
+      var d = (res && res.data && res.data.data) ? res.data.data : {};
+      d['remc_variations'] = JSON.stringify(VARIATIONS);
+      d['__client'] = CLIENT;
+      sb.from('remc_state').upsert({ id:WS, data:d, updated_at:new Date().toISOString() }).then(function(r2){
+        if(r2 && r2.error){ setCloud('offline','#fee2e2','#dc2626'); if(cb) cb(r2.error.message); }
+        else { DATA=d; setCloud('☁︎','#dcfce7','#15803d'); if(cb) cb(null); }
+      });
+    });
+  }
   function subscribe(){
     if(!sb) return;
     sb.channel('sup_'+WS).on('postgres_changes', {event:'*',schema:'public',table:'remc_state',filter:'id=eq.'+WS}, function(payload){
@@ -459,18 +658,28 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
   function myProjectIds(){ var s={}; myProjects().forEach(function(p){ s[String(p.id)]=true; }); return s; }
   function projName(id){ var p=PROJECTS.find(function(x){return String(x.id)===String(id);}); return p?(p.name||('#'+id)):('#'+id); }
   function myBookings(){ var ids=myProjectIds(); return BOOKINGS.filter(function(b){ return ids[String(b.projectId)]; }); }
+  function bookingRanges(b){
+    if(b && Array.isArray(b.ranges) && b.ranges.length) return b.ranges;
+    return [{start:(b&&b.start), end:(b&&b.end)}];
+  }
   function bookingCoversDay(b,dk){
-    if(dk < b.start || dk > b.end) return false;
     var d=parseKey(dk), w=d.getDay();
     if(w===6 && b.skipSat) return false;
     if(w===0 && b.skipSun) return false;
-    return true;
+    var rs=bookingRanges(b);
+    for(var i=0;i<rs.length;i++){
+      var s=rs[i].start, e=rs[i].end; if(!s||!e) continue;
+      if(e<s){ var t=s; s=e; e=t; }
+      if(dk>=s && dk<=e) return true;
+    }
+    return false;
   }
+  window.bookingCoversDay=bookingCoversDay;
   var MN=['January','February','March','April','May','June','July','August','September','October','November','December'];
   var DOW=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
   // ---------- render ----------
-  function render(){ try{ updateWarn(); }catch(e){} if(VIEW==='notes') renderAllNotes(); else if(VIEW==='list') renderProjects(); else if(VIEW==='day') renderDay(); else if(VIEW==='week') renderWeek(); else renderMonth(); }
+  function render(){ try{ updateWarn(); }catch(e){} if(VIEW==='notes') renderAllNotes(); else if(VIEW==='list') renderProjects(); else if(VIEW==='day') renderDay(); else if(VIEW==='week') renderWeek(); else renderMonth(); try{ if(typeof renderProjCal==='function' && $('projcal-ov') && $('projcal-ov').classList.contains('open') && PROJCAL_PID!=null) renderProjCal(); }catch(e){} }
   function renderAllNotes(){
     var mine=myProjects();
     var withNotes=mine.filter(function(p){ return NOTES[String(p.id)] && String(NOTES[String(p.id)]).trim(); });
@@ -553,6 +762,10 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
         + '<div class="pf">'
         +   '<button class="pbook" onclick="openBook(\''+esc(p.id)+'\')">+ Book a job</button>'
         +   '<button class="pnotes" onclick="openNotes(\''+esc(p.id)+'\')">Notes'+(NOTES[String(p.id)] && String(NOTES[String(p.id)]).trim() ? ' <span class="ndot">●</span>':'')+'</button>'
+        +   '<button class="pcal" onclick="openProjCal(\''+esc(p.id)+'\')">📅 Calendar</button>'
+        +   '<button class="ptest" onclick="openTest(\''+esc(p.id)+'\')">🧪 Test</button>'
+        +   '<button class="ptransfer" onclick="openTransfer(\''+esc(p.id)+'\')">🚚 Transfer</button>'
+        +   '<button class="pvar" onclick="openVariation(\''+esc(p.id)+'\')">🔧 Variation</button>'
         +   '<span class="pcount">'+cnt+' booking'+(cnt===1?'':'s')+'</span>'
         + '</div>'
         + '</div>';
@@ -598,11 +811,14 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     html+='</div>';
     $('view').innerHTML=html;
   }
+  function bkRangesLabel(b){
+    return bookingRanges(b).filter(function(r){return r.start&&r.end;}).map(function(r){ return fmtShort(r.start)+'→'+fmtShort(r.end); }).join(', ');
+  }
   function bkRow(b){
     return '<div class="bk" style="border-left-color:'+(b.color||'#2563eb')+'" onclick="openEdit(\''+b.id+'\')">'
       +'<div class="bk-main"><div class="bk-name">'+esc(projName(b.projectId))+'</div>'
       +'<div class="bk-sub">'+esc(b.activity||'')+(b.machine?' · '+esc(b.machine):'')+'</div></div>'
-      +'<div class="bk-range">'+fmtShort(b.start)+'→'+fmtShort(b.end)+'</div></div>';
+      +'<div class="bk-range">'+bkRangesLabel(b)+'</div></div>';
   }
   function fmtShort(s){ var d=parseKey(s); return d.getDate()+'/'+(d.getMonth()+1); }
 
@@ -645,16 +861,58 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
   function syncWk(){ var s=$('wk-sat'), u=$('wk-sun'); if(s) s.classList.toggle('on', !!($('f-sat')&&$('f-sat').checked)); if(u) u.classList.toggle('on', !!($('f-sun')&&$('f-sun').checked)); }
   window.pickColor=function(c){ PICK_COLOR=c; fillSwatches(); };
 
+  function _setFixedProject(pid){
+    var sel=$('f-project'), fx=$('f-project-fixed');
+    var p=PROJECTS.find(function(x){ return String(x.id)===String(pid); });
+    if(pid!=null && pid!=='' && fx){
+      var nm = p ? (p.name||('Project '+p.id)) : ('Project '+pid);
+      if(p && p.jobNumber && String(p.jobNumber).trim() && String(p.jobNumber).toLowerCase()!==String(nm).toLowerCase()) nm = p.jobNumber+' — '+nm;
+      fx.textContent = nm;
+      fx.style.display=''; if(sel) sel.style.display='none';
+    } else {
+      if(fx) fx.style.display='none'; if(sel) sel.style.display='';
+    }
+  }
+
+  // ----- multiple (non-sequential) periods -----
+  window.bkAddRange=function(start, end){
+    var host=$('f-extra-ranges'); if(!host) return;
+    var wrap=document.createElement('div');
+    wrap.className='f-range-row';
+    wrap.innerHTML='<div class="fld"><label>Also from</label><input type="date" class="rr-start" oninput="updateSaveState()" onchange="updateSaveState()"></div>'
+      +'<div class="fld"><label>to</label><input type="date" class="rr-end" oninput="updateSaveState()" onchange="updateSaveState()"></div>'
+      +'<button type="button" class="rr-x" title="Remove this period" onclick="var r=this.closest(\'.f-range-row\'); if(r) r.remove(); updateSaveState();">✕</button>';
+    host.appendChild(wrap);
+    if(start) wrap.querySelector('.rr-start').value=start;
+    if(end) wrap.querySelector('.rr-end').value=end;
+    updateSaveState();
+  };
+  function bkReadRanges(){
+    var out=[];
+    var s0=($('f-start')||{}).value||'', e0=($('f-end')||{}).value||'';
+    if(s0 && e0) out.push({start:s0, end:e0});
+    var rows=document.querySelectorAll('#f-extra-ranges .f-range-row');
+    for(var i=0;i<rows.length;i++){
+      var s=(rows[i].querySelector('.rr-start')||{}).value||'', e=(rows[i].querySelector('.rr-end')||{}).value||'';
+      if(s && e) out.push({start:s, end:e});
+    }
+    out.forEach(function(r){ if(r.end<r.start){ var t=r.start; r.start=r.end; r.end=t; } });
+    return out;
+  }
+
   window.openBook=function(pid){
     EDIT_ID=null; PICK_COLOR=COLORS[0];
     $('sheet-title').textContent='Book Job';
     $('f-del').style.display='none';
     fillProjectSelect();
     fillMachineList();
-    // start empty so the user chooses; only preselect a project when one was passed in
+    // book only for the project this button belongs to — project is fixed, no picker
     $('f-project').value = (pid!=null) ? String(pid) : '';
+    _setFixedProject(pid);
     $('f-start').value=''; $('f-end').value='';
+    if($('f-extra-ranges')) $('f-extra-ranges').innerHTML='';
     $('f-activity').value=''; $('f-machine').value=''; $('f-sat').checked=false; $('f-sun').checked=false; syncWk();
+    if($('f-notes')) $('f-notes').value='';
     fillSwatches();
     updateSaveState();
     $('sheet-ov').classList.add('open');
@@ -666,8 +924,13 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     $('f-del').style.display='';
     fillProjectSelect();
     $('f-project').value=String(b.projectId);
-    $('f-start').value=b.start; $('f-end').value=b.end;
+    _setFixedProject(b.projectId);
+    var _rs=bookingRanges(b);
+    $('f-start').value=(_rs[0]&&_rs[0].start)||b.start||''; $('f-end').value=(_rs[0]&&_rs[0].end)||b.end||'';
+    if($('f-extra-ranges')) $('f-extra-ranges').innerHTML='';
+    for(var _i=1;_i<_rs.length;_i++){ if(_rs[_i]&&_rs[_i].start&&_rs[_i].end) bkAddRange(_rs[_i].start, _rs[_i].end); }
     $('f-activity').value=b.activity||''; $('f-machine').value=b.machine||'';
+    if($('f-notes')) $('f-notes').value=b.notes||'';
     $('f-sat').checked=!b.skipSat; $('f-sun').checked=!b.skipSun; syncWk();
     fillSwatches();
     updateSaveState();
@@ -694,6 +957,456 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     setTimeout(function(){ try{ $('n-text').focus(); }catch(e){} }, 60);
   };
   window.closeNotes=function(){ $('notes-ov').classList.remove('open'); NOTES_PID=null; };
+
+  // ---------- per-project calendar + list (past & future) ----------
+  var PROJCAL_PID=null, PROJCAL_OFFSET=0;
+  function pcFmtRange(s,e){
+    var f=function(d){ try{ return new Date(d+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}); }catch(_){ return d; } };
+    return (s===e) ? f(s) : (f(s)+' – '+f(e));
+  }
+  window.openProjCal=function(pid){
+    PROJCAL_PID=String(pid); PROJCAL_OFFSET=0;
+    renderProjCal();
+    $('projcal-ov').classList.add('open');
+  };
+  window.closeProjCal=function(){ $('projcal-ov').classList.remove('open'); PROJCAL_PID=null; };
+  window.projCalShift=function(n){ PROJCAL_OFFSET += n; renderProjCal(); };
+
+  // ---------- compaction tests (per project) ----------
+  window.updateTestSave=function(){
+    var btn=$('t-save'); if(!btn) return;
+    var ok = !!($('t-date')&&$('t-date').value) && !!($('t-type')&&$('t-type').value.trim());
+    btn.disabled=!ok; btn.classList.toggle('disabled', !ok);
+  };
+  window.openTest=function(pid){
+    TEST_PID=String(pid);
+    if($('t-date')) $('t-date').value='';
+    if($('t-type')) $('t-type').value='';
+    if($('t-notes')) $('t-notes').value='';
+    updateTestSave();
+    renderTests();
+    $('test-ov').classList.add('open');
+  };
+  window.closeTest=function(){ $('test-ov').classList.remove('open'); TEST_PID=null; };
+  function renderTests(){
+    var pid=TEST_PID; if(pid==null) return;
+    var p=PROJECTS.find(function(x){return String(x.id)===String(pid);});
+    $('test-title').textContent = p ? (p.name||('Project '+pid)) : 'Compaction Tests';
+    var list=(TESTS[String(pid)]||[]).slice().sort(function(a,b){ return a.date<b.date?-1:(a.date>b.date?1:0); });
+    var tk=todayKey();
+    if(!list.length){ $('test-list').innerHTML='<div class="pc-list-h">Booked tests (0)</div><div class="pc-empty">No compaction tests booked yet.</div>'; return; }
+    $('test-list').innerHTML='<div class="pc-list-h">Booked tests ('+list.length+')</div>' + list.map(function(t){
+      var isPast = t.date && t.date < tk;
+      var tag = isPast ? '<span class="pc-past">Past</span>' : '<span class="pc-upcoming">Upcoming</span>';
+      return '<div class="pc-item'+(isPast?' past':'')+'" style="border-left-color:#7c3aed">'
+        + '<div class="pc-item-date">'+esc(pcFmtRange(t.date,t.date))+' '+tag+'<button class="t-del" onclick="deleteTest(\''+esc(pid)+'\',\''+esc(t.id)+'\')" title="Remove test">✕</button></div>'
+        + '<div class="pc-item-desc">🧪 '+esc(t.type||'Test')+'</div>'
+        + (t.notes && String(t.notes).trim() ? '<div class="pc-item-notes">📝 '+esc(t.notes)+'</div>':'')
+        + '</div>';
+    }).join('');
+  }
+  window.saveTest=function(){
+    var pid=TEST_PID; if(pid==null) return;
+    var date=($('t-date')||{}).value||'', type=(($('t-type')||{}).value||'').trim(), notes=(($('t-notes')||{}).value||'').trim();
+    if(!date){ alert('Please choose a date for the test.'); return; }
+    if(!type){ alert('Please choose the type of test.'); return; }
+    if(!TESTS[String(pid)]) TESTS[String(pid)]=[];
+    TESTS[String(pid)].push({
+      id:'ct_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
+      date:date, type:type, notes:notes,
+      createdAt:new Date().toISOString(),
+      bookedBy: ME? ME.name : 'Supervisor', au_user: ME? (ME.username||'') : '', au_app:'Mobile'
+    });
+    if($('t-date')) $('t-date').value='';
+    if($('t-type')) $('t-type').value='';
+    if($('t-notes')) $('t-notes').value='';
+    updateTestSave();
+    renderTests();
+    supShowSaving('Saving to the system…');
+    pushTests(function(err){
+      if(err){ supShowResult(false, 'Could not save. Check your connection and try again.'); }
+      else { pull(function(){ renderTests(); }); supShowResult(true, 'Test booked'); }
+    });
+  };
+  window.deleteTest=function(pid, id){
+    if(!confirm('Remove this compaction test?')) return;
+    TESTS[String(pid)] = (TESTS[String(pid)]||[]).filter(function(t){ return String(t.id)!==String(id); });
+    renderTests();
+    supShowSaving('Saving…');
+    pushTests(function(err){
+      if(err){ supShowResult(false, 'Could not save. Check your connection.'); }
+      else { pull(function(){ renderTests(); }); supShowResult(true, 'Test removed'); }
+    });
+  };
+
+  // ---------- machine transfer / removal (per project) ----------
+  function fillTrDest(){
+    var sel=$('tr-dest'); if(!sel) return;
+    var mine=myProjects().filter(function(p){ return String(p.id)!==String(TR_PID); });
+    sel.innerHTML = '<option value="">Choose destination site…</option>' + mine.map(function(p){ return '<option value="'+esc(p.id)+'">'+esc(p.name||('#'+p.id))+(p.jobNumber?' ('+esc(p.jobNumber)+')':'')+'</option>'; }).join('');
+  }
+  window.updateTrSave=function(){
+    var btn=$('tr-save'); if(!btn) return;
+    var machineOk = !!($('tr-machine')&&$('tr-machine').value.trim());
+    var actionOk = !!TR_ACTION;
+    var destOk = (TR_ACTION!=='transfer') || !!($('tr-dest')&&$('tr-dest').value);
+    var ok = machineOk && actionOk && destOk;
+    btn.disabled=!ok; btn.classList.toggle('disabled', !ok);
+  };
+  window.trSetAction=function(a){
+    TR_ACTION=a;
+    if($('tr-act-remove')) $('tr-act-remove').classList.toggle('on', a==='remove');
+    if($('tr-act-transfer')) $('tr-act-transfer').classList.toggle('on', a==='transfer');
+    if($('tr-dest-wrap')) $('tr-dest-wrap').style.display = (a==='transfer') ? '' : 'none';
+    if(a!=='transfer'){ if($('tr-dest')) $('tr-dest').value=''; if($('tr-dest-addr')) $('tr-dest-addr').textContent=''; }
+    updateTrSave();
+  };
+  window.trDestChanged=function(){
+    var sel=$('tr-dest'); var pid=sel?sel.value:'';
+    var p=PROJECTS.find(function(x){return String(x.id)===String(pid);});
+    $('tr-dest-addr').textContent = p ? (p.address ? ('📍 '+p.address) : 'No address on file') : '';
+    updateTrSave();
+  };
+  window.openTransfer=function(pid){
+    TR_PID=String(pid); TR_ACTION='';
+    var p=PROJECTS.find(function(x){return String(x.id)===String(pid);});
+    $('tr-title').textContent = p ? (p.name||('Project '+pid)) : 'Machine Transfer';
+    $('tr-from').innerHTML = p ? (esc(p.name||('Project '+pid)) + (p.address?'<div class="tr-addr">📍 '+esc(p.address)+'</div>':'')) : ('Project '+esc(pid));
+    if($('tr-machine')) $('tr-machine').value='';
+    if($('tr-date')) $('tr-date').value='';
+    if($('tr-notes')) $('tr-notes').value='';
+    if($('tr-act-remove')) $('tr-act-remove').classList.remove('on');
+    if($('tr-act-transfer')) $('tr-act-transfer').classList.remove('on');
+    if($('tr-dest-wrap')) $('tr-dest-wrap').style.display='none';
+    fillMachineList(); fillTrDest();
+    if($('tr-dest')) $('tr-dest').value=''; if($('tr-dest-addr')) $('tr-dest-addr').textContent='';
+    updateTrSave();
+    renderTransfers();
+    $('transfer-ov').classList.add('open');
+  };
+  window.closeTransfer=function(){ $('transfer-ov').classList.remove('open'); TR_PID=null; };
+  function renderTransfers(){
+    var pid=TR_PID; if(pid==null) return;
+    var list=(TRANSFERS[String(pid)]||[]).slice().sort(function(a,b){ var ac=a.createdAt||'', bc=b.createdAt||''; return ac<bc?1:(ac>bc?-1:0); });
+    if(!list.length){ $('tr-list').innerHTML='<div class="pc-list-h">Requests (0)</div><div class="pc-empty">No transfer or removal requests yet.</div>'; return; }
+    $('tr-list').innerHTML='<div class="pc-list-h">Requests ('+list.length+')</div>' + list.map(function(t){
+      var isTransfer = t.action==='transfer';
+      var head = '🚚 '+esc(t.machine||'Machine')+' — '+(isTransfer?'Transfer':'Remove / pick up');
+      var route = isTransfer ? (esc(t.fromName)+(t.toName?(' → '+esc(t.toName)):'')) : ('From '+esc(t.fromName));
+      var addr = (isTransfer && t.toAddr) ? ('📍 '+esc(t.toAddr)) : (t.fromAddr?('📍 '+esc(t.fromAddr)):'');
+      return '<div class="pc-item" style="border-left-color:'+(isTransfer?'#0891b2':'#f59e0b')+'">'
+        + '<div class="pc-item-date">'+head+(t.date?' · '+esc(pcFmtRange(t.date,t.date)):'')+'<button class="t-del" onclick="deleteTransfer(\''+esc(pid)+'\',\''+esc(t.id)+'\')" title="Remove request">✕</button></div>'
+        + '<div class="pc-item-desc">'+route+'</div>'
+        + (addr ? '<div class="pc-item-notes">'+addr+'</div>':'')
+        + (t.notes && String(t.notes).trim() ? '<div class="pc-item-notes">📝 '+esc(t.notes)+'</div>':'')
+        + '</div>';
+    }).join('');
+  }
+  window.saveTransfer=function(){
+    var pid=TR_PID; if(pid==null) return;
+    var machine=(($('tr-machine')||{}).value||'').trim();
+    if(!machine){ alert('Please enter which machine.'); return; }
+    if(!TR_ACTION){ alert('Please choose: remove or transfer.'); return; }
+    var p=PROJECTS.find(function(x){return String(x.id)===String(pid);});
+    var rec={
+      id:'mt_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
+      machine:machine, action:TR_ACTION,
+      fromId:String(pid), fromName:(p?(p.name||('#'+pid)):('#'+pid)), fromAddr:(p&&p.address)||'',
+      date:($('tr-date')||{}).value||'', notes:(($('tr-notes')||{}).value||'').trim(),
+      createdAt:new Date().toISOString(), bookedBy: ME? ME.name : 'Supervisor', au_user: ME? (ME.username||'') : '', au_app:'Mobile'
+    };
+    if(TR_ACTION==='transfer'){
+      var toId=($('tr-dest')||{}).value;
+      if(!toId){ alert('Please choose the destination site.'); return; }
+      var tp=PROJECTS.find(function(x){return String(x.id)===String(toId);});
+      rec.toId=String(toId); rec.toName=(tp?(tp.name||('#'+toId)):('#'+toId)); rec.toAddr=(tp&&tp.address)||'';
+    }
+    if(!TRANSFERS[String(pid)]) TRANSFERS[String(pid)]=[];
+    TRANSFERS[String(pid)].push(rec);
+    var wasTransfer = TR_ACTION==='transfer';
+    // reset the form
+    TR_ACTION='';
+    if($('tr-machine')) $('tr-machine').value='';
+    if($('tr-date')) $('tr-date').value='';
+    if($('tr-notes')) $('tr-notes').value='';
+    if($('tr-act-remove')) $('tr-act-remove').classList.remove('on');
+    if($('tr-act-transfer')) $('tr-act-transfer').classList.remove('on');
+    if($('tr-dest-wrap')) $('tr-dest-wrap').style.display='none';
+    if($('tr-dest')) $('tr-dest').value=''; if($('tr-dest-addr')) $('tr-dest-addr').textContent='';
+    updateTrSave();
+    renderTransfers();
+    supShowSaving('Sending to the office…');
+    pushTransfers(function(err){
+      if(err){ supShowResult(false, 'Could not send. Check your connection and try again.'); }
+      else { pull(function(){ renderTransfers(); }); supShowResult(true, wasTransfer ? 'Transfer request sent' : 'Removal request sent'); }
+    });
+  };
+  window.deleteTransfer=function(pid, id){
+    if(!confirm('Remove this request?')) return;
+    TRANSFERS[String(pid)] = (TRANSFERS[String(pid)]||[]).filter(function(t){ return String(t.id)!==String(id); });
+    renderTransfers();
+    supShowSaving('Saving…');
+    pushTransfers(function(err){
+      if(err){ supShowResult(false, 'Could not save. Check your connection.'); }
+      else { pull(function(){ renderTransfers(); }); supShowResult(true, 'Request removed'); }
+    });
+  };
+
+  // ---------- variations (per project) ----------
+  function _openImg(src){
+    if(!src) return;
+    var w=window.open('','_blank');
+    if(!w){ try{ var a=document.createElement('a'); a.href=src; a.download='photo.jpg'; a.click(); }catch(e){} return; }
+    w.document.write('<html><head><title>Photo</title></head><body style="margin:0;background:#111;display:flex;align-items:center;justify-content:center;min-height:100vh"><img src="'+src+'" style="max-width:100%;max-height:100vh"></body></html>');
+  }
+  function _openFile(src,name){
+    if(!src) return;
+    var isImg=/^data:image/.test(src), isPdf=/^data:application\/pdf/.test(src);
+    var w=window.open('','_blank');
+    if(!w){ var a=document.createElement('a'); a.href=src; a.download=name||'file'; a.click(); return; }
+    if(isImg){ w.document.write('<html><body style="margin:0;background:#111;display:flex;align-items:center;justify-content:center;min-height:100vh"><img src="'+src+'" style="max-width:100%;max-height:100vh"></body></html>'); }
+    else if(isPdf){ w.document.write('<html><body style="margin:0"><embed src="'+src+'" width="100%" height="100%" type="application/pdf"></body></html>'); }
+    else { var a=w.document.createElement('a'); a.href=src; a.download=name||'file'; w.document.body.appendChild(a); a.click(); try{ w.close(); }catch(e){} }
+  }
+  window.varViewPhoto=function(i){ _openImg(_varPhotos[i]); };
+  window.varViewSavedPhoto=function(pid,vid,i){ var v=(VARIATIONS[String(pid)]||[]).find(function(x){return String(x.id)===String(vid);}); if(v&&v.photos&&v.photos[i]) _openImg(v.photos[i]); };
+  window.varViewSavedDocket=function(pid,vid,i){ var v=(VARIATIONS[String(pid)]||[]).find(function(x){return String(x.id)===String(vid);}); if(v&&v.dockets&&v.dockets[i]) _openFile(v.dockets[i].src, v.dockets[i].name); };
+  window.varRemovePhoto=function(i){ _varPhotos.splice(i,1); varRenderPending(); };
+  window.varRemoveDocket=function(i){ _varDockets.splice(i,1); varRenderPending(); };
+  function varRenderPending(){
+    var ph=$('v-photos'); if(ph){ ph.innerHTML=_varPhotos.map(function(src,i){ return '<div class="v-thumb"><img src="'+src+'" onclick="varViewPhoto('+i+')"><button type="button" class="v-thumb-x" onclick="varRemovePhoto('+i+')">✕</button></div>'; }).join(''); }
+    var dk=$('v-dockets'); if(dk){ dk.innerHTML=_varDockets.map(function(d,i){ return '<div class="v-file"><span class="v-file-n">📄 '+esc(d.name||'file')+'</span><button type="button" class="v-file-x" onclick="varRemoveDocket('+i+')">✕</button></div>'; }).join(''); }
+  }
+  window.varPhotoChosen=function(e){
+    var files=e.target.files; if(!files||!files.length) return;
+    [].slice.call(files).forEach(function(file){
+      var reader=new FileReader();
+      reader.onload=function(ev){
+        var raw=ev.target.result;
+        var idx=_varPhotos.length; _varPhotos.push(raw); varRenderPending();
+        // resize in the browser to keep the file small; harmless if it fails (e.g. in tests)
+        try{
+          var img=new Image();
+          img.onload=function(){ try{
+            var max=1100, w=img.width||0, h=img.height||0;
+            if(w&&h){ if(w>max||h>max){ if(w>h){ h=Math.round(h*max/w); w=max; } else { w=Math.round(w*max/h); h=max; } }
+              var cv=document.createElement('canvas'); cv.width=w; cv.height=h; var ctx=cv.getContext('2d');
+              if(ctx){ ctx.drawImage(img,0,0,w,h); var out=cv.toDataURL('image/jpeg',0.6); if(out && out.length>10){ _varPhotos[idx]=out; varRenderPending(); } } }
+          }catch(_){ } };
+          img.src=raw;
+        }catch(_){ }
+      };
+      reader.readAsDataURL(file);
+    });
+    e.target.value='';
+  };
+  window.varDocketChosen=function(e){
+    var files=e.target.files; if(!files||!files.length) return;
+    [].slice.call(files).forEach(function(file){
+      var reader=new FileReader();
+      reader.onload=function(ev){ _varDockets.push({ name:file.name, src:ev.target.result, type:'file', size:(file.size/1024).toFixed(0)+' KB' }); varRenderPending(); };
+      reader.readAsDataURL(file);
+    });
+    e.target.value='';
+  };
+  function varReadRanges(){
+    var out=[];
+    var s0=($('v-start')||{}).value||'', e0=($('v-end')||{}).value||'';
+    if(s0&&e0) out.push({start:s0,end:e0});
+    var rows=document.querySelectorAll('#v-extra-ranges .f-range-row');
+    for(var i=0;i<rows.length;i++){ var s=(rows[i].querySelector('.rr-start')||{}).value||'', e=(rows[i].querySelector('.rr-end')||{}).value||''; if(s&&e) out.push({start:s,end:e}); }
+    out.forEach(function(r){ if(r.end<r.start){ var t=r.start; r.start=r.end; r.end=t; } });
+    return out;
+  }
+  window.varAddRange=function(start,end){
+    var host=$('v-extra-ranges'); if(!host) return;
+    var wrap=document.createElement('div'); wrap.className='f-range-row';
+    wrap.innerHTML='<div class="fld"><label>Also from</label><input type="date" class="rr-start"></div>'
+      +'<div class="fld"><label>to</label><input type="date" class="rr-end"></div>'
+      +'<button type="button" class="rr-x" title="Remove this period" onclick="var r=this.closest(\'.f-range-row\'); if(r) r.remove();">✕</button>';
+    host.appendChild(wrap);
+    if(start) wrap.querySelector('.rr-start').value=start;
+    if(end) wrap.querySelector('.rr-end').value=end;
+  };
+  window.updateVarSave=function(){
+    var btn=$('v-save'); if(!btn) return;
+    var ok = !!($('v-desc')&&$('v-desc').value.trim()) && !!($('v-start')&&$('v-start').value) && !!($('v-end')&&$('v-end').value);
+    btn.disabled=!ok; btn.classList.toggle('disabled', !ok);
+  };
+  function varFormHasContent(){
+    var f=function(id){ return !!($(id) && String($(id).value||'').trim()); };
+    if(f('v-desc')||f('v-start')||f('v-end')||f('v-machine')||f('v-comments')) return true;
+    if(_varPhotos.length || _varDockets.length) return true;
+    if(document.querySelectorAll('#v-extra-ranges .f-range-row').length) return true;
+    return false;
+  }
+  window.openVariation=function(pid){
+    VAR_PID=String(pid); VAR_EDIT_ID=null; _varPhotos=[]; _varDockets=[]; _varSaving=false;
+    if($('var-close-btn')) $('var-close-btn').disabled=false;
+    var p=PROJECTS.find(function(x){return String(x.id)===String(pid);});
+    $('var-title').textContent = p ? (p.name||('Project '+pid)) : 'Variations';
+    var _th=document.querySelector('#variation-ov .th'); if(_th) _th.textContent='🔧 Add a variation';
+    if($('v-save')) $('v-save').textContent='+ Add variation';
+    ['v-desc','v-start','v-end','v-machine','v-comments'].forEach(function(id){ if($(id)) $(id).value=''; });
+    if($('v-extra-ranges')) $('v-extra-ranges').innerHTML='';
+    fillMachineList();
+    varRenderPending();
+    updateVarSave();
+    renderVariations();
+    $('variation-ov').classList.add('open');
+  };
+  window.openVariationEdit=function(pid, vid){
+    var v=(VARIATIONS[String(pid)]||[]).find(function(x){return String(x.id)===String(vid);}); if(!v) return;
+    VAR_PID=String(pid); VAR_EDIT_ID=String(vid); _varSaving=false;
+    if($('var-close-btn')) $('var-close-btn').disabled=false;
+    _varPhotos=(v.photos||[]).slice(); _varDockets=(v.dockets||[]).slice();
+    if($('v-desc')) $('v-desc').value=v.description||'';
+    var rs=(v.ranges&&v.ranges.length)?v.ranges:[];
+    if($('v-start')) $('v-start').value=(rs[0]&&rs[0].start)||'';
+    if($('v-end')) $('v-end').value=(rs[0]&&rs[0].end)||'';
+    if($('v-extra-ranges')) $('v-extra-ranges').innerHTML='';
+    for(var i=1;i<rs.length;i++){ if(rs[i]&&rs[i].start&&rs[i].end) varAddRange(rs[i].start, rs[i].end); }
+    if($('v-machine')) $('v-machine').value=v.machine||'';
+    if($('v-comments')) $('v-comments').value=v.comments||'';
+    var _th=document.querySelector('#variation-ov .th'); if(_th) _th.textContent='✏️ Edit variation';
+    if($('v-save')) $('v-save').textContent='Save changes';
+    fillMachineList();
+    varRenderPending();
+    updateVarSave();
+    $('variation-ov').classList.add('open');
+    var _body=document.querySelector('#variation-ov .test-body'); if(_body) _body.scrollTop=0;
+  };
+  window.closeVariation=function(){
+    if(_varSaving){ supShowSaving('Still saving — please wait…'); return; }
+    if(varFormHasContent()){ if(!confirm('You have an unsaved variation. Go back and lose what you entered?')) return; }
+    _varPhotos=[]; _varDockets=[];
+    if($('v-extra-ranges')) $('v-extra-ranges').innerHTML='';
+    varRenderPending();
+    $('variation-ov').classList.remove('open'); VAR_PID=null;
+  };
+  function renderVariations(){
+    var pid=VAR_PID; if(pid==null) return;
+    var list=(VARIATIONS[String(pid)]||[]).slice().sort(function(a,b){ var ac=a.createdAt||'', bc=b.createdAt||''; return ac<bc?-1:(ac>bc?1:0); });
+    if(!list.length){ $('var-list').innerHTML='<div class="pc-list-h">Variations (0)</div><div class="pc-empty">No variations added yet.</div>'; return; }
+    $('var-list').innerHTML='<div class="pc-list-h">Variations ('+list.length+')</div>' + list.map(function(v, _idx){
+      var _num = String(_idx+1).padStart(2,'0');
+      var periods = (v.ranges&&v.ranges.length) ? v.ranges.filter(function(r){return r.start&&r.end;}).map(function(r){ return '<span class="v-period">'+esc(pcFmtRange(r.start,r.end))+'</span>'; }).join('') : '';
+      var photos = (v.photos&&v.photos.length) ? '<div class="v-item-photos">'+v.photos.map(function(src,i){ return '<img src="'+src+'" onclick="varViewSavedPhoto(\''+esc(pid)+'\',\''+esc(v.id)+'\','+i+')">'; }).join('')+'</div>' : '';
+      var dockets = (v.dockets&&v.dockets.length) ? '<div class="v-files">'+v.dockets.map(function(d,i){ return '<div class="v-file"><span class="v-file-n" onclick="varViewSavedDocket(\''+esc(pid)+'\',\''+esc(v.id)+'\','+i+')">📄 '+esc(d.name||'docket')+'</span></div>'; }).join('')+'</div>' : '';
+      return '<div class="pc-item" style="border-left-color:#ea580c">'
+        + '<div class="pc-item-date"><span style="flex:1">🔧 Variation '+_num+'</span><button class="t-edit" onclick="openVariationEdit(\''+esc(pid)+'\',\''+esc(v.id)+'\')" title="Edit variation">✏️</button><button class="t-del" onclick="deleteVariation(\''+esc(pid)+'\',\''+esc(v.id)+'\')" title="Remove variation">✕</button></div>'
+        + '<div class="pc-item-desc">'+esc(v.description||'')+'</div>'
+        + (periods ? '<div class="v-periods">'+periods+'</div>' : '')
+        + (v.machine ? '<div class="pc-item-notes">🚜 '+esc(v.machine)+'</div>' : '')
+        + (v.comments && String(v.comments).trim() ? '<div class="pc-item-notes">💬 '+esc(v.comments)+'</div>' : '')
+        + photos
+        + dockets
+        + '</div>';
+    }).join('');
+  }
+  window.saveVariation=function(){
+    var pid=VAR_PID; if(pid==null) return;
+    var desc=(($('v-desc')||{}).value||'').trim();
+    if(!desc){ alert('Please add a description for the variation.'); return; }
+    var ranges=varReadRanges();
+    if(!ranges.length){ alert('Please choose start and finish dates.'); return; }
+    var rec={
+      id:'vr_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
+      description:desc,
+      ranges:ranges,
+      machine:(($('v-machine')||{}).value||'').trim(),
+      comments:(($('v-comments')||{}).value||'').trim(),
+      photos:_varPhotos.slice(),
+      dockets:_varDockets.slice(),
+      createdAt:new Date().toISOString(), bookedBy: ME? ME.name : 'Supervisor', au_user: ME? (ME.username||'') : '', au_app:'Mobile'
+    };
+    if(!VARIATIONS[String(pid)]) VARIATIONS[String(pid)]=[];
+    var wasEdit=false;
+    if(VAR_EDIT_ID){
+      var _i=VARIATIONS[String(pid)].findIndex(function(x){return String(x.id)===String(VAR_EDIT_ID);});
+      if(_i>=0){
+        rec.id=VARIATIONS[String(pid)][_i].id;
+        rec.createdAt=VARIATIONS[String(pid)][_i].createdAt || rec.createdAt;
+        rec.au_eby = ME? ME.name : 'Supervisor'; rec.au_eat = new Date().toISOString(); rec.au_eapp='Mobile';
+        VARIATIONS[String(pid)][_i]=rec; wasEdit=true;
+      } else { VARIATIONS[String(pid)].push(rec); }
+    } else {
+      VARIATIONS[String(pid)].push(rec);
+    }
+    VAR_EDIT_ID=null;
+    // reset the form
+    _varPhotos=[]; _varDockets=[];
+    ['v-desc','v-start','v-end','v-machine','v-comments'].forEach(function(id){ if($(id)) $(id).value=''; });
+    if($('v-extra-ranges')) $('v-extra-ranges').innerHTML='';
+    var _th=document.querySelector('#variation-ov .th'); if(_th) _th.textContent='🔧 Add a variation';
+    if($('v-save')) $('v-save').textContent='+ Add variation';
+    varRenderPending();
+    updateVarSave();
+    renderVariations();
+    _varSaving=true; if($('var-close-btn')) $('var-close-btn').disabled=true;
+    supShowSaving('Saving to the system…');
+    pushVariations(function(err){
+      _varSaving=false; if($('var-close-btn')) $('var-close-btn').disabled=false;
+      if(err){ supShowResult(false, 'Could not save. Check your connection and try again.'); }
+      else { pull(function(){ renderVariations(); }); supShowResult(true, wasEdit ? 'Variation updated' : 'Variation added'); }
+    });
+  };
+  window.deleteVariation=function(pid, id){
+    if(!confirm('Remove this variation?')) return;
+    VARIATIONS[String(pid)] = (VARIATIONS[String(pid)]||[]).filter(function(v){ return String(v.id)!==String(id); });
+    renderVariations();
+    supShowSaving('Saving…');
+    pushVariations(function(err){
+      if(err){ supShowResult(false, 'Could not save. Check your connection.'); }
+      else { pull(function(){ renderVariations(); }); supShowResult(true, 'Variation removed'); }
+    });
+  };
+  function renderProjCal(){
+    var pid=PROJCAL_PID; if(pid==null) return;
+    var p=PROJECTS.find(function(x){return String(x.id)===String(pid);});
+    $('projcal-title').textContent = p ? (p.name||('Project '+pid)) : 'Project';
+    var bks=BOOKINGS.filter(function(b){ return String(b.projectId)===String(pid); });
+    var tk=todayKey();
+    // ----- month calendar -----
+    var base=new Date(); base.setDate(1); base.setMonth(base.getMonth()+PROJCAL_OFFSET);
+    var y=base.getFullYear(), m=base.getMonth();
+    $('projcal-month').textContent = MN[m]+' '+y;
+    var first=new Date(y,m,1); var start=addDays(first, -(((first.getDay())+6)%7));
+    var g='<div class="pc-mgrid"><div class="pc-mrow pc-head">'+['M','T','W','T','F','S','S'].map(function(d){return '<div>'+d+'</div>';}).join('')+'</div>';
+    for(var wk=0; wk<6; wk++){
+      g+='<div class="pc-mrow">';
+      for(var c=0;c<7;c++){
+        var d=addDays(start, wk*7+c), dk=keyOf(d), out=(d.getMonth()!==m), today=dk===tk;
+        var has=bks.some(function(b){ return bookingCoversDay(b,dk); });
+        g+='<div class="pc-cell'+(out?' out':'')+(today?' today':'')+(has?' has':'')+'">'+d.getDate()+'</div>';
+      }
+      g+='</div>';
+    }
+    g+='</div>';
+    $('projcal-grid').innerHTML=g;
+    // ----- list (all bookings, past & future) -----
+    if(!bks.length){ $('projcal-list').innerHTML='<div class="pc-empty">No bookings for this project yet.</div>'; return; }
+    // one line per period (non-sequential ranges are shown separately)
+    var items=[];
+    bks.forEach(function(b){
+      bookingRanges(b).filter(function(r){return r.start&&r.end;}).forEach(function(r){
+        var s=r.start, e=r.end; if(e<s){ var t=s; s=e; e=t; }
+        items.push({ b:b, s:s, e:e });
+      });
+    });
+    items.sort(function(a,b){ return a.s<b.s?-1:(a.s>b.s?1:0); });
+    $('projcal-list').innerHTML='<div class="pc-list-h">All bookings ('+bks.length+')</div>' + items.map(function(o){
+      var b=o.b;
+      var isPast = o.e && o.e < tk;
+      var desc = [b.activity, b.machine].filter(Boolean).join(' · ') || 'No description';
+      var tag = isPast ? '<span class="pc-past">Past</span>' : '<span class="pc-upcoming">Upcoming</span>';
+      return '<div class="pc-item'+(isPast?' past':'')+'" style="border-left-color:'+(b.color||'#2563eb')+';cursor:pointer" onclick="openEdit(\''+b.id+'\')" title="Tap to edit this booking">'
+        + '<div class="pc-item-date">'+esc(pcFmtRange(o.s,o.e))+' '+tag+'</div>'
+        + '<div class="pc-item-desc">'+esc(desc)+'</div>'
+        + (b.notes && String(b.notes).trim() ? '<div class="pc-item-notes">📝 '+esc(b.notes)+'</div>':'')
+        + '</div>';
+    }).join('');
+  }
   window.saveNotes=function(){
     if(NOTES_PID==null) return;
     var pid=NOTES_PID;
@@ -733,16 +1446,21 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
   window.saveBooking=function(){
     var pid=$('f-project').value;
     if(!pid){ alert('You have no projects assigned to you. Ask the office to set you as Supervisor on a project.'); return; }
-    var start=$('f-start').value, end=$('f-end').value;
-    if(!start||!end){ alert('Please choose start and end dates.'); return; }
-    if(end<start){ var t=start; start=end; end=t; }
+    var ranges=bkReadRanges();
+    if(!ranges.length){ alert('Please choose start and end dates.'); return; }
+    // primary start/end bound the whole booking (earliest start → latest end)
+    var _st=ranges.map(function(r){return r.start;}).sort();
+    var _en=ranges.map(function(r){return r.end;}).sort();
+    var start=_st[0], end=_en[_en.length-1];
     // safety: only your own projects
     if(!myProjectIds()[String(pid)]){ alert('You can only book your own projects.'); return; }
     var rec = {
       projectId: isNaN(pid)? pid : +pid,
       start:start, end:end,
+      ranges:ranges,
       activity:$('f-activity').value.trim(),
       machine:$('f-machine').value.trim(),
+      notes:($('f-notes')?$('f-notes').value.trim():''),
       color:PICK_COLOR,
       skipSat: !$('f-sat').checked,
       skipSun: !$('f-sun').checked,
@@ -754,7 +1472,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
       var _pn = _p ? (_p.name || ('#'+rec.projectId)) : ('#'+rec.projectId);
       var _cl = (_p && _p.cName) ? _p.cName : '';
       var _fmt = function(d){ try{ return new Date(d+'T00:00:00').toLocaleDateString('en-GB',{weekday:'short', day:'numeric', month:'short', year:'numeric'}); }catch(e){ return d; } };
-      var _range = (start===end) ? _fmt(start) : (_fmt(start)+'  →  '+_fmt(end));
+      var _range = ranges.map(function(r){ return (r.start===r.end) ? _fmt(r.start) : (_fmt(r.start)+'  →  '+_fmt(r.end)); }).join('\n              ');
       var _msg = 'Are you sure you want to register this job?\n\nProject: '+_pn+(_cl?('\nClient: '+_cl):'')+'\nDate(s): '+_range;
       if(!confirm(_msg)) return;
       rec.color = COLORS[Math.abs(String(rec.projectId).split('').reduce(function(a,c){return a+c.charCodeAt(0);},0)) % COLORS.length];
