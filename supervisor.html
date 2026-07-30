@@ -98,6 +98,35 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);-web
 .v-item-photos img{width:60px;height:60px;object-fit:cover;border-radius:7px;border:1px solid var(--border);cursor:pointer}
 .v-periods{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
 .v-period{font-size:11px;font-weight:700;color:var(--mid);background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:2px 9px}
+.pcard .psub{background:#f0fdfa;color:#0f766e;border:1px solid #99f6e4;border-radius:8px;padding:8px 12px;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer}
+.pcard .pallow{background:#fefce8;color:#a16207;border:1px solid #fde68a;border-radius:8px;padding:8px 12px;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer}
+.v-file-view{background:#eff6ff;border:1px solid #bfdbfe;color:#1d4ed8;border-radius:7px;padding:5px 12px;font-family:inherit;font-size:12px;font-weight:800;cursor:pointer;flex:0 0 auto}
+/* ---- Subcontractor horizontal timeline ---- */
+.sub-timeline-h{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--mid);margin:4px 0 2px}
+.sub-track{display:flex;overflow-x:auto;padding:22px 4px 14px;-webkit-overflow-scrolling:touch}
+.sub-node{flex:0 0 auto;width:172px;position:relative;padding:0 8px}
+.sub-node::before{content:'';position:absolute;top:7px;left:0;right:0;height:3px;background:var(--border2);z-index:0}
+.sub-node:first-child::before{left:50%}
+.sub-node:last-child::before{right:50%}
+.sub-dot{position:absolute;top:0;left:50%;transform:translateX(-50%);width:17px;height:17px;border-radius:50%;border:3px solid var(--surface);z-index:1;box-shadow:0 0 0 1px var(--border)}
+.sub-card{margin-top:28px;background:var(--surface);border:1px solid var(--border);border-top:4px solid var(--blue);border-radius:12px;box-shadow:var(--shadow);padding:11px 12px;cursor:pointer}
+.sub-card:active{transform:scale(.99)}
+.sub-date{font-size:12px;font-weight:800;color:var(--mid)}
+.sub-product{font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:900;text-transform:uppercase;letter-spacing:.5px;color:var(--text);margin-top:3px;line-height:1.05}
+.sub-name{font-size:13px;color:var(--mid);margin-top:3px}
+.sub-status{display:inline-block;margin-top:9px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;border-radius:20px;padding:2px 9px}
+.sub-status.booked{background:#dcfce7;color:#15803d}
+.sub-status.pending{background:#fef3c7;color:#92400e}
+.sub-tap{font-size:10px;color:var(--muted);margin-top:8px}
+.sub-intro{background:#f0fdfa;border:1px solid #99f6e4;color:#0f766e;border-radius:10px;padding:11px 13px;font-size:13px;line-height:1.5;margin-bottom:6px}
+.sub-req{margin-top:8px;font-size:11px;font-weight:800;border-radius:8px;padding:5px 8px;line-height:1.3}
+.sub-req.postpone{background:#fef3c7;color:#92400e;border:1px solid #fde68a}
+.sub-req.cancel{background:#fee2e2;color:#b91c1c;border:1px solid #fecaca}
+.sub-reqbox{background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;border-radius:10px;padding:10px 12px;font-size:13px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.sub-reqclear{margin-left:auto;background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:8px;padding:5px 10px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer}
+#sub-act-info{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:12px;font-size:14px;color:var(--text)}
+#sub-act-info .sai-p{font-weight:800}
+#sub-act-info .sai-m{font-size:12px;color:var(--muted);margin-top:2px}
 /* ---- Per-project calendar view ---- */
 .projcal-ov{display:none;position:fixed;inset:0;background:var(--bg);z-index:90;flex-direction:column}
 .projcal-ov.open{display:flex}
@@ -453,6 +482,49 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
   </div>
 </div>
 
+<div class="test-ov" id="subs-ov">
+  <div class="projcal-top">
+    <button class="back" onclick="closeSubs()">‹ Close</button>
+    <div class="projcal-title" id="subs-title">Subcontractors</div>
+  </div>
+  <div class="test-body">
+    <div class="sub-intro">Subcontractors scheduled by the office. Tap a subcontractor to ask the office to <b>postpone</b> or <b>cancel</b> it.</div>
+    <div class="sub-timeline-h" id="sub-tl-h">Timeline</div>
+    <div class="sub-track" id="sub-track"></div>
+  </div>
+</div>
+
+<div class="test-ov" id="allow-ov">
+  <div class="projcal-top">
+    <button class="back" onclick="closeAllow()">‹ Close</button>
+    <div class="projcal-title" id="allow-title">Project Allowances</div>
+  </div>
+  <div class="test-body">
+    <div class="sub-intro">Project allowances uploaded by the office. Tap a file to view or download.</div>
+    <div class="v-files" id="allow-list" style="margin-top:12px"></div>
+  </div>
+</div>
+
+<div class="ov" id="sub-act-ov" onclick="if(event.target===this) closeSubAct()">
+  <div class="sheet">
+    <div class="sheet-head">
+      <div class="sheet-title">Postpone or cancel request</div>
+      <button class="x" onclick="closeSubAct()">&times;</button>
+    </div>
+    <div class="sheet-body">
+      <div id="sub-act-info"></div>
+      <div id="sub-act-current"></div>
+      <div class="fld"><label>Suggested new date (for postpone)</label><input id="sub-act-date" type="date"></div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.5">This sends a request to the office. They will action it in the main software.</div>
+    </div>
+    <div class="sheet-foot">
+      <button class="btn btn-del" onclick="subReqCancel()">Request cancel</button>
+      <button class="btn btn-cancel" onclick="closeSubAct()">Close</button>
+      <button class="btn btn-save" onclick="subReqPostpone()">Request postpone</button>
+    </div>
+  </div>
+</div>
+
 <script>
 (function(){
   var CFG = window.REMC_SUP_CLOUD || {};
@@ -467,6 +539,8 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
   var TESTS = {}, TEST_PID = null;
   var TRANSFERS = {}, TR_PID = null, TR_ACTION = '';
   var VARIATIONS = {}, VAR_PID = null, _varPhotos = [], _varDockets = [], _varSaving = false, VAR_EDIT_ID = null;
+  var SUBCONS = {}, SUB_PID = null, SUB_STATUS = 'booked', SUB_ACT = { pid:null, id:null };
+  var PROJDOCS = {}, ALLOW_PID = null;
 
   function $(id){ return document.getElementById(id); }
   function setCloud(t,bg,c){ var e=$('cloud'); if(!e)return; e.textContent=t; e.style.background=bg||'#f1f5f9'; e.style.color=c||'#64748b'; }
@@ -489,6 +563,8 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     TESTS    = j('remc_compaction_tests','{}'); if(!TESTS || typeof TESTS!=='object' || Array.isArray(TESTS)) TESTS={};
     TRANSFERS= j('remc_machine_transfers','{}'); if(!TRANSFERS || typeof TRANSFERS!=='object' || Array.isArray(TRANSFERS)) TRANSFERS={};
     VARIATIONS= j('remc_variations','{}'); if(!VARIATIONS || typeof VARIATIONS!=='object' || Array.isArray(VARIATIONS)) VARIATIONS={};
+    SUBCONS  = j('remc_sub_bookings','{}'); if(!SUBCONS || typeof SUBCONS!=='object' || Array.isArray(SUBCONS)) SUBCONS={};
+    PROJDOCS = j('remc_proj_docs','{}'); if(!PROJDOCS || typeof PROJDOCS!=='object' || Array.isArray(PROJDOCS)) PROJDOCS={};
     fillMachineList();
   }
   // Fill the Machine dropdown with the machines uploaded in App 1 (falls back to a default list)
@@ -600,6 +676,19 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     sb.from('remc_state').select('data').eq('id',WS).maybeSingle().then(function(res){
       var d = (res && res.data && res.data.data) ? res.data.data : {};
       d['remc_variations'] = JSON.stringify(VARIATIONS);
+      d['__client'] = CLIENT;
+      sb.from('remc_state').upsert({ id:WS, data:d, updated_at:new Date().toISOString() }).then(function(r2){
+        if(r2 && r2.error){ setCloud('offline','#fee2e2','#dc2626'); if(cb) cb(r2.error.message); }
+        else { DATA=d; setCloud('☁︎','#dcfce7','#15803d'); if(cb) cb(null); }
+      });
+    });
+  }
+  function pushSubs(cb){
+    if(!ensureClient()){ if(cb) cb('noconfig'); return; }
+    setCloud('saving…','#fef3c7','#92400e');
+    sb.from('remc_state').select('data').eq('id',WS).maybeSingle().then(function(res){
+      var d = (res && res.data && res.data.data) ? res.data.data : {};
+      d['remc_sub_bookings'] = JSON.stringify(SUBCONS);
       d['__client'] = CLIENT;
       sb.from('remc_state').upsert({ id:WS, data:d, updated_at:new Date().toISOString() }).then(function(r2){
         if(r2 && r2.error){ setCloud('offline','#fee2e2','#dc2626'); if(cb) cb(r2.error.message); }
@@ -766,6 +855,8 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
         +   '<button class="ptest" onclick="openTest(\''+esc(p.id)+'\')">🧪 Test</button>'
         +   '<button class="ptransfer" onclick="openTransfer(\''+esc(p.id)+'\')">🚚 Transfer</button>'
         +   '<button class="pvar" onclick="openVariation(\''+esc(p.id)+'\')">🔧 Variation</button>'
+        +   '<button class="psub" onclick="openSubs(\''+esc(p.id)+'\')">👷 Subs</button>'
+        +   '<button class="pallow" onclick="openAllow(\''+esc(p.id)+'\')">📋 Allowances</button>'
         +   '<span class="pcount">'+cnt+' booking'+(cnt===1?'':'s')+'</span>'
         + '</div>'
         + '</div>';
@@ -1360,6 +1451,120 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
       if(err){ supShowResult(false, 'Could not save. Check your connection.'); }
       else { pull(function(){ renderVariations(); }); supShowResult(true, 'Variation removed'); }
     });
+  };
+
+  // ---------- subcontractors (read-only timeline from the office; supervisor can request changes) ----------
+  var _SUB_COLORS = { booked:'#16a34a', pending:'#f59e0b' };
+  window.openSubs=function(pid){
+    SUB_PID=String(pid);
+    var p=PROJECTS.find(function(x){return String(x.id)===String(pid);});
+    $('subs-title').textContent = p ? (p.name||('Project '+pid)) : 'Subcontractors';
+    renderSubs();
+    $('subs-ov').classList.add('open');
+  };
+  window.closeSubs=function(){ $('subs-ov').classList.remove('open'); SUB_PID=null; };
+  function renderSubs(){
+    var pid=SUB_PID; if(pid==null) return;
+    var list=(SUBCONS[String(pid)]||[]).slice().sort(function(a,b){ var ad=a.date||'', bd=b.date||''; return ad<bd?-1:(ad>bd?1:0); });
+    var h=$('sub-tl-h'); if(h) h.textContent = list.length ? ('Timeline ('+list.length+')') : 'Timeline';
+    var track=$('sub-track'); if(!track) return;
+    if(!list.length){ track.innerHTML='<div class="sub-empty" style="padding:20px;text-align:center;color:var(--muted)">No subcontractors scheduled for this job yet.<br>These come from the office in the main software.</div>'; return; }
+    track.innerHTML = list.map(function(s){
+      var col=_SUB_COLORS[s.status]||'#2563eb';
+      var st=(s.status==='pending')?'pending':'booked';
+      var stLabel=(s.status==='pending')?'Pending':'Booked';
+      var reqBadge='';
+      if(s.req && s.req.type==='postpone'){ reqBadge='<div class="sub-req postpone">⚠ Postpone requested'+(s.req.date?(' → '+esc(pcFmtRange(s.req.date,s.req.date))):'')+'</div>'; }
+      else if(s.req && s.req.type==='cancel'){ reqBadge='<div class="sub-req cancel">⚠ Cancel requested</div>'; }
+      return '<div class="sub-node">'
+        + '<div class="sub-dot" style="background:'+col+'"></div>'
+        + '<div class="sub-card" style="border-top-color:'+col+'" onclick="subAction(\''+esc(pid)+'\',\''+esc(s.id)+'\')">'
+        +   '<div class="sub-date">'+esc(pcFmtRange(s.date,s.date))+'</div>'
+        +   '<div class="sub-product">'+esc(s.product||'—')+'</div>'
+        +   '<div class="sub-name">'+esc(s.name||'')+'</div>'
+        +   '<span class="sub-status '+st+'">'+stLabel+'</span>'
+        +   (s.notes && String(s.notes).trim() ? '<div class="pc-item-notes" style="margin-top:8px">📝 '+esc(s.notes)+'</div>' : '')
+        +   reqBadge
+        +   '<div class="sub-tap">Tap to request postpone / cancel</div>'
+        + '</div>'
+        + '</div>';
+    }).join('');
+  }
+  function _subActRefresh(){
+    var s=(SUBCONS[String(SUB_ACT.pid)]||[]).find(function(x){return String(x.id)===String(SUB_ACT.id);});
+    var cur=$('sub-act-current'); if(!cur) return;
+    if(s && s.req){
+      var txt = (s.req.type==='postpone') ? ('Postpone requested'+(s.req.date?(' to '+esc(pcFmtRange(s.req.date,s.req.date))):'')) : 'Cancel requested';
+      cur.innerHTML = '<div class="sub-reqbox">⚠ '+txt+' <button type="button" class="sub-reqclear" onclick="subReqClear()">Clear request</button></div>';
+    } else { cur.innerHTML=''; }
+  }
+  window.subAction=function(pid, id){
+    var s=(SUBCONS[String(pid)]||[]).find(function(x){return String(x.id)===String(id);}); if(!s) return;
+    SUB_ACT={ pid:String(pid), id:String(id) };
+    var info=$('sub-act-info');
+    if(info){ info.innerHTML = '<div class="sai-p">'+esc(s.product||'')+' — '+esc(s.name||'')+'</div>'
+      + '<div class="sai-m">'+esc(pcFmtRange(s.date,s.date))+' · '+(s.status==='pending'?'Pending':'Booked')+'</div>'; }
+    if($('sub-act-date')) $('sub-act-date').value=(s.req && s.req.date) ? s.req.date : (s.date||'');
+    _subActRefresh();
+    $('sub-act-ov').classList.add('open');
+  };
+  window.closeSubAct=function(){ $('sub-act-ov').classList.remove('open'); SUB_ACT={pid:null,id:null}; };
+  function _subSaveReq(msg){
+    renderSubs(); _subActRefresh();
+    supShowSaving('Sending to the office…');
+    pushSubs(function(err){ if(err){ supShowResult(false, 'Could not send. Check your connection and try again.'); } else { pull(function(){ renderSubs(); }); supShowResult(true, msg); } });
+  }
+  window.subReqPostpone=function(){
+    var pid=SUB_ACT.pid, id=SUB_ACT.id; if(pid==null) return;
+    var nd=($('sub-act-date')||{}).value||'';
+    if(!nd){ alert('Please choose the suggested new date.'); return; }
+    var s=(SUBCONS[String(pid)]||[]).find(function(x){return String(x.id)===String(id);}); if(!s) return;
+    s.req={ type:'postpone', date:nd, by: ME? ME.name : 'Supervisor', user: ME? (ME.username||'') : '', at:new Date().toISOString() };
+    closeSubAct(); _subSaveReq('Postpone requested');
+  };
+  window.subReqCancel=function(){
+    var pid=SUB_ACT.pid, id=SUB_ACT.id; if(pid==null) return;
+    if(!confirm('Ask the office to cancel this subcontractor?')) return;
+    var s=(SUBCONS[String(pid)]||[]).find(function(x){return String(x.id)===String(id);}); if(!s) return;
+    s.req={ type:'cancel', by: ME? ME.name : 'Supervisor', user: ME? (ME.username||'') : '', at:new Date().toISOString() };
+    closeSubAct(); _subSaveReq('Cancel requested');
+  };
+  window.subReqClear=function(){
+    var pid=SUB_ACT.pid, id=SUB_ACT.id; if(pid==null) return;
+    var s=(SUBCONS[String(pid)]||[]).find(function(x){return String(x.id)===String(id);}); if(!s) return;
+    delete s.req;
+    _subSaveReq('Request cleared');
+  };
+
+  // ---------- project allowances (read-only, uploaded by the office in App 1) ----------
+  window.openAllow=function(pid){
+    ALLOW_PID=String(pid);
+    var p=PROJECTS.find(function(x){return String(x.id)===String(pid);});
+    $('allow-title').textContent = p ? (p.name||('Project '+pid)) : 'Project Allowances';
+    renderAllow();
+    $('allow-ov').classList.add('open');
+  };
+  window.closeAllow=function(){ $('allow-ov').classList.remove('open'); ALLOW_PID=null; };
+  function renderAllow(){
+    var pid=ALLOW_PID; if(pid==null) return;
+    var docs=((PROJDOCS[String(pid)]||{}).allowances)||{};
+    var keys=Object.keys(docs).filter(function(k){ var d=docs[k]; return d && (d.name || d.src); });
+    var host=$('allow-list'); if(!host) return;
+    if(!keys.length){ host.innerHTML='<div class="pc-empty" style="padding:26px 16px;text-align:center;color:var(--muted)">No project allowances uploaded yet.<br>These come from the office in the main software.</div>'; return; }
+    host.innerHTML = keys.map(function(k){
+      var d=docs[k];
+      var nm = d.label || d.name || 'Project Allowances';
+      return '<div class="v-file">'
+        + '<span class="v-file-n" onclick="openAllowDoc(\''+esc(pid)+'\',\''+esc(k)+'\')">📄 '+esc(nm)+'</span>'
+        + '<button type="button" class="v-file-view" onclick="openAllowDoc(\''+esc(pid)+'\',\''+esc(k)+'\')">View</button>'
+        + '</div>';
+    }).join('');
+  }
+  window.openAllowDoc=function(pid, key){
+    var docs=((PROJDOCS[String(pid)]||{}).allowances)||{};
+    var d=docs[key]; if(!d || !d.src) return;
+    if(d.type==='link'){ window.open(d.src,'_blank'); return; }
+    _openFile(d.src, d.name);
   };
   function renderProjCal(){
     var pid=PROJCAL_PID; if(pid==null) return;
