@@ -88,6 +88,9 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);-web
 .v-attach{background:var(--surface2);border:1.5px dashed var(--border2);color:var(--blue);border-radius:9px;padding:9px 12px;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer;width:100%}
 .v-thumbs{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
 .v-thumb{position:relative;width:74px;height:74px;border-radius:9px;overflow:hidden;border:1px solid var(--border)}
+.v-thumb-up{display:flex;align-items:center;justify-content:center;background:var(--surface2);color:var(--muted);font-size:22px}
+.v-thumb-up span{animation:vpulse 1s ease-in-out infinite}
+@keyframes vpulse{0%,100%{opacity:.4}50%{opacity:1}}
 .v-thumb img{width:100%;height:100%;object-fit:cover;cursor:pointer;display:block}
 .v-thumb-x{position:absolute;top:2px;right:2px;width:20px;height:20px;border:none;border-radius:50%;background:rgba(220,38,38,.92);color:#fff;font-size:11px;font-weight:700;cursor:pointer;line-height:1}
 .v-files{margin-top:8px;display:flex;flex-direction:column;gap:6px}
@@ -1327,6 +1330,52 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
   };
 
   // ---------- variations (per project) ----------
+  // ---- Media in Supabase Storage (keeps the synced document small) ----
+  var MEDIA_BUCKET='remc-media';
+  function _photoUrl(p){ return (p&&typeof p==='object') ? (p.url||p.src||'') : (p||''); }   // legacy: a plain base64 string
+  function _docketUrl(d){ return (d&&typeof d==='object') ? (d.url||d.src||'') : (d||''); }
+  function _resizeDataUrl(dataUrl, max, quality, cb){
+    var done=false; function fin(v){ if(done) return; done=true; cb(v); }
+    try{
+      var img=new Image();
+      img.onload=function(){ try{
+        var w=img.width||0, h=img.height||0;
+        if(w&&h){ if(w>max||h>max){ if(w>h){ h=Math.round(h*max/w); w=max; } else { w=Math.round(w*max/h); h=max; } }
+          var cv=document.createElement('canvas'); cv.width=w; cv.height=h; var ctx=cv.getContext('2d');
+          if(ctx){ ctx.drawImage(img,0,0,w,h); var out=cv.toDataURL('image/jpeg',quality); if(out&&out.length>10){ fin(out); return; } } }
+        fin(null);
+      }catch(_){ fin(null); } };
+      img.onerror=function(){ fin(null); };
+      setTimeout(function(){ fin(null); }, 2500); // fallback so the upload never gets stuck if load/error never fires
+      img.src=dataUrl;
+    }catch(_){ fin(null); }
+  }
+  function _uploadMedia(dataUrl, name, kind, cb){
+    try{
+      if(!sb || !sb.storage){ cb('offline'); return; }
+      var m=/^data:([^;]+);base64,([\s\S]*)$/.exec(dataUrl||'');
+      if(!m){ cb('bad-file'); return; }
+      var mime=m[1], bin=atob(m[2]), len=bin.length, arr=new Uint8Array(len);
+      for(var i=0;i<len;i++) arr[i]=bin.charCodeAt(i);
+      var blob=new Blob([arr], {type:mime});
+      var ext=((mime.split('/')[1]||'bin').split('+')[0]).replace(/[^a-z0-9]/gi,'').slice(0,5)||'bin';
+      var uid=(ME&&ME.username)?String(ME.username).replace(/[^a-z0-9_-]/gi,'') : 'sup';
+      var path=uid+'/'+Date.now()+'_'+Math.random().toString(36).slice(2,8)+'.'+ext;
+      sb.storage.from(MEDIA_BUCKET).upload(path, blob, {contentType:mime, upsert:true}).then(function(res){
+        if(res && res.error){ cb((res.error.message)||'upload-failed'); return; }
+        var pub=sb.storage.from(MEDIA_BUCKET).getPublicUrl(path);
+        var url=(pub&&pub.data&&pub.data.publicUrl)||'';
+        cb(null, {url:url, path:path, name:name||('file.'+ext), kind:kind});
+      }).catch(function(err){ cb((err&&err.message)||'upload-failed'); });
+    }catch(e){ cb(String(e)); }
+  }
+  function _mediaError(err){
+    var e=String(err||'');
+    var msg = /not found|bucket|404/i.test(e) ? 'Photo not uploaded: the "remc-media" storage bucket is not set up yet. Ask the office to create it.'
+            : /offline|network|failed to fetch/i.test(e) ? 'Photo not uploaded: no connection. Try again when online.'
+            : ('Photo not uploaded: '+e);
+    try{ if(typeof supShowResult==='function') supShowResult(false, msg); else alert(msg); }catch(_){ }
+  }
   function _openImg(src){
     if(!src) return;
     var w=window.open('','_blank');
@@ -1335,6 +1384,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
   }
   function _openFile(src,name){
     if(!src) return;
+    if(/^https?:/.test(src)){ var wo=window.open(src,'_blank'); if(!wo){ try{ var la=document.createElement('a'); la.href=src; la.target='_blank'; la.rel='noopener'; la.click(); }catch(e){} } return; }
     var isImg=/^data:image/.test(src), isPdf=/^data:application\/pdf/.test(src);
     var w=window.open('','_blank');
     if(!w){ var a=document.createElement('a'); a.href=src; a.download=name||'file'; a.click(); return; }
@@ -1342,34 +1392,37 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     else if(isPdf){ w.document.write('<html><body style="margin:0"><embed src="'+src+'" width="100%" height="100%" type="application/pdf"></body></html>'); }
     else { var a=w.document.createElement('a'); a.href=src; a.download=name||'file'; w.document.body.appendChild(a); a.click(); try{ w.close(); }catch(e){} }
   }
-  window.varViewPhoto=function(i){ _openImg(_varPhotos[i]); };
-  window.varViewSavedPhoto=function(pid,vid,i){ var v=(VARIATIONS[String(pid)]||[]).find(function(x){return String(x.id)===String(vid);}); if(v&&v.photos&&v.photos[i]) _openImg(v.photos[i]); };
-  window.varViewSavedDocket=function(pid,vid,i){ var v=(VARIATIONS[String(pid)]||[]).find(function(x){return String(x.id)===String(vid);}); if(v&&v.dockets&&v.dockets[i]) _openFile(v.dockets[i].src, v.dockets[i].name); };
+  window.varViewPhoto=function(i){ _openImg(_photoUrl(_varPhotos[i])); };
+  window.varViewSavedPhoto=function(pid,vid,i){ var v=(VARIATIONS[String(pid)]||[]).find(function(x){return String(x.id)===String(vid);}); if(v&&v.photos&&v.photos[i]) _openImg(_photoUrl(v.photos[i])); };
+  window.varViewSavedDocket=function(pid,vid,i){ var v=(VARIATIONS[String(pid)]||[]).find(function(x){return String(x.id)===String(vid);}); var d=v&&v.dockets&&v.dockets[i]; if(d) _openFile(_docketUrl(d), d.name); };
   window.varRemovePhoto=function(i){ _varPhotos.splice(i,1); varRenderPending(); };
   window.varRemoveDocket=function(i){ _varDockets.splice(i,1); varRenderPending(); };
   function varRenderPending(){
-    var ph=$('v-photos'); if(ph){ ph.innerHTML=_varPhotos.map(function(src,i){ return '<div class="v-thumb"><img src="'+src+'" onclick="varViewPhoto('+i+')"><button type="button" class="v-thumb-x" onclick="varRemovePhoto('+i+')">✕</button></div>'; }).join(''); }
-    var dk=$('v-dockets'); if(dk){ dk.innerHTML=_varDockets.map(function(d,i){ return '<div class="v-file"><span class="v-file-n">📄 '+esc(d.name||'file')+'</span><button type="button" class="v-file-x" onclick="varRemoveDocket('+i+')">✕</button></div>'; }).join(''); }
+    var ph=$('v-photos'); if(ph){ ph.innerHTML=_varPhotos.map(function(p,i){
+      if(p&&p.uploading) return '<div class="v-thumb v-thumb-up"><span>⏳</span></div>';
+      return '<div class="v-thumb"><img src="'+esc(_photoUrl(p))+'" onclick="varViewPhoto('+i+')"><button type="button" class="v-thumb-x" onclick="varRemovePhoto('+i+')">✕</button></div>'; }).join(''); }
+    var dk=$('v-dockets'); if(dk){ dk.innerHTML=_varDockets.map(function(d,i){
+      var up=(d&&d.uploading)?' ⏳':'';
+      return '<div class="v-file"><span class="v-file-n">📄 '+esc((d&&d.name)||'file')+up+'</span>'+((d&&d.uploading)?'':'<button type="button" class="v-file-x" onclick="varRemoveDocket('+i+')">✕</button>')+'</div>'; }).join(''); }
   }
   window.varPhotoChosen=function(e){
     var files=e.target.files; if(!files||!files.length) return;
     [].slice.call(files).forEach(function(file){
+      var ph={uploading:true, name:file.name, kind:'image'}; _varPhotos.push(ph); varRenderPending();
       var reader=new FileReader();
       reader.onload=function(ev){
         var raw=ev.target.result;
-        var idx=_varPhotos.length; _varPhotos.push(raw); varRenderPending();
-        // resize in the browser to keep the file small; harmless if it fails (e.g. in tests)
-        try{
-          var img=new Image();
-          img.onload=function(){ try{
-            var max=1100, w=img.width||0, h=img.height||0;
-            if(w&&h){ if(w>max||h>max){ if(w>h){ h=Math.round(h*max/w); w=max; } else { w=Math.round(w*max/h); h=max; } }
-              var cv=document.createElement('canvas'); cv.width=w; cv.height=h; var ctx=cv.getContext('2d');
-              if(ctx){ ctx.drawImage(img,0,0,w,h); var out=cv.toDataURL('image/jpeg',0.6); if(out && out.length>10){ _varPhotos[idx]=out; varRenderPending(); } } }
-          }catch(_){ } };
-          img.src=raw;
-        }catch(_){ }
+        // resize in the browser to keep the upload small, then send to Storage
+        _resizeDataUrl(raw, 1100, 0.6, function(small){
+          _uploadMedia(small||raw, file.name, 'image', function(err, item){
+            var i=_varPhotos.indexOf(ph);
+            if(err){ if(i>=0) _varPhotos.splice(i,1); varRenderPending(); _mediaError(err); return; }
+            if(i>=0) _varPhotos[i]=item; else _varPhotos.push(item);
+            varRenderPending();
+          });
+        });
       };
+      reader.onerror=function(){ var i=_varPhotos.indexOf(ph); if(i>=0) _varPhotos.splice(i,1); varRenderPending(); };
       reader.readAsDataURL(file);
     });
     e.target.value='';
@@ -1377,8 +1430,18 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
   window.varDocketChosen=function(e){
     var files=e.target.files; if(!files||!files.length) return;
     [].slice.call(files).forEach(function(file){
+      var dk={uploading:true, name:file.name, kind:'file', size:(file.size/1024).toFixed(0)+' KB'}; _varDockets.push(dk); varRenderPending();
       var reader=new FileReader();
-      reader.onload=function(ev){ _varDockets.push({ name:file.name, src:ev.target.result, type:'file', size:(file.size/1024).toFixed(0)+' KB' }); varRenderPending(); };
+      reader.onload=function(ev){
+        _uploadMedia(ev.target.result, file.name, 'file', function(err, item){
+          var i=_varDockets.indexOf(dk);
+          if(err){ if(i>=0) _varDockets.splice(i,1); varRenderPending(); _mediaError(err); return; }
+          item.size=dk.size; item.type='file';
+          if(i>=0) _varDockets[i]=item; else _varDockets.push(item);
+          varRenderPending();
+        });
+      };
+      reader.onerror=function(){ var i=_varDockets.indexOf(dk); if(i>=0) _varDockets.splice(i,1); varRenderPending(); };
       reader.readAsDataURL(file);
     });
     e.target.value='';
@@ -1465,7 +1528,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     $('var-list').innerHTML='<div class="pc-list-h">Variations ('+list.length+')</div>' + list.map(function(v, _idx){
       var _num = String(_idx+1).padStart(2,'0');
       var periods = (v.ranges&&v.ranges.length) ? v.ranges.filter(function(r){return r.start&&r.end;}).map(function(r){ return '<span class="v-period">'+esc(pcFmtRange(r.start,r.end))+'</span>'; }).join('') : '';
-      var photos = (v.photos&&v.photos.length) ? '<div class="v-item-photos">'+v.photos.map(function(src,i){ return '<img src="'+src+'" onclick="varViewSavedPhoto(\''+esc(pid)+'\',\''+esc(v.id)+'\','+i+')">'; }).join('')+'</div>' : '';
+      var photos = (v.photos&&v.photos.length) ? '<div class="v-item-photos">'+v.photos.map(function(p,i){ return '<img src="'+esc(_photoUrl(p))+'" onclick="varViewSavedPhoto(\''+esc(pid)+'\',\''+esc(v.id)+'\','+i+')">'; }).join('')+'</div>' : '';
       var dockets = (v.dockets&&v.dockets.length) ? '<div class="v-files">'+v.dockets.map(function(d,i){ return '<div class="v-file"><span class="v-file-n" onclick="varViewSavedDocket(\''+esc(pid)+'\',\''+esc(v.id)+'\','+i+')">📄 '+esc(d.name||'docket')+'</span></div>'; }).join('')+'</div>' : '';
       return '<div class="pc-item" style="border-left-color:#ea580c">'
         + '<div class="pc-item-date"><span style="flex:1">🔧 Variation '+_num+'</span><button class="t-edit" onclick="openVariationEdit(\''+esc(pid)+'\',\''+esc(v.id)+'\')" title="Edit variation">✏️</button><button class="t-del" onclick="deleteVariation(\''+esc(pid)+'\',\''+esc(v.id)+'\')" title="Remove variation">✕</button></div>'
@@ -1490,8 +1553,8 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
       ranges:ranges,
       machine:(($('v-machine')||{}).value||'').trim(),
       comments:(($('v-comments')||{}).value||'').trim(),
-      photos:_varPhotos.slice(),
-      dockets:_varDockets.slice(),
+      photos:_varPhotos.filter(function(p){ return p && !p.uploading; }).slice(),
+      dockets:_varDockets.filter(function(d){ return d && !d.uploading; }).slice(),
       createdAt:new Date().toISOString(), bookedBy: ME? ME.name : 'Supervisor', au_user: ME? (ME.username||'') : '', au_app:'Mobile'
     };
     if(!VARIATIONS[String(pid)]) VARIATIONS[String(pid)]=[];
