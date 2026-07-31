@@ -88,6 +88,11 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);-web
 .v-attach{background:var(--surface2);border:1.5px dashed var(--border2);color:var(--blue);border-radius:9px;padding:9px 12px;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer;width:100%}
 .v-thumbs{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
 .v-thumb{position:relative;width:74px;height:74px;border-radius:9px;overflow:hidden;border:1px solid var(--border)}
+.be-opt{display:flex;align-items:flex-start;gap:10px;padding:12px;border:1px solid var(--border);border-radius:12px;margin-bottom:10px;cursor:pointer;font-size:14px;color:var(--ink)}
+.be-opt input{margin-top:3px;width:17px;height:17px}
+.be-opt small{color:var(--muted)}
+.be-test{margin-top:8px;background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:8px 12px;font-size:13px;font-weight:700;cursor:pointer;color:var(--mid)}
+.be-save{width:100%;margin-top:16px;background:#16a34a;color:#fff;border:none;border-radius:11px;padding:13px;font-size:15px;font-weight:800;cursor:pointer}
 .v-thumb-up{display:flex;align-items:center;justify-content:center;background:var(--surface2);color:var(--muted);font-size:22px}
 .v-thumb-up span{animation:vpulse 1s ease-in-out infinite}
 @keyframes vpulse{0%,100%{opacity:.4}50%{opacity:1}}
@@ -308,6 +313,26 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     <label style="display:flex;align-items:center;gap:8px;font-size:14px;color:var(--mid);margin:2px 0 12px;cursor:pointer;user-select:none"><input id="lg-remember" type="checkbox" style="width:17px;height:17px;cursor:pointer">Keep me signed in (auto-login on this device)</label>
     <button id="lg-btn">Sign in</button>
     <div class="login-msg" id="lg-msg"></div>
+    <button type="button" onclick="openSettings()" style="margin-top:14px;background:none;border:none;color:#8b95a8;font-size:13px;cursor:pointer;text-decoration:underline">⚙️ Connection settings</button>
+  </div>
+</div>
+
+<!-- CONNECTION SETTINGS -->
+<div id="settings-ov" class="ov">
+  <div class="ov-card" style="max-width:420px">
+    <div class="ov-h"><span>⚙️ Connection</span><button type="button" onclick="closeSettings()">✕</button></div>
+    <div class="ov-body" style="padding:16px">
+      <p style="margin:0 0 12px;color:var(--mid);font-size:14px">Choose where this app reads and saves its data.</p>
+      <label class="be-opt"><input type="radio" name="be-mode" value="cloud"><span><b>☁️ Cloud (Supabase)</b><br><small>Works anywhere, no PC needed.</small></span></label>
+      <label class="be-opt"><input type="radio" name="be-mode" value="server"><span><b>💻 My server (PC)</b><br><small>Uses the server running on your office PC.</small></span></label>
+      <div id="be-url-wrap" style="display:none;margin-top:8px">
+        <label style="font-size:13px;font-weight:700;color:var(--mid)">Server address</label>
+        <input id="be-url" type="text" placeholder="https://....trycloudflare.com" style="width:100%;box-sizing:border-box;padding:11px;border:1px solid var(--border);border-radius:10px;font-size:15px;margin-top:5px">
+        <button type="button" class="be-test" onclick="testServer()">Test connection</button>
+        <div id="be-test-result" style="font-size:13px;margin-top:6px"></div>
+      </div>
+      <button type="button" class="be-save" onclick="saveSettings()">Save &amp; reload</button>
+    </div>
   </div>
 </div>
 
@@ -321,6 +346,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
       <div class="who-sub">Supervisor</div>
     </div>
     <button class="notif-btn" id="notif-btn" onclick="openNotif()" title="Notifications">🔔<span class="notif-badge" id="notif-badge" style="display:none">0</span></button>
+    <button class="notif-btn" id="settings-btn" onclick="openSettings()" title="Connection settings">⚙️</button>
     <button class="logout" id="logout">Log out</button>
   </div>
 
@@ -602,14 +628,71 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     if(!_reconnTimer){ _reconnTimer=setTimeout(function(){ _reconnTimer=null; try{ refreshFromCloud(); }catch(e){} }, 4000); }
   }
 
-  // ---------- Supabase ----------
+  // ---------- Backend: Cloud (Supabase) or My Server (PC) ----------
+  function _beMode(){ try{ return localStorage.getItem('remc_sup_backend')==='server' ? 'server' : 'cloud'; }catch(e){ return 'cloud'; } }
+  function _beUrl(){ try{ return String(localStorage.getItem('remc_sup_server_url')||'').trim().replace(/\/+$/,''); }catch(e){ return ''; } }
+  // A tiny stand-in for the Supabase client that talks to your PC server instead.
+  // It mimics only the few calls the app uses, so the rest of the sync code is unchanged.
+  function _serverClient(base){
+    base = String(base||'').replace(/\/+$/,'');
+    function jget(path){ return fetch(base+path,{method:'GET'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }); }
+    function jpost(path,body){ return fetch(base+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body||{})}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }); }
+    return {
+      __server:true, __base:base,
+      from:function(){
+        var q={ select:function(){ return q; }, eq:function(){ return q; },
+          maybeSingle:function(){ return jget('/state').then(function(j){ return { data:{ data:j.data||{}, updated_at:j.updated_at||null }, error:null }; }).catch(function(e){ return { data:null, error:{ message:(e&&e.message)||'network' } }; }); },
+          upsert:function(obj){ var data=(obj&&obj.data)||{}; return jpost('/state',{ data:data, client:(data&&data.__client)||null }).then(function(){ return { error:null }; }).catch(function(e){ return { error:{ message:(e&&e.message)||'network' } }; }); }
+        };
+        return q;
+      },
+      channel:function(){
+        var ch={ _es:null,
+          on:function(evt,opts,cb){ try{ ch._es=new EventSource(base+'/events'); ch._es.onmessage=function(m){ try{ var d=JSON.parse(m.data); if(d && d.client!=='__initial__') cb({ new:{ data:d.data } }); }catch(e){} }; }catch(e){} return ch; },
+          subscribe:function(){ return ch; }
+        };
+        return ch;
+      },
+      removeChannel:function(ch){ try{ if(ch&&ch._es) ch._es.close(); }catch(e){} }
+    };
+  }
+
+  // ---------- Supabase / server ----------
   function ensureClient(){
     if(sb) return true;
+    if(_beMode()==='server'){ var u=_beUrl(); if(!u) return false; sb=_serverClient(u); return true; }
     if(typeof supabase==='undefined' || !supabase.createClient) return false;
     if(!CFG.url || String(CFG.anonKey||'').indexOf('PASTE_')>=0) return false;
     sb = supabase.createClient(CFG.url, CFG.anonKey);
     return true;
   }
+  function _beSelectedMode(){ var rs=document.getElementsByName('be-mode'); for(var i=0;i<rs.length;i++){ if(rs[i].checked) return rs[i].value; } return 'cloud'; }
+  function _beToggleUrl(){ var w=$('be-url-wrap'); if(w) w.style.display=(_beSelectedMode()==='server')?'':'none'; }
+  window.openSettings=function(){
+    var m=_beMode();
+    var rs=document.getElementsByName('be-mode'); [].forEach.call(rs,function(r){ r.checked=(r.value===m); r.onchange=_beToggleUrl; });
+    if($('be-url')) $('be-url').value=_beUrl();
+    if($('be-test-result')) $('be-test-result').textContent='';
+    _beToggleUrl();
+    $('settings-ov').classList.add('open');
+  };
+  window.closeSettings=function(){ $('settings-ov').classList.remove('open'); };
+  window.testServer=function(){
+    var u=String($('be-url').value||'').trim().replace(/\/+$/,''); var el=$('be-test-result');
+    if(!u){ el.textContent='Enter the server address first.'; el.style.color='#b45309'; return; }
+    el.textContent='Testing…'; el.style.color='#64748b';
+    fetch(u+'/health').then(function(r){ return r.json(); }).then(function(j){
+      if(j && j.ok){ el.textContent='✓ Connected to your server'; el.style.color='#15803d'; }
+      else { el.textContent='Reached it, but the answer was unexpected.'; el.style.color='#b45309'; }
+    }).catch(function(){ el.textContent='✗ Could not reach it. Is the server running?'; el.style.color='#dc2626'; });
+  };
+  window.saveSettings=function(){
+    var m=_beSelectedMode();
+    var u=String(($('be-url')&&$('be-url').value)||'').trim().replace(/\/+$/,'');
+    if(m==='server' && !u){ alert('Enter the server address (https://....) first.'); return; }
+    try{ localStorage.setItem('remc_sup_backend', m); localStorage.setItem('remc_sup_server_url', u); }catch(e){}
+    location.reload();
+  };
   function parseData(){
     function j(k,def){ try{ return JSON.parse(DATA[k]||def); }catch(e){ return JSON.parse(def); } }
     PROJECTS = j('remc_projects','[]'); if(!Array.isArray(PROJECTS)) PROJECTS=[];
@@ -1352,6 +1435,14 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
   }
   function _uploadMedia(dataUrl, name, kind, cb){
     try{
+      if(_beMode()==='server'){
+        var base=_beUrl(); if(!base){ cb('offline'); return; }
+        fetch(base+'/upload',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:name,dataUrl:dataUrl})})
+          .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+          .then(function(j){ cb(null,{url:j.url,path:j.path,name:name||j.name,kind:kind}); })
+          .catch(function(e){ cb((e&&e.message)||'upload-failed'); });
+        return;
+      }
       if(!sb || !sb.storage){ cb('offline'); return; }
       var m=/^data:([^;]+);base64,([\s\S]*)$/.exec(dataUrl||'');
       if(!m){ cb('bad-file'); return; }

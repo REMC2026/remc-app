@@ -11466,6 +11466,50 @@ function teamEditProjectBooking(pid){
       badge.textContent = 'Local';
       nr.insertBefore(badge, nr.firstChild);
     }
+    if(!document.getElementById('remc-conn-btn')){
+      var g=document.createElement('button'); g.id='remc-conn-btn'; g.type='button'; g.title='Connection settings'; g.textContent='⚙️';
+      g.style.cssText='font-size:13px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:4px 9px;cursor:pointer';
+      g.onclick=function(){ window.remcOpenConn(); };
+      nr.insertBefore(g, nr.firstChild);
+    }
+    window.remcOpenConn=function(){
+      var old=document.getElementById('remc-conn-ov'); if(old) old.remove();
+      var mode=(function(){try{return localStorage.getItem('remc_backend')==='server'?'server':'cloud';}catch(e){return 'cloud';}})();
+      var url=(function(){try{return String(localStorage.getItem('remc_server_url')||'').trim().replace(/\/+$/,'');}catch(e){return '';}})();
+      var ov=document.createElement('div'); ov.id='remc-conn-ov';
+      ov.style.cssText='position:fixed;inset:0;z-index:100000;background:rgba(15,22,33,.55);display:flex;align-items:center;justify-content:center;font-family:Barlow,sans-serif;padding:16px';
+      ov.innerHTML='<div style="background:#fff;border-radius:16px;max-width:440px;width:100%;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.3)">'
+        +'<div style="display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid #e4e8ef"><b style="font-size:16px">⚙️ Connection</b><button id="rc-x" style="border:none;background:none;font-size:18px;cursor:pointer;color:#8b95a8">✕</button></div>'
+        +'<div style="padding:18px">'
+        +'<p style="margin:0 0 12px;color:#4b5666;font-size:14px">Choose where this app reads and saves its data.</p>'
+        +'<label class="rc-opt"><input type="radio" name="rc-mode" value="cloud"'+(mode==="cloud"?" checked":"")+'> <span><b>☁️ Cloud (Supabase)</b><br><small style="color:#8b95a8">Works anywhere, online.</small></span></label>'
+        +'<label class="rc-opt"><input type="radio" name="rc-mode" value="server"'+(mode==="server"?" checked":"")+'> <span><b>💻 My server (PC)</b><br><small style="color:#8b95a8">Uses the server on this office PC.</small></span></label>'
+        +'<div id="rc-url-wrap" style="display:'+(mode==="server"?"block":"none")+';margin-top:8px"><label style="font-size:13px;font-weight:700;color:#4b5666">Server address</label>'
+        +'<input id="rc-url" type="text" value="'+String(url).replace(/"/g,"&quot;")+'" placeholder="https://....trycloudflare.com" style="width:100%;box-sizing:border-box;padding:11px;border:1px solid #e4e8ef;border-radius:10px;font-size:14px;margin-top:5px">'
+        +'<button id="rc-test" type="button" style="margin-top:8px;background:#f8fafc;border:1px solid #e4e8ef;border-radius:9px;padding:8px 12px;font-size:13px;font-weight:700;cursor:pointer">Test connection</button>'
+        +'<div id="rc-res" style="font-size:13px;margin-top:6px"></div></div>'
+        +'<button id="rc-save" type="button" style="width:100%;margin-top:16px;background:#16a34a;color:#fff;border:none;border-radius:11px;padding:13px;font-size:15px;font-weight:800;cursor:pointer">Save &amp; reload</button>'
+        +'</div></div>';
+      document.body.appendChild(ov);
+      var st=document.createElement('style'); st.textContent='.rc-opt{display:flex;align-items:flex-start;gap:10px;padding:12px;border:1px solid #e4e8ef;border-radius:12px;margin-bottom:10px;cursor:pointer;font-size:14px}.rc-opt input{margin-top:3px;width:17px;height:17px}'; ov.appendChild(st);
+      function selMode(){ var rs=ov.querySelectorAll('input[name=rc-mode]'); for(var i=0;i<rs.length;i++) if(rs[i].checked) return rs[i].value; return 'cloud'; }
+      function toggle(){ document.getElementById('rc-url-wrap').style.display=(selMode()==='server')?'block':'none'; }
+      [].forEach.call(ov.querySelectorAll('input[name=rc-mode]'),function(r){ r.onchange=toggle; });
+      document.getElementById('rc-x').onclick=function(){ ov.remove(); };
+      ov.onclick=function(e){ if(e.target===ov) ov.remove(); };
+      document.getElementById('rc-test').onclick=function(){
+        var u=String(document.getElementById('rc-url').value||'').trim().replace(/\/+$/,''); var el=document.getElementById('rc-res');
+        if(!u){ el.textContent='Enter the address first.'; el.style.color='#b45309'; return; }
+        el.textContent='Testing…'; el.style.color='#64748b';
+        fetch(u+'/health').then(function(r){return r.json();}).then(function(j){ if(j&&j.ok){ el.textContent='✓ Connected to your server'; el.style.color='#15803d'; } else { el.textContent='Reached it, but unexpected answer.'; el.style.color='#b45309'; } }).catch(function(){ el.textContent='✕ Could not reach it. Is the server running?'; el.style.color='#dc2626'; });
+      };
+      document.getElementById('rc-save').onclick=function(){
+        var m=selMode(); var u=String(document.getElementById('rc-url').value||'').trim().replace(/\/+$/,'');
+        if(m==='server' && !u){ alert('Enter the server address (https://....) first.'); return; }
+        try{ localStorage.setItem('remc_backend', m); localStorage.setItem('remc_server_url', u); }catch(e){}
+        location.reload();
+      };
+    };
     // Backup now lives in Settings → 💾 Backup (no longer in the top bar)
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', inject); else inject();
@@ -11476,14 +11520,37 @@ function teamEditProjectBooking(pid){
 <script>
 (function(){
   var CFG = window.REMC_CLOUD || {};
+  function _beMode(){ try{ return localStorage.getItem('remc_backend')==='server' ? 'server':'cloud'; }catch(e){ return 'cloud'; } }
+  function _beUrl(){ try{ return String(localStorage.getItem('remc_server_url')||'').trim().replace(/\/+$/,''); }catch(e){ return ''; } }
+  var SERVERMODE = (_beMode()==='server' && !!_beUrl());
   var configured = CFG.url && CFG.anonKey && String(CFG.url).indexOf('PASTE_')<0 && String(CFG.anonKey).indexOf('PASTE_')<0;
-  window.REMC_CLOUD_ACTIVE = !!configured;
-  if (!configured){ console.log('[REMC Cloud] Not configured — running locally.'); return; }
-  if (typeof supabase === 'undefined' || !supabase.createClient){ console.warn('[REMC Cloud] Supabase library not loaded.'); return; }
+  window.REMC_CLOUD_ACTIVE = !!configured || SERVERMODE;
+  if (!configured && !SERVERMODE){ console.log('[REMC Cloud] Not configured — running locally.'); return; }
+  if (!SERVERMODE && (typeof supabase === 'undefined' || !supabase.createClient)){ console.warn('[REMC Cloud] Supabase library not loaded.'); return; }
 
   var WS = CFG.workspace || 'remc-main';
   var CLIENT_ID = Math.random().toString(36).slice(2);
-  var sb = supabase.createClient(CFG.url, CFG.anonKey); window.REMC_SB = sb;
+  function _serverClient(base){
+    base=String(base||'').replace(/\/+$/,'');
+    function jget(pp){ return fetch(base+pp,{method:'GET'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }); }
+    function jpost(pp,b){ return fetch(base+pp,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b||{})}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }); }
+    var fakeUser={ email:'office@local' };
+    return { __server:true, __base:base,
+      from:function(){ var q={ select:function(){return q;}, eq:function(){return q;},
+        maybeSingle:function(){ return jget('/state').then(function(j){ return { data:{ data:j.data||{}, updated_at:j.updated_at||null }, error:null }; }).catch(function(e){ return { data:null, error:{ message:(e&&e.message)||'network' } }; }); },
+        upsert:function(obj){ var data=(obj&&obj.data)||{}; return jpost('/state',{ data:data, client:(data&&data.__client)||null }).then(function(){ return { error:null }; }).catch(function(e){ return { error:{ message:(e&&e.message)||'network' } }; }); }
+      }; return q; },
+      channel:function(){ var ch={ _es:null, on:function(evt,opts,cb){ try{ ch._es=new EventSource(base+'/events'); ch._es.onmessage=function(m){ try{ var d=JSON.parse(m.data); if(d && d.client!=='__initial__') cb({ new:{ data:d.data } }); }catch(e){} }; }catch(e){} return ch; }, subscribe:function(){ return ch; } }; return ch; },
+      removeChannel:function(ch){ try{ if(ch&&ch._es) ch._es.close(); }catch(e){} },
+      auth:{ getSession:function(){ return Promise.resolve({ data:{ session:{ user:fakeUser } }, error:null }); },
+        getUser:function(){ return Promise.resolve({ data:{ user:fakeUser }, error:null }); },
+        signInWithPassword:function(){ return Promise.resolve({ data:{ user:fakeUser, session:{ user:fakeUser } }, error:null }); },
+        updateUser:function(){ return Promise.resolve({ data:{ user:fakeUser }, error:null }); },
+        signOut:function(){ return Promise.resolve({ error:null }); },
+        onAuthStateChange:function(){ return { data:{ subscription:{ unsubscribe:function(){} } } }; } }
+    };
+  }
+  var sb = SERVERMODE ? _serverClient(_beUrl()) : supabase.createClient(CFG.url, CFG.anonKey); window.REMC_SB = sb;
   var _applying = false, _pushTimer = null, _dirty = {};
 
   function collectState(){
@@ -11500,16 +11567,30 @@ function teamEditProjectBooking(pid){
   function setStatus(state){
     var el = document.getElementById('remc-cloud-badge'); if(!el) return;
     el.style.display='';
-    var map = { saving:['Saving…','#fef3c7','#92400e'], saved:['Synced ☁️','#dcfce7','#15803d'], error:['Offline','#fee2e2','#dc2626'], loading:['Loading…','#eff6ff','#1d4ed8'] };
+    var map = { saving:['Saving…','#fef3c7','#92400e'], saved:['Synced ☁️','#dcfce7','#15803d'], error:['Offline','#fee2e2','#dc2626'], loading:['Loading…','#eff6ff','#1d4ed8'], reconnecting:['Reconnecting…','#fef3c7','#92400e'] };
     var m = map[state]||map.saved; el.textContent=m[0]; el.style.background=m[1]; el.style.color=m[2];
+  }
+  var _cloudFailN=0, _reconnTimer=null, _reconnDelay=4000;
+  function _cloudBadge(){ return document.getElementById('remc-cloud-badge'); }
+  function _cloudOk(){ _cloudFailN=0; _reconnDelay=4000; if(_reconnTimer){ clearTimeout(_reconnTimer); _reconnTimer=null; } setStatus('saved'); var el=_cloudBadge(); if(el) el.title='Synced with the cloud'; }
+  function _cloudFail(msg){
+    _cloudFailN++;
+    if(msg){ try{ window.REMC_LAST_CLOUD_ERROR=String(msg); console.warn('[REMC Cloud] sync problem:', msg); }catch(e){} }
+    var off=(typeof navigator!=='undefined' && navigator.onLine===false);
+    setStatus(off?'error':'reconnecting');
+    var el=_cloudBadge(); if(el) el.title=(off?'This device appears to be offline. ':'Having trouble reaching the cloud. ')+(window.REMC_LAST_CLOUD_ERROR?('Last error: '+window.REMC_LAST_CLOUD_ERROR+'. '):'')+'Retrying automatically…';
+    if(!_reconnTimer){ _reconnTimer=setTimeout(function(){ _reconnTimer=null; try{ refreshFromCloud(); }catch(e){} }, _reconnDelay); _reconnDelay=Math.min(_reconnDelay*2, 30000); }
   }
   function pull(cb){
     setStatus('loading');
     sb.from('remc_state').select('data').eq('id', WS).maybeSingle().then(function(res){
-      if(res && !res.error && res.data && res.data.data){ applyState(res.data.data); }
+      var _d = (res && !res.error && res.data && res.data.data) ? res.data.data : null;
+      var _has = _d && Object.keys(_d).some(function(k){ return k.indexOf('remc_')===0; });
+      if(_has){ applyState(_d); }
+      else if(SERVERMODE){ try{ sb.from('remc_state').upsert({ id:WS, data:collectState(), updated_at:new Date().toISOString() }); }catch(e){} }
       if(cb) cb();
     }).catch(function(){
-      setStatus('error');
+      _cloudFail();
       try{ ldSet(100,'Could not reach the cloud — showing saved data.'); ldHide(); }catch(e){}
       if(cb) cb();
     });
@@ -11533,13 +11614,13 @@ function teamEditProjectBooking(pid){
       }
       base.__client = CLIENT_ID;
       sb.from('remc_state').upsert({ id:WS, data:base, updated_at:new Date().toISOString() }).then(function(r2){
-        if(r2 && r2.error){ setStatus('error'); return; }
+        if(r2 && r2.error){ _cloudFail(r2.error.message||r2.error); return; }
         _dirty = {};
         try{ markSnapshotClean(); }catch(e){}
-        setStatus('saved');
+        _cloudOk();
         scheduleBackup();
       });
-    }).catch(function(){ setStatus('error'); });
+    }).catch(function(e){ _cloudFail((e&&(e.message||e))||'network'); });
   }
   function schedulePush(){ if(_applying) return; setStatus('saving'); clearTimeout(_pushTimer); _pushTimer=setTimeout(push, 1200); }
 
@@ -11648,15 +11729,16 @@ function teamEditProjectBooking(pid){
     _refreshing = true;
     sb.from('remc_state').select('data,updated_at').eq('id', WS).maybeSingle().then(function(res){
       _refreshing = false;
-      if(!res || res.error || !res.data || !res.data.data) return;
+      if(!res || res.error){ _cloudFail(res && res.error && (res.error.message||res.error)); return; }
+      _cloudOk();                                      // reached the cloud → healthy, clear any stale offline
+      if(!res.data || !res.data.data) return;
       var stamp = String(res.data.updated_at||'');
       if(stamp && stamp === _lastSeen) return;         // nothing new
       _lastSeen = stamp;
       var d = res.data.data;
       if(d.__client === CLIENT_ID) return;             // our own write
       applyRemoteAndRender(d);
-      setStatus('saved');
-    }).catch(function(){ _refreshing = false; });
+    }).catch(function(e){ _refreshing = false; _cloudFail((e&&(e.message||e))||'network'); });
   }
   function startAutoRefresh(){
     if(_refreshTimer) return;
@@ -11841,10 +11923,10 @@ function teamEditProjectBooking(pid){
         var data = (res && res.data && res.data.data) ? res.data.data : {};
         data[k] = valueStr; data['__client'] = CLIENT_ID;
         sb.from('remc_state').upsert({ id:WS, data:data, updated_at:new Date().toISOString() }).then(function(r2){
-          setStatus(r2 && r2.error ? 'error' : 'saved');
+          if(r2 && r2.error) _cloudFail(r2.error.message||r2.error); else _cloudOk();
           if(cb) cb(r2 && r2.error ? (r2.error.message||'error') : null);
         });
-      });
+      }).catch(function(e){ _cloudFail((e&&(e.message||e))||'network'); if(cb) cb('network'); });
     }catch(e){ if(cb) cb(String(e)); }
   };
   window.remcCloudActive = true;
