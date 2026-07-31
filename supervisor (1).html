@@ -29,6 +29,16 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);-web
 .book-btn{background:var(--blue);color:#fff;border:none;border-radius:9px;padding:9px 16px;font-family:inherit;font-size:14px;font-weight:800;cursor:pointer;box-shadow:0 2px 10px rgba(37,99,235,.3)}
 .menu{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
 .home{display:flex;flex-direction:column;gap:14px;padding:8px 0}
+.note-acts{display:flex;gap:2px;flex-shrink:0}
+.note-ico{background:none;border:none;font-size:14px;cursor:pointer;padding:4px 6px;border-radius:6px;opacity:.55;transition:.12s;line-height:1}
+.note-ico:hover{opacity:1;background:var(--surface2)}
+.np-row{text-align:left;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;cursor:pointer;font-family:inherit;transition:.12s;width:100%}
+.np-row:hover{border-color:var(--border2);background:#fff}
+.np-n{font-size:14px;font-weight:800;color:var(--text)}
+.np-m{font-size:11px;color:var(--muted);margin-top:2px}
+.home-row{display:flex;gap:14px}
+.home-row .home-card{flex:1 1 0;min-width:0;padding:26px 12px;display:flex;flex-direction:column;justify-content:center}
+.home-row .hc-t{font-size:22px}
 .notes-link{align-self:center;margin-top:-6px;background:none;border:none;color:var(--muted);font-family:inherit;font-size:13px;font-weight:800;cursor:pointer;padding:2px 10px}
 .notes-link:active{opacity:.6}
 .home-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:26px 20px;box-shadow:var(--shadow);cursor:pointer;text-align:center;transition:.12s}
@@ -38,7 +48,9 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);-web
 .home-book{background:var(--blue);border-color:var(--blue)}
 .home-book .hc-t{color:#fff}
 .home-book .hc-s{color:rgba(255,255,255,.88)}
-.back{background:none;border:none;color:var(--blue);font-family:inherit;font-size:14px;font-weight:800;cursor:pointer;padding:6px 2px;margin-bottom:6px}
+.back{display:inline-flex;align-items:center;gap:4px;background:var(--blue-light,#eff6ff);border:1.5px solid rgba(37,99,235,0.25);color:var(--blue);font-family:inherit;font-size:17px;font-weight:800;cursor:pointer;padding:11px 20px;margin-bottom:10px;border-radius:12px;transition:all 0.15s;-webkit-tap-highlight-color:transparent}
+.back:hover{background:#dbeafe;border-color:rgba(37,99,235,0.4)}
+.back:active{transform:scale(0.97)}
 .mbtn{flex:1;min-width:78px;background:var(--surface);color:var(--mid);border:1px solid var(--border);border-radius:10px;padding:11px 8px;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer;transition:.12s}
 .mbtn.on{background:var(--red);color:#fff;border-color:var(--red)}
 .mbtn.mbook{background:var(--blue);color:#fff;border-color:var(--blue);flex:1.25}
@@ -49,12 +61,126 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);-web
 .pcard .pi{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--mid)}
 .pcard .pi-ic{width:16px;text-align:center;flex-shrink:0;opacity:.8}
 .pcard .pi a{color:var(--blue);text-decoration:none;font-weight:700}
-.pcard .pf{display:flex;align-items:center;gap:10px;margin-top:10px}
+.pcard .pf{display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap}
 .pcard .pbook{background:var(--blue);color:#fff;border:none;border-radius:8px;padding:8px 14px;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer}
 .pcard .pnotes{background:var(--surface2);color:var(--mid);border:1px solid var(--border2);border-radius:8px;padding:8px 12px;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer}
 .pcard .ndot{color:var(--red);font-size:13px;line-height:1}
 .note-body{margin-top:9px;font-size:14px;color:var(--text);white-space:pre-wrap;line-height:1.5;background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:10px 12px}
 .pcard .pcount{font-size:12px;color:var(--muted)}
+.pcard .pcal{background:#eef2ff;color:#4338ca;border:1px solid #c7d2fe;border-radius:8px;padding:8px 12px;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer}
+.pcard .ptest{background:#f5f3ff;color:#6d28d9;border:1px solid #ddd6fe;border-radius:8px;padding:8px 12px;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer}
+/* ---- Compaction test view ---- */
+.test-ov{display:none;position:fixed;inset:0;background:var(--bg);z-index:92;flex-direction:column}
+.test-ov.open{display:flex}
+.test-body{flex:1;overflow-y:auto;padding:16px;max-width:640px;margin:0 auto;width:100%;box-sizing:border-box}
+.test-form{background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);padding:16px;margin-bottom:18px}
+.test-form .th{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--text);margin-bottom:12px}
+.test-form .btn-save{width:100%;margin-top:4px}
+.t-del{margin-left:auto;background:#fee2e2;border:1px solid #fecaca;color:#dc2626;border-radius:7px;width:28px;height:28px;cursor:pointer;font-size:13px;font-weight:700;flex:0 0 auto}
+.t-edit{background:#eff6ff;border:1px solid #bfdbfe;color:#1d4ed8;border-radius:7px;width:28px;height:28px;cursor:pointer;font-size:13px;font-weight:700;flex:0 0 auto}
+.pcard .ptransfer{background:#ecfeff;color:#0e7490;border:1px solid #a5f3fc;border-radius:8px;padding:8px 12px;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer}
+.tr-fixed{padding:11px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:9px;font-size:15px;font-weight:700;color:var(--text)}
+.tr-addr{font-size:12px;color:var(--muted);font-weight:600;margin-top:4px}
+.tr-actions{display:flex;gap:8px;flex-wrap:wrap}
+.tr-act{flex:1 1 0;min-width:130px;padding:11px 10px;border:1.5px solid var(--border2);background:var(--surface2);border-radius:10px;font-family:inherit;font-size:13px;font-weight:800;color:var(--mid);cursor:pointer}
+.tr-act.on{border-color:var(--blue);background:#eff6ff;color:var(--blue)}
+.pcard .pvar{background:#fff7ed;color:#c2410c;border:1px solid #fed7aa;border-radius:8px;padding:8px 12px;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer}
+.v-attach{background:var(--surface2);border:1.5px dashed var(--border2);color:var(--blue);border-radius:9px;padding:9px 12px;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer;width:100%}
+.v-thumbs{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.v-thumb{position:relative;width:74px;height:74px;border-radius:9px;overflow:hidden;border:1px solid var(--border)}
+.be-opt{display:flex;align-items:flex-start;gap:10px;padding:12px;border:1px solid var(--border);border-radius:12px;margin-bottom:10px;cursor:pointer;font-size:14px;color:var(--ink)}
+.be-opt input{margin-top:3px;width:17px;height:17px}
+.be-opt small{color:var(--muted)}
+.be-test{margin-top:8px;background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:8px 12px;font-size:13px;font-weight:700;cursor:pointer;color:var(--mid)}
+.be-save{width:100%;margin-top:16px;background:#16a34a;color:#fff;border:none;border-radius:11px;padding:13px;font-size:15px;font-weight:800;cursor:pointer}
+.v-thumb-up{display:flex;align-items:center;justify-content:center;background:var(--surface2);color:var(--muted);font-size:22px}
+.v-thumb-up span{animation:vpulse 1s ease-in-out infinite}
+@keyframes vpulse{0%,100%{opacity:.4}50%{opacity:1}}
+.v-thumb img{width:100%;height:100%;object-fit:cover;cursor:pointer;display:block}
+.v-thumb-x{position:absolute;top:2px;right:2px;width:20px;height:20px;border:none;border-radius:50%;background:rgba(220,38,38,.92);color:#fff;font-size:11px;font-weight:700;cursor:pointer;line-height:1}
+.v-files{margin-top:8px;display:flex;flex-direction:column;gap:6px}
+.v-file{display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-size:12px;font-weight:700;color:var(--text)}
+.v-file-n{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;color:var(--blue)}
+.v-file-x{background:#fee2e2;border:1px solid #fecaca;color:#dc2626;border-radius:6px;width:24px;height:24px;cursor:pointer;font-size:12px;font-weight:700;flex:0 0 auto}
+.v-item-photos{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.v-item-photos img{width:60px;height:60px;object-fit:cover;border-radius:7px;border:1px solid var(--border);cursor:pointer}
+.v-periods{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.v-period{font-size:11px;font-weight:700;color:var(--mid);background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:2px 9px}
+.pcard .psub{background:#f0fdfa;color:#0f766e;border:1px solid #99f6e4;border-radius:8px;padding:8px 12px;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer}
+.pcard .pallow{background:#fefce8;color:#a16207;border:1px solid #fde68a;border-radius:8px;padding:8px 12px;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer}
+.v-file-view{background:#eff6ff;border:1px solid #bfdbfe;color:#1d4ed8;border-radius:7px;padding:5px 12px;font-family:inherit;font-size:12px;font-weight:800;cursor:pointer;flex:0 0 auto}
+.pcard .phist{background:#f8fafc;color:#475569;border:1px solid #e2e8f0;border-radius:8px;padding:8px 12px;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer}
+.hist-item{display:flex;gap:11px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);padding:11px 13px;margin-bottom:9px}
+.hist-item.del{background:#fff5f5;border-color:#fecaca}
+.hist-ic{flex:0 0 auto;width:30px;height:30px;border-radius:8px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:15px}
+.hist-body{flex:1;min-width:0}
+.hist-t{font-size:14px;font-weight:800;color:var(--text)}
+.hist-d{font-size:13px;color:var(--mid);margin-top:2px;word-break:break-word}
+.hist-m{font-size:11px;color:var(--muted);margin-top:5px;font-weight:600}
+.notif-btn{position:relative;background:var(--surface2);border:1px solid var(--border);border-radius:10px;width:40px;height:40px;font-size:18px;cursor:pointer;flex:0 0 auto;line-height:1}
+.notif-badge{position:absolute;top:-6px;right:-6px;min-width:18px;height:18px;padding:0 4px;border-radius:9px;background:#e11d1d;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;line-height:1;box-shadow:0 0 0 2px var(--surface)}
+.notif-hint{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.5}
+.notif-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#e11d1d;margin-left:6px;vertical-align:middle}
+.hist-item.unread{border-color:#93c5fd;box-shadow:0 0 0 1px #93c5fd}
+.hist-chg{margin-top:7px;background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:8px 10px}
+.chg-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:12px;padding:2px 0}
+.chg-lbl{font-weight:800;color:var(--mid);min-width:78px}
+.chg-from{color:#b91c1c;text-decoration:line-through;opacity:.8}
+.chg-arrow{color:var(--muted);font-weight:800}
+.chg-to{color:#15803d;font-weight:800}
+/* ---- Subcontractor horizontal timeline ---- */
+.sub-timeline-h{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--mid);margin:4px 0 2px}
+.sub-track{display:flex;overflow-x:auto;padding:22px 4px 14px;-webkit-overflow-scrolling:touch}
+.sub-node{flex:0 0 auto;width:172px;position:relative;padding:0 8px}
+.sub-node::before{content:'';position:absolute;top:7px;left:0;right:0;height:3px;background:var(--border2);z-index:0}
+.sub-node:first-child::before{left:50%}
+.sub-node:last-child::before{right:50%}
+.sub-dot{position:absolute;top:0;left:50%;transform:translateX(-50%);width:17px;height:17px;border-radius:50%;border:3px solid var(--surface);z-index:1;box-shadow:0 0 0 1px var(--border)}
+.sub-card{margin-top:28px;background:var(--surface);border:1px solid var(--border);border-top:4px solid var(--blue);border-radius:12px;box-shadow:var(--shadow);padding:11px 12px;cursor:pointer}
+.sub-card:active{transform:scale(.99)}
+.sub-date{font-size:12px;font-weight:800;color:var(--mid)}
+.sub-product{font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:900;text-transform:uppercase;letter-spacing:.5px;color:var(--text);margin-top:3px;line-height:1.05}
+.sub-name{font-size:13px;color:var(--mid);margin-top:3px}
+.sub-status{display:inline-block;margin-top:9px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;border-radius:20px;padding:2px 9px}
+.sub-status.booked{background:#dcfce7;color:#15803d}
+.sub-status.pending{background:#fef3c7;color:#92400e}
+.sub-tap{font-size:10px;color:var(--muted);margin-top:8px}
+.sub-intro{background:#f0fdfa;border:1px solid #99f6e4;color:#0f766e;border-radius:10px;padding:11px 13px;font-size:13px;line-height:1.5;margin-bottom:6px}
+.sub-req{margin-top:8px;font-size:11px;font-weight:800;border-radius:8px;padding:5px 8px;line-height:1.3}
+.sub-req.postpone{background:#fef3c7;color:#92400e;border:1px solid #fde68a}
+.sub-req.cancel{background:#fee2e2;color:#b91c1c;border:1px solid #fecaca}
+.sub-reqbox{background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;border-radius:10px;padding:10px 12px;font-size:13px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.sub-reqclear{margin-left:auto;background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:8px;padding:5px 10px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer}
+#sub-act-info{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:12px;font-size:14px;color:var(--text)}
+#sub-act-info .sai-p{font-weight:800}
+#sub-act-info .sai-m{font-size:12px;color:var(--muted);margin-top:2px}
+/* ---- Per-project calendar view ---- */
+.projcal-ov{display:none;position:fixed;inset:0;background:var(--bg);z-index:90;flex-direction:column}
+.projcal-ov.open{display:flex}
+.projcal-top{position:sticky;top:0;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;padding:12px 14px;box-shadow:0 1px 8px rgba(0,0,0,.06);z-index:2}
+.projcal-title{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;text-transform:uppercase;letter-spacing:.5px;color:var(--text);min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.projcal-body{flex:1;overflow-y:auto;display:flex;gap:16px;flex-wrap:wrap;padding:16px;align-items:flex-start}
+.projcal-cal{flex:1 1 320px;min-width:290px;background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);padding:12px}
+.projcal-navrow{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.projcal-navrow>div{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;letter-spacing:.5px}
+.projcal-navrow button{width:36px;height:36px;border:1px solid var(--border2);background:var(--surface2);border-radius:9px;font-size:18px;cursor:pointer;color:var(--text)}
+.pc-mgrid{display:flex;flex-direction:column;gap:4px}
+.pc-mrow{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.pc-mrow.pc-head>div{text-align:center;font-size:10px;font-weight:800;color:var(--muted);padding:2px 0}
+.pc-cell{aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;font-size:13px;border-radius:8px;background:var(--surface2);color:var(--text)}
+.pc-cell.out{color:var(--muted);opacity:.45}
+.pc-cell.today{outline:2px solid var(--blue);outline-offset:-2px;font-weight:800}
+.pc-cell.has{background:var(--blue);color:#fff;font-weight:800}
+.projcal-list{flex:1 1 300px;min-width:280px}
+.pc-list-h{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--mid);margin-bottom:10px}
+.pc-item{background:var(--surface);border:1px solid var(--border);border-left:4px solid var(--blue);border-radius:12px;box-shadow:var(--shadow);padding:12px 14px;margin-bottom:10px}
+.pc-item.past{opacity:.62}
+.pc-item-date{font-size:14px;font-weight:800;color:var(--text);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.pc-past{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:1px 8px}
+.pc-upcoming{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#15803d;background:#dcfce7;border:1px solid #bbf7d0;border-radius:20px;padding:1px 8px}
+.pc-item-desc{font-size:13px;color:var(--mid);font-weight:600;margin-top:4px}
+.pc-item-notes{font-size:12px;color:var(--muted);margin-top:6px;background:var(--surface2);border-radius:8px;padding:7px 9px;line-height:1.45;white-space:pre-wrap}
+.pc-empty{padding:30px 16px;text-align:center;color:var(--muted)}
 .daycard{background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:8px;overflow:hidden;box-shadow:var(--shadow)}
 .daycard.today{border-color:var(--red)}
 .daycard.wknd{background:var(--surface2)}
@@ -89,8 +215,14 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);-web
 .sheet-body{padding:16px 18px}
 .fld{margin-bottom:12px}
 .fld label{display:block;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--mid);margin-bottom:5px}
-.fld input,.fld select{width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:9px;padding:11px 12px;font-family:inherit;font-size:15px;color:var(--text);outline:none}
-.fld input:focus,.fld select:focus{border-color:var(--blue)}
+.fld input,.fld select,.fld textarea{width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:9px;padding:11px 12px;font-family:inherit;font-size:15px;color:var(--text);outline:none}
+.fld textarea{resize:vertical;min-height:64px;line-height:1.4}
+.fld input:focus,.fld select:focus,.fld textarea:focus{border-color:var(--blue)}
+.add-range-btn{background:none;border:1.5px dashed var(--border2);color:var(--blue);border-radius:9px;padding:9px 12px;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer;width:100%;margin:-4px 0 4px}
+.add-range-btn:active{transform:scale(.99)}
+.f-range-row{display:flex;gap:10px;align-items:flex-end;margin-bottom:12px}
+.f-range-row .fld{flex:1;margin-bottom:0}
+.f-range-row .rr-x{flex:0 0 auto;background:#fee2e2;border:1px solid #fecaca;color:#dc2626;border-radius:9px;width:40px;height:44px;cursor:pointer;font-size:15px;font-weight:700}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .chk{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--mid)}
 .swatches{display:flex;gap:8px;flex-wrap:wrap}
@@ -99,6 +231,9 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);-web
 .sheet-foot{display:flex;gap:10px;padding:14px 18px;border-top:1px solid var(--border);position:sticky;bottom:0;background:var(--surface)}
 .btn{flex:1;border:none;border-radius:10px;padding:13px;font-family:inherit;font-size:15px;font-weight:800;cursor:pointer}
 .btn-save{background:var(--blue);color:#fff}
+.btn-save:disabled,.btn-save.disabled{background:#cbd5e1;color:#eef2f7;cursor:not-allowed;box-shadow:none}
+.req{color:#dc2626;font-weight:900}
+.opt{color:var(--muted);font-weight:600;text-transform:none;letter-spacing:0;font-size:10px}
 .btn-del{background:#fee2e2;color:#dc2626;flex:0 0 auto;padding:13px 18px}
 .btn-cancel{background:var(--surface2);color:var(--mid);border:1px solid var(--border)}
 /* Login */
@@ -121,10 +256,10 @@ body.cal-mode #main{flex:1;min-height:0;display:flex;flex-direction:column}
 body.cal-mode #warn,body.cal-mode .back,body.cal-mode #sched-menu,body.cal-mode #cal-toolbar{flex-shrink:0}
 body.cal-mode #view{flex:1;min-height:0;display:flex;flex-direction:column}
 /* Week: 7 equal-height day cards, each scrolls on its own */
-.wk-grid{flex:1;min-height:0;display:flex;flex-direction:column;gap:7px;overflow-y:auto}
-.wk-grid .daycard{flex:1 1 0;min-height:96px;margin-bottom:0;display:flex;flex-direction:column;overflow:hidden}
+.wk-grid{flex:1;min-height:0;display:flex;flex-direction:column;gap:7px;overflow-y:auto;padding-bottom:6px}
+.wk-grid .daycard{margin-bottom:0;flex:0 0 auto;overflow:visible}
 .wk-grid .dc-head{flex-shrink:0}
-.wk-grid .dc-body{flex:1;min-height:0;overflow-y:auto}
+.wk-grid .dc-body{overflow:visible}
 .dc-count{margin-left:auto;font-size:10px;font-weight:800;color:var(--mid);background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:1px 8px}
 /* Month: 6 equal-height week rows, each cell scrolls on its own */
 body.cal-mode .mgrid{flex:1;min-height:0;display:flex;flex-direction:column}
@@ -139,7 +274,6 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
 @media (max-width:640px){
   body.cal-mode .mgrid{overflow-y:auto}
   body.cal-mode .mgrid .mrow:not(.mrow-head){min-height:76px}
-  .wk-grid .daycard{min-height:88px}
 }
 .wk-toggle{display:flex;gap:10px}
 .wk-day{flex:1;padding:11px 12px;border:1.5px solid var(--border);border-radius:12px;background:var(--surface2);color:var(--mid);font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;transition:all .15s;user-select:none}
@@ -147,6 +281,14 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
 .wk-day .wk-check{width:20px;height:20px;border-radius:6px;border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:transparent;transition:all .15s;flex-shrink:0}
 .wk-day.on{border-color:var(--green);background:#e9f9f0;color:#0f7a43}
 .wk-day.on .wk-check{background:var(--green);border-color:var(--green);color:#fff}
+#sup-toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);z-index:5000;min-width:240px;max-width:88vw;padding:14px 20px;border-radius:14px;font-family:inherit;font-size:14px;font-weight:700;color:#fff;box-shadow:0 12px 40px rgba(0,0,0,0.28);display:flex;align-items:center;gap:12px;opacity:0;pointer-events:none;transition:opacity .25s, transform .25s}
+#sup-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#sup-toast.saving{background:#334155}
+#sup-toast.ok{background:#16a34a}
+#sup-toast.err{background:#dc2626}
+#sup-toast .sp{width:18px;height:18px;border:2.5px solid rgba(255,255,255,0.35);border-top-color:#fff;border-radius:50%;animation:supspin .7s linear infinite;flex-shrink:0}
+@keyframes supspin{to{transform:rotate(360deg)}}
+#sup-toast .tick{font-size:18px;flex-shrink:0}
 </style>
 </head>
 <body>
@@ -171,6 +313,26 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     <label style="display:flex;align-items:center;gap:8px;font-size:14px;color:var(--mid);margin:2px 0 12px;cursor:pointer;user-select:none"><input id="lg-remember" type="checkbox" style="width:17px;height:17px;cursor:pointer">Keep me signed in (auto-login on this device)</label>
     <button id="lg-btn">Sign in</button>
     <div class="login-msg" id="lg-msg"></div>
+    <button type="button" onclick="openSettings()" style="margin-top:14px;background:none;border:none;color:#8b95a8;font-size:13px;cursor:pointer;text-decoration:underline">⚙️ Connection settings</button>
+  </div>
+</div>
+
+<!-- CONNECTION SETTINGS -->
+<div id="settings-ov" class="ov">
+  <div class="ov-card" style="max-width:420px">
+    <div class="ov-h"><span>⚙️ Connection</span><button type="button" onclick="closeSettings()">✕</button></div>
+    <div class="ov-body" style="padding:16px">
+      <p style="margin:0 0 12px;color:var(--mid);font-size:14px">Choose where this app reads and saves its data.</p>
+      <label class="be-opt"><input type="radio" name="be-mode" value="cloud"><span><b>☁️ Cloud (Supabase)</b><br><small>Works anywhere, no PC needed.</small></span></label>
+      <label class="be-opt"><input type="radio" name="be-mode" value="server"><span><b>💻 My server (PC)</b><br><small>Uses the server running on your office PC.</small></span></label>
+      <div id="be-url-wrap" style="display:none;margin-top:8px">
+        <label style="font-size:13px;font-weight:700;color:var(--mid)">Server address</label>
+        <input id="be-url" type="text" placeholder="https://....trycloudflare.com" style="width:100%;box-sizing:border-box;padding:11px;border:1px solid var(--border);border-radius:10px;font-size:15px;margin-top:5px">
+        <button type="button" class="be-test" onclick="testServer()">Test connection</button>
+        <div id="be-test-result" style="font-size:13px;margin-top:6px"></div>
+      </div>
+      <button type="button" class="be-save" onclick="saveSettings()">Save &amp; reload</button>
+    </div>
   </div>
 </div>
 
@@ -183,6 +345,8 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
       <div class="who-name" id="who-name"></div>
       <div class="who-sub">Supervisor</div>
     </div>
+    <button class="notif-btn" id="notif-btn" onclick="openNotif()" title="Notifications">🔔<span class="notif-badge" id="notif-badge" style="display:none">0</span></button>
+    <button class="notif-btn" id="settings-btn" onclick="openSettings()" title="Connection settings">⚙️</button>
     <button class="logout" id="logout">Log out</button>
   </div>
 
@@ -198,10 +362,6 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
         <div class="hc-t">Booked Jobs</div>
         <div class="hc-s">See what's scheduled</div>
       </div>
-      <div class="home-card home-book" onclick="openBook()">
-        <div class="hc-t">Book Job</div>
-        <div class="hc-s">Schedule a new job</div>
-      </div>
     </div>
 
     <!-- MAIN (projects list or schedule) -->
@@ -209,6 +369,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
       <button class="back" onclick="goHome()">‹ Menu</button>
       <div id="warn"></div>
       <div class="menu" id="sched-menu" style="display:none">
+        <button class="mbtn" id="m-day" onclick="setView('day')">Day</button>
         <button class="mbtn on" id="m-week" onclick="setView('week')">Week</button>
         <button class="mbtn" id="m-month" onclick="setView('month')">Month</button>
       </div>
@@ -232,13 +393,16 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
       <button class="x" onclick="closeSheet()">&times;</button>
     </div>
     <div class="sheet-body">
-      <div class="fld"><label>Project</label><select id="f-project"></select></div>
+      <div class="fld"><label>Project <span class="req">*</span></label><select id="f-project" onchange="updateSaveState()"></select><div id="f-project-fixed" style="display:none;padding:11px 13px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;font-size:15px;font-weight:700;color:var(--text)"></div></div>
       <div class="row2">
-        <div class="fld"><label>Start date</label><input id="f-start" type="date"></div>
-        <div class="fld"><label>End date</label><input id="f-end" type="date"></div>
+        <div class="fld"><label>Start date <span class="req">*</span></label><input id="f-start" type="date" oninput="updateSaveState()" onchange="updateSaveState()"></div>
+        <div class="fld"><label>Finish date <span class="req">*</span></label><input id="f-end" type="date" oninput="updateSaveState()" onchange="updateSaveState()"></div>
       </div>
-      <div class="fld"><label>Activity</label><input id="f-activity" list="act-list" placeholder="e.g. Bulk earthworks"><datalist id="act-list"><option value="Bulk earthworks"><option value="Detailed excavation"><option value="Site cut"><option value="Trenching"><option value="Backfill"><option value="Level & compact"><option value="Load out"></datalist></div>
-      <div class="fld"><label>Machine</label><input id="f-machine" list="mac-list" placeholder="e.g. 20T Excavator"><datalist id="mac-list"><option value="5T Excavator"><option value="8T Excavator"><option value="13T Excavator"><option value="20T Excavator"><option value="30T Excavator"><option value="Loader"><option value="Dozer"><option value="Skid steer"></datalist></div>
+      <div id="f-extra-ranges"></div>
+      <button type="button" class="add-range-btn" id="f-add-range" onclick="bkAddRange()">+ Add another period</button>
+      <div class="fld"><label>Activity <span class="opt">(optional)</span></label><input id="f-activity" list="act-list" placeholder="e.g. Bulk earthworks"><datalist id="act-list"><option value="Bulk earthworks"><option value="Detailed excavation"><option value="Site cut"><option value="Trenching"><option value="Backfill"><option value="Level & compact"><option value="Load out"></datalist></div>
+      <div class="fld"><label>Machine <span class="opt">(optional)</span></label><input id="f-machine" list="mac-list" placeholder="e.g. 20T Excavator"><datalist id="mac-list"><option value="5T Excavator"><option value="8T Excavator"><option value="13T Excavator"><option value="20T Excavator"><option value="30T Excavator"><option value="Loader"><option value="Dozer"><option value="Skid steer"></datalist></div>
+      <div class="fld"><label>Notes <span class="opt">(optional)</span></label><textarea id="f-notes" rows="3" placeholder="Any extra info for this booking…"></textarea></div>
       <div class="fld"><label>Include weekend days</label>
         <div class="wk-toggle">
           <button type="button" class="wk-day" id="wk-sat" onclick="toggleWk('sat')"><span class="wk-check">✓</span>Saturdays</button>
@@ -250,7 +414,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     <div class="sheet-foot">
       <button class="btn btn-del" id="f-del" style="display:none" onclick="cancelBooking()">Cancel job</button>
       <button class="btn btn-cancel" onclick="closeSheet()">Close</button>
-      <button class="btn btn-save" onclick="saveBooking()">Save</button>
+      <button class="btn btn-save" id="f-save" onclick="saveBooking()">Save</button>
     </div>
   </div>
 </div>
@@ -274,6 +438,165 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
   </div>
 </div>
 
+<div class="projcal-ov" id="projcal-ov">
+  <div class="projcal-top">
+    <button class="back" onclick="closeProjCal()">‹ Close</button>
+    <div class="projcal-title" id="projcal-title">Project</div>
+  </div>
+  <div class="projcal-body">
+    <div class="projcal-cal">
+      <div class="projcal-navrow">
+        <button type="button" onclick="projCalShift(-1)">‹</button>
+        <div id="projcal-month">—</div>
+        <button type="button" onclick="projCalShift(1)">›</button>
+      </div>
+      <div id="projcal-grid"></div>
+    </div>
+    <div class="projcal-list" id="projcal-list"></div>
+  </div>
+</div>
+
+<div class="test-ov" id="test-ov">
+  <div class="projcal-top">
+    <button class="back" onclick="closeTest()">‹ Close</button>
+    <div class="projcal-title" id="test-title">Compaction Tests</div>
+  </div>
+  <div class="test-body">
+    <div class="test-form">
+      <div class="th">🧪 Book a compaction test</div>
+      <div class="fld"><label>Date <span class="req">*</span></label><input id="t-date" type="date" oninput="updateTestSave()" onchange="updateTestSave()"></div>
+      <div class="fld"><label>Test type <span class="req">*</span></label><input id="t-type" list="test-type-list" placeholder="e.g. Sand Replacement, Nuclear Density…" oninput="updateTestSave()"><datalist id="test-type-list"><option value="Sand Replacement Test"><option value="Nuclear Density Test"><option value="Field Density Test"><option value="Standard Proctor"><option value="Modified Proctor"><option value="CBR (California Bearing Ratio)"><option value="Plate Load Test"><option value="Dynamic Cone Penetrometer (DCP)"><option value="Compaction Test"></datalist></div>
+      <div class="fld"><label>Notes <span class="opt">(optional)</span></label><textarea id="t-notes" rows="2" placeholder="Any extra info for the tester…"></textarea></div>
+      <button class="btn btn-save" id="t-save" onclick="saveTest()">+ Add test</button>
+    </div>
+    <div class="test-list" id="test-list"></div>
+  </div>
+</div>
+
+<div class="test-ov" id="transfer-ov">
+  <div class="projcal-top">
+    <button class="back" onclick="closeTransfer()">‹ Close</button>
+    <div class="projcal-title" id="tr-title">Machine Transfer</div>
+  </div>
+  <div class="test-body">
+    <div class="test-form">
+      <div class="th">🚚 Machine transfer / removal</div>
+      <div class="fld"><label>From (current site)</label><div id="tr-from" class="tr-fixed"></div></div>
+      <div class="fld"><label>Machine <span class="req">*</span></label><input id="tr-machine" list="mac-list" placeholder="e.g. 20T Excavator" oninput="updateTrSave()"></div>
+      <div class="fld"><label>What needs to happen? <span class="req">*</span></label>
+        <div class="tr-actions">
+          <button type="button" class="tr-act" id="tr-act-remove" onclick="trSetAction('remove')">📤 Remove / pick up</button>
+          <button type="button" class="tr-act" id="tr-act-transfer" onclick="trSetAction('transfer')">🔄 Transfer to another site</button>
+        </div>
+      </div>
+      <div class="fld" id="tr-dest-wrap" style="display:none"><label>Transfer to <span class="req">*</span></label><select id="tr-dest" onchange="trDestChanged()"></select><div id="tr-dest-addr" class="tr-addr"></div></div>
+      <div class="fld"><label>Date needed <span class="opt">(optional)</span></label><input id="tr-date" type="date"></div>
+      <div class="fld"><label>Notes <span class="opt">(optional)</span></label><textarea id="tr-notes" rows="2" placeholder="Any details for the office…"></textarea></div>
+      <button class="btn btn-save" id="tr-save" onclick="saveTransfer()">+ Send request</button>
+    </div>
+    <div class="test-list" id="tr-list"></div>
+  </div>
+</div>
+
+<div class="test-ov" id="variation-ov">
+  <div class="projcal-top">
+    <button class="back" id="var-close-btn" onclick="closeVariation()">‹ Close</button>
+    <div class="projcal-title" id="var-title">Variations</div>
+  </div>
+  <div class="test-body">
+    <div class="test-form">
+      <div class="th">🔧 Add a variation</div>
+      <div class="fld"><label>Description <span class="req">*</span></label><textarea id="v-desc" rows="3" placeholder="What is the variation? e.g. Extra rock excavation in north corner…" oninput="updateVarSave()"></textarea></div>
+      <div class="row2">
+        <div class="fld"><label>Start date <span class="req">*</span></label><input id="v-start" type="date" oninput="updateVarSave()" onchange="updateVarSave()"></div>
+        <div class="fld"><label>Finish date <span class="req">*</span></label><input id="v-end" type="date" oninput="updateVarSave()" onchange="updateVarSave()"></div>
+      </div>
+      <div id="v-extra-ranges"></div>
+      <button type="button" class="add-range-btn" id="v-add-range" onclick="varAddRange()">+ Add another period</button>
+      <div class="fld"><label>Machine needed <span class="opt">(optional)</span></label><input id="v-machine" list="mac-list" placeholder="e.g. 20T Excavator"></div>
+      <div class="fld"><label>Comments <span class="opt">(optional)</span></label><textarea id="v-comments" rows="2" placeholder="Any comments about this variation…"></textarea></div>
+      <div class="fld"><label>Photos <span class="opt">(optional)</span></label>
+        <input type="file" id="v-photo-input" accept="image/*" multiple style="display:none" onchange="varPhotoChosen(event)">
+        <button type="button" class="v-attach" onclick="document.getElementById('v-photo-input').click()">📷 Add photos</button>
+        <div id="v-photos" class="v-thumbs"></div>
+      </div>
+      <div class="fld"><label>Docket(s) <span class="opt">(optional — one or more files)</span></label>
+        <input type="file" id="v-docket-input" accept="application/pdf,image/*,.doc,.docx,.xls,.xlsx" multiple style="display:none" onchange="varDocketChosen(event)">
+        <button type="button" class="v-attach" onclick="document.getElementById('v-docket-input').click()">📎 Attach docket</button>
+        <div id="v-dockets" class="v-files"></div>
+      </div>
+      <button class="btn btn-save" id="v-save" onclick="saveVariation()">+ Add variation</button>
+    </div>
+    <div class="test-list" id="var-list"></div>
+  </div>
+</div>
+
+<div class="test-ov" id="subs-ov">
+  <div class="projcal-top">
+    <button class="back" onclick="closeSubs()">‹ Close</button>
+    <div class="projcal-title" id="subs-title">Subcontractors</div>
+  </div>
+  <div class="test-body">
+    <div class="sub-intro">Subcontractors scheduled by the office. Tap a subcontractor to ask the office to <b>postpone</b> or <b>cancel</b> it.</div>
+    <div class="sub-timeline-h" id="sub-tl-h">Timeline</div>
+    <div class="sub-track" id="sub-track"></div>
+  </div>
+</div>
+
+<div class="test-ov" id="allow-ov">
+  <div class="projcal-top">
+    <button class="back" onclick="closeAllow()">‹ Close</button>
+    <div class="projcal-title" id="allow-title">Project Allowances</div>
+  </div>
+  <div class="test-body">
+    <div class="sub-intro">Project allowances uploaded by the office. Tap a file to view or download.</div>
+    <div class="v-files" id="allow-list" style="margin-top:12px"></div>
+  </div>
+</div>
+
+<div class="test-ov" id="hist-ov">
+  <div class="projcal-top">
+    <button class="back" onclick="closeHistory()">‹ Close</button>
+    <div class="projcal-title" id="hist-title">History</div>
+  </div>
+  <div class="test-body">
+    <div class="sub-intro">Everything done on this job — bookings, tests, transfers, variations and subcontractor requests — with date, time and who did it.</div>
+    <div id="hist-list" style="margin-top:12px"></div>
+  </div>
+</div>
+
+<div class="test-ov" id="notif-ov">
+  <div class="projcal-top">
+    <button class="back" onclick="closeNotif()">‹ Close</button>
+    <div class="projcal-title">Notifications</div>
+  </div>
+  <div class="test-body">
+    <div class="sub-intro">Updates on your jobs — new bookings, subcontractor changes, machine transfers and cancellations made by the office or the team.</div>
+    <div id="notif-enable-wrap"></div>
+    <div id="notif-list" style="margin-top:12px"></div>
+  </div>
+</div>
+
+<div class="ov" id="sub-act-ov" onclick="if(event.target===this) closeSubAct()">
+  <div class="sheet">
+    <div class="sheet-head">
+      <div class="sheet-title">Postpone or cancel request</div>
+      <button class="x" onclick="closeSubAct()">&times;</button>
+    </div>
+    <div class="sheet-body">
+      <div id="sub-act-info"></div>
+      <div id="sub-act-current"></div>
+      <div class="fld"><label>Suggested new date (for postpone)</label><input id="sub-act-date" type="date"></div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.5">This sends a request to the office. They will action it in the main software.</div>
+    </div>
+    <div class="sheet-foot">
+      <button class="btn btn-del" onclick="subReqCancel()">Request cancel</button>
+      <button class="btn btn-cancel" onclick="closeSubAct()">Close</button>
+      <button class="btn btn-save" onclick="subReqPostpone()">Request postpone</button>
+    </div>
+  </div>
+</div>
+
 <script>
 (function(){
   var CFG = window.REMC_SUP_CLOUD || {};
@@ -282,27 +605,115 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
   var COLORS = ['#2563eb','#16a34a','#9333ea','#ea580c','#0891b2','#be123c','#b45309','#059669'];
   var sb = null, connected = false;
   var DATA = {};           // full shared document
-  var PROJECTS = [], BOOKINGS = [], SUPERS = [], NOTES = {};
+  var PROJECTS = [], BOOKINGS = [], SUPERS = [], NOTES = {}, MACHINES = [];
   var ME = null;           // {username, name}
   var VIEW = 'list', OFFSET = 0, EDIT_ID = null, PICK_COLOR = COLORS[0], NOTES_PID = null;
+  var TESTS = {}, TEST_PID = null;
+  var TRANSFERS = {}, TR_PID = null, TR_ACTION = '';
+  var VARIATIONS = {}, VAR_PID = null, _varPhotos = [], _varDockets = [], _varSaving = false, VAR_EDIT_ID = null;
+  var SUBCONS = {}, SUB_PID = null, SUB_STATUS = 'booked', SUB_ACT = { pid:null, id:null };
+  var PROJDOCS = {}, ALLOW_PID = null;
+  var ACTIVITY = [], HIST_PID = null;
 
   function $(id){ return document.getElementById(id); }
   function setCloud(t,bg,c){ var e=$('cloud'); if(!e)return; e.textContent=t; e.style.background=bg||'#f1f5f9'; e.style.color=c||'#64748b'; }
+  var _cloudFailN=0, _reconnTimer=null;
+  function _cloudOk(){ _cloudFailN=0; connected=true; if(_reconnTimer){ clearTimeout(_reconnTimer); _reconnTimer=null; } setCloud('☁︎','#dcfce7','#15803d'); }
+  function _cloudFail(){
+    _cloudFailN++;
+    var reallyOffline = (typeof navigator!=='undefined' && navigator.onLine===false);
+    if(reallyOffline) setCloud('offline','#fee2e2','#dc2626');
+    else setCloud('reconnecting…','#fef3c7','#92400e');
+    // keep retrying while it fails; _cloudOk() clears this once a request succeeds
+    if(!_reconnTimer){ _reconnTimer=setTimeout(function(){ _reconnTimer=null; try{ refreshFromCloud(); }catch(e){} }, 4000); }
+  }
 
-  // ---------- Supabase ----------
+  // ---------- Backend: Cloud (Supabase) or My Server (PC) ----------
+  function _beMode(){ try{ return localStorage.getItem('remc_sup_backend')==='server' ? 'server' : 'cloud'; }catch(e){ return 'cloud'; } }
+  function _beUrl(){ try{ return String(localStorage.getItem('remc_sup_server_url')||'').trim().replace(/\/+$/,''); }catch(e){ return ''; } }
+  // A tiny stand-in for the Supabase client that talks to your PC server instead.
+  // It mimics only the few calls the app uses, so the rest of the sync code is unchanged.
+  function _serverClient(base){
+    base = String(base||'').replace(/\/+$/,'');
+    function jget(path){ return fetch(base+path,{method:'GET'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }); }
+    function jpost(path,body){ return fetch(base+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body||{})}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }); }
+    return {
+      __server:true, __base:base,
+      from:function(){
+        var q={ select:function(){ return q; }, eq:function(){ return q; },
+          maybeSingle:function(){ return jget('/state').then(function(j){ return { data:{ data:j.data||{}, updated_at:j.updated_at||null }, error:null }; }).catch(function(e){ return { data:null, error:{ message:(e&&e.message)||'network' } }; }); },
+          upsert:function(obj){ var data=(obj&&obj.data)||{}; return jpost('/state',{ data:data, client:(data&&data.__client)||null }).then(function(){ return { error:null }; }).catch(function(e){ return { error:{ message:(e&&e.message)||'network' } }; }); }
+        };
+        return q;
+      },
+      channel:function(){
+        var ch={ _es:null,
+          on:function(evt,opts,cb){ try{ ch._es=new EventSource(base+'/events'); ch._es.onmessage=function(m){ try{ var d=JSON.parse(m.data); if(d && d.client!=='__initial__') cb({ new:{ data:d.data } }); }catch(e){} }; }catch(e){} return ch; },
+          subscribe:function(){ return ch; }
+        };
+        return ch;
+      },
+      removeChannel:function(ch){ try{ if(ch&&ch._es) ch._es.close(); }catch(e){} }
+    };
+  }
+
+  // ---------- Supabase / server ----------
   function ensureClient(){
     if(sb) return true;
+    if(_beMode()==='server'){ var u=_beUrl(); if(!u) return false; sb=_serverClient(u); return true; }
     if(typeof supabase==='undefined' || !supabase.createClient) return false;
     if(!CFG.url || String(CFG.anonKey||'').indexOf('PASTE_')>=0) return false;
     sb = supabase.createClient(CFG.url, CFG.anonKey);
     return true;
   }
+  function _beSelectedMode(){ var rs=document.getElementsByName('be-mode'); for(var i=0;i<rs.length;i++){ if(rs[i].checked) return rs[i].value; } return 'cloud'; }
+  function _beToggleUrl(){ var w=$('be-url-wrap'); if(w) w.style.display=(_beSelectedMode()==='server')?'':'none'; }
+  window.openSettings=function(){
+    var m=_beMode();
+    var rs=document.getElementsByName('be-mode'); [].forEach.call(rs,function(r){ r.checked=(r.value===m); r.onchange=_beToggleUrl; });
+    if($('be-url')) $('be-url').value=_beUrl();
+    if($('be-test-result')) $('be-test-result').textContent='';
+    _beToggleUrl();
+    $('settings-ov').classList.add('open');
+  };
+  window.closeSettings=function(){ $('settings-ov').classList.remove('open'); };
+  window.testServer=function(){
+    var u=String($('be-url').value||'').trim().replace(/\/+$/,''); var el=$('be-test-result');
+    if(!u){ el.textContent='Enter the server address first.'; el.style.color='#b45309'; return; }
+    el.textContent='Testing…'; el.style.color='#64748b';
+    fetch(u+'/health').then(function(r){ return r.json(); }).then(function(j){
+      if(j && j.ok){ el.textContent='✓ Connected to your server'; el.style.color='#15803d'; }
+      else { el.textContent='Reached it, but the answer was unexpected.'; el.style.color='#b45309'; }
+    }).catch(function(){ el.textContent='✗ Could not reach it. Is the server running?'; el.style.color='#dc2626'; });
+  };
+  window.saveSettings=function(){
+    var m=_beSelectedMode();
+    var u=String(($('be-url')&&$('be-url').value)||'').trim().replace(/\/+$/,'');
+    if(m==='server' && !u){ alert('Enter the server address (https://....) first.'); return; }
+    try{ localStorage.setItem('remc_sup_backend', m); localStorage.setItem('remc_sup_server_url', u); }catch(e){}
+    location.reload();
+  };
   function parseData(){
     function j(k,def){ try{ return JSON.parse(DATA[k]||def); }catch(e){ return JSON.parse(def); } }
     PROJECTS = j('remc_projects','[]'); if(!Array.isArray(PROJECTS)) PROJECTS=[];
     BOOKINGS = j('remc_scheduler','[]'); if(!Array.isArray(BOOKINGS)) BOOKINGS=[];
     SUPERS   = j('remc_supervisors','[]'); if(!Array.isArray(SUPERS)) SUPERS=[];
     NOTES    = j('remc_project_notes','{}'); if(!NOTES || typeof NOTES!=='object' || Array.isArray(NOTES)) NOTES={};
+    MACHINES = j('remc_machine_names','[]'); if(!Array.isArray(MACHINES)) MACHINES=[];
+    TESTS    = j('remc_compaction_tests','{}'); if(!TESTS || typeof TESTS!=='object' || Array.isArray(TESTS)) TESTS={};
+    TRANSFERS= j('remc_machine_transfers','{}'); if(!TRANSFERS || typeof TRANSFERS!=='object' || Array.isArray(TRANSFERS)) TRANSFERS={};
+    VARIATIONS= j('remc_variations','{}'); if(!VARIATIONS || typeof VARIATIONS!=='object' || Array.isArray(VARIATIONS)) VARIATIONS={};
+    SUBCONS  = j('remc_sub_bookings','{}'); if(!SUBCONS || typeof SUBCONS!=='object' || Array.isArray(SUBCONS)) SUBCONS={};
+    PROJDOCS = j('remc_proj_docs','{}'); if(!PROJDOCS || typeof PROJDOCS!=='object' || Array.isArray(PROJDOCS)) PROJDOCS={};
+    ACTIVITY = j('remc_activity_log','[]'); if(!Array.isArray(ACTIVITY)) ACTIVITY=[];
+    fillMachineList();
+  }
+  // Fill the Machine dropdown with the machines uploaded in App 1 (falls back to a default list)
+  function fillMachineList(){
+    var dl=$('mac-list'); if(!dl) return;
+    var list = (MACHINES && MACHINES.length) ? MACHINES
+      : ['5T Excavator','8T Excavator','13T Excavator','20T Excavator','30T Excavator','Loader','Dozer','Skid steer'];
+    dl.innerHTML = list.map(function(n){ return '<option value="'+String(n).replace(/"/g,'&quot;')+'">'; }).join('');
   }
   // ---- Loading overlay with progress ----
   var _ldEl=null, _ldPct=0, _ldTimer=null;
@@ -339,11 +750,11 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     if(!ensureClient()){ if(cb) cb('noconfig'); return; }
     setCloud('…','#eff6ff','#1d4ed8');
     sb.from('remc_state').select('data').eq('id',WS).maybeSingle().then(function(res){
-      if(res && res.error){ setCloud('offline','#fee2e2','#dc2626'); if(cb) cb(res.error.message||'error'); return; }
+      if(res && res.error){ _cloudFail(); if(cb) cb(res.error.message||'error'); return; }
       DATA = (res && res.data && res.data.data) ? res.data.data : {};
-      parseData(); connected=true; setCloud('☁︎','#dcfce7','#15803d'); if(cb) cb(null);
+      parseData(); connected=true; _cloudOk(); if(cb) cb(null);
     }).catch(function(e){
-      setCloud('offline','#fee2e2','#dc2626');
+      _cloudFail();
       if(cb) cb((e && e.message) || 'network');
     });
   }
@@ -356,8 +767,8 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
       d['remc_scheduler'] = JSON.stringify(BOOKINGS);
       d['__client'] = CLIENT;
       sb.from('remc_state').upsert({ id:WS, data:d, updated_at:new Date().toISOString() }).then(function(r2){
-        if(r2 && r2.error){ setCloud('offline','#fee2e2','#dc2626'); if(cb) cb(r2.error.message); }
-        else { DATA=d; setCloud('☁︎','#dcfce7','#15803d'); if(cb) cb(null); }
+        if(r2 && r2.error){ _cloudFail(); if(cb) cb(r2.error.message); }
+        else { DATA=d; _cloudOk(); if(cb) cb(null); }
       });
     });
   }
@@ -369,10 +780,83 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
       d['remc_project_notes'] = JSON.stringify(NOTES);
       d['__client'] = CLIENT;
       sb.from('remc_state').upsert({ id:WS, data:d, updated_at:new Date().toISOString() }).then(function(r2){
-        if(r2 && r2.error){ setCloud('offline','#fee2e2','#dc2626'); if(cb) cb(r2.error.message); }
-        else { DATA=d; setCloud('☁︎','#dcfce7','#15803d'); if(cb) cb(null); }
+        if(r2 && r2.error){ _cloudFail(); if(cb) cb(r2.error.message); }
+        else { DATA=d; _cloudOk(); if(cb) cb(null); }
       });
     });
+  }
+  function pushTests(cb){
+    if(!ensureClient()){ if(cb) cb('noconfig'); return; }
+    setCloud('saving…','#fef3c7','#92400e');
+    sb.from('remc_state').select('data').eq('id',WS).maybeSingle().then(function(res){
+      var d = (res && res.data && res.data.data) ? res.data.data : {};
+      d['remc_compaction_tests'] = JSON.stringify(TESTS);
+      d['__client'] = CLIENT;
+      sb.from('remc_state').upsert({ id:WS, data:d, updated_at:new Date().toISOString() }).then(function(r2){
+        if(r2 && r2.error){ _cloudFail(); if(cb) cb(r2.error.message); }
+        else { DATA=d; _cloudOk(); if(cb) cb(null); }
+      });
+    });
+  }
+  function pushTransfers(cb){
+    if(!ensureClient()){ if(cb) cb('noconfig'); return; }
+    setCloud('saving…','#fef3c7','#92400e');
+    sb.from('remc_state').select('data').eq('id',WS).maybeSingle().then(function(res){
+      var d = (res && res.data && res.data.data) ? res.data.data : {};
+      d['remc_machine_transfers'] = JSON.stringify(TRANSFERS);
+      d['__client'] = CLIENT;
+      sb.from('remc_state').upsert({ id:WS, data:d, updated_at:new Date().toISOString() }).then(function(r2){
+        if(r2 && r2.error){ _cloudFail(); if(cb) cb(r2.error.message); }
+        else { DATA=d; _cloudOk(); if(cb) cb(null); }
+      });
+    });
+  }
+  function pushVariations(cb){
+    if(!ensureClient()){ if(cb) cb('noconfig'); return; }
+    setCloud('saving…','#fef3c7','#92400e');
+    sb.from('remc_state').select('data').eq('id',WS).maybeSingle().then(function(res){
+      var d = (res && res.data && res.data.data) ? res.data.data : {};
+      d['remc_variations'] = JSON.stringify(VARIATIONS);
+      d['__client'] = CLIENT;
+      sb.from('remc_state').upsert({ id:WS, data:d, updated_at:new Date().toISOString() }).then(function(r2){
+        if(r2 && r2.error){ _cloudFail(); if(cb) cb(r2.error.message); }
+        else { DATA=d; _cloudOk(); if(cb) cb(null); }
+      });
+    });
+  }
+  function pushSubs(cb){
+    if(!ensureClient()){ if(cb) cb('noconfig'); return; }
+    setCloud('saving…','#fef3c7','#92400e');
+    sb.from('remc_state').select('data').eq('id',WS).maybeSingle().then(function(res){
+      var d = (res && res.data && res.data.data) ? res.data.data : {};
+      d['remc_sub_bookings'] = JSON.stringify(SUBCONS);
+      d['__client'] = CLIENT;
+      sb.from('remc_state').upsert({ id:WS, data:d, updated_at:new Date().toISOString() }).then(function(r2){
+        if(r2 && r2.error){ _cloudFail(); if(cb) cb(r2.error.message); }
+        else { DATA=d; _cloudOk(); if(cb) cb(null); }
+      });
+    });
+  }
+  function pushActivity(cb){
+    if(!ensureClient()){ if(cb) cb('noconfig'); return; }
+    sb.from('remc_state').select('data').eq('id',WS).maybeSingle().then(function(res){
+      var d = (res && res.data && res.data.data) ? res.data.data : {};
+      d['remc_activity_log'] = JSON.stringify(ACTIVITY);
+      d['__client'] = CLIENT;
+      sb.from('remc_state').upsert({ id:WS, data:d, updated_at:new Date().toISOString() }).then(function(r2){
+        if(r2 && r2.error){ if(cb) cb(r2.error.message); } else { DATA=d; if(cb) cb(null); }
+      });
+    }).catch(function(e){ if(cb) cb((e&&e.message)||'network'); });
+  }
+  // Record a destructive / request action so it shows in History (creations & edits are derived from the data itself)
+  function logActivity(kind, action, pid, detail){
+    try{
+      if(!Array.isArray(ACTIVITY)) ACTIVITY=[];
+      var p=PROJECTS.find(function(x){return String(x.id)===String(pid);});
+      ACTIVITY.push({ id:'log_'+Date.now()+'_'+Math.random().toString(36).slice(2,6), at:new Date().toISOString(), by: ME? ME.name : 'Supervisor', user: ME? (ME.username||'') : '', app:'Mobile', projectId:String(pid), projectName: p?(p.name||('Project '+pid)):('Project '+pid), kind:kind, action:action, detail:detail||'' });
+      if(ACTIVITY.length>2000) ACTIVITY=ACTIVITY.slice(-2000);
+      pushActivity();
+    }catch(e){}
   }
   function subscribe(){
     if(!sb) return;
@@ -380,6 +864,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
       var d = payload && payload.new && payload.new.data;
       if(!d || d.__client===CLIENT) return;
       DATA=d; parseData(); render();
+      try{ updateNotifBadge(); notifCheckAndFire(); }catch(e){}
     }).subscribe();
     startAutoRefresh();
   }
@@ -392,15 +877,16 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     _refreshing=true;
     sb.from('remc_state').select('data,updated_at').eq('id',WS).maybeSingle().then(function(res){
       _refreshing=false;
-      if(!res || res.error || !res.data || !res.data.data) return;
+      if(!res || res.error){ _cloudFail(); return; }
+      _cloudOk(); // reached the cloud → healthy, clear any stale offline
+      if(!res.data || !res.data.data) return;
       var stamp=String(res.data.updated_at||'');
       if(stamp && stamp===_lastSeen) return;
       _lastSeen=stamp;
       var d=res.data.data;
       if(d.__client===CLIENT) return;
       DATA=d; parseData(); render();
-      setCloud('☁︎','#dcfce7','#15803d');
-    }).catch(function(){ _refreshing=false; });
+    }).catch(function(){ _refreshing=false; _cloudFail(); });
   }
   function startAutoRefresh(){
     if(_refreshTimer) return;
@@ -425,30 +911,83 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
   function myProjectIds(){ var s={}; myProjects().forEach(function(p){ s[String(p.id)]=true; }); return s; }
   function projName(id){ var p=PROJECTS.find(function(x){return String(x.id)===String(id);}); return p?(p.name||('#'+id)):('#'+id); }
   function myBookings(){ var ids=myProjectIds(); return BOOKINGS.filter(function(b){ return ids[String(b.projectId)]; }); }
+  function bookingRanges(b){
+    if(b && Array.isArray(b.ranges) && b.ranges.length) return b.ranges;
+    return [{start:(b&&b.start), end:(b&&b.end)}];
+  }
   function bookingCoversDay(b,dk){
-    if(dk < b.start || dk > b.end) return false;
     var d=parseKey(dk), w=d.getDay();
     if(w===6 && b.skipSat) return false;
     if(w===0 && b.skipSun) return false;
-    return true;
+    var rs=bookingRanges(b);
+    for(var i=0;i<rs.length;i++){
+      var s=rs[i].start, e=rs[i].end; if(!s||!e) continue;
+      if(e<s){ var t=s; s=e; e=t; }
+      if(dk>=s && dk<=e) return true;
+    }
+    return false;
   }
+  window.bookingCoversDay=bookingCoversDay;
   var MN=['January','February','March','April','May','June','July','August','September','October','November','December'];
   var DOW=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
   // ---------- render ----------
-  function render(){ try{ updateWarn(); }catch(e){} if(VIEW==='notes') renderAllNotes(); else if(VIEW==='list') renderProjects(); else if(VIEW==='week') renderWeek(); else renderMonth(); }
+  function render(){ try{ updateWarn(); }catch(e){} try{ _detectChanges(); }catch(e){} if(VIEW==='notes') renderAllNotes(); else if(VIEW==='list') renderProjects(); else if(VIEW==='day') renderDay(); else if(VIEW==='week') renderWeek(); else renderMonth(); try{ if(typeof renderProjCal==='function' && $('projcal-ov') && $('projcal-ov').classList.contains('open') && PROJCAL_PID!=null) renderProjCal(); }catch(e){} try{ updateNotifBadge(); }catch(e){} }
   function renderAllNotes(){
     var mine=myProjects();
     var withNotes=mine.filter(function(p){ return NOTES[String(p.id)] && String(NOTES[String(p.id)]).trim(); });
-    if(!withNotes.length){ $('view').innerHTML='<div class="empty" style="padding:26px;text-align:center;color:var(--muted)">No notes yet. Open a project and tap <b>Notes</b> to add one.</div>'; return; }
-    $('view').innerHTML = withNotes.map(function(p){
+    var addBtn='<button class="btn btn-save" style="width:100%;margin-bottom:14px" onclick="newComment()">+ New comment</button>';
+    if(!withNotes.length){
+      $('view').innerHTML = addBtn + '<div class="empty" style="padding:26px;text-align:center;color:var(--muted)">No comments yet. Tap <b>+ New comment</b> to add one.</div>';
+      return;
+    }
+    $('view').innerHTML = addBtn + withNotes.map(function(p){
+      var pid=String(p.id);
       return '<div class="pcard">'
-        + '<div class="pn">'+esc(p.name||('Project '+p.id))+'</div>'
-        + '<div class="pm">'+esc([p.jobNumber,p.address].filter(Boolean).join(' · '))+'</div>'
-        + '<div class="note-body">'+esc(NOTES[String(p.id)])+'</div>'
+        + '<div style="display:flex;align-items:flex-start;gap:8px">'
+        +   '<div style="flex:1;min-width:0"><div class="pn">'+esc(p.name||('Project '+p.id))+'</div>'
+        +   '<div class="pm">'+esc([p.jobNumber,p.address].filter(Boolean).join(' · '))+'</div></div>'
+        +   '<div class="note-acts">'
+        +     '<button class="note-ico" title="Edit" onclick="openNotes(\''+pid+'\')">✏️</button>'
+        +     '<button class="note-ico" title="Delete" onclick="deleteNote(\''+pid+'\')">🗑️</button>'
+        +   '</div>'
+        + '</div>'
+        + '<div class="note-body">'+esc(NOTES[pid])+'</div>'
         + '</div>';
     }).join('');
   }
+  // "+ New comment" → pick which project to comment on
+  window.newComment=function(){
+    var mine=myProjects();
+    if(!mine.length){ alert('You have no projects assigned to you.'); return; }
+    var ov=document.getElementById('note-pick-ov'); if(ov) ov.remove();
+    ov=document.createElement('div'); ov.id='note-pick-ov'; ov.className='ov open';
+    ov.innerHTML='<div class="sheet"><div class="sheet-head"><div class="sheet-title">Choose a project</div><button class="x" onclick="closeNotePick()">&times;</button></div>'
+      +'<div class="sheet-body"><div style="display:flex;flex-direction:column;gap:8px">'
+      + mine.map(function(p){ var pid=String(p.id); var has=NOTES[pid]&&String(NOTES[pid]).trim();
+          return '<button class="np-row" onclick="pickNoteProject(\''+pid+'\')"><div class="np-n">'+esc(p.name||('Project '+p.id))+'</div>'
+            +'<div class="np-m">'+esc([p.jobNumber,p.address].filter(Boolean).join(' · '))+(has?' · <b style="color:#16a34a">has comment</b>':'')+'</div></button>';
+        }).join('')
+      +'</div></div></div>';
+    document.body.appendChild(ov);
+    var db=false;
+    ov.addEventListener('mousedown', function(e){ db=(e.target===this); });
+    ov.addEventListener('click', function(e){ if(e.target===this && db) closeNotePick(); db=false; });
+  };
+  window.closeNotePick=function(){ var ov=document.getElementById('note-pick-ov'); if(ov) ov.remove(); };
+  window.pickNoteProject=function(pid){ closeNotePick(); openNotes(pid); };
+  window.deleteNote=function(pid){
+    pid=String(pid);
+    if(!NOTES[pid]){ return; }
+    if(!confirm('Delete this note?\n\nThis cannot be undone.')) return;
+    delete NOTES[pid];
+    render();
+    supShowSaving('Deleting…');
+    pushNotes(function(err){
+      if(err){ supShowResult(false, 'Could not delete. Check your connection and try again.'); }
+      else { pull(function(){ render(); }); supShowResult(true, 'Note deleted'); }
+    });
+  };
   function renderProjects(){
     var mine=myProjects();
     if(!mine.length){
@@ -476,6 +1015,13 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
         + '<div class="pf">'
         +   '<button class="pbook" onclick="openBook(\''+esc(p.id)+'\')">+ Book a job</button>'
         +   '<button class="pnotes" onclick="openNotes(\''+esc(p.id)+'\')">Notes'+(NOTES[String(p.id)] && String(NOTES[String(p.id)]).trim() ? ' <span class="ndot">●</span>':'')+'</button>'
+        +   '<button class="pcal" onclick="openProjCal(\''+esc(p.id)+'\')">📅 Calendar</button>'
+        +   '<button class="ptest" onclick="openTest(\''+esc(p.id)+'\')">🧪 Test</button>'
+        +   '<button class="ptransfer" onclick="openTransfer(\''+esc(p.id)+'\')">🚚 Transfer</button>'
+        +   '<button class="pvar" onclick="openVariation(\''+esc(p.id)+'\')">🔧 Variation</button>'
+        +   '<button class="psub" onclick="openSubs(\''+esc(p.id)+'\')">👷 Subs</button>'
+        +   '<button class="pallow" onclick="openAllow(\''+esc(p.id)+'\')">📋 Allowances</button>'
+        +   '<button class="phist" onclick="openHistory(\''+esc(p.id)+'\')">🕘 History</button>'
         +   '<span class="pcount">'+cnt+' booking'+(cnt===1?'':'s')+'</span>'
         + '</div>'
         + '</div>';
@@ -487,6 +1033,20 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     var mon=addDays(base, dow===0?-6:1-dow); var out=[];
     for(var i=0;i<7;i++) out.push(addDays(mon,i));
     return out;
+  }
+  function renderDay(){
+    var d=addDays(new Date(), OFFSET); var dk=keyOf(d);
+    $('range-lbl').textContent = DOW[d.getDay()]+', '+d.getDate()+' '+MN[d.getMonth()].slice(0,3)+' '+d.getFullYear();
+    var bks=myBookings(); var tk=todayKey(); var today=dk===tk; var w=d.getDay(), wknd=(w===0||w===6);
+    var todays=bks.filter(function(b){ return bookingCoversDay(b,dk); });
+    var html='<div class="wk-grid"><div class="daycard'+(today?' today':'')+(wknd?' wknd':'')+'">'
+      +'<div class="dc-head"><span class="dc-dow">'+DOW[w]+'</span><span class="dc-date">'+d.getDate()+' '+MN[d.getMonth()].slice(0,3)+'</span>'
+      + (todays.length? '<span class="dc-count">'+todays.length+'</span>' : '')
+      +'</div>'
+      +'<div class="dc-body">'
+      + (todays.length? todays.map(bkRow).join('') : '<div class="empty">No jobs</div>')
+      +'</div></div></div>';
+    $('view').innerHTML=html;
   }
   function renderWeek(){
     var days=weekDays();
@@ -507,11 +1067,14 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     html+='</div>';
     $('view').innerHTML=html;
   }
+  function bkRangesLabel(b){
+    return bookingRanges(b).filter(function(r){return r.start&&r.end;}).map(function(r){ return fmtShort(r.start)+'→'+fmtShort(r.end); }).join(', ');
+  }
   function bkRow(b){
     return '<div class="bk" style="border-left-color:'+(b.color||'#2563eb')+'" onclick="openEdit(\''+b.id+'\')">'
       +'<div class="bk-main"><div class="bk-name">'+esc(projName(b.projectId))+'</div>'
       +'<div class="bk-sub">'+esc(b.activity||'')+(b.machine?' · '+esc(b.machine):'')+'</div></div>'
-      +'<div class="bk-range">'+fmtShort(b.start)+'→'+fmtShort(b.end)+'</div></div>';
+      +'<div class="bk-range">'+bkRangesLabel(b)+'</div></div>';
   }
   function fmtShort(s){ var d=parseKey(s); return d.getDate()+'/'+(d.getMonth()+1); }
 
@@ -543,7 +1106,8 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
   // ---------- booking sheet ----------
   function fillProjectSelect(){
     var sel=$('f-project'); var mine=myProjects();
-    sel.innerHTML = mine.length ? mine.map(function(p){ return '<option value="'+esc(p.id)+'">'+esc(p.name||('#'+p.id))+(p.jobNumber?' ('+esc(p.jobNumber)+')':'')+'</option>'; }).join('')
+    sel.innerHTML = mine.length
+      ? '<option value="">Choose a project…</option>' + mine.map(function(p){ return '<option value="'+esc(p.id)+'">'+esc(p.name||('#'+p.id))+(p.jobNumber?' ('+esc(p.jobNumber)+')':'')+'</option>'; }).join('')
       : '<option value="">No projects assigned to you</option>';
   }
   function fillSwatches(){
@@ -553,15 +1117,60 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
   function syncWk(){ var s=$('wk-sat'), u=$('wk-sun'); if(s) s.classList.toggle('on', !!($('f-sat')&&$('f-sat').checked)); if(u) u.classList.toggle('on', !!($('f-sun')&&$('f-sun').checked)); }
   window.pickColor=function(c){ PICK_COLOR=c; fillSwatches(); };
 
+  function _setFixedProject(pid){
+    var sel=$('f-project'), fx=$('f-project-fixed');
+    var p=PROJECTS.find(function(x){ return String(x.id)===String(pid); });
+    if(pid!=null && pid!=='' && fx){
+      var nm = p ? (p.name||('Project '+p.id)) : ('Project '+pid);
+      if(p && p.jobNumber && String(p.jobNumber).trim() && String(p.jobNumber).toLowerCase()!==String(nm).toLowerCase()) nm = p.jobNumber+' — '+nm;
+      fx.textContent = nm;
+      fx.style.display=''; if(sel) sel.style.display='none';
+    } else {
+      if(fx) fx.style.display='none'; if(sel) sel.style.display='';
+    }
+  }
+
+  // ----- multiple (non-sequential) periods -----
+  window.bkAddRange=function(start, end){
+    var host=$('f-extra-ranges'); if(!host) return;
+    var wrap=document.createElement('div');
+    wrap.className='f-range-row';
+    wrap.innerHTML='<div class="fld"><label>Also from</label><input type="date" class="rr-start" oninput="updateSaveState()" onchange="updateSaveState()"></div>'
+      +'<div class="fld"><label>to</label><input type="date" class="rr-end" oninput="updateSaveState()" onchange="updateSaveState()"></div>'
+      +'<button type="button" class="rr-x" title="Remove this period" onclick="var r=this.closest(\'.f-range-row\'); if(r) r.remove(); updateSaveState();">✕</button>';
+    host.appendChild(wrap);
+    if(start) wrap.querySelector('.rr-start').value=start;
+    if(end) wrap.querySelector('.rr-end').value=end;
+    updateSaveState();
+  };
+  function bkReadRanges(){
+    var out=[];
+    var s0=($('f-start')||{}).value||'', e0=($('f-end')||{}).value||'';
+    if(s0 && e0) out.push({start:s0, end:e0});
+    var rows=document.querySelectorAll('#f-extra-ranges .f-range-row');
+    for(var i=0;i<rows.length;i++){
+      var s=(rows[i].querySelector('.rr-start')||{}).value||'', e=(rows[i].querySelector('.rr-end')||{}).value||'';
+      if(s && e) out.push({start:s, end:e});
+    }
+    out.forEach(function(r){ if(r.end<r.start){ var t=r.start; r.start=r.end; r.end=t; } });
+    return out;
+  }
+
   window.openBook=function(pid){
     EDIT_ID=null; PICK_COLOR=COLORS[0];
     $('sheet-title').textContent='Book Job';
     $('f-del').style.display='none';
     fillProjectSelect();
-    if(pid!=null){ var _s=$('f-project'); if(_s) _s.value=String(pid); }
-    var t=todayKey(); $('f-start').value=t; $('f-end').value=t;
+    fillMachineList();
+    // book only for the project this button belongs to — project is fixed, no picker
+    $('f-project').value = (pid!=null) ? String(pid) : '';
+    _setFixedProject(pid);
+    $('f-start').value=''; $('f-end').value='';
+    if($('f-extra-ranges')) $('f-extra-ranges').innerHTML='';
     $('f-activity').value=''; $('f-machine').value=''; $('f-sat').checked=false; $('f-sun').checked=false; syncWk();
+    if($('f-notes')) $('f-notes').value='';
     fillSwatches();
+    updateSaveState();
     $('sheet-ov').classList.add('open');
   };
   window.openEdit=function(id){
@@ -571,11 +1180,28 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     $('f-del').style.display='';
     fillProjectSelect();
     $('f-project').value=String(b.projectId);
-    $('f-start').value=b.start; $('f-end').value=b.end;
+    _setFixedProject(b.projectId);
+    var _rs=bookingRanges(b);
+    $('f-start').value=(_rs[0]&&_rs[0].start)||b.start||''; $('f-end').value=(_rs[0]&&_rs[0].end)||b.end||'';
+    if($('f-extra-ranges')) $('f-extra-ranges').innerHTML='';
+    for(var _i=1;_i<_rs.length;_i++){ if(_rs[_i]&&_rs[_i].start&&_rs[_i].end) bkAddRange(_rs[_i].start, _rs[_i].end); }
     $('f-activity').value=b.activity||''; $('f-machine').value=b.machine||'';
+    if($('f-notes')) $('f-notes').value=b.notes||'';
     $('f-sat').checked=!b.skipSat; $('f-sun').checked=!b.skipSun; syncWk();
     fillSwatches();
+    updateSaveState();
     $('sheet-ov').classList.add('open');
+  };
+  // Save is only enabled when Project + Start + Finish date are all filled in
+  window.updateSaveState=function(){
+    var btn=$('f-save'); if(!btn) return;
+    var pid=($('f-project')||{}).value||'';
+    var st=($('f-start')||{}).value||'';
+    var en=($('f-end')||{}).value||'';
+    var okAll = !!pid && !!st && !!en;
+    btn.disabled = !okAll;
+    btn.classList.toggle('disabled', !okAll);
+    btn.title = okAll ? '' : 'Choose a project and both dates first';
   };
   window.closeSheet=function(){ $('sheet-ov').classList.remove('open'); };
   window.openNotes=function(pid){
@@ -587,58 +1213,968 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     setTimeout(function(){ try{ $('n-text').focus(); }catch(e){} }, 60);
   };
   window.closeNotes=function(){ $('notes-ov').classList.remove('open'); NOTES_PID=null; };
+
+  // ---------- per-project calendar + list (past & future) ----------
+  var PROJCAL_PID=null, PROJCAL_OFFSET=0;
+  function pcFmtRange(s,e){
+    var f=function(d){ try{ return new Date(d+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}); }catch(_){ return d; } };
+    return (s===e) ? f(s) : (f(s)+' – '+f(e));
+  }
+  window.openProjCal=function(pid){
+    PROJCAL_PID=String(pid); PROJCAL_OFFSET=0;
+    renderProjCal();
+    $('projcal-ov').classList.add('open');
+  };
+  window.closeProjCal=function(){ $('projcal-ov').classList.remove('open'); PROJCAL_PID=null; };
+  window.projCalShift=function(n){ PROJCAL_OFFSET += n; renderProjCal(); };
+
+  // ---------- compaction tests (per project) ----------
+  window.updateTestSave=function(){
+    var btn=$('t-save'); if(!btn) return;
+    var ok = !!($('t-date')&&$('t-date').value) && !!($('t-type')&&$('t-type').value.trim());
+    btn.disabled=!ok; btn.classList.toggle('disabled', !ok);
+  };
+  window.openTest=function(pid){
+    TEST_PID=String(pid);
+    if($('t-date')) $('t-date').value='';
+    if($('t-type')) $('t-type').value='';
+    if($('t-notes')) $('t-notes').value='';
+    updateTestSave();
+    renderTests();
+    $('test-ov').classList.add('open');
+  };
+  window.closeTest=function(){ $('test-ov').classList.remove('open'); TEST_PID=null; };
+  function renderTests(){
+    var pid=TEST_PID; if(pid==null) return;
+    var p=PROJECTS.find(function(x){return String(x.id)===String(pid);});
+    $('test-title').textContent = p ? (p.name||('Project '+pid)) : 'Compaction Tests';
+    var list=(TESTS[String(pid)]||[]).slice().sort(function(a,b){ return a.date<b.date?-1:(a.date>b.date?1:0); });
+    var tk=todayKey();
+    if(!list.length){ $('test-list').innerHTML='<div class="pc-list-h">Booked tests (0)</div><div class="pc-empty">No compaction tests booked yet.</div>'; return; }
+    $('test-list').innerHTML='<div class="pc-list-h">Booked tests ('+list.length+')</div>' + list.map(function(t){
+      var isPast = t.date && t.date < tk;
+      var tag = isPast ? '<span class="pc-past">Past</span>' : '<span class="pc-upcoming">Upcoming</span>';
+      return '<div class="pc-item'+(isPast?' past':'')+'" style="border-left-color:#7c3aed">'
+        + '<div class="pc-item-date">'+esc(pcFmtRange(t.date,t.date))+' '+tag+'<button class="t-del" onclick="deleteTest(\''+esc(pid)+'\',\''+esc(t.id)+'\')" title="Remove test">✕</button></div>'
+        + '<div class="pc-item-desc">🧪 '+esc(t.type||'Test')+'</div>'
+        + (t.notes && String(t.notes).trim() ? '<div class="pc-item-notes">📝 '+esc(t.notes)+'</div>':'')
+        + '</div>';
+    }).join('');
+  }
+  window.saveTest=function(){
+    var pid=TEST_PID; if(pid==null) return;
+    var date=($('t-date')||{}).value||'', type=(($('t-type')||{}).value||'').trim(), notes=(($('t-notes')||{}).value||'').trim();
+    if(!date){ alert('Please choose a date for the test.'); return; }
+    if(!type){ alert('Please choose the type of test.'); return; }
+    if(!TESTS[String(pid)]) TESTS[String(pid)]=[];
+    TESTS[String(pid)].push({
+      id:'ct_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
+      date:date, type:type, notes:notes,
+      createdAt:new Date().toISOString(),
+      bookedBy: ME? ME.name : 'Supervisor', au_user: ME? (ME.username||'') : '', au_app:'Mobile'
+    });
+    if($('t-date')) $('t-date').value='';
+    if($('t-type')) $('t-type').value='';
+    if($('t-notes')) $('t-notes').value='';
+    updateTestSave();
+    renderTests();
+    supShowSaving('Saving to the system…');
+    pushTests(function(err){
+      if(err){ supShowResult(false, 'Could not save. Check your connection and try again.'); }
+      else { pull(function(){ renderTests(); }); supShowResult(true, 'Test booked'); }
+    });
+  };
+  window.deleteTest=function(pid, id){
+    if(!confirm('Remove this compaction test?')) return;
+    var _t=(TESTS[String(pid)]||[]).find(function(x){return String(x.id)===String(id);});
+    if(_t){ try{ logActivity('test','deleted', pid, (_t.type||'Test')+' · '+pcFmtRange(_t.date,_t.date)); }catch(e){} }
+    TESTS[String(pid)] = (TESTS[String(pid)]||[]).filter(function(t){ return String(t.id)!==String(id); });
+    renderTests();
+    supShowSaving('Saving…');
+    pushTests(function(err){
+      if(err){ supShowResult(false, 'Could not save. Check your connection.'); }
+      else { pull(function(){ renderTests(); }); supShowResult(true, 'Test removed'); }
+    });
+  };
+
+  // ---------- machine transfer / removal (per project) ----------
+  function fillTrDest(){
+    var sel=$('tr-dest'); if(!sel) return;
+    var mine=myProjects().filter(function(p){ return String(p.id)!==String(TR_PID); });
+    sel.innerHTML = '<option value="">Choose destination site…</option>' + mine.map(function(p){ return '<option value="'+esc(p.id)+'">'+esc(p.name||('#'+p.id))+(p.jobNumber?' ('+esc(p.jobNumber)+')':'')+'</option>'; }).join('');
+  }
+  window.updateTrSave=function(){
+    var btn=$('tr-save'); if(!btn) return;
+    var machineOk = !!($('tr-machine')&&$('tr-machine').value.trim());
+    var actionOk = !!TR_ACTION;
+    var destOk = (TR_ACTION!=='transfer') || !!($('tr-dest')&&$('tr-dest').value);
+    var ok = machineOk && actionOk && destOk;
+    btn.disabled=!ok; btn.classList.toggle('disabled', !ok);
+  };
+  window.trSetAction=function(a){
+    TR_ACTION=a;
+    if($('tr-act-remove')) $('tr-act-remove').classList.toggle('on', a==='remove');
+    if($('tr-act-transfer')) $('tr-act-transfer').classList.toggle('on', a==='transfer');
+    if($('tr-dest-wrap')) $('tr-dest-wrap').style.display = (a==='transfer') ? '' : 'none';
+    if(a!=='transfer'){ if($('tr-dest')) $('tr-dest').value=''; if($('tr-dest-addr')) $('tr-dest-addr').textContent=''; }
+    updateTrSave();
+  };
+  window.trDestChanged=function(){
+    var sel=$('tr-dest'); var pid=sel?sel.value:'';
+    var p=PROJECTS.find(function(x){return String(x.id)===String(pid);});
+    $('tr-dest-addr').textContent = p ? (p.address ? ('📍 '+p.address) : 'No address on file') : '';
+    updateTrSave();
+  };
+  window.openTransfer=function(pid){
+    TR_PID=String(pid); TR_ACTION='';
+    var p=PROJECTS.find(function(x){return String(x.id)===String(pid);});
+    $('tr-title').textContent = p ? (p.name||('Project '+pid)) : 'Machine Transfer';
+    $('tr-from').innerHTML = p ? (esc(p.name||('Project '+pid)) + (p.address?'<div class="tr-addr">📍 '+esc(p.address)+'</div>':'')) : ('Project '+esc(pid));
+    if($('tr-machine')) $('tr-machine').value='';
+    if($('tr-date')) $('tr-date').value='';
+    if($('tr-notes')) $('tr-notes').value='';
+    if($('tr-act-remove')) $('tr-act-remove').classList.remove('on');
+    if($('tr-act-transfer')) $('tr-act-transfer').classList.remove('on');
+    if($('tr-dest-wrap')) $('tr-dest-wrap').style.display='none';
+    fillMachineList(); fillTrDest();
+    if($('tr-dest')) $('tr-dest').value=''; if($('tr-dest-addr')) $('tr-dest-addr').textContent='';
+    updateTrSave();
+    renderTransfers();
+    $('transfer-ov').classList.add('open');
+  };
+  window.closeTransfer=function(){ $('transfer-ov').classList.remove('open'); TR_PID=null; };
+  function renderTransfers(){
+    var pid=TR_PID; if(pid==null) return;
+    var list=(TRANSFERS[String(pid)]||[]).slice().sort(function(a,b){ var ac=a.createdAt||'', bc=b.createdAt||''; return ac<bc?1:(ac>bc?-1:0); });
+    if(!list.length){ $('tr-list').innerHTML='<div class="pc-list-h">Requests (0)</div><div class="pc-empty">No transfer or removal requests yet.</div>'; return; }
+    $('tr-list').innerHTML='<div class="pc-list-h">Requests ('+list.length+')</div>' + list.map(function(t){
+      var isTransfer = t.action==='transfer';
+      var head = '🚚 '+esc(t.machine||'Machine')+' — '+(isTransfer?'Transfer':'Remove / pick up');
+      var route = isTransfer ? (esc(t.fromName)+(t.toName?(' → '+esc(t.toName)):'')) : ('From '+esc(t.fromName));
+      var addr = (isTransfer && t.toAddr) ? ('📍 '+esc(t.toAddr)) : (t.fromAddr?('📍 '+esc(t.fromAddr)):'');
+      return '<div class="pc-item" style="border-left-color:'+(isTransfer?'#0891b2':'#f59e0b')+'">'
+        + '<div class="pc-item-date">'+head+(t.date?' · '+esc(pcFmtRange(t.date,t.date)):'')+'<button class="t-del" onclick="deleteTransfer(\''+esc(pid)+'\',\''+esc(t.id)+'\')" title="Remove request">✕</button></div>'
+        + '<div class="pc-item-desc">'+route+'</div>'
+        + (addr ? '<div class="pc-item-notes">'+addr+'</div>':'')
+        + (t.notes && String(t.notes).trim() ? '<div class="pc-item-notes">📝 '+esc(t.notes)+'</div>':'')
+        + '</div>';
+    }).join('');
+  }
+  window.saveTransfer=function(){
+    var pid=TR_PID; if(pid==null) return;
+    var machine=(($('tr-machine')||{}).value||'').trim();
+    if(!machine){ alert('Please enter which machine.'); return; }
+    if(!TR_ACTION){ alert('Please choose: remove or transfer.'); return; }
+    var p=PROJECTS.find(function(x){return String(x.id)===String(pid);});
+    var rec={
+      id:'mt_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
+      machine:machine, action:TR_ACTION,
+      fromId:String(pid), fromName:(p?(p.name||('#'+pid)):('#'+pid)), fromAddr:(p&&p.address)||'',
+      date:($('tr-date')||{}).value||'', notes:(($('tr-notes')||{}).value||'').trim(),
+      createdAt:new Date().toISOString(), bookedBy: ME? ME.name : 'Supervisor', au_user: ME? (ME.username||'') : '', au_app:'Mobile'
+    };
+    if(TR_ACTION==='transfer'){
+      var toId=($('tr-dest')||{}).value;
+      if(!toId){ alert('Please choose the destination site.'); return; }
+      var tp=PROJECTS.find(function(x){return String(x.id)===String(toId);});
+      rec.toId=String(toId); rec.toName=(tp?(tp.name||('#'+toId)):('#'+toId)); rec.toAddr=(tp&&tp.address)||'';
+    }
+    if(!TRANSFERS[String(pid)]) TRANSFERS[String(pid)]=[];
+    TRANSFERS[String(pid)].push(rec);
+    var wasTransfer = TR_ACTION==='transfer';
+    // reset the form
+    TR_ACTION='';
+    if($('tr-machine')) $('tr-machine').value='';
+    if($('tr-date')) $('tr-date').value='';
+    if($('tr-notes')) $('tr-notes').value='';
+    if($('tr-act-remove')) $('tr-act-remove').classList.remove('on');
+    if($('tr-act-transfer')) $('tr-act-transfer').classList.remove('on');
+    if($('tr-dest-wrap')) $('tr-dest-wrap').style.display='none';
+    if($('tr-dest')) $('tr-dest').value=''; if($('tr-dest-addr')) $('tr-dest-addr').textContent='';
+    updateTrSave();
+    renderTransfers();
+    supShowSaving('Sending to the office…');
+    pushTransfers(function(err){
+      if(err){ supShowResult(false, 'Could not send. Check your connection and try again.'); }
+      else { pull(function(){ renderTransfers(); }); supShowResult(true, wasTransfer ? 'Transfer request sent' : 'Removal request sent'); }
+    });
+  };
+  window.deleteTransfer=function(pid, id){
+    if(!confirm('Remove this request?')) return;
+    var _r=(TRANSFERS[String(pid)]||[]).find(function(x){return String(x.id)===String(id);});
+    if(_r){ try{ logActivity('transfer','deleted', pid, (_r.machine||'Machine')+(_r.action==='transfer'?(' → '+(_r.toName||'')):' (remove)')); }catch(e){} }
+    TRANSFERS[String(pid)] = (TRANSFERS[String(pid)]||[]).filter(function(t){ return String(t.id)!==String(id); });
+    renderTransfers();
+    supShowSaving('Saving…');
+    pushTransfers(function(err){
+      if(err){ supShowResult(false, 'Could not save. Check your connection.'); }
+      else { pull(function(){ renderTransfers(); }); supShowResult(true, 'Request removed'); }
+    });
+  };
+
+  // ---------- variations (per project) ----------
+  // ---- Media in Supabase Storage (keeps the synced document small) ----
+  var MEDIA_BUCKET='remc-media';
+  function _photoUrl(p){ return (p&&typeof p==='object') ? (p.url||p.src||'') : (p||''); }   // legacy: a plain base64 string
+  function _docketUrl(d){ return (d&&typeof d==='object') ? (d.url||d.src||'') : (d||''); }
+  function _resizeDataUrl(dataUrl, max, quality, cb){
+    var done=false; function fin(v){ if(done) return; done=true; cb(v); }
+    try{
+      var img=new Image();
+      img.onload=function(){ try{
+        var w=img.width||0, h=img.height||0;
+        if(w&&h){ if(w>max||h>max){ if(w>h){ h=Math.round(h*max/w); w=max; } else { w=Math.round(w*max/h); h=max; } }
+          var cv=document.createElement('canvas'); cv.width=w; cv.height=h; var ctx=cv.getContext('2d');
+          if(ctx){ ctx.drawImage(img,0,0,w,h); var out=cv.toDataURL('image/jpeg',quality); if(out&&out.length>10){ fin(out); return; } } }
+        fin(null);
+      }catch(_){ fin(null); } };
+      img.onerror=function(){ fin(null); };
+      setTimeout(function(){ fin(null); }, 2500); // fallback so the upload never gets stuck if load/error never fires
+      img.src=dataUrl;
+    }catch(_){ fin(null); }
+  }
+  function _uploadMedia(dataUrl, name, kind, cb){
+    try{
+      if(_beMode()==='server'){
+        var base=_beUrl(); if(!base){ cb('offline'); return; }
+        fetch(base+'/upload',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:name,dataUrl:dataUrl})})
+          .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+          .then(function(j){ cb(null,{url:j.url,path:j.path,name:name||j.name,kind:kind}); })
+          .catch(function(e){ cb((e&&e.message)||'upload-failed'); });
+        return;
+      }
+      if(!sb || !sb.storage){ cb('offline'); return; }
+      var m=/^data:([^;]+);base64,([\s\S]*)$/.exec(dataUrl||'');
+      if(!m){ cb('bad-file'); return; }
+      var mime=m[1], bin=atob(m[2]), len=bin.length, arr=new Uint8Array(len);
+      for(var i=0;i<len;i++) arr[i]=bin.charCodeAt(i);
+      var blob=new Blob([arr], {type:mime});
+      var ext=((mime.split('/')[1]||'bin').split('+')[0]).replace(/[^a-z0-9]/gi,'').slice(0,5)||'bin';
+      var uid=(ME&&ME.username)?String(ME.username).replace(/[^a-z0-9_-]/gi,'') : 'sup';
+      var path=uid+'/'+Date.now()+'_'+Math.random().toString(36).slice(2,8)+'.'+ext;
+      sb.storage.from(MEDIA_BUCKET).upload(path, blob, {contentType:mime, upsert:true}).then(function(res){
+        if(res && res.error){ cb((res.error.message)||'upload-failed'); return; }
+        var pub=sb.storage.from(MEDIA_BUCKET).getPublicUrl(path);
+        var url=(pub&&pub.data&&pub.data.publicUrl)||'';
+        cb(null, {url:url, path:path, name:name||('file.'+ext), kind:kind});
+      }).catch(function(err){ cb((err&&err.message)||'upload-failed'); });
+    }catch(e){ cb(String(e)); }
+  }
+  function _mediaError(err){
+    var e=String(err||'');
+    var msg = /not found|bucket|404/i.test(e) ? 'Photo not uploaded: the "remc-media" storage bucket is not set up yet. Ask the office to create it.'
+            : /offline|network|failed to fetch/i.test(e) ? 'Photo not uploaded: no connection. Try again when online.'
+            : ('Photo not uploaded: '+e);
+    try{ if(typeof supShowResult==='function') supShowResult(false, msg); else alert(msg); }catch(_){ }
+  }
+  function _openImg(src){
+    if(!src) return;
+    var w=window.open('','_blank');
+    if(!w){ try{ var a=document.createElement('a'); a.href=src; a.download='photo.jpg'; a.click(); }catch(e){} return; }
+    w.document.write('<html><head><title>Photo</title></head><body style="margin:0;background:#111;display:flex;align-items:center;justify-content:center;min-height:100vh"><img src="'+src+'" style="max-width:100%;max-height:100vh"></body></html>');
+  }
+  function _openFile(src,name){
+    if(!src) return;
+    if(/^https?:/.test(src)){ var wo=window.open(src,'_blank'); if(!wo){ try{ var la=document.createElement('a'); la.href=src; la.target='_blank'; la.rel='noopener'; la.click(); }catch(e){} } return; }
+    var isImg=/^data:image/.test(src), isPdf=/^data:application\/pdf/.test(src);
+    var w=window.open('','_blank');
+    if(!w){ var a=document.createElement('a'); a.href=src; a.download=name||'file'; a.click(); return; }
+    if(isImg){ w.document.write('<html><body style="margin:0;background:#111;display:flex;align-items:center;justify-content:center;min-height:100vh"><img src="'+src+'" style="max-width:100%;max-height:100vh"></body></html>'); }
+    else if(isPdf){ w.document.write('<html><body style="margin:0"><embed src="'+src+'" width="100%" height="100%" type="application/pdf"></body></html>'); }
+    else { var a=w.document.createElement('a'); a.href=src; a.download=name||'file'; w.document.body.appendChild(a); a.click(); try{ w.close(); }catch(e){} }
+  }
+  window.varViewPhoto=function(i){ _openImg(_photoUrl(_varPhotos[i])); };
+  window.varViewSavedPhoto=function(pid,vid,i){ var v=(VARIATIONS[String(pid)]||[]).find(function(x){return String(x.id)===String(vid);}); if(v&&v.photos&&v.photos[i]) _openImg(_photoUrl(v.photos[i])); };
+  window.varViewSavedDocket=function(pid,vid,i){ var v=(VARIATIONS[String(pid)]||[]).find(function(x){return String(x.id)===String(vid);}); var d=v&&v.dockets&&v.dockets[i]; if(d) _openFile(_docketUrl(d), d.name); };
+  window.varRemovePhoto=function(i){ _varPhotos.splice(i,1); varRenderPending(); };
+  window.varRemoveDocket=function(i){ _varDockets.splice(i,1); varRenderPending(); };
+  function varRenderPending(){
+    var ph=$('v-photos'); if(ph){ ph.innerHTML=_varPhotos.map(function(p,i){
+      if(p&&p.uploading) return '<div class="v-thumb v-thumb-up"><span>⏳</span></div>';
+      return '<div class="v-thumb"><img src="'+esc(_photoUrl(p))+'" onclick="varViewPhoto('+i+')"><button type="button" class="v-thumb-x" onclick="varRemovePhoto('+i+')">✕</button></div>'; }).join(''); }
+    var dk=$('v-dockets'); if(dk){ dk.innerHTML=_varDockets.map(function(d,i){
+      var up=(d&&d.uploading)?' ⏳':'';
+      return '<div class="v-file"><span class="v-file-n">📄 '+esc((d&&d.name)||'file')+up+'</span>'+((d&&d.uploading)?'':'<button type="button" class="v-file-x" onclick="varRemoveDocket('+i+')">✕</button>')+'</div>'; }).join(''); }
+  }
+  window.varPhotoChosen=function(e){
+    var files=e.target.files; if(!files||!files.length) return;
+    [].slice.call(files).forEach(function(file){
+      var ph={uploading:true, name:file.name, kind:'image'}; _varPhotos.push(ph); varRenderPending();
+      var reader=new FileReader();
+      reader.onload=function(ev){
+        var raw=ev.target.result;
+        // resize in the browser to keep the upload small, then send to Storage
+        _resizeDataUrl(raw, 1100, 0.6, function(small){
+          _uploadMedia(small||raw, file.name, 'image', function(err, item){
+            var i=_varPhotos.indexOf(ph);
+            if(err){ if(i>=0) _varPhotos.splice(i,1); varRenderPending(); _mediaError(err); return; }
+            if(i>=0) _varPhotos[i]=item; else _varPhotos.push(item);
+            varRenderPending();
+          });
+        });
+      };
+      reader.onerror=function(){ var i=_varPhotos.indexOf(ph); if(i>=0) _varPhotos.splice(i,1); varRenderPending(); };
+      reader.readAsDataURL(file);
+    });
+    e.target.value='';
+  };
+  window.varDocketChosen=function(e){
+    var files=e.target.files; if(!files||!files.length) return;
+    [].slice.call(files).forEach(function(file){
+      var dk={uploading:true, name:file.name, kind:'file', size:(file.size/1024).toFixed(0)+' KB'}; _varDockets.push(dk); varRenderPending();
+      var reader=new FileReader();
+      reader.onload=function(ev){
+        _uploadMedia(ev.target.result, file.name, 'file', function(err, item){
+          var i=_varDockets.indexOf(dk);
+          if(err){ if(i>=0) _varDockets.splice(i,1); varRenderPending(); _mediaError(err); return; }
+          item.size=dk.size; item.type='file';
+          if(i>=0) _varDockets[i]=item; else _varDockets.push(item);
+          varRenderPending();
+        });
+      };
+      reader.onerror=function(){ var i=_varDockets.indexOf(dk); if(i>=0) _varDockets.splice(i,1); varRenderPending(); };
+      reader.readAsDataURL(file);
+    });
+    e.target.value='';
+  };
+  function varReadRanges(){
+    var out=[];
+    var s0=($('v-start')||{}).value||'', e0=($('v-end')||{}).value||'';
+    if(s0&&e0) out.push({start:s0,end:e0});
+    var rows=document.querySelectorAll('#v-extra-ranges .f-range-row');
+    for(var i=0;i<rows.length;i++){ var s=(rows[i].querySelector('.rr-start')||{}).value||'', e=(rows[i].querySelector('.rr-end')||{}).value||''; if(s&&e) out.push({start:s,end:e}); }
+    out.forEach(function(r){ if(r.end<r.start){ var t=r.start; r.start=r.end; r.end=t; } });
+    return out;
+  }
+  window.varAddRange=function(start,end){
+    var host=$('v-extra-ranges'); if(!host) return;
+    var wrap=document.createElement('div'); wrap.className='f-range-row';
+    wrap.innerHTML='<div class="fld"><label>Also from</label><input type="date" class="rr-start"></div>'
+      +'<div class="fld"><label>to</label><input type="date" class="rr-end"></div>'
+      +'<button type="button" class="rr-x" title="Remove this period" onclick="var r=this.closest(\'.f-range-row\'); if(r) r.remove();">✕</button>';
+    host.appendChild(wrap);
+    if(start) wrap.querySelector('.rr-start').value=start;
+    if(end) wrap.querySelector('.rr-end').value=end;
+  };
+  window.updateVarSave=function(){
+    var btn=$('v-save'); if(!btn) return;
+    var ok = !!($('v-desc')&&$('v-desc').value.trim()) && !!($('v-start')&&$('v-start').value) && !!($('v-end')&&$('v-end').value);
+    btn.disabled=!ok; btn.classList.toggle('disabled', !ok);
+  };
+  function varFormHasContent(){
+    var f=function(id){ return !!($(id) && String($(id).value||'').trim()); };
+    if(f('v-desc')||f('v-start')||f('v-end')||f('v-machine')||f('v-comments')) return true;
+    if(_varPhotos.length || _varDockets.length) return true;
+    if(document.querySelectorAll('#v-extra-ranges .f-range-row').length) return true;
+    return false;
+  }
+  window.openVariation=function(pid){
+    VAR_PID=String(pid); VAR_EDIT_ID=null; _varPhotos=[]; _varDockets=[]; _varSaving=false;
+    if($('var-close-btn')) $('var-close-btn').disabled=false;
+    var p=PROJECTS.find(function(x){return String(x.id)===String(pid);});
+    $('var-title').textContent = p ? (p.name||('Project '+pid)) : 'Variations';
+    var _th=document.querySelector('#variation-ov .th'); if(_th) _th.textContent='🔧 Add a variation';
+    if($('v-save')) $('v-save').textContent='+ Add variation';
+    ['v-desc','v-start','v-end','v-machine','v-comments'].forEach(function(id){ if($(id)) $(id).value=''; });
+    if($('v-extra-ranges')) $('v-extra-ranges').innerHTML='';
+    fillMachineList();
+    varRenderPending();
+    updateVarSave();
+    renderVariations();
+    $('variation-ov').classList.add('open');
+  };
+  window.openVariationEdit=function(pid, vid){
+    var v=(VARIATIONS[String(pid)]||[]).find(function(x){return String(x.id)===String(vid);}); if(!v) return;
+    VAR_PID=String(pid); VAR_EDIT_ID=String(vid); _varSaving=false;
+    if($('var-close-btn')) $('var-close-btn').disabled=false;
+    _varPhotos=(v.photos||[]).slice(); _varDockets=(v.dockets||[]).slice();
+    if($('v-desc')) $('v-desc').value=v.description||'';
+    var rs=(v.ranges&&v.ranges.length)?v.ranges:[];
+    if($('v-start')) $('v-start').value=(rs[0]&&rs[0].start)||'';
+    if($('v-end')) $('v-end').value=(rs[0]&&rs[0].end)||'';
+    if($('v-extra-ranges')) $('v-extra-ranges').innerHTML='';
+    for(var i=1;i<rs.length;i++){ if(rs[i]&&rs[i].start&&rs[i].end) varAddRange(rs[i].start, rs[i].end); }
+    if($('v-machine')) $('v-machine').value=v.machine||'';
+    if($('v-comments')) $('v-comments').value=v.comments||'';
+    var _th=document.querySelector('#variation-ov .th'); if(_th) _th.textContent='✏️ Edit variation';
+    if($('v-save')) $('v-save').textContent='Save changes';
+    fillMachineList();
+    varRenderPending();
+    updateVarSave();
+    $('variation-ov').classList.add('open');
+    var _body=document.querySelector('#variation-ov .test-body'); if(_body) _body.scrollTop=0;
+  };
+  window.closeVariation=function(){
+    if(_varSaving){ supShowSaving('Still saving — please wait…'); return; }
+    if(varFormHasContent()){ if(!confirm('You have an unsaved variation. Go back and lose what you entered?')) return; }
+    _varPhotos=[]; _varDockets=[];
+    if($('v-extra-ranges')) $('v-extra-ranges').innerHTML='';
+    varRenderPending();
+    $('variation-ov').classList.remove('open'); VAR_PID=null;
+  };
+  function renderVariations(){
+    var pid=VAR_PID; if(pid==null) return;
+    var list=(VARIATIONS[String(pid)]||[]).slice().sort(function(a,b){ var ac=a.createdAt||'', bc=b.createdAt||''; return ac<bc?-1:(ac>bc?1:0); });
+    if(!list.length){ $('var-list').innerHTML='<div class="pc-list-h">Variations (0)</div><div class="pc-empty">No variations added yet.</div>'; return; }
+    $('var-list').innerHTML='<div class="pc-list-h">Variations ('+list.length+')</div>' + list.map(function(v, _idx){
+      var _num = String(_idx+1).padStart(2,'0');
+      var periods = (v.ranges&&v.ranges.length) ? v.ranges.filter(function(r){return r.start&&r.end;}).map(function(r){ return '<span class="v-period">'+esc(pcFmtRange(r.start,r.end))+'</span>'; }).join('') : '';
+      var photos = (v.photos&&v.photos.length) ? '<div class="v-item-photos">'+v.photos.map(function(p,i){ return '<img src="'+esc(_photoUrl(p))+'" onclick="varViewSavedPhoto(\''+esc(pid)+'\',\''+esc(v.id)+'\','+i+')">'; }).join('')+'</div>' : '';
+      var dockets = (v.dockets&&v.dockets.length) ? '<div class="v-files">'+v.dockets.map(function(d,i){ return '<div class="v-file"><span class="v-file-n" onclick="varViewSavedDocket(\''+esc(pid)+'\',\''+esc(v.id)+'\','+i+')">📄 '+esc(d.name||'docket')+'</span></div>'; }).join('')+'</div>' : '';
+      return '<div class="pc-item" style="border-left-color:#ea580c">'
+        + '<div class="pc-item-date"><span style="flex:1">🔧 Variation '+_num+'</span><button class="t-edit" onclick="openVariationEdit(\''+esc(pid)+'\',\''+esc(v.id)+'\')" title="Edit variation">✏️</button><button class="t-del" onclick="deleteVariation(\''+esc(pid)+'\',\''+esc(v.id)+'\')" title="Remove variation">✕</button></div>'
+        + '<div class="pc-item-desc">'+esc(v.description||'')+'</div>'
+        + (periods ? '<div class="v-periods">'+periods+'</div>' : '')
+        + (v.machine ? '<div class="pc-item-notes">🚜 '+esc(v.machine)+'</div>' : '')
+        + (v.comments && String(v.comments).trim() ? '<div class="pc-item-notes">💬 '+esc(v.comments)+'</div>' : '')
+        + photos
+        + dockets
+        + '</div>';
+    }).join('');
+  }
+  window.saveVariation=function(){
+    var pid=VAR_PID; if(pid==null) return;
+    var desc=(($('v-desc')||{}).value||'').trim();
+    if(!desc){ alert('Please add a description for the variation.'); return; }
+    var ranges=varReadRanges();
+    if(!ranges.length){ alert('Please choose start and finish dates.'); return; }
+    var rec={
+      id:'vr_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
+      description:desc,
+      ranges:ranges,
+      machine:(($('v-machine')||{}).value||'').trim(),
+      comments:(($('v-comments')||{}).value||'').trim(),
+      photos:_varPhotos.filter(function(p){ return p && !p.uploading; }).slice(),
+      dockets:_varDockets.filter(function(d){ return d && !d.uploading; }).slice(),
+      createdAt:new Date().toISOString(), bookedBy: ME? ME.name : 'Supervisor', au_user: ME? (ME.username||'') : '', au_app:'Mobile'
+    };
+    if(!VARIATIONS[String(pid)]) VARIATIONS[String(pid)]=[];
+    var wasEdit=false;
+    if(VAR_EDIT_ID){
+      var _i=VARIATIONS[String(pid)].findIndex(function(x){return String(x.id)===String(VAR_EDIT_ID);});
+      if(_i>=0){
+        var _oldVar=VARIATIONS[String(pid)][_i];
+        var _vch=_varChanges(_oldVar, rec);
+        rec.id=VARIATIONS[String(pid)][_i].id;
+        rec.createdAt=VARIATIONS[String(pid)][_i].createdAt || rec.createdAt;
+        rec.au_eby = ME? ME.name : 'Supervisor'; rec.au_eat = new Date().toISOString(); rec.au_eapp='Mobile';
+        if(_vch.length) rec.au_changes=_vch;
+        VARIATIONS[String(pid)][_i]=rec; wasEdit=true;
+      } else { VARIATIONS[String(pid)].push(rec); }
+    } else {
+      VARIATIONS[String(pid)].push(rec);
+    }
+    VAR_EDIT_ID=null;
+    // reset the form
+    _varPhotos=[]; _varDockets=[];
+    ['v-desc','v-start','v-end','v-machine','v-comments'].forEach(function(id){ if($(id)) $(id).value=''; });
+    if($('v-extra-ranges')) $('v-extra-ranges').innerHTML='';
+    var _th=document.querySelector('#variation-ov .th'); if(_th) _th.textContent='🔧 Add a variation';
+    if($('v-save')) $('v-save').textContent='+ Add variation';
+    varRenderPending();
+    updateVarSave();
+    renderVariations();
+    _varSaving=true; if($('var-close-btn')) $('var-close-btn').disabled=true;
+    supShowSaving('Saving to the system…');
+    pushVariations(function(err){
+      _varSaving=false; if($('var-close-btn')) $('var-close-btn').disabled=false;
+      if(err){ supShowResult(false, 'Could not save. Check your connection and try again.'); }
+      else { pull(function(){ renderVariations(); }); supShowResult(true, wasEdit ? 'Variation updated' : 'Variation added'); }
+    });
+  };
+  window.deleteVariation=function(pid, id){
+    if(!confirm('Remove this variation?')) return;
+    var _v=(VARIATIONS[String(pid)]||[]).find(function(x){return String(x.id)===String(id);});
+    if(_v){ try{ logActivity('variation','deleted', pid, String(_v.description||'').slice(0,60)); }catch(e){} }
+    VARIATIONS[String(pid)] = (VARIATIONS[String(pid)]||[]).filter(function(v){ return String(v.id)!==String(id); });
+    renderVariations();
+    supShowSaving('Saving…');
+    pushVariations(function(err){
+      if(err){ supShowResult(false, 'Could not save. Check your connection.'); }
+      else { pull(function(){ renderVariations(); }); supShowResult(true, 'Variation removed'); }
+    });
+  };
+
+  // ---------- subcontractors (read-only timeline from the office; supervisor can request changes) ----------
+  var _SUB_COLORS = { booked:'#16a34a', pending:'#f59e0b' };
+  window.openSubs=function(pid){
+    SUB_PID=String(pid);
+    var p=PROJECTS.find(function(x){return String(x.id)===String(pid);});
+    $('subs-title').textContent = p ? (p.name||('Project '+pid)) : 'Subcontractors';
+    renderSubs();
+    $('subs-ov').classList.add('open');
+  };
+  window.closeSubs=function(){ $('subs-ov').classList.remove('open'); SUB_PID=null; };
+  function renderSubs(){
+    var pid=SUB_PID; if(pid==null) return;
+    var list=(SUBCONS[String(pid)]||[]).slice().sort(function(a,b){ var ad=a.date||'', bd=b.date||''; return ad<bd?-1:(ad>bd?1:0); });
+    var h=$('sub-tl-h'); if(h) h.textContent = list.length ? ('Timeline ('+list.length+')') : 'Timeline';
+    var track=$('sub-track'); if(!track) return;
+    if(!list.length){ track.innerHTML='<div class="sub-empty" style="padding:20px;text-align:center;color:var(--muted)">No subcontractors scheduled for this job yet.<br>These come from the office in the main software.</div>'; return; }
+    track.innerHTML = list.map(function(s){
+      var col=_SUB_COLORS[s.status]||'#2563eb';
+      var st=(s.status==='pending')?'pending':'booked';
+      var stLabel=(s.status==='pending')?'Pending':'Booked';
+      var reqBadge='';
+      if(s.req && s.req.type==='postpone'){ reqBadge='<div class="sub-req postpone">⚠ Postpone requested'+(s.req.date?(' → '+esc(pcFmtRange(s.req.date,s.req.date))):'')+'</div>'; }
+      else if(s.req && s.req.type==='cancel'){ reqBadge='<div class="sub-req cancel">⚠ Cancel requested</div>'; }
+      return '<div class="sub-node">'
+        + '<div class="sub-dot" style="background:'+col+'"></div>'
+        + '<div class="sub-card" style="border-top-color:'+col+'" onclick="subAction(\''+esc(pid)+'\',\''+esc(s.id)+'\')">'
+        +   '<div class="sub-date">'+esc(pcFmtRange(s.date,s.date))+'</div>'
+        +   '<div class="sub-product">'+esc(s.product||'—')+'</div>'
+        +   '<div class="sub-name">'+esc(s.name||'')+'</div>'
+        +   '<span class="sub-status '+st+'">'+stLabel+'</span>'
+        +   (s.notes && String(s.notes).trim() ? '<div class="pc-item-notes" style="margin-top:8px">📝 '+esc(s.notes)+'</div>' : '')
+        +   reqBadge
+        +   '<div class="sub-tap">Tap to request postpone / cancel</div>'
+        + '</div>'
+        + '</div>';
+    }).join('');
+  }
+  function _subActRefresh(){
+    var s=(SUBCONS[String(SUB_ACT.pid)]||[]).find(function(x){return String(x.id)===String(SUB_ACT.id);});
+    var cur=$('sub-act-current'); if(!cur) return;
+    if(s && s.req){
+      var txt = (s.req.type==='postpone') ? ('Postpone requested'+(s.req.date?(' to '+esc(pcFmtRange(s.req.date,s.req.date))):'')) : 'Cancel requested';
+      cur.innerHTML = '<div class="sub-reqbox">⚠ '+txt+' <button type="button" class="sub-reqclear" onclick="subReqClear()">Clear request</button></div>';
+    } else { cur.innerHTML=''; }
+  }
+  window.subAction=function(pid, id){
+    var s=(SUBCONS[String(pid)]||[]).find(function(x){return String(x.id)===String(id);}); if(!s) return;
+    SUB_ACT={ pid:String(pid), id:String(id) };
+    var info=$('sub-act-info');
+    if(info){ info.innerHTML = '<div class="sai-p">'+esc(s.product||'')+' — '+esc(s.name||'')+'</div>'
+      + '<div class="sai-m">'+esc(pcFmtRange(s.date,s.date))+' · '+(s.status==='pending'?'Pending':'Booked')+'</div>'; }
+    if($('sub-act-date')) $('sub-act-date').value=(s.req && s.req.date) ? s.req.date : (s.date||'');
+    _subActRefresh();
+    $('sub-act-ov').classList.add('open');
+  };
+  window.closeSubAct=function(){ $('sub-act-ov').classList.remove('open'); SUB_ACT={pid:null,id:null}; };
+  function _subSaveReq(msg){
+    renderSubs(); _subActRefresh();
+    supShowSaving('Sending to the office…');
+    pushSubs(function(err){ if(err){ supShowResult(false, 'Could not send. Check your connection and try again.'); } else { pull(function(){ renderSubs(); }); supShowResult(true, msg); } });
+  }
+  window.subReqPostpone=function(){
+    var pid=SUB_ACT.pid, id=SUB_ACT.id; if(pid==null) return;
+    var nd=($('sub-act-date')||{}).value||'';
+    if(!nd){ alert('Please choose the suggested new date.'); return; }
+    var s=(SUBCONS[String(pid)]||[]).find(function(x){return String(x.id)===String(id);}); if(!s) return;
+    s.req={ type:'postpone', date:nd, by: ME? ME.name : 'Supervisor', user: ME? (ME.username||'') : '', at:new Date().toISOString() };
+    try{ logActivity('sub','postpone_requested', pid, (s.product||'')+' · '+(s.name||'')+' → '+pcFmtRange(nd,nd)); }catch(e){}
+    closeSubAct(); _subSaveReq('Postpone requested');
+  };
+  window.subReqCancel=function(){
+    var pid=SUB_ACT.pid, id=SUB_ACT.id; if(pid==null) return;
+    if(!confirm('Ask the office to cancel this subcontractor?')) return;
+    var s=(SUBCONS[String(pid)]||[]).find(function(x){return String(x.id)===String(id);}); if(!s) return;
+    s.req={ type:'cancel', by: ME? ME.name : 'Supervisor', user: ME? (ME.username||'') : '', at:new Date().toISOString() };
+    try{ logActivity('sub','cancel_requested', pid, (s.product||'')+' · '+(s.name||'')); }catch(e){}
+    closeSubAct(); _subSaveReq('Cancel requested');
+  };
+  window.subReqClear=function(){
+    var pid=SUB_ACT.pid, id=SUB_ACT.id; if(pid==null) return;
+    var s=(SUBCONS[String(pid)]||[]).find(function(x){return String(x.id)===String(id);}); if(!s) return;
+    delete s.req;
+    try{ logActivity('sub','request_cleared', pid, (s.product||'')+' · '+(s.name||'')); }catch(e){}
+    _subSaveReq('Request cleared');
+  };
+
+  // ---------- project allowances (read-only, uploaded by the office in App 1) ----------
+  window.openAllow=function(pid){
+    ALLOW_PID=String(pid);
+    var p=PROJECTS.find(function(x){return String(x.id)===String(pid);});
+    $('allow-title').textContent = p ? (p.name||('Project '+pid)) : 'Project Allowances';
+    renderAllow();
+    $('allow-ov').classList.add('open');
+  };
+  window.closeAllow=function(){ $('allow-ov').classList.remove('open'); ALLOW_PID=null; };
+  function renderAllow(){
+    var pid=ALLOW_PID; if(pid==null) return;
+    var docs=((PROJDOCS[String(pid)]||{}).allowances)||{};
+    var keys=Object.keys(docs).filter(function(k){ var d=docs[k]; return d && (d.name || d.src); });
+    var host=$('allow-list'); if(!host) return;
+    if(!keys.length){ host.innerHTML='<div class="pc-empty" style="padding:26px 16px;text-align:center;color:var(--muted)">No project allowances uploaded yet.<br>These come from the office in the main software.</div>'; return; }
+    host.innerHTML = keys.map(function(k){
+      var d=docs[k];
+      var nm = d.label || d.name || 'Project Allowances';
+      return '<div class="v-file">'
+        + '<span class="v-file-n" onclick="openAllowDoc(\''+esc(pid)+'\',\''+esc(k)+'\')">📄 '+esc(nm)+'</span>'
+        + '<button type="button" class="v-file-view" onclick="openAllowDoc(\''+esc(pid)+'\',\''+esc(k)+'\')">View</button>'
+        + '</div>';
+    }).join('');
+  }
+  window.openAllowDoc=function(pid, key){
+    var docs=((PROJDOCS[String(pid)]||{}).allowances)||{};
+    var d=docs[key]; if(!d || !d.src) return;
+    if(d.type==='link'){ window.open(d.src,'_blank'); return; }
+    _openFile(d.src, d.name);
+  };
+
+  // ---------- history (activity log per project) ----------
+  function _bkDetail(b){
+    var d=bookingRanges(b).filter(function(r){return r.start&&r.end;}).map(function(r){ return pcFmtRange(r.start,r.end); }).join(', ');
+    return d + (b.activity?(' · '+b.activity):'') + (b.machine?(' · '+b.machine):'');
+  }
+  function _rangesTxt(rs){ return (rs||[]).filter(function(r){return r.start&&r.end;}).map(function(r){ return pcFmtRange(r.start,r.end); }).join(', '); }
+  function _bkChanges(oldB, rec){
+    var ch=[];
+    var o=_rangesTxt(bookingRanges(oldB)), n=_rangesTxt(rec.ranges);
+    if(o!==n) ch.push({label:'Dates', from:o||'—', to:n||'—'});
+    if(String(oldB.activity||'')!==String(rec.activity||'')) ch.push({label:'Description', from:oldB.activity||'—', to:rec.activity||'—'});
+    if(String(oldB.machine||'')!==String(rec.machine||'')) ch.push({label:'Machine', from:oldB.machine||'—', to:rec.machine||'—'});
+    if(String(oldB.notes||'')!==String(rec.notes||'')) ch.push({label:'Notes', from:oldB.notes||'—', to:rec.notes||'—'});
+    return ch;
+  }
+  function _varChanges(oldV, rec){
+    var ch=[];
+    if(String(oldV.description||'')!==String(rec.description||'')) ch.push({label:'Description', from:oldV.description||'—', to:rec.description||'—'});
+    var o=_rangesTxt(oldV.ranges), n=_rangesTxt(rec.ranges);
+    if(o!==n) ch.push({label:'Dates', from:o||'—', to:n||'—'});
+    if(String(oldV.machine||'')!==String(rec.machine||'')) ch.push({label:'Machine', from:oldV.machine||'—', to:rec.machine||'—'});
+    if(String(oldV.comments||'')!==String(rec.comments||'')) ch.push({label:'Comments', from:oldV.comments||'—', to:rec.comments||'—'});
+    var op=(oldV.photos||[]).length, np=(rec.photos||[]).length; if(op!==np) ch.push({label:'Photos', from:op+' photo(s)', to:np+' photo(s)'});
+    var od=(oldV.dockets||[]).length, nd=(rec.dockets||[]).length; if(od!==nd) ch.push({label:'Dockets', from:od+' file(s)', to:nd+' file(s)'});
+    return ch;
+  }
+  function _changesHtml(ch){
+    if(!ch || !ch.length) return '';
+    return '<div class="hist-chg">'+ch.map(function(c){
+      return '<div class="chg-row"><span class="chg-lbl">'+esc(c.label)+'</span><span class="chg-from">'+esc(String(c.from))+'</span><span class="chg-arrow">→</span><span class="chg-to">'+esc(String(c.to))+'</span></div>';
+    }).join('')+'</div>';
+  }
+  // Detect changes to bookings (including ones made by the office in App 1) by comparing to the
+  // last state this device saw. Lets History/Notifications show what changed even without App 1 help.
+  function _bkSig(b){ return JSON.stringify({ r:_rangesTxt(bookingRanges(b)), a:String(b.activity||''), m:String(b.machine||''), n:String(b.notes||'') }); }
+  function _sigChanges(o, n){
+    var ch=[];
+    if(o.r!==n.r) ch.push({label:'Dates', from:o.r||'—', to:n.r||'—'});
+    if(o.a!==n.a) ch.push({label:'Description', from:o.a||'—', to:n.a||'—'});
+    if(o.m!==n.m) ch.push({label:'Machine', from:o.m||'—', to:n.m||'—'});
+    if(o.n!==n.n) ch.push({label:'Notes', from:o.n||'—', to:n.n||'—'});
+    return ch;
+  }
+  function _snapKey(){ return 'remc_sup_snap_'+((ME&&ME.username)||'x'); }
+  function _obsKey(){ return 'remc_sup_obs_'+((ME&&ME.username)||'x'); }
+  function _getObs(){ try{ return JSON.parse((typeof _lsGet==='function'?_lsGet(_obsKey()):localStorage.getItem(_obsKey()))||'{}')||{}; }catch(e){ return {}; } }
+  function _detectChanges(){
+    try{
+      if(!ME) return;
+      var snap={}, obs={};
+      try{ snap=JSON.parse(_lsGet(_snapKey())||'{}')||{}; }catch(e){ snap={}; }
+      try{ obs=JSON.parse(_lsGet(_obsKey())||'{}')||{}; }catch(e){ obs={}; }
+      var mine=myProjectIds();
+      var newSnap={};
+      (BOOKINGS||[]).forEach(function(b){
+        if(!mine[String(b.projectId)]) return;
+        var id=String(b.id); var sig=_bkSig(b); newSnap[id]=sig;
+        if(snap[id]!==undefined && snap[id]!==sig){
+          var o={}, n={};
+          try{ o=JSON.parse(snap[id]); }catch(e){}
+          try{ n=JSON.parse(sig); }catch(e){}
+          var ch=_sigChanges(o,n);
+          if(ch.length){ obs[id]={ at:new Date().toISOString(), changes:ch, by:(b.au_eby||'Office'), user:(b.au_euser||''), app:(b.au_eapp||'PC'), projectId:String(b.projectId) }; }
+        }
+      });
+      var pruned={}; Object.keys(obs).forEach(function(id){ if(newSnap[id]!==undefined) pruned[id]=obs[id]; });
+      _lsSet(_snapKey(), JSON.stringify(newSnap));
+      _lsSet(_obsKey(), JSON.stringify(pruned));
+    }catch(e){}
+  }
+  function _fmtWhen(at){ if(!at) return ''; try{ var d=new Date(at); return d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})+', '+d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}); }catch(e){ return String(at); } }
+  function _evLabel(kind, action){
+    var m={
+      'booking|created':['📅','Job booked'], 'booking|updated':['✏️','Job updated'], 'booking|deleted':['❌','Job cancelled'],
+      'test|created':['🧪','Compaction test booked'], 'test|deleted':['🗑️','Test removed'],
+      'transfer|transfer_requested':['🚚','Machine transfer requested'], 'transfer|removal_requested':['🚚','Machine removal requested'], 'transfer|deleted':['🗑️','Transfer request removed'],
+      'variation|created':['🔧','Variation added'], 'variation|updated':['🔧','Variation updated'], 'variation|deleted':['🗑️','Variation removed'],
+      'sub|scheduled':['👷','Subcontractor scheduled'], 'sub|postpone_requested':['👷','Subcontractor postpone requested'], 'sub|cancel_requested':['👷','Subcontractor cancel requested'], 'sub|request_cleared':['👷','Subcontractor request cleared']
+    };
+    return m[kind+'|'+action] || ['•', action];
+  }
+  function buildHistory(pid){
+    var pidS=String(pid); var evs=[]; var _obs=_getObs();
+    (BOOKINGS||[]).filter(function(b){return String(b.projectId)===pidS;}).forEach(function(b){
+      evs.push({ at:(b.au_at||b.createdAt||''), by:(b.au_by||b.bookedBy||''), user:(b.au_user||''), app:(b.au_app||''), kind:'booking', action:'created', detail:_bkDetail(b) });
+      var _o=_obs[String(b.id)];
+      if(_o && _o.changes && _o.changes.length){ evs.push({ at:_o.at, by:(_o.by||'Office'), user:(_o.user||''), app:(_o.app||'PC'), kind:'booking', action:'updated', detail:_bkDetail(b), changes:_o.changes }); }
+    });
+    ((TESTS[pidS])||[]).forEach(function(t){ evs.push({ at:(t.createdAt||''), by:(t.bookedBy||''), user:(t.au_user||''), app:(t.au_app||''), kind:'test', action:'created', detail:(t.type||'Test')+(t.date?(' · '+pcFmtRange(t.date,t.date)):'') }); });
+    ((TRANSFERS[pidS])||[]).forEach(function(t){ evs.push({ at:(t.createdAt||''), by:(t.bookedBy||''), user:(t.au_user||''), app:(t.au_app||''), kind:'transfer', action:(t.action==='transfer'?'transfer_requested':'removal_requested'), detail:(t.machine||'Machine')+(t.action==='transfer'?(' → '+(t.toName||'')):' (remove / pick up)') }); });
+    ((VARIATIONS[pidS])||[]).forEach(function(v){
+      evs.push({ at:(v.createdAt||''), by:(v.bookedBy||''), user:(v.au_user||''), app:(v.au_app||''), kind:'variation', action:'created', detail:String(v.description||'').slice(0,70) });
+      if(v.au_eat){ evs.push({ at:v.au_eat, by:(v.au_eby||''), user:'', app:(v.au_eapp||''), kind:'variation', action:'updated', detail:String(v.description||'').slice(0,70), changes:(v.au_changes||null) }); }
+    });
+    ((SUBCONS[pidS])||[]).forEach(function(s){ if(s.createdAt) evs.push({ at:s.createdAt, by:(s.bookedBy||'Office'), user:'', app:(s.au_app||'PC'), kind:'sub', action:'scheduled', detail:(s.product||'')+' · '+(s.name||'')+(s.date?(' · '+pcFmtRange(s.date,s.date)):'') }); });
+    (ACTIVITY||[]).filter(function(e){return String(e.projectId)===pidS;}).forEach(function(e){ evs.push({ at:(e.at||''), by:(e.by||''), user:(e.user||''), app:(e.app||''), kind:e.kind, action:e.action, detail:(e.detail||'') }); });
+    evs.sort(function(a,b){ return (a.at<b.at)?1:((a.at>b.at)?-1:0); });
+    return evs;
+  }
+  window.openHistory=function(pid){
+    HIST_PID=String(pid);
+    var p=PROJECTS.find(function(x){return String(x.id)===String(pid);});
+    $('hist-title').textContent = p ? (p.name||('Project '+pid)) : 'History';
+    renderHistory();
+    $('hist-ov').classList.add('open');
+  };
+  window.closeHistory=function(){ $('hist-ov').classList.remove('open'); HIST_PID=null; };
+  function renderHistory(){
+    var pid=HIST_PID; if(pid==null) return;
+    var evs=buildHistory(pid);
+    var host=$('hist-list'); if(!host) return;
+    if(!evs.length){ host.innerHTML='<div class="pc-empty" style="padding:26px 16px;text-align:center;color:var(--muted)">No activity recorded for this job yet.</div>'; return; }
+    host.innerHTML='<div class="pc-list-h">Activity ('+evs.length+')</div>' + evs.map(function(e){
+      var L=_evLabel(e.kind, e.action);
+      var who = e.by ? (esc(e.by)+(e.user?(' ('+esc(e.user)+')'):'')) : 'Unknown';
+      var appTag = e.app ? (' · '+(e.app==='PC'?'Office':'Mobile')) : '';
+      var isDel = /deleted|cancel/.test(e.action);
+      return '<div class="hist-item'+(isDel?' del':'')+'">'
+        + '<div class="hist-ic">'+L[0]+'</div>'
+        + '<div class="hist-body">'
+        +   '<div class="hist-t">'+esc(L[1])+'</div>'
+        +   (e.detail ? '<div class="hist-d">'+esc(e.detail)+'</div>' : '')
+        +   _changesHtml(e.changes)
+        +   '<div class="hist-m">'+esc(_fmtWhen(e.at))+' · '+who+appTag+'</div>'
+        + '</div>'
+        + '</div>';
+    }).join('');
+  }
+
+  // ---------- notifications (updates across the supervisor's jobs) ----------
+  var _appStart = new Date().toISOString();
+  function _lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+  function _lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+  function _notifSeenKey(){ return 'remc_sup_notif_seen_'+((ME&&ME.username)||'x'); }
+  function _notifFiredKey(){ return 'remc_sup_notif_fired_'+((ME&&ME.username)||'x'); }
+  function _isMine(e){ return e && e.app==='Mobile' && String(e.user||'')===String((ME&&ME.username)||''); }
+  function buildNotifications(){
+    var evs=[];
+    (myProjects()||[]).forEach(function(p){
+      var pid=String(p.id);
+      buildHistory(pid).forEach(function(e){ e.projectId=pid; e.projectName=(p.name||('Project '+pid)); evs.push(e); });
+    });
+    evs.sort(function(a,b){ return (a.at<b.at)?1:((a.at>b.at)?-1:0); });
+    return evs;
+  }
+  function updateNotifBadge(){
+    var badge=$('notif-badge'); if(!badge) return;
+    var seen=_lsGet(_notifSeenKey())||'';
+    var evs=buildNotifications();
+    var unread=evs.filter(function(e){ return e.at && e.at>seen && !_isMine(e); }).length;
+    if(unread>0){ badge.textContent = unread>99?'99+':String(unread); badge.style.display=''; }
+    else { badge.style.display='none'; }
+  }
+  function renderNotif(){
+    var ew=$('notif-enable-wrap');
+    if(ew){
+      var supported=(typeof Notification!=='undefined');
+      var perm=supported?Notification.permission:'unsupported';
+      if(supported && perm!=='granted'){ ew.innerHTML='<button type="button" class="btn btn-save" onclick="enableNotif()">🔔 Turn on phone notifications</button>'+(perm==='denied'?'<div class="notif-hint">Notifications are blocked. Turn them on for this site in your browser settings.</div>':'<div class="notif-hint">Get alerted on your phone while the app is open.</div>'); }
+      else if(supported && perm==='granted'){ ew.innerHTML='<div class="notif-hint">✅ Phone notifications are on (while the app is open in your browser).</div>'; }
+      else { ew.innerHTML='<div class="notif-hint">Your browser does not support phone notifications.</div>'; }
+    }
+    var evs=buildNotifications();
+    var seen=_lsGet(_notifSeenKey())||'';
+    var host=$('notif-list'); if(!host) return;
+    if(!evs.length){ host.innerHTML='<div class="pc-empty" style="padding:26px 16px;text-align:center;color:var(--muted)">No notifications yet.<br>You will see updates on your jobs here.</div>'; return; }
+    host.innerHTML = evs.slice(0,60).map(function(e){
+      var L=_evLabel(e.kind, e.action);
+      var who = e.by ? (esc(e.by)+(e.user?(' ('+esc(e.user)+')'):'')) : 'Unknown';
+      var appTag = e.app ? (' · '+(e.app==='PC'?'Office':'Mobile')) : '';
+      var isDel=/deleted|cancel/.test(e.action);
+      var unread = e.at && e.at>seen && !_isMine(e);
+      return '<div class="hist-item'+(isDel?' del':'')+(unread?' unread':'')+'">'
+        + '<div class="hist-ic">'+L[0]+'</div>'
+        + '<div class="hist-body">'
+        +   '<div class="hist-t">'+esc(L[1])+(unread?' <span class="notif-dot"></span>':'')+'</div>'
+        +   '<div class="hist-d">'+esc(e.projectName||'')+(e.detail?(' — '+esc(e.detail)):'')+'</div>'
+        +   _changesHtml(e.changes)
+        +   '<div class="hist-m">'+esc(_fmtWhen(e.at))+' · '+who+appTag+'</div>'
+        + '</div>'
+        + '</div>';
+    }).join('');
+  }
+  window.openNotif=function(){
+    renderNotif();
+    $('notif-ov').classList.add('open');
+    var evs=buildNotifications();
+    var newest=evs.length?evs[0].at:'';
+    var nowIso=new Date().toISOString();
+    _lsSet(_notifSeenKey(), (newest && newest>nowIso)?newest:nowIso);
+    updateNotifBadge();
+  };
+  window.closeNotif=function(){ $('notif-ov').classList.remove('open'); };
+  window.enableNotif=function(){
+    try{
+      if(typeof Notification==='undefined'){ alert('Your browser does not support phone notifications.'); return; }
+      var r=Notification.requestPermission();
+      if(r && typeof r.then==='function'){ r.then(function(p){ renderNotif(); if(p==='granted'){ try{ new Notification('REMC Supervisor', {body:'Notifications are on. You will be alerted about updates on your jobs.'}); }catch(e){} } }); }
+      else { renderNotif(); }
+    }catch(e){}
+  };
+  function notifCheckAndFire(){
+    try{
+      if(typeof Notification==='undefined' || Notification.permission!=='granted') return;
+      var lastFired=_lsGet(_notifFiredKey())||'';
+      var floor = (lastFired>_appStart)?lastFired:_appStart;
+      var evs=buildNotifications();
+      var fresh=evs.filter(function(e){ return e.at && e.at>floor && !_isMine(e); });
+      if(!fresh.length) return;
+      var newest=fresh[0];
+      var L=_evLabel(newest.kind, newest.action);
+      var body = (fresh.length===1) ? (L[1]+' — '+(newest.projectName||'')) : (fresh.length+' new updates on your jobs');
+      try{ new Notification('REMC Supervisor', {body:body}); }catch(e){}
+      _lsSet(_notifFiredKey(), newest.at);
+      updateNotifBadge();
+    }catch(e){}
+  }
+  window.updateNotifBadge=updateNotifBadge;
+  window.notifCheckAndFire=notifCheckAndFire;
+  function renderProjCal(){
+    var pid=PROJCAL_PID; if(pid==null) return;
+    var p=PROJECTS.find(function(x){return String(x.id)===String(pid);});
+    $('projcal-title').textContent = p ? (p.name||('Project '+pid)) : 'Project';
+    var bks=BOOKINGS.filter(function(b){ return String(b.projectId)===String(pid); });
+    var tk=todayKey();
+    // ----- month calendar -----
+    var base=new Date(); base.setDate(1); base.setMonth(base.getMonth()+PROJCAL_OFFSET);
+    var y=base.getFullYear(), m=base.getMonth();
+    $('projcal-month').textContent = MN[m]+' '+y;
+    var first=new Date(y,m,1); var start=addDays(first, -(((first.getDay())+6)%7));
+    var g='<div class="pc-mgrid"><div class="pc-mrow pc-head">'+['M','T','W','T','F','S','S'].map(function(d){return '<div>'+d+'</div>';}).join('')+'</div>';
+    for(var wk=0; wk<6; wk++){
+      g+='<div class="pc-mrow">';
+      for(var c=0;c<7;c++){
+        var d=addDays(start, wk*7+c), dk=keyOf(d), out=(d.getMonth()!==m), today=dk===tk;
+        var has=bks.some(function(b){ return bookingCoversDay(b,dk); });
+        g+='<div class="pc-cell'+(out?' out':'')+(today?' today':'')+(has?' has':'')+'">'+d.getDate()+'</div>';
+      }
+      g+='</div>';
+    }
+    g+='</div>';
+    $('projcal-grid').innerHTML=g;
+    // ----- list (all bookings, past & future) -----
+    if(!bks.length){ $('projcal-list').innerHTML='<div class="pc-empty">No bookings for this project yet.</div>'; return; }
+    // one line per period (non-sequential ranges are shown separately)
+    var items=[];
+    bks.forEach(function(b){
+      bookingRanges(b).filter(function(r){return r.start&&r.end;}).forEach(function(r){
+        var s=r.start, e=r.end; if(e<s){ var t=s; s=e; e=t; }
+        items.push({ b:b, s:s, e:e });
+      });
+    });
+    items.sort(function(a,b){ return a.s<b.s?-1:(a.s>b.s?1:0); });
+    $('projcal-list').innerHTML='<div class="pc-list-h">All bookings ('+bks.length+')</div>' + items.map(function(o){
+      var b=o.b;
+      var isPast = o.e && o.e < tk;
+      var desc = [b.activity, b.machine].filter(Boolean).join(' · ') || 'No description';
+      var tag = isPast ? '<span class="pc-past">Past</span>' : '<span class="pc-upcoming">Upcoming</span>';
+      return '<div class="pc-item'+(isPast?' past':'')+'" style="border-left-color:'+(b.color||'#2563eb')+';cursor:pointer" onclick="openEdit(\''+b.id+'\')" title="Tap to edit this booking">'
+        + '<div class="pc-item-date">'+esc(pcFmtRange(o.s,o.e))+' '+tag+'</div>'
+        + '<div class="pc-item-desc">'+esc(desc)+'</div>'
+        + (b.notes && String(b.notes).trim() ? '<div class="pc-item-notes">📝 '+esc(b.notes)+'</div>':'')
+        + '</div>';
+    }).join('');
+  }
   window.saveNotes=function(){
     if(NOTES_PID==null) return;
+    var pid=NOTES_PID;
+    var existed = !!(NOTES[pid] && String(NOTES[pid]).trim());
     var v=$('n-text').value;
-    if(v && v.trim()) NOTES[NOTES_PID]=v; else delete NOTES[NOTES_PID];
+    var hasText = !!(v && v.trim());
+    if(hasText) NOTES[pid]=v; else delete NOTES[pid];
     $('notes-ov').classList.remove('open');
-    if(VIEW==='list') renderProjects();
-    pushNotes(function(err){ if(err){ alert('Could not save notes to the cloud: '+err); } else { pull(function(){ if(VIEW==='list') renderProjects(); }); } });
     NOTES_PID=null;
+    render();
+    supShowSaving('Saving…');
+    pushNotes(function(err){
+      if(err){ supShowResult(false, 'Could not save. Check your connection and try again.'); }
+      else {
+        pull(function(){ render(); });
+        supShowResult(true, !hasText ? 'Note removed' : (existed ? 'Note updated' : 'Note added'));
+      }
+    });
   };
+
+  // ---------- saving indicator ----------
+  var _toastTimer=null;
+  function supShowSaving(msg){
+    var t=$('sup-toast'); if(!t) return;
+    clearTimeout(_toastTimer);
+    t.className='saving show';
+    t.innerHTML='<span class="sp"></span><span>'+esc(msg||'Saving…')+'</span>';
+  }
+  function supShowResult(ok, msg){
+    var t=$('sup-toast'); if(!t){ if(!ok) alert(msg); return; }
+    clearTimeout(_toastTimer);
+    t.className=(ok?'ok':'err')+' show';
+    t.innerHTML='<span class="tick">'+(ok?'✓':'⚠')+'</span><span>'+esc(msg)+'</span>';
+    _toastTimer=setTimeout(function(){ t.className=t.className.replace(' show',''); }, ok?2600:4200);
+  }
 
   window.saveBooking=function(){
     var pid=$('f-project').value;
     if(!pid){ alert('You have no projects assigned to you. Ask the office to set you as Supervisor on a project.'); return; }
-    var start=$('f-start').value, end=$('f-end').value;
-    if(!start||!end){ alert('Please choose start and end dates.'); return; }
-    if(end<start){ var t=start; start=end; end=t; }
+    var ranges=bkReadRanges();
+    if(!ranges.length){ alert('Please choose start and end dates.'); return; }
+    // primary start/end bound the whole booking (earliest start → latest end)
+    var _st=ranges.map(function(r){return r.start;}).sort();
+    var _en=ranges.map(function(r){return r.end;}).sort();
+    var start=_st[0], end=_en[_en.length-1];
     // safety: only your own projects
     if(!myProjectIds()[String(pid)]){ alert('You can only book your own projects.'); return; }
     var rec = {
       projectId: isNaN(pid)? pid : +pid,
       start:start, end:end,
+      ranges:ranges,
       activity:$('f-activity').value.trim(),
       machine:$('f-machine').value.trim(),
+      notes:($('f-notes')?$('f-notes').value.trim():''),
       color:PICK_COLOR,
       skipSat: !$('f-sat').checked,
       skipSun: !$('f-sun').checked,
       bookedBy: ME? ME.name : 'Supervisor'
     };
+    var isNew = !EDIT_ID;
     if(!EDIT_ID){
       var _p = PROJECTS.find(function(x){ return String(x.id)===String(rec.projectId); });
       var _pn = _p ? (_p.name || ('#'+rec.projectId)) : ('#'+rec.projectId);
       var _cl = (_p && _p.cName) ? _p.cName : '';
       var _fmt = function(d){ try{ return new Date(d+'T00:00:00').toLocaleDateString('en-GB',{weekday:'short', day:'numeric', month:'short', year:'numeric'}); }catch(e){ return d; } };
-      var _range = (start===end) ? _fmt(start) : (_fmt(start)+'  →  '+_fmt(end));
+      var _range = ranges.map(function(r){ return (r.start===r.end) ? _fmt(r.start) : (_fmt(r.start)+'  →  '+_fmt(r.end)); }).join('\n              ');
       var _msg = 'Are you sure you want to register this job?\n\nProject: '+_pn+(_cl?('\nClient: '+_cl):'')+'\nDate(s): '+_range;
       if(!confirm(_msg)) return;
       rec.color = COLORS[Math.abs(String(rec.projectId).split('').reduce(function(a,c){return a+c.charCodeAt(0);},0)) % COLORS.length];
     }
     if(EDIT_ID){
       var i=BOOKINGS.findIndex(function(x){return String(x.id)===String(EDIT_ID);});
-      if(i>=0) BOOKINGS[i]=Object.assign({}, BOOKINGS[i], rec);
+      if(i>=0){
+        var _oldBk=BOOKINGS[i];
+        var _ch=_bkChanges(_oldBk, rec);
+        BOOKINGS[i]=Object.assign({}, BOOKINGS[i], rec);
+        BOOKINGS[i].au_eby = ME? ME.name : 'Supervisor'; BOOKINGS[i].au_euser = ME? (ME.username||'') : ''; BOOKINGS[i].au_eat = new Date().toISOString(); BOOKINGS[i].au_eapp = 'Mobile';
+        if(_ch.length) BOOKINGS[i].au_changes=_ch; else delete BOOKINGS[i].au_changes;
+      }
     } else {
       rec.id = 'bk_'+Date.now()+'_'+Math.random().toString(36).slice(2,6);
       rec.createdAt = new Date().toISOString();
+      rec.au_by = ME? ME.name : 'Supervisor'; rec.au_user = ME? (ME.username||'') : ''; rec.au_at = new Date().toISOString(); rec.au_app = 'Mobile';
       BOOKINGS.push(rec);
     }
     closeSheet(); render();
-    pushBookings(function(err){ if(err){ alert('Could not save to the cloud: '+err); } else { pull(function(){ render(); }); } });
+    // show the saving bar; report success only once it is really saved to the system
+    supShowSaving('Saving to the system…');
+    pushBookings(function(err){
+      if(err){ supShowResult(false, 'Could not save. Check your connection and try again.'); }
+      else { pull(function(){ render(); }); supShowResult(true, isNew ? 'Job registered successfully' : 'Changes saved'); }
+    });
   };
   window.cancelBooking=function(){
     if(!EDIT_ID) return;
     if(!confirm('Cancel this job booking?')) return;
+    var _b=BOOKINGS.find(function(x){return String(x.id)===String(EDIT_ID);});
+    if(_b){ try{ logActivity('booking','deleted', _b.projectId, _bkDetail(_b)); }catch(e){} }
     BOOKINGS = BOOKINGS.filter(function(x){ return String(x.id)!==String(EDIT_ID); });
     EDIT_ID=null;
     closeSheet(); render();
@@ -648,9 +2184,9 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
   // ---------- view + nav ----------
   window.setView=function(v){
     VIEW=v; OFFSET=0;
-    ['week','month'].forEach(function(k){ var b=$('m-'+k); if(b) b.classList.toggle('on', v===k); });
-    var tb=$('cal-toolbar'); if(tb) tb.style.display=(v==='week'||v==='month')?'':'none';
-    document.body.classList.toggle('cal-mode', v==='week'||v==='month');
+    ['day','week','month'].forEach(function(k){ var b=$('m-'+k); if(b) b.classList.toggle('on', v===k); });
+    var tb=$('cal-toolbar'); if(tb) tb.style.display=(v==='day'||v==='week'||v==='month')?'':'none';
+    document.body.classList.toggle('cal-mode', v==='day'||v==='week'||v==='month');
     render();
   };
   function _showMain(){ var h=$('home'), m=$('main'); if(h) h.style.display='none'; if(m) m.style.display=''; }
@@ -675,9 +2211,12 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     $('login').style.display='none'; $('app').style.display='';
     $('who-name').textContent = ME.name;
     try{ sessionStorage.setItem('remc_sup_me', JSON.stringify(ME)); }catch(e){}
+    try{ if(!_lsGet(_notifSeenKey())) _lsSet(_notifSeenKey(), new Date().toISOString()); }catch(e){}
     updateWarn();
     subscribe();
     goHome();
+    try{ _detectChanges(); }catch(e){}
+    try{ updateNotifBadge(); }catch(e){}
   }
   function doLogin(){
     var msg=$('lg-msg'); msg.textContent='Signing in…';
@@ -708,8 +2247,14 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     $('lg-btn').onclick=doLogin;
     $('lg-pass').addEventListener('keydown', function(e){ if(e.key==='Enter') doLogin(); });
     $('logout').onclick=function(){ try{ sessionStorage.removeItem('remc_sup_me'); localStorage.removeItem('sup_saved_user'); localStorage.removeItem('sup_saved_pass'); localStorage.setItem('sup_remember','0'); }catch(e){}; location.reload(); };
-    $('sheet-ov').addEventListener('click', function(e){ if(e.target===this) closeSheet(); });
-    $('notes-ov').addEventListener('click', function(e){ if(e.target===this) closeNotes(); });
+    // Close on backdrop click — but ONLY if the click STARTED on the backdrop.
+    // (Selecting text inside a field and releasing the mouse over the backdrop
+    //  used to fire a click on the overlay and wrongly close the sheet.)
+    var _sheetDownBk=false, _notesDownBk=false;
+    $('sheet-ov').addEventListener('mousedown', function(e){ _sheetDownBk=(e.target===this); });
+    $('sheet-ov').addEventListener('click', function(e){ if(e.target===this && _sheetDownBk) closeSheet(); _sheetDownBk=false; });
+    $('notes-ov').addEventListener('mousedown', function(e){ _notesDownBk=(e.target===this); });
+    $('notes-ov').addEventListener('click', function(e){ if(e.target===this && _notesDownBk) closeNotes(); _notesDownBk=false; });
     if(!ensureClient()){ $('lg-msg').textContent='Paste the anon key (same as the main app) into this file first.'; return; }
     // Pre-fill the login form from saved credentials on this device
     var remUser='', remPass='', remOn=false;
@@ -739,5 +2284,6 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 })();
 </script>
+<div id="sup-toast"></div>
 </body>
 </html>
