@@ -11468,7 +11468,7 @@ function teamEditProjectBooking(pid){
     }
     if(!document.getElementById('remc-conn-btn')){
       var g=document.createElement('button'); g.id='remc-conn-btn'; g.type='button'; g.title='Connection settings'; g.textContent='⚙️';
-      g.style.cssText='font-size:13px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:4px 9px;cursor:pointer';
+      g.style.cssText='font-size:13px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:4px 9px;cursor:pointer;display:none';
       g.onclick=function(){ window.remcOpenConn(); };
       nr.insertBefore(g, nr.firstChild);
     }

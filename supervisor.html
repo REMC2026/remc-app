@@ -313,7 +313,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     <label style="display:flex;align-items:center;gap:8px;font-size:14px;color:var(--mid);margin:2px 0 12px;cursor:pointer;user-select:none"><input id="lg-remember" type="checkbox" style="width:17px;height:17px;cursor:pointer">Keep me signed in (auto-login on this device)</label>
     <button id="lg-btn">Sign in</button>
     <div class="login-msg" id="lg-msg"></div>
-    <button type="button" onclick="openSettings()" style="margin-top:14px;background:none;border:none;color:#8b95a8;font-size:13px;cursor:pointer;text-decoration:underline">⚙️ Connection settings</button>
+    <button type="button" onclick="openSettings()" style="display:none;margin-top:14px;background:none;border:none;color:#8b95a8;font-size:13px;cursor:pointer;text-decoration:underline">⚙️ Connection settings</button>
   </div>
 </div>
 
@@ -346,7 +346,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
       <div class="who-sub">Supervisor</div>
     </div>
     <button class="notif-btn" id="notif-btn" onclick="openNotif()" title="Notifications">🔔<span class="notif-badge" id="notif-badge" style="display:none">0</span></button>
-    <button class="notif-btn" id="settings-btn" onclick="openSettings()" title="Connection settings">⚙️</button>
+    <button class="notif-btn" id="settings-btn" onclick="openSettings()" title="Connection settings" style="display:none">⚙️</button>
     <button class="logout" id="logout">Log out</button>
   </div>
 
