@@ -346,6 +346,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
       <div class="who-sub">Supervisor</div>
     </div>
     <button class="notif-btn" id="notif-btn" onclick="openNotif()" title="Notifications">🔔<span class="notif-badge" id="notif-badge" style="display:none">0</span></button>
+    <button class="notif-btn" id="cloud-check-btn" onclick="supCloudCheck()" title="Check the cloud connection">🩺</button>
     <button class="notif-btn" id="settings-btn" onclick="openSettings()" title="Connection settings" style="display:none">⚙️</button>
     <button class="logout" id="logout">Log out</button>
   </div>
@@ -781,6 +782,67 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     if(el){ setTimeout(function(){ el.style.transition='opacity .25s'; el.style.opacity='0'; setTimeout(function(){ try{ el.remove(); }catch(e){} }, 260); }, 200); }
   }
 
+
+  // ---- Cloud check -------------------------------------------------------
+  // Plain-English report so a problem can be identified without the console.
+  window.supCloudCheck = function(){
+    var lines = [];
+    function done(){
+      alert('CLOUD CHECK\n\n' + lines.join('\n'));
+      try{ console.log('[REMC] cloud check\n' + lines.join('\n')); }catch(e){}
+    }
+    lines.push('Phone online: ' + (navigator.onLine ? 'yes' : 'NO'));
+    lines.push('Supabase library: ' + (typeof supabase !== 'undefined' && supabase.createClient ? 'loaded' : 'NOT LOADED'));
+    if (typeof supabase === 'undefined' || !supabase.createClient){
+      lines.push('');
+      lines.push('The app could not download the Supabase library.');
+      lines.push('Usually a connection problem or a blocked network.');
+      return done();
+    }
+    var t0 = Date.now();
+    fetch(String(CFG.url).replace(/\/$/,'') + '/rest/v1/remc_state?id=eq.' + encodeURIComponent(WS) + '&select=data',
+          { headers:{ apikey: CFG.anonKey } })
+      .then(function(r){
+        return r.text().then(function(body){
+          lines.push('Server answered: HTTP ' + r.status + ' in ' + (Date.now()-t0) + ' ms');
+          if (r.ok){
+            var rows = 0, keys = 0;
+            try{ var j = JSON.parse(body); rows = j.length;
+                 if(rows && j[0] && j[0].data) keys = Object.keys(j[0].data).length; }catch(e){}
+            lines.push('Rows found: ' + rows);
+            lines.push('Keys in the shared document: ' + keys);
+            lines.push('Document size: ' + (body.length/1024).toFixed(1) + ' KB');
+            lines.push('');
+            if (rows === 0){
+              lines.push('THE CLOUD IS EMPTY.');
+              lines.push('The connection works, but there is no data yet.');
+              lines.push('Open the office app and let it save once.');
+            } else if (keys < 3){
+              lines.push('WARNING: the document looks almost empty.');
+              lines.push('It may have been overwritten. Restore a backup in the office app.');
+            } else {
+              lines.push('CONNECTION IS WORKING.');
+              lines.push('If a save is still not showing up, tell Claude what this says.');
+            }
+          } else {
+            lines.push('Server said: ' + String(body).slice(0,200));
+            lines.push('');
+            if (r.status === 401 || r.status === 403) lines.push('The key was refused. The API key probably needs updating.');
+            else if (r.status === 404) lines.push('The table was not found.');
+            else if (r.status >= 500) lines.push('Supabase itself is refusing. Often the free monthly limit.');
+          }
+          done();
+        });
+      })
+      .catch(function(e){
+        lines.push('Could not reach the server: ' + ((e && e.message) || 'unknown'));
+        lines.push('');
+        lines.push('The request never left this phone, or the server did not answer.');
+        lines.push('Possible causes: no signal, the project is paused, or the monthly limit was reached.');
+        done();
+      });
+  };
+
   function pull(cb){
     if(!ensureClient()){ if(cb) cb('noconfig'); return; }
     setCloud('…','#eff6ff','#1d4ed8');
@@ -798,83 +860,104 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     setCloud('saving…','#fef3c7','#92400e');
     // read-modify-write: pull latest, change only remc_scheduler, push back
     sb.from('remc_state').select('data').eq('id',WS).maybeSingle().then(function(res){
+      // If the read failed we must STOP here. Carrying on would write a
+      // document containing only this one key and wipe everything else.
+      if(res && res.error){ _cloudFail(); if(cb) cb(res.error.message||'error'); return; }
       var d = (res && res.data && res.data.data) ? res.data.data : {};
       d['remc_scheduler'] = JSON.stringify(BOOKINGS);
       d['__client'] = CLIENT;
       sb.from('remc_state').upsert({ id:WS, data:d, updated_at:new Date().toISOString() }).then(function(r2){
         if(r2 && r2.error){ _cloudFail(); if(cb) cb(r2.error.message); }
         else { DATA=d; _cloudOk(); if(cb) cb(null); }
-      });
-    });
+      }).catch(function(e){ _cloudFail(); if(cb) cb((e&&e.message)||'network'); });
+    }).catch(function(e){ _cloudFail(); if(cb) cb((e&&e.message)||'network'); });
   }
   function pushNotes(cb){
     if(!ensureClient()){ if(cb) cb('noconfig'); return; }
     setCloud('saving…','#fef3c7','#92400e');
     sb.from('remc_state').select('data').eq('id',WS).maybeSingle().then(function(res){
+      // If the read failed we must STOP here. Carrying on would write a
+      // document containing only this one key and wipe everything else.
+      if(res && res.error){ _cloudFail(); if(cb) cb(res.error.message||'error'); return; }
       var d = (res && res.data && res.data.data) ? res.data.data : {};
       d['remc_project_notes'] = JSON.stringify(NOTES);
       d['__client'] = CLIENT;
       sb.from('remc_state').upsert({ id:WS, data:d, updated_at:new Date().toISOString() }).then(function(r2){
         if(r2 && r2.error){ _cloudFail(); if(cb) cb(r2.error.message); }
         else { DATA=d; _cloudOk(); if(cb) cb(null); }
-      });
-    });
+      }).catch(function(e){ _cloudFail(); if(cb) cb((e&&e.message)||'network'); });
+    }).catch(function(e){ _cloudFail(); if(cb) cb((e&&e.message)||'network'); });
   }
   function pushTests(cb){
     if(!ensureClient()){ if(cb) cb('noconfig'); return; }
     setCloud('saving…','#fef3c7','#92400e');
     sb.from('remc_state').select('data').eq('id',WS).maybeSingle().then(function(res){
+      // If the read failed we must STOP here. Carrying on would write a
+      // document containing only this one key and wipe everything else.
+      if(res && res.error){ _cloudFail(); if(cb) cb(res.error.message||'error'); return; }
       var d = (res && res.data && res.data.data) ? res.data.data : {};
       d['remc_compaction_tests'] = JSON.stringify(TESTS);
       d['__client'] = CLIENT;
       sb.from('remc_state').upsert({ id:WS, data:d, updated_at:new Date().toISOString() }).then(function(r2){
         if(r2 && r2.error){ _cloudFail(); if(cb) cb(r2.error.message); }
         else { DATA=d; _cloudOk(); if(cb) cb(null); }
-      });
-    });
+      }).catch(function(e){ _cloudFail(); if(cb) cb((e&&e.message)||'network'); });
+    }).catch(function(e){ _cloudFail(); if(cb) cb((e&&e.message)||'network'); });
   }
   function pushTransfers(cb){
     if(!ensureClient()){ if(cb) cb('noconfig'); return; }
     setCloud('saving…','#fef3c7','#92400e');
     sb.from('remc_state').select('data').eq('id',WS).maybeSingle().then(function(res){
+      // If the read failed we must STOP here. Carrying on would write a
+      // document containing only this one key and wipe everything else.
+      if(res && res.error){ _cloudFail(); if(cb) cb(res.error.message||'error'); return; }
       var d = (res && res.data && res.data.data) ? res.data.data : {};
       d['remc_machine_transfers'] = JSON.stringify(TRANSFERS);
       d['__client'] = CLIENT;
       sb.from('remc_state').upsert({ id:WS, data:d, updated_at:new Date().toISOString() }).then(function(r2){
         if(r2 && r2.error){ _cloudFail(); if(cb) cb(r2.error.message); }
         else { DATA=d; _cloudOk(); if(cb) cb(null); }
-      });
-    });
+      }).catch(function(e){ _cloudFail(); if(cb) cb((e&&e.message)||'network'); });
+    }).catch(function(e){ _cloudFail(); if(cb) cb((e&&e.message)||'network'); });
   }
   function pushVariations(cb){
     if(!ensureClient()){ if(cb) cb('noconfig'); return; }
     setCloud('saving…','#fef3c7','#92400e');
     sb.from('remc_state').select('data').eq('id',WS).maybeSingle().then(function(res){
+      // If the read failed we must STOP here. Carrying on would write a
+      // document containing only this one key and wipe everything else.
+      if(res && res.error){ _cloudFail(); if(cb) cb(res.error.message||'error'); return; }
       var d = (res && res.data && res.data.data) ? res.data.data : {};
       d['remc_variations'] = JSON.stringify(VARIATIONS);
       d['__client'] = CLIENT;
       sb.from('remc_state').upsert({ id:WS, data:d, updated_at:new Date().toISOString() }).then(function(r2){
         if(r2 && r2.error){ _cloudFail(); if(cb) cb(r2.error.message); }
         else { DATA=d; _cloudOk(); if(cb) cb(null); }
-      });
-    });
+      }).catch(function(e){ _cloudFail(); if(cb) cb((e&&e.message)||'network'); });
+    }).catch(function(e){ _cloudFail(); if(cb) cb((e&&e.message)||'network'); });
   }
   function pushSubs(cb){
     if(!ensureClient()){ if(cb) cb('noconfig'); return; }
     setCloud('saving…','#fef3c7','#92400e');
     sb.from('remc_state').select('data').eq('id',WS).maybeSingle().then(function(res){
+      // If the read failed we must STOP here. Carrying on would write a
+      // document containing only this one key and wipe everything else.
+      if(res && res.error){ _cloudFail(); if(cb) cb(res.error.message||'error'); return; }
       var d = (res && res.data && res.data.data) ? res.data.data : {};
       d['remc_sub_bookings'] = JSON.stringify(SUBCONS);
       d['__client'] = CLIENT;
       sb.from('remc_state').upsert({ id:WS, data:d, updated_at:new Date().toISOString() }).then(function(r2){
         if(r2 && r2.error){ _cloudFail(); if(cb) cb(r2.error.message); }
         else { DATA=d; _cloudOk(); if(cb) cb(null); }
-      });
-    });
+      }).catch(function(e){ _cloudFail(); if(cb) cb((e&&e.message)||'network'); });
+    }).catch(function(e){ _cloudFail(); if(cb) cb((e&&e.message)||'network'); });
   }
   function pushActivity(cb){
     if(!ensureClient()){ if(cb) cb('noconfig'); return; }
     sb.from('remc_state').select('data').eq('id',WS).maybeSingle().then(function(res){
+      // If the read failed we must STOP here. Carrying on would write a
+      // document containing only this one key and wipe everything else.
+      if(res && res.error){ _cloudFail(); if(cb) cb(res.error.message||'error'); return; }
       var d = (res && res.data && res.data.data) ? res.data.data : {};
       d['remc_activity_log'] = JSON.stringify(ACTIVITY);
       d['__client'] = CLIENT;
@@ -893,14 +976,22 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
       pushActivity();
     }catch(e){}
   }
+  // Realtime delivers the WHOLE row on every change. With all of the app
+  // state in one jsonb column that meant re-downloading the entire document
+  // every time anybody saved anything - the main reason the free egress
+  // allowance was being burned through. The cheap timestamp poll below does
+  // the same job for a few bytes. Set this to true to switch realtime back on.
+  var USE_REALTIME = false;
   function subscribe(){
     if(!sb) return;
-    sb.channel('sup_'+WS).on('postgres_changes', {event:'*',schema:'public',table:'remc_state',filter:'id=eq.'+WS}, function(payload){
-      var d = payload && payload.new && payload.new.data;
-      if(!d || d.__client===CLIENT) return;
-      DATA=d; parseData(); render();
-      try{ updateNotifBadge(); notifCheckAndFire(); }catch(e){}
-    }).subscribe();
+    if(USE_REALTIME){
+      sb.channel('sup_'+WS).on('postgres_changes', {event:'*',schema:'public',table:'remc_state',filter:'id=eq.'+WS}, function(payload){
+        var d = payload && payload.new && payload.new.data;
+        if(!d || d.__client===CLIENT) return;
+        DATA=d; parseData(); render();
+        try{ updateNotifBadge(); notifCheckAndFire(); }catch(e){}
+      }).subscribe();
+    }
     startAutoRefresh();
   }
 
@@ -910,17 +1001,22 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
   function refreshFromCloud(){
     if(_refreshing || !sb || !ME) return;
     _refreshing=true;
-    sb.from('remc_state').select('data,updated_at').eq('id',WS).maybeSingle().then(function(res){
-      _refreshing=false;
-      if(!res || res.error){ _cloudFail(); return; }
+    // Step 1 - ask ONLY for the timestamp. A few bytes, not the whole document.
+    sb.from('remc_state').select('updated_at').eq('id',WS).maybeSingle().then(function(res){
+      if(!res || res.error){ _refreshing=false; _cloudFail(); return; }
       _cloudOk(); // reached the cloud → healthy, clear any stale offline
-      if(!res.data || !res.data.data) return;
-      var stamp=String(res.data.updated_at||'');
-      if(stamp && stamp===_lastSeen) return;
-      _lastSeen=stamp;
-      var d=res.data.data;
-      if(d.__client===CLIENT) return;
-      DATA=d; parseData(); render();
+      var stamp = String((res.data && res.data.updated_at) || '');
+      if(!stamp || stamp===_lastSeen){ _refreshing=false; return; }   // nothing new, nothing downloaded
+      // Step 2 - something really did change, so now fetch it.
+      sb.from('remc_state').select('data').eq('id',WS).maybeSingle().then(function(r2){
+        _refreshing=false;
+        if(!r2 || r2.error || !r2.data || !r2.data.data) return;
+        _lastSeen=stamp;
+        var d=r2.data.data;
+        if(d.__client===CLIENT) return;
+        DATA=d; parseData(); render();
+        try{ updateNotifBadge(); notifCheckAndFire(); }catch(e){}
+      }).catch(function(){ _refreshing=false; _cloudFail(); });
     }).catch(function(){ _refreshing=false; _cloudFail(); });
   }
   function startAutoRefresh(){

@@ -1633,7 +1633,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
         <div>
           <div class="ops-title">Operations</div>
           <div class="ops-sub">Compaction tests, machine transfers and subcontractor bookings
-            <span style="margin-left:8px;font-size:10px;font-weight:700;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:1px 7px">build 2026-08-06d</span>
+            <span style="margin-left:8px;font-size:10px;font-weight:700;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:1px 7px">build 2026-08-06f</span>
           </div>
         </div>
         <div style="display:flex;gap:8px;align-items:center">
@@ -2675,7 +2675,7 @@ function tick() {
 // One-time build check
 if (!window._buildChecked) {
   window._buildChecked = true;
-  window.REMC_BUILD = "2026-08-06d";
+  window.REMC_BUILD = "2026-08-06f";
   console.log("%c REMC v1.1 \u00B7 build " + window.REMC_BUILD + " loaded successfully ", "background:#16a34a;color:white;font-size:14px;padding:4px 8px;border-radius:4px");
 }
 
@@ -12102,7 +12102,10 @@ function teamEditProjectBooking(pid){
     // This stops one device from wiping bookings/notes another device just created.
     var dirty = Object.keys(_dirty);
     sb.from('remc_state').select('data').eq('id', WS).maybeSingle().then(function(res){
-      var base = (res && !res.error && res.data && res.data.data) ? res.data.data : null;
+      // A failed read must never turn into a write. Pushing our snapshot on top
+      // of a document we could not read can wipe what another device just saved.
+      if(res && res.error){ _cloudFail(res.error.message||res.error); return; }
+      var base = (res && res.data && res.data.data) ? res.data.data : null;
       if(!base || !Object.keys(base).length){ base = collectState(); }   // first ever write
       else if(dirty.length){
         dirty.forEach(function(k){
@@ -12238,14 +12241,22 @@ function teamEditProjectBooking(pid){
     try{ if(typeof _currentPage!=='undefined' && typeof showPage==='function') showPage(_currentPage); }catch(e){}
   }
 
+  // Realtime hands over the WHOLE row on every change. Because the entire app
+  // state sits in a single jsonb column, every save re-sent the complete
+  // document to every device - the main drain on the free egress allowance.
+  // The cheap timestamp poll below covers the same ground for a few bytes.
+  // Set this to true to switch realtime back on.
+  var USE_REALTIME = false;
   function subscribe(){
-    sb.channel('remc_state_'+WS)
-      .on('postgres_changes', { event:'*', schema:'public', table:'remc_state', filter:'id=eq.'+WS }, function(payload){
-        var d = payload && payload.new && payload.new.data;
-        if(!d || d.__client === CLIENT_ID) return; // ignore our own writes
-        applyRemoteAndRender(d);
-        try{ scheduleBackup(); }catch(e){}
-      }).subscribe();
+    if(USE_REALTIME){
+      sb.channel('remc_state_'+WS)
+        .on('postgres_changes', { event:'*', schema:'public', table:'remc_state', filter:'id=eq.'+WS }, function(payload){
+          var d = payload && payload.new && payload.new.data;
+          if(!d || d.__client === CLIENT_ID) return; // ignore our own writes
+          applyRemoteAndRender(d);
+          try{ scheduleBackup(); }catch(e){}
+        }).subscribe();
+    }
     startAutoRefresh();
   }
 
@@ -12255,17 +12266,22 @@ function teamEditProjectBooking(pid){
   function refreshFromCloud(){
     if(_refreshing || !sb) return;
     _refreshing = true;
-    sb.from('remc_state').select('data,updated_at').eq('id', WS).maybeSingle().then(function(res){
-      _refreshing = false;
-      if(!res || res.error){ _cloudFail(res && res.error && (res.error.message||res.error)); return; }
+    // Step 1 - ask ONLY for the timestamp. A few bytes, not the whole document.
+    sb.from('remc_state').select('updated_at').eq('id', WS).maybeSingle().then(function(res){
+      if(!res || res.error){ _refreshing = false; _cloudFail(res && res.error && (res.error.message||res.error)); return; }
       _cloudOk();                                      // reached the cloud → healthy, clear any stale offline
-      if(!res.data || !res.data.data) return;
-      var stamp = String(res.data.updated_at||'');
-      if(stamp && stamp === _lastSeen) return;         // nothing new
-      _lastSeen = stamp;
-      var d = res.data.data;
-      if(d.__client === CLIENT_ID) return;             // our own write
-      applyRemoteAndRender(d);
+      var stamp = String((res.data && res.data.updated_at) || '');
+      if(!stamp || stamp === _lastSeen){ _refreshing = false; return; }   // nothing new, nothing downloaded
+      // Step 2 - something really did change, so now fetch it.
+      sb.from('remc_state').select('data').eq('id', WS).maybeSingle().then(function(r2){
+        _refreshing = false;
+        if(!r2 || r2.error || !r2.data || !r2.data.data) return;
+        _lastSeen = stamp;
+        var d = r2.data.data;
+        if(d.__client === CLIENT_ID) return;           // our own write
+        applyRemoteAndRender(d);
+        try{ scheduleBackup(); }catch(e){}
+      }).catch(function(e){ _refreshing = false; _cloudFail((e&&(e.message||e))||'network'); });
     }).catch(function(e){ _refreshing = false; _cloudFail((e&&(e.message||e))||'network'); });
   }
   function startAutoRefresh(){
