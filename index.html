@@ -1524,7 +1524,26 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
   .ops-cal-month{font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;min-width:190px}
   .ops-nav-btn{width:30px;height:30px;border:1px solid var(--border);background:var(--surface);border-radius:7px;cursor:pointer;font-size:14px;color:var(--mid);display:flex;align-items:center;justify-content:center;transition:all .12s}
   .ops-nav-btn:hover{background:var(--surface2);border-color:var(--border2);color:var(--text)}
-  .ops-board{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-bottom:18px;align-items:start}
+  .ops-hist-bar{display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap;padding-bottom:12px;margin-bottom:14px;border-bottom:2px solid var(--border)}
+  .ops-hist-test{border:1px solid var(--border);border-radius:11px;margin-bottom:12px;overflow:hidden;background:var(--surface)}
+  .ops-hist-head{padding:10px 14px;background:var(--surface2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .ops-hist-title{font-size:13px;font-weight:800}
+  .ops-hist-proj{font-size:11.5px;color:var(--mid);font-weight:600}
+  .ops-hist-body{padding:10px 14px}
+  .ops-tl{position:relative;padding-left:20px}
+  .ops-tl:before{content:'';position:absolute;left:5px;top:6px;bottom:6px;width:2px;background:var(--border)}
+  .ops-tl-row{position:relative;padding:5px 0 5px 4px;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+  .ops-tl-dot{position:absolute;left:-19px;top:10px;width:10px;height:10px;border-radius:50%;background:var(--muted);border:2px solid var(--surface);box-shadow:0 0 0 1px var(--border)}
+  .ops-tl-dot.red{background:var(--red)} .ops-tl-dot.amber{background:var(--amber)}
+  .ops-tl-dot.green{background:var(--green)} .ops-tl-dot.blue{background:var(--blue)}
+  .ops-tl-when{font-size:10.5px;color:var(--muted);font-weight:700;min-width:132px;font-variant-numeric:tabular-nums}
+  .ops-tl-what{font-size:12px;font-weight:700;color:var(--text)}
+  .ops-tl-who{font-size:11px;color:var(--mid)}
+  .ops-tl-gap{font-size:10px;color:var(--muted);font-style:italic}
+  .ops-hist-flat{border:1px solid var(--border);border-radius:11px;overflow:hidden;background:var(--surface)}
+  .ops-hist-flat .ops-tl-row{padding:8px 14px;border-bottom:1px solid var(--border)}
+  .ops-hist-flat .ops-tl-row:last-child{border-bottom:none}
+  .ops-board{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px;align-items:start}
   .ops-col{background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);overflow:hidden;border-top:3px solid var(--border2)}
   .ops-col.red{border-top-color:var(--red)}
   .ops-col.amber{border-top-color:var(--amber)}
@@ -1553,8 +1572,8 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
   .ops-late{color:var(--red);font-weight:800}
   .ops-col.green{border-top-color:var(--green)}
   .ops-col-title.green{color:var(--green)}
-  @media (max-width:1500px){ .ops-board{grid-template-columns:repeat(2,1fr)} }
-  @media (max-width:900px){ .ops-board{grid-template-columns:1fr} }
+  @media (max-width:1200px){ .ops-board{grid-template-columns:repeat(2,1fr)} }
+  @media (max-width:820px){ .ops-board{grid-template-columns:1fr} }
   .ops-inbox{background:var(--surface);border:1px solid rgba(217,119,6,.35);border-radius:12px;box-shadow:var(--shadow);margin-bottom:16px;overflow:hidden}
   .ops-inbox-head{padding:11px 16px;background:#fffbeb;border-bottom:1px solid rgba(217,119,6,.25);display:flex;align-items:center;gap:10px}
   .ops-inbox-title{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#92400e}
@@ -1633,7 +1652,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
         <div>
           <div class="ops-title">Operations</div>
           <div class="ops-sub">Compaction tests, machine transfers and subcontractor bookings
-            <span style="margin-left:8px;font-size:10px;font-weight:700;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:1px 7px">build 2026-08-06f</span>
+            <span style="margin-left:8px;font-size:10px;font-weight:700;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:1px 7px">build 2026-08-06h</span>
           </div>
         </div>
         <div style="display:flex;gap:8px;align-items:center">
@@ -1659,6 +1678,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
       <div class="ops-panel" id="op-panel-tests">
         <div class="ops-toolbar">
           <button class="ops-btn primary" onclick="opTestOpen()">+ Book a test</button>
+          <button class="ops-btn" onclick="opHistOpen()">&#128340; History</button>
           <div class="ops-cal-bar" style="margin-bottom:0">
             <button class="ops-nav-btn" onclick="opCalMove(-1)">&#8249;</button>
             <div class="ops-cal-month" id="op-cal-month">—</div>
@@ -1685,15 +1705,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
           <div class="ops-cal-grid" id="op-cal-grid"></div>
         </div>
 
-        <div class="ops-toolbar">
-          <div class="ops-filters">
-            <button class="ops-fbtn active" data-tf="upcoming" onclick="opTestFilter('upcoming')">Upcoming</button>
-            <button class="ops-fbtn" data-tf="await" onclick="opTestFilter('await')">Awaiting result</button>
-            <button class="ops-fbtn" data-tf="done" onclick="opTestFilter('done')">Completed</button>
-            <button class="ops-fbtn" data-tf="all" onclick="opTestFilter('all')">All</button>
-          </div>
-        </div>
-        <div id="op-test-list"></div>
+        <div id="op-test-list" style="display:none"></div>
       </div>
 
       <!-- ─────────── TRANSFERS ─────────── -->
@@ -1741,6 +1753,41 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
         <div id="op-sub-list"></div>
       </div>
 
+    </div>
+  </div>
+
+  <!-- ─────────── TEST HISTORY ─────────── -->
+  <div class="proj-modal-overlay" id="op-hist-modal">
+    <div class="proj-modal" style="width:900px;max-width:96vw">
+      <div class="proj-modal-header"><span>&#128340; Compaction test history</span>
+        <button class="proj-modal-close" onclick="opHistClose()">&#10005;</button></div>
+      <div class="proj-modal-body" style="max-height:70vh;overflow-y:auto">
+        <div class="ops-hist-bar">
+          <div>
+            <div class="ops-row-lbl">Project</div>
+            <select class="ops-sel" id="op-hist-proj" onchange="opHistRender()"></select>
+          </div>
+          <div>
+            <div class="ops-row-lbl">Supervisor</div>
+            <select class="ops-sel" id="op-hist-sup" onchange="opHistRender()"></select>
+          </div>
+          <div>
+            <div class="ops-row-lbl">View</div>
+            <select class="ops-sel" id="op-hist-view" onchange="opHistRender()">
+              <option value="test">By test (full process)</option>
+              <option value="time">By timeline (newest first)</option>
+            </select>
+          </div>
+          <div style="margin-left:auto">
+            <div class="ops-row-lbl">Search</div>
+            <input class="ops-search" id="op-hist-q" style="width:190px" placeholder="type, company, notes…" oninput="opHistRender()">
+          </div>
+        </div>
+        <div id="op-hist-body"></div>
+      </div>
+      <div class="proj-modal-footer">
+        <button class="proj-modal-cancel" onclick="opHistClose()">Close</button>
+      </div>
     </div>
   </div>
 
@@ -1810,6 +1857,8 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
         </div>
       </div>
       <div class="proj-modal-footer">
+        <button class="proj-modal-cancel" id="op-res-undo" onclick="opResReopen()"
+          style="margin-right:auto">Undo confirm</button>
         <button class="proj-modal-cancel" onclick="opResClose()">Cancel</button>
         <button class="proj-modal-save" onclick="opResSave()">Save result</button>
       </div>
@@ -2675,7 +2724,7 @@ function tick() {
 // One-time build check
 if (!window._buildChecked) {
   window._buildChecked = true;
-  window.REMC_BUILD = "2026-08-06f";
+  window.REMC_BUILD = "2026-08-06h";
   console.log("%c REMC v1.1 \u00B7 build " + window.REMC_BUILD + " loaded successfully ", "background:#16a34a;color:white;font-size:14px;padding:4px 8px;border-radius:4px");
 }
 
@@ -14031,16 +14080,12 @@ function teamEditProjectBooking(pid){
     var incoming = all.filter(function(x){ return !isConfirmed(x); });
     var colNew  = incoming.filter(function(x){ return reqStatus(x)==='new'; }).sort(byReceived);
     var colWork = incoming.filter(function(x){ return reqStatus(x)!=='new'; }).sort(byReceived);
-    var colBook = all.filter(function(x){ return isConfirmed(x) && !x.result && x.date && x.date >= today(); })
-                     .sort(function(a,b){ return String(a.date)<String(b.date)?-1:1; });
     var colRes  = all.filter(awaitingResult).sort(function(a,b){ return String(a.date)<String(b.date)?-1:1; });
     box.innerHTML='<div class="ops-board">'
       + col('red','\uD83D\uDCE5 To book', 'Sent by the supervisors. Nobody has acted on these yet.',
             colNew, reqCard, 'Nothing new from the supervisors.', true)
       + col('amber','\u23F3 Pending confirmation', 'We contacted the company \u2014 waiting for them to confirm.',
             colWork, reqCard, 'Nothing waiting on a company.', false)
-      + col('green','\u2705 Booked', 'Confirmed and on the calendar. Waiting for the day to come round.',
-            colBook, bookedCard, 'Nothing booked ahead.', false)
       + col('blue','\uD83E\uDDEA Pending result', 'The test day has passed and the result has not come back.',
             colRes, resultCard, 'No results outstanding.', false)
       + '</div>';
@@ -14078,32 +14123,13 @@ function teamEditProjectBooking(pid){
       +'<select class="ops-sel" onchange="opReqStatus(\''+esc(x._pid)+'\',\''+esc(x.id)+'\',this.value)">'+opts+'</select>'
       +'<input class="ops-inp-sm" style="width:100%" placeholder="Company doing the test" value="'+esc(x.company||'')+'" '
       +'onchange="opReqCompany(\''+esc(x._pid)+'\',\''+esc(x.id)+'\',this.value)">'
-      +'<input class="ops-inp-sm" style="width:132px" type="date" value="'+esc(x.date||'')+'" '
-      +'onchange="opReqDate(\''+esc(x._pid)+'\',\''+esc(x.id)+'\',this.value)">'
+      +(st==='new' ? ''
+        : '<input class="ops-inp-sm" style="width:132px" type="date" value="'+esc(x.date||'')+'" '
+          +'onchange="opReqDate(\''+esc(x._pid)+'\',\''+esc(x.id)+'\',this.value)">')
       +(st==='new'
         ? '<button class="ops-btn sm primary" onclick="opReqStart(\''+esc(x._pid)+'\',\''+esc(x.id)+'\')">Start booking \u2192</button>'
         : '<button class="ops-btn sm primary" onclick="opReqConfirm(\''+esc(x._pid)+'\',\''+esc(x.id)+'\')">\u2713 Confirm</button>')
       +'<button class="ops-btn sm" onclick="opReqDecline(\''+esc(x._pid)+'\',\''+esc(x.id)+'\')">Decline</button>'
-      +'</div></div>';
-  }
-
-  function bookedCard(x){
-    var t=today(), isToday=(x.date===t);
-    return '<div class="ops-card" style="border-left-color:'+(isToday?'var(--red)':'var(--green)')+'">'
-      +'<div class="ops-card-top"><div class="ops-card-title">'+esc(x.type||'Test')+'</div>'
-      +(isToday?'<span class="ops-pill ops-p-today">Today</span>'
-               :'<span class="ops-pill ops-p-done">Booked</span>')+'</div>'
-      +'<div class="ops-card-proj">'+esc(projName(x._pid))
-      +(projJob(x._pid)?(' \u00B7 <span style="color:var(--red)">'+esc(projJob(x._pid))+'</span>'):'')+'</div>'
-      +'<div class="ops-card-meta"><strong>'+esc(fmt(x.date))+'</strong>'
-      +(x.date?(' \u00B7 '+esc(relDay(x.date))):'')+'<br>'
-      +(x.company?esc(x.company):'<span style="color:var(--amber);font-weight:700">no company yet</span>')
-      +(x.office&&x.office.confirmedBy?('<br>Confirmed by '+esc(x.office.confirmedBy)):'')+'</div>'
-      +(x.notes?('<div class="ops-card-note">'+esc(x.notes)+'</div>'):'')
-      +'<div class="ops-card-ctl">'
-      +'<button class="ops-btn sm" onclick="opResOpen(\''+esc(x._pid)+'\',\''+esc(x.id)+'\')">Record result</button>'
-      +'<button class="ops-btn sm" onclick="opTestOpen(\''+esc(x._pid)+'\',\''+esc(x.id)+'\')">Edit</button>'
-      +'<button class="ops-btn sm" onclick="opReqReopen(\''+esc(x._pid)+'\',\''+esc(x.id)+'\')">Undo confirm</button>'
       +'</div></div>';
   }
 
@@ -14123,6 +14149,34 @@ function teamEditProjectBooking(pid){
       +'<button class="ops-btn sm" onclick="opTestOpen(\''+esc(x._pid)+'\',\''+esc(x.id)+'\')">Edit</button>'
       +'</div></div>';
   }
+  // Every step of a test is written into its own little event list, so the
+  // History panel can show the whole story: who asked, when, what the office
+  // did, when it was confirmed and when the result landed.
+  function addEvent(x, kind, what, who){
+    if(!x.office) x.office={};
+    if(!Array.isArray(x.office.events)) x.office.events=[];
+    x.office.events.push({ at:new Date().toISOString(), kind:kind, what:what,
+                           who:who||String(window.REMC_ME||'Office') });
+    if(x.office.events.length>60) x.office.events=x.office.events.slice(-60);
+  }
+  // Older records have no event list. Build one from what we do know so the
+  // history is never blank for tests created before this existed.
+  function eventsOf(x){
+    var ev=(x.office && Array.isArray(x.office.events)) ? x.office.events.slice() : [];
+    var seen={}; ev.forEach(function(e){ seen[e.kind+'|'+e.at]=1; });
+    function seed(kind, at, what, who){
+      if(!at) return;
+      if(ev.some(function(e){ return e.kind===kind; })) return;
+      ev.push({ at:at, kind:kind, what:what, who:who, _seeded:true });
+    }
+    seed('requested', x.createdAt, 'Test requested for '+fmt(x.date), x.bookedBy||'Supervisor');
+    if(x.office){
+      seed('confirmed', x.office.confirmedAt, 'Confirmed and put on the calendar', x.office.confirmedBy||'Office');
+    }
+    if(x.result) seed('result', x.resultAt, 'Result received: '+(x.result==='pass'?'Passed':'Failed'), 'Office');
+    ev.sort(function(a,b){ return String(a.at)<String(b.at)?-1:1; });
+    return ev;
+  }
   function reqTouch(pid,id,mutate,logAction,logDetail){
     var store=obj(K_TESTS), t=null;
     putBack(store,pid,id,function(x){
@@ -14136,22 +14190,28 @@ function teamEditProjectBooking(pid){
     return t;
   }
   window.opReqStatus=function(pid,id,v){
-    reqTouch(pid,id,function(x){ x.office.status=v; },'request_status',
+    reqTouch(pid,id,function(x){ x.office.status=v; addEvent(x,'status','Marked as '+(REQ_LABEL[v]||v)); },'request_status',
       function(t){ return (t.type||'Test')+' \u00B7 marked as '+(REQ_LABEL[v]||v); });
     opRender();
   };
   window.opReqCompany=function(pid,id,v){
-    reqTouch(pid,id,function(x){ x.company=String(v||'').trim(); },null,null);
+    reqTouch(pid,id,function(x){ var nv=String(v||'').trim();
+      if(nv!==String(x.company||'')) addEvent(x,'company', nv? ('Company set to '+nv) : 'Company cleared');
+      x.company=nv; },null,null);
     opRender();
   };
   window.opReqDate=function(pid,id,v){
-    reqTouch(pid,id,function(x){ if(!x.office.wantedDate) x.office.wantedDate=x.date; x.date=v; },null,null);
+    reqTouch(pid,id,function(x){
+      if(!x.office.wantedDate) x.office.wantedDate=x.date;
+      if(v!==x.date) addEvent(x,'date','Date moved '+fmt(x.date)+' \u2192 '+fmt(v));
+      x.date=v; },null,null);
     opRender();
   };
   // Move a brand new request into the booking stage. Confirming straight from
   // 'No action yet' would skip the whole workflow, so it goes through here.
   window.opReqStart=function(pid,id){
-    reqTouch(pid,id,function(x){ x.office.status='awaiting'; },'request_status',
+    reqTouch(pid,id,function(x){ x.office.status='awaiting';
+      addEvent(x,'status','Booking started \u2014 waiting on the company'); },'request_status',
       function(t){ return (t.type||'Test')+' \u00B7 booking started, waiting on the company'; });
     opRender();
   };
@@ -14159,7 +14219,8 @@ function teamEditProjectBooking(pid){
   window.opReqReopen=function(pid,id){
     if(!confirm('Take this test off the calendar and put it back in Pending confirmation?')) return;
     reqTouch(pid,id,function(x){ x.office.confirmed=false; x.office.status='awaiting';
-      delete x.office.confirmedAt; delete x.office.confirmedBy; },'request_reopened',
+      delete x.office.confirmedAt; delete x.office.confirmedBy;
+      addEvent(x,'reopened','Taken back off the calendar'); },'request_reopened',
       function(t){ return (t.type||'Test')+' \u00B7 taken back off the calendar'; });
     opRender();
   };
@@ -14177,6 +14238,7 @@ function teamEditProjectBooking(pid){
       x.office.confirmed=true; x.office.status='booked';
       x.office.confirmedAt=new Date().toISOString();
       x.office.confirmedBy=String(window.REMC_ME||'Office');
+      addEvent(x,'confirmed','Confirmed for '+fmt(x.date)+(x.company?(' with '+x.company):''));
     },'request_confirmed',function(t){
       return (t.type||'Test')+' \u00B7 confirmed for '+fmt(t.date)+(t.company?(' \u00B7 '+t.company):'')
         +(t.office && t.office.wantedDate && t.office.wantedDate!==t.date ? (' \u00B7 moved from '+fmt(t.office.wantedDate)) : '');
@@ -14248,7 +14310,10 @@ function teamEditProjectBooking(pid){
       store[String(pid)].push({ id:nid('ct'), date:date, type:type, company:company, notes:notes,
         createdAt:new Date().toISOString(), bookedBy:'Office', au_user:String(window.REMC_ME||''), au_app:'PC',
         office:{ confirmed:true, status:'booked', receivedAt:new Date().toISOString(),
-                 confirmedAt:new Date().toISOString(), confirmedBy:String(window.REMC_ME||'Office') } });
+                 confirmedAt:new Date().toISOString(), confirmedBy:String(window.REMC_ME||'Office'),
+                 events:[{ at:new Date().toISOString(), kind:'requested',
+                           what:'Booked directly by the office for '+fmt(date)+(company?(' with '+company):''),
+                           who:String(window.REMC_ME||'Office') }] } });
       if(save(K_TESTS,store)) logIt('test','created',pid,type+(date?(' \u00B7 '+fmt(date)):'')+(company?(' \u00B7 '+company):''));
     }
     opTestClose(); opRender();
@@ -14271,7 +14336,16 @@ function teamEditProjectBooking(pid){
       +esc(fmt(t.date))+(t.company?(' \u00B7 '+esc(t.company)):' \u00B7 no company booked');
     setVal('op-res-value', t.result||'');
     setVal('op-res-notes', t.resultNotes||'');
+    // Only offer to undo while it is still confirmed and has no result yet.
+    var undo=document.getElementById('op-res-undo');
+    if(undo) undo.style.display = (isConfirmed(t) && !t.result) ? '' : 'none';
     document.getElementById('op-res-modal').classList.add('open');
+  };
+  window.opResReopen=function(){
+    if(!RES_REF) return;
+    var ref={pid:RES_REF.pid, id:RES_REF.id};
+    opResClose();
+    opReqReopen(ref.pid, ref.id);
   };
   window.opResClose=function(){ document.getElementById('op-res-modal').classList.remove('open'); RES_REF=null; };
   window.opResSave=function(){
@@ -14281,6 +14355,8 @@ function teamEditProjectBooking(pid){
     putBack(store, RES_REF.pid, RES_REF.id, function(x){
       t=x; x.result=v||''; x.resultNotes=n;
       x.resultAt = v ? new Date().toISOString() : '';
+      addEvent(x,'result', v ? ('Result received: '+(v==='pass'?'Passed':'Failed')+(n?(' \u2014 '+n):''))
+                             : 'Result cleared');
       x.au_eby='Office'; x.au_eat=new Date().toISOString(); x.au_eapp='PC';
     });
     if(save(K_TESTS,store)) logIt('test', v?('result_'+v):'result_cleared', RES_REF.pid,
@@ -14617,12 +14693,112 @@ function teamEditProjectBooking(pid){
     opRender();
   };
 
+  // ───────── History ─────────
+  var EV_DOT = { requested:'red', status:'amber', company:'amber', date:'amber',
+                 confirmed:'green', reopened:'amber', result:'blue' };
+  function stamp(iso){
+    if(!iso) return '\u2014';
+    try{ var d=new Date(iso);
+      return DAYN[d.getDay()]+' '+d.getDate()+' '+MON[d.getMonth()]+' '+d.getFullYear()
+             +', '+pad(d.getHours())+':'+pad(d.getMinutes());
+    }catch(e){ return String(iso); }
+  }
+  function gapText(a,b){
+    if(!a||!b) return '';
+    var ms=new Date(b)-new Date(a); if(!(ms>0)) return '';
+    var h=Math.round(ms/3600000);
+    if(h<1) return '(a few minutes later)';
+    if(h<48) return '('+h+'h later)';
+    return '('+Math.round(h/24)+' days later)';
+  }
+  window.opHistOpen=function(){
+    var all=flat(obj(K_TESTS));
+    var ps={}, sups={};
+    all.forEach(function(x){
+      ps[x._pid]=projName(x._pid);
+      var who=String(x.bookedBy||'').trim(); if(who) sups[who]=1;
+    });
+    var pSel=document.getElementById('op-hist-proj');
+    if(pSel){
+      var keep=pSel.value;
+      pSel.innerHTML='<option value="">All projects</option>'
+        +Object.keys(ps).sort(function(a,b){ return ps[a].localeCompare(ps[b]); })
+          .map(function(id){ return '<option value="'+esc(id)+'">'+esc(ps[id])+'</option>'; }).join('');
+      pSel.value=keep||'';
+    }
+    var sSel=document.getElementById('op-hist-sup');
+    if(sSel){
+      var keep2=sSel.value;
+      sSel.innerHTML='<option value="">Everyone</option>'
+        +Object.keys(sups).sort().map(function(n){ return '<option value="'+esc(n)+'">'+esc(n)+'</option>'; }).join('');
+      sSel.value=keep2||'';
+    }
+    document.getElementById('op-hist-modal').classList.add('open');
+    opHistRender();
+  };
+  window.opHistClose=function(){ document.getElementById('op-hist-modal').classList.remove('open'); };
+  window.opHistRender=function(){
+    var box=document.getElementById('op-hist-body'); if(!box) return;
+    var pid=getVal('op-hist-proj'), sup=getVal('op-hist-sup'),
+        mode=getVal('op-hist-view')||'test',
+        q=String((document.getElementById('op-hist-q')||{}).value||'').trim().toLowerCase();
+    var list=flat(obj(K_TESTS)).filter(function(x){
+      if(pid && String(x._pid)!==String(pid)) return false;
+      if(sup && String(x.bookedBy||'')!==sup) return false;
+      if(q && ((x.type||'')+' '+(x.company||'')+' '+(x.notes||'')+' '+projName(x._pid)).toLowerCase().indexOf(q)<0) return false;
+      return true;
+    });
+    if(!list.length){ box.innerHTML='<div class="ops-empty-big">Nothing matches these filters.</div>'; return; }
+
+    if(mode==='time'){
+      var rows=[];
+      list.forEach(function(x){
+        eventsOf(x).forEach(function(e){
+          rows.push({ at:e.at, html:
+            '<div class="ops-tl-row">'
+            +'<span class="ops-tl-when">'+esc(stamp(e.at))+'</span>'
+            +'<span class="ops-tl-what">'+esc(e.what)+'</span>'
+            +'<span class="ops-tl-who">'+esc(x.type||'Test')+' \u00B7 '+esc(projName(x._pid))
+            +' \u00B7 by '+esc(e.who||'\u2014')+'</span></div>' });
+        });
+      });
+      rows.sort(function(a,b){ return String(a.at)<String(b.at)?1:-1; });
+      box.innerHTML='<div class="ops-hist-flat">'+rows.map(function(r){ return r.html; }).join('')+'</div>';
+      return;
+    }
+
+    list.sort(function(a,b){ return String(a.createdAt||'')<String(b.createdAt||'')?1:-1; });
+    box.innerHTML=list.map(function(x){
+      var ev=eventsOf(x), prev=null;
+      var st = x.result ? (x.result==='pass'?'<span class="ops-pill ops-p-pass">Passed</span>'
+                                            :'<span class="ops-pill ops-p-fail">Failed</span>')
+             : isConfirmed(x) ? (awaitingResult(x)?'<span class="ops-pill ops-p-await">Awaiting result</span>'
+                                                  :'<span class="ops-pill ops-p-done">Booked</span>')
+             : '<span class="ops-pill '+REQ_PILL[reqStatus(x)]+'">'+esc(REQ_LABEL[reqStatus(x)])+'</span>';
+      var body = ev.length ? ev.map(function(e){
+          var g=gapText(prev, e.at); prev=e.at;
+          return '<div class="ops-tl-row"><span class="ops-tl-dot '+(EV_DOT[e.kind]||'')+'"></span>'
+            +'<span class="ops-tl-when">'+esc(stamp(e.at))+'</span>'
+            +'<span class="ops-tl-what">'+esc(e.what)+'</span>'
+            +'<span class="ops-tl-who">'+esc(e.who||'\u2014')+'</span>'
+            +(g?('<span class="ops-tl-gap">'+esc(g)+'</span>'):'')+'</div>';
+        }).join('') : '<div class="ops-col-empty">No history recorded for this one.</div>';
+      return '<div class="ops-hist-test"><div class="ops-hist-head">'
+        +'<span class="ops-hist-title">'+esc(x.type||'Test')+'</span>'
+        +'<span class="ops-hist-proj">'+esc(projName(x._pid))
+        +(projJob(x._pid)?(' \u00B7 '+esc(projJob(x._pid))):'')+'</span>'
+        +'<span class="ops-hist-proj">Test day: '+esc(fmt(x.date))+'</span>'
+        +'<span style="margin-left:auto">'+st+'</span></div>'
+        +'<div class="ops-hist-body"><div class="ops-tl">'+body+'</div></div></div>';
+    }).join('');
+  };
+
   // ───────── small dom helpers ─────────
   function getVal(id){ var e=document.getElementById(id); return e? String(e.value||'') : ''; }
   function setVal(id,v){ var e=document.getElementById(id); if(e) e.value = (v==null?'':v); }
 
   // close modals when clicking the dark background
-  ['op-test-modal','op-res-modal','op-tr-modal','op-sub-modal'].forEach(function(id){
+  ['op-test-modal','op-res-modal','op-tr-modal','op-sub-modal','op-hist-modal'].forEach(function(id){
     document.addEventListener('click', function(ev){
       var ov=document.getElementById(id);
       if(ov && ev.target===ov) ov.classList.remove('open');
