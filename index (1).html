@@ -194,7 +194,7 @@ body.hide-residential .overview-layout{grid-template-columns:200px 1fr 180px}
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <!-- ☁️ CLOUD (Supabase) — library + config. Leave the PASTE_ values to run fully offline. -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.9"></script>
   <script>
     // Paste your Supabase Project URL and anon (public) key here to turn on cloud sync + login.
     // While these say PASTE_..., the app works exactly as before (offline, local only).
@@ -932,7 +932,6 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
                       <span id="plan-day-label" style="font-size:12px;font-weight:600;color:var(--muted)"></span>
                       <span id="plan-active-count" style="font-size:11px;color:var(--muted)"></span>
                     </div>
-                    <span id="plan-active-count" style="font-size:11px;color:var(--muted)"></span>
                   </div>
 
                   <!-- Project picker modal -->
@@ -1457,6 +1456,432 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
   <!-- ══ PAGE: SETTINGS ══ -->
 
 <div id="page-jobscheduler" class="page"><div class="jsc-shell"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px"><div><div style="font-family:Barlow Condensed,sans-serif;font-size:26px;font-weight:800;text-transform:uppercase">Job Scheduler</div><div style="font-size:13px;color:var(--muted)">Book and schedule jobs</div></div><div style="display:flex;gap:8px;align-items:center"><div style="display:flex;border:1.5px solid var(--border);border-radius:8px;overflow:hidden"><button onclick="schSetView('today')" id="sch-view-today" style="padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;border:none;background:var(--surface);color:var(--text)">Today</button><button onclick="schSetView('week')" id="sch-view-week" style="padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;border:none;background:var(--red);color:#fff">Week</button><button onclick="schSetView('month')" id="sch-view-month" style="padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;border:none;background:var(--surface);color:var(--text)">Month</button></div><button onclick="schPrev()" style="padding:6px 12px;background:var(--surface);border:1px solid var(--border);border-radius:6px;cursor:pointer">&#8249;</button><button onclick="schNext()" style="padding:6px 12px;background:var(--surface);border:1px solid var(--border);border-radius:6px;cursor:pointer">&#8250;</button><span id="sch-date-label" style="font-size:14px;font-weight:700;min-width:200px;text-align:center"></span><button onclick="schToday()" style="padding:6px 14px;background:var(--surface);border:1.5px solid var(--border);border-radius:8px;font-size:11px;font-weight:700;cursor:pointer">Today</button><button onclick="schAddBooking()" style="padding:6px 16px;background:var(--blue);color:#fff;border:none;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer">+ Book Job</button></div></div><div id="sch-gantt" style="border:1.5px solid var(--border);border-radius:10px;overflow:hidden;background:var(--surface)"><div id="sch-gantt-content"></div></div></div></div>
+
+  <!-- ══════════════════════ OPERATIONS PAGE ══════════════════════ -->
+  <style>
+  .ops-page{padding:20px 24px;max-width:1600px;margin:0 auto;height:calc(100vh - 56px);overflow-y:auto}
+  .ops-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;gap:12px;flex-wrap:wrap}
+  .ops-title{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px}
+  .ops-sub{font-size:13px;color:var(--muted);margin-top:2px}
+  .ops-btn{padding:7px 16px;background:var(--surface);border:1.5px solid var(--border);border-radius:8px;font-family:'Barlow',sans-serif;font-size:12px;font-weight:700;color:var(--mid);cursor:pointer;transition:all .15s;white-space:nowrap}
+  .ops-btn:hover{border-color:var(--border2);color:var(--text)}
+  .ops-btn.primary{background:var(--red);border-color:var(--red);color:#fff}
+  .ops-btn.primary:hover{background:#c81a1a;border-color:#c81a1a}
+  .ops-btn.ghost{background:none}
+  .ops-btn.sm{padding:4px 10px;font-size:11px}
+  .ops-tabs{display:flex;align-items:center;gap:0;border-bottom:2px solid var(--border);margin-bottom:18px;flex-wrap:wrap}
+  .ops-tab{padding:9px 20px;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;white-space:nowrap;transition:all .15s;display:flex;align-items:center;gap:7px;user-select:none}
+  .ops-tab:hover{color:var(--mid)}
+  .ops-tab.active{color:var(--text);border-bottom-color:var(--red)}
+  .ops-tab-count{font-size:10px;font-weight:800;background:var(--surface2);border:1px solid var(--border);color:var(--mid);padding:1px 7px;border-radius:10px;min-width:22px;text-align:center}
+  .ops-tab.active .ops-tab-count{background:var(--red);border-color:var(--red);color:#fff}
+  .ops-tab-count.alert{background:#fee2e2;border-color:#fecaca;color:var(--red)}
+  .ops-panel{display:none}
+  .ops-panel.active{display:block}
+  .ops-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+  .ops-stat{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:13px 16px;box-shadow:var(--shadow);border-left:3px solid var(--border2)}
+  .ops-stat.red{border-left-color:var(--red)}
+  .ops-stat.amber{border-left-color:var(--amber)}
+  .ops-stat.blue{border-left-color:var(--blue)}
+  .ops-stat.green{border-left-color:var(--green)}
+  .ops-stat-lbl{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:4px}
+  .ops-stat-val{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:800;line-height:1}
+  .ops-stat-sub{font-size:11px;color:var(--muted);margin-top:3px}
+  .ops-group{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--shadow);margin-bottom:14px}
+  .ops-group-head{padding:11px 16px;border-bottom:1px solid var(--border);background:var(--surface2);display:flex;align-items:center;gap:10px}
+  .ops-group-title{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px}
+  .ops-group-title.red{color:var(--red)}
+  .ops-group-title.amber{color:var(--amber)}
+  .ops-group-title.blue{color:var(--blue)}
+  .ops-group-count{margin-left:auto;background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:2px 9px;font-size:11px;font-weight:700;color:var(--mid)}
+  .ops-group-body{padding:10px 12px}
+  .ops-item{display:flex;align-items:flex-start;gap:11px;padding:10px 12px;border:1px solid var(--border);border-radius:9px;margin-bottom:6px;background:var(--surface);transition:all .12s;border-left:3px solid var(--border2)}
+  .ops-item:last-child{margin-bottom:0}
+  .ops-item:hover{border-color:var(--border2);box-shadow:0 2px 8px rgba(0,0,0,.06)}
+  .ops-item.red{border-left-color:var(--red);background:#fffafa}
+  .ops-item.amber{border-left-color:var(--amber);background:#fffdf6}
+  .ops-item.blue{border-left-color:var(--blue)}
+  .ops-item.green{border-left-color:var(--green)}
+  .ops-item.grey{border-left-color:var(--muted);opacity:.72}
+  .ops-item-icon{font-size:17px;line-height:1.2;flex-shrink:0;width:22px;text-align:center}
+  .ops-item-main{flex:1;min-width:0}
+  .ops-item-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:2px}
+  .ops-item-meta{font-size:11.5px;color:var(--mid)}
+  .ops-item-note{font-size:11px;color:var(--muted);margin-top:3px;font-style:italic}
+  .ops-item-actions{display:flex;gap:5px;flex-shrink:0;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+  .ops-pill{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.7px;padding:2px 8px;border-radius:5px;border:1px solid;white-space:nowrap}
+  .ops-p-today{background:#fee2e2;color:var(--red);border-color:#fecaca}
+  .ops-p-booked{background:var(--blue-light);color:var(--blue);border-color:rgba(37,99,235,.22)}
+  .ops-p-await{background:var(--amber-light);color:var(--amber);border-color:rgba(217,119,6,.25)}
+  .ops-p-pass{background:var(--green-light);color:var(--green);border-color:rgba(22,163,74,.25)}
+  .ops-p-fail{background:#fee2e2;color:var(--red);border-color:#fecaca}
+  .ops-p-pending{background:var(--amber-light);color:var(--amber);border-color:rgba(217,119,6,.25)}
+  .ops-p-done{background:var(--green-light);color:var(--green);border-color:rgba(22,163,74,.25)}
+  .ops-p-grey{background:var(--surface2);color:var(--mid);border-color:var(--border)}
+  .ops-empty{padding:34px 20px;text-align:center;color:var(--muted);font-size:13px}
+  .ops-empty-big{padding:60px 20px;text-align:center;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow)}
+  .ops-cal-bar{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+  .ops-cal-month{font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;min-width:190px}
+  .ops-nav-btn{width:30px;height:30px;border:1px solid var(--border);background:var(--surface);border-radius:7px;cursor:pointer;font-size:14px;color:var(--mid);display:flex;align-items:center;justify-content:center;transition:all .12s}
+  .ops-nav-btn:hover{background:var(--surface2);border-color:var(--border2);color:var(--text)}
+  .ops-inbox{background:var(--surface);border:1px solid rgba(217,119,6,.35);border-radius:12px;box-shadow:var(--shadow);margin-bottom:16px;overflow:hidden}
+  .ops-inbox-head{padding:11px 16px;background:#fffbeb;border-bottom:1px solid rgba(217,119,6,.25);display:flex;align-items:center;gap:10px}
+  .ops-inbox-title{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#92400e}
+  .ops-inbox-sub{font-size:11px;color:#a16207}
+  .ops-inbox-body{padding:10px 12px}
+  .ops-sel{background:var(--surface);border:1.5px solid var(--border);border-radius:6px;padding:4px 8px;font-size:11px;font-family:'Barlow',sans-serif;font-weight:700;color:var(--text);outline:none;cursor:pointer}
+  .ops-sel:focus{border-color:var(--red)}
+  .ops-inp-sm{background:var(--surface);border:1.5px solid var(--border);border-radius:6px;padding:4px 9px;font-size:11px;font-family:'Barlow',sans-serif;color:var(--text);outline:none;width:170px}
+  .ops-inp-sm:focus{border-color:var(--red)}
+  .ops-row{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:8px;padding-top:8px;border-top:1px dashed var(--border)}
+  .ops-row-lbl{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--muted)}
+  .ops-p-emailed{background:#e0e7ff;color:#4338ca;border-color:#c7d2fe}
+  .ops-p-followup{background:#ffedd5;color:#c2410c;border-color:#fed7aa}
+  .ops-p-new{background:#fee2e2;color:var(--red);border-color:#fecaca}
+  .ops-cal{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--shadow);margin-bottom:18px}
+  .ops-cal-head{display:grid;grid-template-columns:repeat(7,1fr);background:var(--surface2);border-bottom:2px solid var(--border2)}
+  .ops-cal-hd{padding:8px 4px;text-align:center;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted)}
+  .ops-cal-grid{display:grid;grid-template-columns:repeat(7,1fr)}
+  .ops-cal-day{min-height:104px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);padding:5px 5px 6px;overflow:hidden}
+  .ops-cal-day:nth-child(7n){border-right:none}
+  .ops-cal-day.other{background:var(--bg);opacity:.45}
+  .ops-cal-day.wkend{background:#fcfcfd}
+  .ops-cal-day.today{background:#fff7f7;box-shadow:inset 0 0 0 2px rgba(225,29,29,.35)}
+  .ops-cal-num{font-size:11px;font-weight:800;color:var(--muted);margin-bottom:4px;display:flex;align-items:center;justify-content:space-between}
+  .ops-cal-day.today .ops-cal-num{color:var(--red)}
+  .ops-chip{border-radius:5px;padding:3px 6px;margin-bottom:3px;font-size:10px;line-height:1.3;cursor:pointer;border:1px solid;transition:all .12s}
+  .ops-chip:hover{transform:translateX(1px);box-shadow:0 2px 6px rgba(0,0,0,.1)}
+  .ops-chip-proj{font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ops-chip-line{font-weight:600;opacity:.9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ops-chip.booked{background:var(--blue-light);color:#1d4ed8;border-color:rgba(37,99,235,.25)}
+  .ops-chip.await{background:var(--amber-light);color:#92400e;border-color:rgba(217,119,6,.28)}
+  .ops-chip.pass{background:var(--green-light);color:#15803d;border-color:rgba(22,163,74,.28)}
+  .ops-chip.fail{background:#fee2e2;color:#b91c1c;border-color:#fecaca}
+  .ops-legend{display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+  .ops-lg{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:var(--mid)}
+  .ops-lg-dot{width:11px;height:11px;border-radius:3px;border:1px solid}
+  .ops-toolbar{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+  .ops-filters{display:flex;background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:3px;gap:2px;box-shadow:var(--shadow)}
+  .ops-fbtn{padding:6px 14px;border:none;background:none;border-radius:7px;font-size:12px;font-weight:700;font-family:'Barlow',sans-serif;color:var(--muted);cursor:pointer;transition:all .15s;white-space:nowrap}
+  .ops-fbtn:hover{background:var(--surface2);color:var(--mid)}
+  .ops-fbtn.active{background:var(--red);color:#fff;box-shadow:0 2px 6px rgba(225,29,29,.25)}
+  .ops-search{background:var(--surface);border:1.5px solid var(--border);border-radius:8px;padding:7px 13px;font-size:13px;font-family:'Barlow',sans-serif;color:var(--text);outline:none;width:210px}
+  .ops-search:focus{border-color:var(--red)}
+  .ops-seq-box{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:14px;box-shadow:var(--shadow)}
+  .ops-seq-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .ops-seq-title{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--mid)}
+  .ops-seq-list{display:flex;flex-wrap:wrap;gap:6px}
+  .ops-seq-item{display:flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:4px 9px;font-size:11.5px;font-weight:700;color:var(--mid)}
+  .ops-seq-n{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:800;color:var(--red)}
+  .ops-seq-x{background:none;border:none;cursor:pointer;color:var(--muted);font-size:12px;padding:0 1px;line-height:1}
+  .ops-seq-x:hover{color:var(--red)}
+  .ops-seq-add{display:flex;gap:7px;margin-top:10px;align-items:center;flex-wrap:wrap}
+  .ops-seq-input{flex:1;min-width:180px;background:var(--surface2);border:1.5px solid var(--border);border-radius:7px;padding:7px 11px;font-size:12px;font-family:'Barlow',sans-serif;color:var(--text);outline:none}
+  .ops-seq-input:focus{border-color:var(--red)}
+  .ops-proj-block{margin-bottom:14px}
+  .ops-proj-head{display:flex;align-items:center;gap:9px;padding:7px 2px 8px;border-bottom:2px solid var(--border);margin-bottom:9px}
+  .ops-proj-name{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;text-transform:uppercase;letter-spacing:.4px}
+  .ops-proj-job{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:800;color:var(--red)}
+  .ops-warn{display:flex;align-items:flex-start;gap:8px;background:#fffbeb;border:1px solid rgba(217,119,6,.28);border-radius:8px;padding:8px 11px;margin-bottom:8px;font-size:11.5px;color:#92400e;font-weight:600}
+  .ops-req{display:flex;align-items:center;gap:8px;background:#fff7ed;border:1px solid rgba(217,119,6,.3);border-radius:7px;padding:6px 10px;margin-top:6px;font-size:11px;font-weight:700;color:#9a3412;flex-wrap:wrap}
+  .ops-modal-body .proj-form-grid{margin-bottom:0}
+  .ops-full{grid-column:1 / -1}
+  .ops-hint{font-size:11px;color:var(--muted);margin-top:4px}
+  @media (max-width:820px){
+    .ops-page{padding:14px}
+    .ops-stats{grid-template-columns:1fr 1fr}
+    .ops-cal-day{min-height:74px}
+    .ops-item{flex-wrap:wrap}
+  }
+  </style>
+
+  <div class="page" id="page-operations">
+    <div class="ops-page">
+
+      <div class="ops-header">
+        <div>
+          <div class="ops-title">Operations</div>
+          <div class="ops-sub">Compaction tests, machine transfers and subcontractor bookings</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span id="op-saved" style="font-size:11px;font-weight:700;color:var(--green);opacity:0;transition:opacity .4s">Saved</span>
+          <button class="ops-btn" onclick="opRender()">&#8635; Refresh</button>
+        </div>
+      </div>
+
+      <div class="ops-tabs">
+        <div class="ops-tab active" data-optab="overview" onclick="opTab('overview')">&#128204; Overview <span class="ops-tab-count" id="op-cnt-overview">0</span></div>
+        <div class="ops-tab" data-optab="tests" onclick="opTab('tests')">&#129514; Compaction Tests <span class="ops-tab-count" id="op-cnt-tests">0</span></div>
+        <div class="ops-tab" data-optab="transfers" onclick="opTab('transfers')">&#128666; Machine Transfers <span class="ops-tab-count" id="op-cnt-transfers">0</span></div>
+        <div class="ops-tab" data-optab="subs" onclick="opTab('subs')">&#128119; Subcontractors <span class="ops-tab-count" id="op-cnt-subs">0</span></div>
+      </div>
+
+      <!-- ─────────── OVERVIEW ─────────── -->
+      <div class="ops-panel active" id="op-panel-overview">
+        <div class="ops-stats" id="op-ov-stats"></div>
+        <div id="op-ov-groups"></div>
+      </div>
+
+      <!-- ─────────── TESTS ─────────── -->
+      <div class="ops-panel" id="op-panel-tests">
+        <div class="ops-toolbar">
+          <button class="ops-btn primary" onclick="opTestOpen()">+ Book a test</button>
+          <div class="ops-cal-bar" style="margin-bottom:0">
+            <button class="ops-nav-btn" onclick="opCalMove(-1)">&#8249;</button>
+            <div class="ops-cal-month" id="op-cal-month">—</div>
+            <button class="ops-nav-btn" onclick="opCalMove(1)">&#8250;</button>
+            <button class="ops-btn sm" onclick="opCalToday()">Today</button>
+          </div>
+          <input class="ops-search" id="op-test-search" placeholder="Search project, type or company…" oninput="opRenderTests()" style="margin-left:auto">
+        </div>
+
+        <div class="ops-legend">
+          <div class="ops-lg"><span class="ops-lg-dot" style="background:var(--blue-light);border-color:rgba(37,99,235,.4)"></span> Booked</div>
+          <div class="ops-lg"><span class="ops-lg-dot" style="background:var(--amber-light);border-color:rgba(217,119,6,.4)"></span> Awaiting result</div>
+          <div class="ops-lg"><span class="ops-lg-dot" style="background:var(--green-light);border-color:rgba(22,163,74,.4)"></span> Passed</div>
+          <div class="ops-lg"><span class="ops-lg-dot" style="background:#fee2e2;border-color:#fecaca"></span> Failed</div>
+        </div>
+
+        <div id="op-test-inbox"></div>
+
+        <div class="ops-cal">
+          <div class="ops-cal-head">
+            <div class="ops-cal-hd">Mon</div><div class="ops-cal-hd">Tue</div><div class="ops-cal-hd">Wed</div>
+            <div class="ops-cal-hd">Thu</div><div class="ops-cal-hd">Fri</div><div class="ops-cal-hd">Sat</div><div class="ops-cal-hd">Sun</div>
+          </div>
+          <div class="ops-cal-grid" id="op-cal-grid"></div>
+        </div>
+
+        <div class="ops-toolbar">
+          <div class="ops-filters">
+            <button class="ops-fbtn active" data-tf="upcoming" onclick="opTestFilter('upcoming')">Upcoming</button>
+            <button class="ops-fbtn" data-tf="await" onclick="opTestFilter('await')">Awaiting result</button>
+            <button class="ops-fbtn" data-tf="done" onclick="opTestFilter('done')">Completed</button>
+            <button class="ops-fbtn" data-tf="all" onclick="opTestFilter('all')">All</button>
+          </div>
+        </div>
+        <div id="op-test-list"></div>
+      </div>
+
+      <!-- ─────────── TRANSFERS ─────────── -->
+      <div class="ops-panel" id="op-panel-transfers">
+        <div class="ops-toolbar">
+          <button class="ops-btn primary" onclick="opTrOpen()">+ New transfer / removal</button>
+          <div class="ops-filters">
+            <button class="ops-fbtn active" data-rf="open" onclick="opTrFilter('open')">Open</button>
+            <button class="ops-fbtn" data-rf="today" onclick="opTrFilter('today')">Today</button>
+            <button class="ops-fbtn" data-rf="done" onclick="opTrFilter('done')">Done</button>
+            <button class="ops-fbtn" data-rf="all" onclick="opTrFilter('all')">All</button>
+          </div>
+          <input class="ops-search" id="op-tr-search" placeholder="Search machine or site…" oninput="opRenderTransfers()" style="margin-left:auto">
+        </div>
+        <div id="op-tr-list"></div>
+      </div>
+
+      <!-- ─────────── SUBCONTRACTORS ─────────── -->
+      <div class="ops-panel" id="op-panel-subs">
+        <div class="ops-toolbar">
+          <button class="ops-btn primary" onclick="opSubOpen()">+ Book a subcontractor</button>
+          <button class="ops-btn" onclick="opSubImport()">&#8681; Import from Settings list</button>
+          <div class="ops-filters">
+            <button class="ops-fbtn active" data-sf="open" onclick="opSubFilter('open')">Upcoming</button>
+            <button class="ops-fbtn" data-sf="issues" onclick="opSubFilter('issues')">Issues</button>
+            <button class="ops-fbtn" data-sf="all" onclick="opSubFilter('all')">All</button>
+          </div>
+          <input class="ops-search" id="op-sub-search" placeholder="Search trade, company or site…" oninput="opRenderSubs()" style="margin-left:auto">
+        </div>
+
+        <div class="ops-seq-box">
+          <div class="ops-seq-head">
+            <div class="ops-seq-title">&#128203; Work sequence</div>
+            <div style="font-size:11px;color:var(--muted)">Bookings out of this order are flagged as an issue.</div>
+            <button class="ops-btn sm ghost" style="margin-left:auto" onclick="opSeqToggle()" id="op-seq-toggle">Edit</button>
+          </div>
+          <div class="ops-seq-list" id="op-seq-list"></div>
+          <div class="ops-seq-add" id="op-seq-add" style="display:none">
+            <input class="ops-seq-input" id="op-seq-new" placeholder="Add a step, e.g. Road Base" onkeydown="if(event.key==='Enter')opSeqAdd()">
+            <button class="ops-btn sm primary" onclick="opSeqAdd()">Add step</button>
+            <button class="ops-btn sm" onclick="opSeqReset()">Reset to default</button>
+          </div>
+        </div>
+
+        <div id="op-sub-list"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ─────────── TEST MODAL ─────────── -->
+  <div class="proj-modal-overlay" id="op-test-modal">
+    <div class="proj-modal" style="width:560px">
+      <div class="proj-modal-header"><span id="op-test-modal-title">Book a compaction test</span>
+        <button class="proj-modal-close" onclick="opTestClose()">&#10005;</button></div>
+      <div class="proj-modal-body ops-modal-body">
+        <div class="proj-form-grid">
+          <div class="proj-form-group ops-full">
+            <label>Project</label>
+            <select id="op-test-proj"></select>
+          </div>
+          <div class="proj-form-group">
+            <label>Date</label>
+            <input type="date" id="op-test-date">
+          </div>
+          <div class="proj-form-group">
+            <label>Test type</label>
+            <input id="op-test-type" list="op-test-types" placeholder="e.g. Sand Replacement Test">
+            <datalist id="op-test-types">
+              <option value="Sand Replacement Test"><option value="Nuclear Density Test"><option value="Field Density Test">
+              <option value="Standard Proctor"><option value="Modified Proctor"><option value="CBR (California Bearing Ratio)">
+              <option value="Plate Load Test"><option value="Dynamic Cone Penetrometer (DCP)"><option value="Compaction Test">
+            </datalist>
+          </div>
+          <div class="proj-form-group ops-full">
+            <label>Company doing the test</label>
+            <input id="op-test-company" list="op-test-companies" placeholder="e.g. Geotech WA">
+            <datalist id="op-test-companies"></datalist>
+            <div class="ops-hint">Leave empty and it will show on the Overview as "lab not booked yet".</div>
+          </div>
+          <div class="proj-form-group ops-full">
+            <label>Notes</label>
+            <input id="op-test-notes" placeholder="Location on site, layer, chainage…">
+          </div>
+        </div>
+      </div>
+      <div class="proj-modal-footer">
+        <button class="proj-modal-cancel" onclick="opTestClose()">Cancel</button>
+        <button class="proj-modal-save" onclick="opTestSave()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────── TEST RESULT MODAL ─────────── -->
+  <div class="proj-modal-overlay" id="op-res-modal">
+    <div class="proj-modal" style="width:480px">
+      <div class="proj-modal-header"><span>Record test result</span>
+        <button class="proj-modal-close" onclick="opResClose()">&#10005;</button></div>
+      <div class="proj-modal-body ops-modal-body">
+        <div id="op-res-info" style="font-size:13px;color:var(--mid);margin-bottom:14px"></div>
+        <div class="proj-form-grid">
+          <div class="proj-form-group ops-full">
+            <label>Result</label>
+            <select id="op-res-value">
+              <option value="">Awaiting result</option>
+              <option value="pass">Passed</option>
+              <option value="fail">Failed</option>
+            </select>
+          </div>
+          <div class="proj-form-group ops-full">
+            <label>Result notes</label>
+            <input id="op-res-notes" placeholder="Density achieved, retest required…">
+          </div>
+        </div>
+      </div>
+      <div class="proj-modal-footer">
+        <button class="proj-modal-cancel" onclick="opResClose()">Cancel</button>
+        <button class="proj-modal-save" onclick="opResSave()">Save result</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────── TRANSFER MODAL ─────────── -->
+  <div class="proj-modal-overlay" id="op-tr-modal">
+    <div class="proj-modal" style="width:600px">
+      <div class="proj-modal-header"><span id="op-tr-modal-title">New machine transfer</span>
+        <button class="proj-modal-close" onclick="opTrClose()">&#10005;</button></div>
+      <div class="proj-modal-body ops-modal-body">
+        <div class="proj-form-grid">
+          <div class="proj-form-group">
+            <label>Machine</label>
+            <input id="op-tr-machine" list="op-tr-machines" placeholder="e.g. 20T Excavator">
+            <datalist id="op-tr-machines"></datalist>
+          </div>
+          <div class="proj-form-group">
+            <label>Action</label>
+            <select id="op-tr-action" onchange="opTrActionChange()">
+              <option value="transfer">Transfer to another site</option>
+              <option value="remove">Remove from site</option>
+            </select>
+          </div>
+          <div class="proj-form-group">
+            <label>From site</label>
+            <select id="op-tr-from"></select>
+          </div>
+          <div class="proj-form-group" id="op-tr-to-wrap">
+            <label>To site</label>
+            <select id="op-tr-to"></select>
+          </div>
+          <div class="proj-form-group">
+            <label>Scheduled date</label>
+            <input type="date" id="op-tr-date">
+          </div>
+          <div class="proj-form-group">
+            <label>Status</label>
+            <select id="op-tr-status">
+              <option value="requested">Requested</option>
+              <option value="scheduled">Scheduled</option>
+              <option value="done">Done</option>
+            </select>
+          </div>
+          <div class="proj-form-group ops-full">
+            <label>Office notes</label>
+            <input id="op-tr-notes" placeholder="Float booked, pilot required…">
+          </div>
+        </div>
+      </div>
+      <div class="proj-modal-footer">
+        <button class="proj-modal-cancel" onclick="opTrClose()">Cancel</button>
+        <button class="proj-modal-save" onclick="opTrSave()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────── SUB MODAL ─────────── -->
+  <div class="proj-modal-overlay" id="op-sub-modal">
+    <div class="proj-modal" style="width:580px">
+      <div class="proj-modal-header"><span id="op-sub-modal-title">Book a subcontractor</span>
+        <button class="proj-modal-close" onclick="opSubClose()">&#10005;</button></div>
+      <div class="proj-modal-body ops-modal-body">
+        <div class="proj-form-grid">
+          <div class="proj-form-group ops-full">
+            <label>Project</label>
+            <select id="op-sub-proj"></select>
+          </div>
+          <div class="proj-form-group">
+            <label>Trade / work</label>
+            <input id="op-sub-product" list="op-sub-trades" placeholder="e.g. Sewer / Drainage">
+            <datalist id="op-sub-trades"></datalist>
+          </div>
+          <div class="proj-form-group">
+            <label>Company</label>
+            <input id="op-sub-name" list="op-sub-companies" placeholder="e.g. Perth Civil Pty Ltd">
+            <datalist id="op-sub-companies"></datalist>
+          </div>
+          <div class="proj-form-group">
+            <label>Date</label>
+            <input type="date" id="op-sub-date">
+          </div>
+          <div class="proj-form-group">
+            <label>Status</label>
+            <select id="op-sub-status">
+              <option value="pending">Pending</option>
+              <option value="booked">Booked</option>
+            </select>
+          </div>
+          <div class="proj-form-group ops-full">
+            <label>Notes</label>
+            <input id="op-sub-notes" placeholder="Access, hours, contact on site…">
+          </div>
+        </div>
+        <div id="op-sub-seqwarn"></div>
+      </div>
+      <div class="proj-modal-footer">
+        <button class="proj-modal-cancel" onclick="opSubClose()">Cancel</button>
+        <button class="proj-modal-save" onclick="opSubSave()">Save</button>
+      </div>
+    </div>
+  </div>
+  <!-- ══════════════════════ END OPERATIONS PAGE ══════════════════════ -->
+
   <div class="page" id="page-settings">
     <div class="settings-wrap">
 
@@ -2649,6 +3074,7 @@ if (pg) pg.classList.add('active');
 if (typeof applyNavVis === 'function') applyNavVis();
 
 if (name === 'overview') { renderOverview(); }
+if (name === 'operations') { try{ if(typeof window.opRender==='function') window.opRender(); }catch(e){} }
 if (name === 'employees') { try{ if(typeof renderEmployees==='function'){ if(typeof window.empFillDeptSelects==='function') window.empFillDeptSelects(); renderEmployees(); } }catch(e){} }
 if (name === 'jobscheduler') { setTimeout(function(){ if(typeof schRender==='function') schRender(); }, 100); }
 if (name === 'material') {
@@ -6455,6 +6881,7 @@ var NAV_TABS = [
 { key: 'team',        label: 'Team Planning',     icon: '👥', onclick: "showPage('team')" },
 { key: 'employees',   label: 'Employees',         icon: '👷', onclick: "showPage('employees')" },
 { key: 'projects',    label: 'Projects',          icon: '📁', onclick: "showPage('projects')" },
+{ key: 'operations',  label: 'Operations',        icon: '🚧', onclick: "showPage('operations')" },
 { key: 'jobscheduler', label: 'Job Scheduler', icon: '', onclick: "showPage('jobscheduler')" },
 { key: 'settings',    label: 'Settings',          icon: '⚙️',  onclick: "showPage('settings')" },
 ];
@@ -11466,6 +11893,50 @@ function teamEditProjectBooking(pid){
       badge.textContent = 'Local';
       nr.insertBefore(badge, nr.firstChild);
     }
+    if(!document.getElementById('remc-conn-btn')){
+      var g=document.createElement('button'); g.id='remc-conn-btn'; g.type='button'; g.title='Connection settings'; g.textContent='⚙️';
+      g.style.cssText='font-size:13px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:4px 9px;cursor:pointer;display:none';
+      g.onclick=function(){ window.remcOpenConn(); };
+      nr.insertBefore(g, nr.firstChild);
+    }
+    window.remcOpenConn=function(){
+      var old=document.getElementById('remc-conn-ov'); if(old) old.remove();
+      var mode=(function(){try{return localStorage.getItem('remc_backend')==='server'?'server':'cloud';}catch(e){return 'cloud';}})();
+      var url=(function(){try{return String(localStorage.getItem('remc_server_url')||'').trim().replace(/\/+$/,'');}catch(e){return '';}})();
+      var ov=document.createElement('div'); ov.id='remc-conn-ov';
+      ov.style.cssText='position:fixed;inset:0;z-index:100000;background:rgba(15,22,33,.55);display:flex;align-items:center;justify-content:center;font-family:Barlow,sans-serif;padding:16px';
+      ov.innerHTML='<div style="background:#fff;border-radius:16px;max-width:440px;width:100%;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.3)">'
+        +'<div style="display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid #e4e8ef"><b style="font-size:16px">⚙️ Connection</b><button id="rc-x" style="border:none;background:none;font-size:18px;cursor:pointer;color:#8b95a8">✕</button></div>'
+        +'<div style="padding:18px">'
+        +'<p style="margin:0 0 12px;color:#4b5666;font-size:14px">Choose where this app reads and saves its data.</p>'
+        +'<label class="rc-opt"><input type="radio" name="rc-mode" value="cloud"'+(mode==="cloud"?" checked":"")+'> <span><b>☁️ Cloud (Supabase)</b><br><small style="color:#8b95a8">Works anywhere, online.</small></span></label>'
+        +'<label class="rc-opt"><input type="radio" name="rc-mode" value="server"'+(mode==="server"?" checked":"")+'> <span><b>💻 My server (PC)</b><br><small style="color:#8b95a8">Uses the server on this office PC.</small></span></label>'
+        +'<div id="rc-url-wrap" style="display:'+(mode==="server"?"block":"none")+';margin-top:8px"><label style="font-size:13px;font-weight:700;color:#4b5666">Server address</label>'
+        +'<input id="rc-url" type="text" value="'+String(url).replace(/"/g,"&quot;")+'" placeholder="https://....trycloudflare.com" style="width:100%;box-sizing:border-box;padding:11px;border:1px solid #e4e8ef;border-radius:10px;font-size:14px;margin-top:5px">'
+        +'<button id="rc-test" type="button" style="margin-top:8px;background:#f8fafc;border:1px solid #e4e8ef;border-radius:9px;padding:8px 12px;font-size:13px;font-weight:700;cursor:pointer">Test connection</button>'
+        +'<div id="rc-res" style="font-size:13px;margin-top:6px"></div></div>'
+        +'<button id="rc-save" type="button" style="width:100%;margin-top:16px;background:#16a34a;color:#fff;border:none;border-radius:11px;padding:13px;font-size:15px;font-weight:800;cursor:pointer">Save &amp; reload</button>'
+        +'</div></div>';
+      document.body.appendChild(ov);
+      var st=document.createElement('style'); st.textContent='.rc-opt{display:flex;align-items:flex-start;gap:10px;padding:12px;border:1px solid #e4e8ef;border-radius:12px;margin-bottom:10px;cursor:pointer;font-size:14px}.rc-opt input{margin-top:3px;width:17px;height:17px}'; ov.appendChild(st);
+      function selMode(){ var rs=ov.querySelectorAll('input[name=rc-mode]'); for(var i=0;i<rs.length;i++) if(rs[i].checked) return rs[i].value; return 'cloud'; }
+      function toggle(){ document.getElementById('rc-url-wrap').style.display=(selMode()==='server')?'block':'none'; }
+      [].forEach.call(ov.querySelectorAll('input[name=rc-mode]'),function(r){ r.onchange=toggle; });
+      document.getElementById('rc-x').onclick=function(){ ov.remove(); };
+      ov.onclick=function(e){ if(e.target===ov) ov.remove(); };
+      document.getElementById('rc-test').onclick=function(){
+        var u=String(document.getElementById('rc-url').value||'').trim().replace(/\/+$/,''); var el=document.getElementById('rc-res');
+        if(!u){ el.textContent='Enter the address first.'; el.style.color='#b45309'; return; }
+        el.textContent='Testing…'; el.style.color='#64748b';
+        fetch(u+'/health').then(function(r){return r.json();}).then(function(j){ if(j&&j.ok){ el.textContent='✓ Connected to your server'; el.style.color='#15803d'; } else { el.textContent='Reached it, but unexpected answer.'; el.style.color='#b45309'; } }).catch(function(){ el.textContent='✕ Could not reach it. Is the server running?'; el.style.color='#dc2626'; });
+      };
+      document.getElementById('rc-save').onclick=function(){
+        var m=selMode(); var u=String(document.getElementById('rc-url').value||'').trim().replace(/\/+$/,'');
+        if(m==='server' && !u){ alert('Enter the server address (https://....) first.'); return; }
+        try{ localStorage.setItem('remc_backend', m); localStorage.setItem('remc_server_url', u); }catch(e){}
+        location.reload();
+      };
+    };
     // Backup now lives in Settings → 💾 Backup (no longer in the top bar)
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', inject); else inject();
@@ -11476,14 +11947,74 @@ function teamEditProjectBooking(pid){
 <script>
 (function(){
   var CFG = window.REMC_CLOUD || {};
+  function _beMode(){ try{ return localStorage.getItem('remc_backend')==='server' ? 'server':'cloud'; }catch(e){ return 'cloud'; } }
+  function _beUrl(){ try{ return String(localStorage.getItem('remc_server_url')||'').trim().replace(/\/+$/,''); }catch(e){ return ''; } }
+  var SERVERMODE = (_beMode()==='server' && !!_beUrl());
   var configured = CFG.url && CFG.anonKey && String(CFG.url).indexOf('PASTE_')<0 && String(CFG.anonKey).indexOf('PASTE_')<0;
-  window.REMC_CLOUD_ACTIVE = !!configured;
-  if (!configured){ console.log('[REMC Cloud] Not configured — running locally.'); return; }
-  if (typeof supabase === 'undefined' || !supabase.createClient){ console.warn('[REMC Cloud] Supabase library not loaded.'); return; }
+  window.REMC_CLOUD_ACTIVE = !!configured || SERVERMODE;
+  if (!configured && !SERVERMODE){ console.log('[REMC Cloud] Not configured — running locally.'); return; }
+  if (!SERVERMODE && (typeof supabase === 'undefined' || !supabase.createClient)){ console.warn('[REMC Cloud] Supabase library not loaded.'); return; }
 
   var WS = CFG.workspace || 'remc-main';
   var CLIENT_ID = Math.random().toString(36).slice(2);
-  var sb = supabase.createClient(CFG.url, CFG.anonKey); window.REMC_SB = sb;
+  function _serverClient(base){
+    base=String(base||'').replace(/\/+$/,'');
+    function jget(pp){ return fetch(base+pp,{method:'GET'}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }); }
+    function jpost(pp,b){ return fetch(base+pp,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b||{})}).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }); }
+    var fakeUser={ email:'office@local' };
+    return { __server:true, __base:base,
+      from:function(){ var q={ select:function(){return q;}, eq:function(){return q;},
+        maybeSingle:function(){ return jget('/state').then(function(j){ return { data:{ data:j.data||{}, updated_at:j.updated_at||null }, error:null }; }).catch(function(e){ return { data:null, error:{ message:(e&&e.message)||'network' } }; }); },
+        upsert:function(obj){ var data=(obj&&obj.data)||{}; return jpost('/state',{ data:data, client:(data&&data.__client)||null }).then(function(){ return { error:null }; }).catch(function(e){ return { error:{ message:(e&&e.message)||'network' } }; }); }
+      }; return q; },
+      channel:function(){ var ch={ _es:null, on:function(evt,opts,cb){ try{ ch._es=new EventSource(base+'/events'); ch._es.onmessage=function(m){ try{ var d=JSON.parse(m.data); if(d && d.client!=='__initial__') cb({ new:{ data:d.data } }); }catch(e){} }; }catch(e){} return ch; }, subscribe:function(){ return ch; } }; return ch; },
+      removeChannel:function(ch){ try{ if(ch&&ch._es) ch._es.close(); }catch(e){} },
+      auth:{ getSession:function(){ return Promise.resolve({ data:{ session:{ user:fakeUser } }, error:null }); },
+        getUser:function(){ return Promise.resolve({ data:{ user:fakeUser }, error:null }); },
+        signInWithPassword:function(){ return Promise.resolve({ data:{ user:fakeUser, session:{ user:fakeUser } }, error:null }); },
+        updateUser:function(){ return Promise.resolve({ data:{ user:fakeUser }, error:null }); },
+        signOut:function(){ return Promise.resolve({ error:null }); },
+        onAuthStateChange:function(){ return { data:{ subscription:{ unsubscribe:function(){} } } }; } }
+    };
+  }
+  // --- Safe fetch -------------------------------------------------------
+  // Some browser extensions (and some embedded viewers) intercept fetch and
+  // hand the request to another window using postMessage. A Headers object
+  // cannot be structured-cloned, so those requests die with
+  // "DataCloneError: Headers object could not be cloned".
+  // Giving supabase-js a fetch that only ever uses plain-object headers keeps
+  // the request cloneable, so it goes through normally.
+  function remcSafeFetch(input, init){
+    init = init || {};
+    var url, base = {};
+    if (input && typeof input === 'object' && typeof input.url === 'string'){ url = input.url; base = input; }
+    else { url = String(input); }
+    var headers = {};
+    function absorb(src){
+      if(!src) return;
+      try{
+        if(typeof src.forEach === 'function' && typeof src.append === 'function'){
+          src.forEach(function(v,k){ headers[k] = v; });            // a Headers object
+        } else if (Array.isArray(src)) {
+          src.forEach(function(p){ if(p && p.length > 1) headers[p[0]] = p[1]; });
+        } else {
+          Object.keys(src).forEach(function(k){ headers[k] = src[k]; });
+        }
+      }catch(e){}
+    }
+    absorb(base.headers); absorb(init.headers);
+    var opts = { method: init.method || base.method || 'GET', headers: headers };
+    if (init.body !== undefined && init.body !== null) opts.body = init.body;
+    if (init.signal) opts.signal = init.signal;
+    if (init.credentials || base.credentials) opts.credentials = init.credentials || base.credentials;
+    if (init.mode) opts.mode = init.mode;
+    if (init.cache) opts.cache = init.cache;
+    return fetch(url, opts);
+  }
+  try{ window.remcSafeFetch = remcSafeFetch; }catch(e){}
+  var sb = SERVERMODE ? _serverClient(_beUrl())
+    : supabase.createClient(CFG.url, CFG.anonKey, { global: { fetch: remcSafeFetch } });
+  window.REMC_SB = sb;
   var _applying = false, _pushTimer = null, _dirty = {};
 
   function collectState(){
@@ -11503,13 +12034,26 @@ function teamEditProjectBooking(pid){
     var map = { saving:['Saving…','#fef3c7','#92400e'], saved:['Synced ☁️','#dcfce7','#15803d'], error:['Offline','#fee2e2','#dc2626'], loading:['Loading…','#eff6ff','#1d4ed8'], reconnecting:['Reconnecting…','#fef3c7','#92400e'] };
     var m = map[state]||map.saved; el.textContent=m[0]; el.style.background=m[1]; el.style.color=m[2];
   }
-  var _cloudFailN=0, _reconnTimer=null;
-  function _cloudOk(){ _cloudFailN=0; if(_reconnTimer){ clearTimeout(_reconnTimer); _reconnTimer=null; } setStatus('saved'); }
-  function _cloudFail(){ _cloudFailN++; var off=(typeof navigator!=='undefined' && navigator.onLine===false); setStatus(off?'error':'reconnecting'); if(!_reconnTimer){ _reconnTimer=setTimeout(function(){ _reconnTimer=null; try{ refreshFromCloud(); }catch(e){} }, 4000); } }
+  var _cloudFailN=0, _reconnTimer=null, _reconnDelay=4000;
+  function _cloudBadge(){ return document.getElementById('remc-cloud-badge'); }
+  function _cloudOk(){ _cloudFailN=0; _reconnDelay=4000; if(_reconnTimer){ clearTimeout(_reconnTimer); _reconnTimer=null; } setStatus('saved'); var el=_cloudBadge(); if(el) el.title='Synced with the cloud'; }
+  function _cloudFail(msg){
+    _cloudFailN++;
+    if(msg){ try{ var _m=String(msg); window.REMC_LAST_CLOUD_ERROR=_m;
+      if(_m!==window._remcLastWarned){ window._remcLastWarned=_m; console.warn('[REMC Cloud] sync problem:', _m); }
+    }catch(e){} }
+    var off=(typeof navigator!=='undefined' && navigator.onLine===false);
+    setStatus(off?'error':'reconnecting');
+    var el=_cloudBadge(); if(el) el.title=(off?'This device appears to be offline. ':'Having trouble reaching the cloud. ')+(window.REMC_LAST_CLOUD_ERROR?('Last error: '+window.REMC_LAST_CLOUD_ERROR+'. '):'')+'Retrying automatically…';
+    if(!_reconnTimer){ _reconnTimer=setTimeout(function(){ _reconnTimer=null; try{ refreshFromCloud(); }catch(e){} }, _reconnDelay); _reconnDelay=Math.min(_reconnDelay*2, 30000); }
+  }
   function pull(cb){
     setStatus('loading');
     sb.from('remc_state').select('data').eq('id', WS).maybeSingle().then(function(res){
-      if(res && !res.error && res.data && res.data.data){ applyState(res.data.data); }
+      var _d = (res && !res.error && res.data && res.data.data) ? res.data.data : null;
+      var _has = _d && Object.keys(_d).some(function(k){ return k.indexOf('remc_')===0; });
+      if(_has){ applyState(_d); }
+      else if(SERVERMODE){ try{ sb.from('remc_state').upsert({ id:WS, data:collectState(), updated_at:new Date().toISOString() }); }catch(e){} }
       if(cb) cb();
     }).catch(function(){
       _cloudFail();
@@ -11536,13 +12080,13 @@ function teamEditProjectBooking(pid){
       }
       base.__client = CLIENT_ID;
       sb.from('remc_state').upsert({ id:WS, data:base, updated_at:new Date().toISOString() }).then(function(r2){
-        if(r2 && r2.error){ _cloudFail(); return; }
+        if(r2 && r2.error){ _cloudFail(r2.error.message||r2.error); return; }
         _dirty = {};
         try{ markSnapshotClean(); }catch(e){}
         _cloudOk();
         scheduleBackup();
       });
-    }).catch(function(){ _cloudFail(); });
+    }).catch(function(e){ _cloudFail((e&&(e.message||e))||'network'); });
   }
   function schedulePush(){ if(_applying) return; setStatus('saving'); clearTimeout(_pushTimer); _pushTimer=setTimeout(push, 1200); }
 
@@ -11588,10 +12132,33 @@ function teamEditProjectBooking(pid){
       // (The Supabase storage client can trigger a "Headers could not be cloned"
       //  postMessage error in some browsers / with certain extensions.)
       var endpoint = String(CFG.url).replace(/\/$/,'') + '/storage/v1/object/remc-backups/remc-latest.xlsx';
+      // Newer Supabase projects use publishable keys (sb_publishable_...). Those are
+      // NOT JWTs, so putting one in an Authorization: Bearer header is rejected
+      // outright (400/401). The official client assembles the right headers by
+      // itself, so use it whenever it is available and only hand-roll as a
+      // fallback -- without the illegal Authorization header.
+      var _sb = null; try{ _sb = window.REMC_SB; }catch(e){}
+      if (_sb && _sb.storage && typeof _sb.storage.from === 'function' && !_sb.__server) {
+        _sb.storage.from('remc-backups').upload('remc-latest.xlsx', blob, {
+          upsert: true, cacheControl: '3600',
+          contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        }).then(function(res){
+          if (res && !res.error){ console.log('[REMC Backup] Excel backup uploaded to cloud.'); _bkWarned = false; }
+          else if (!_bkWarned){
+            _bkWarned = true;
+            console.log('[REMC Backup] Cloud backup not saved: ' + ((res && res.error && res.error.message) || 'unknown')
+              + '. This is optional -- you can still download a backup in Settings > Backup.'
+              + ' To enable it, create a public Storage bucket named "remc-backups".');
+          }
+        }).catch(function(err){
+          if (!_bkWarned){ _bkWarned = true;
+            console.log('[REMC Backup] Cloud backup not saved: ' + ((err && err.message) || 'network') + '. This is optional.'); }
+        });
+        return;
+      }
       fetch(endpoint, {
         method: 'POST',
         headers: {
-          'Authorization': 'Bearer ' + CFG.anonKey,
           'apikey': CFG.anonKey,
           'x-upsert': 'true',
           'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -11602,7 +12169,12 @@ function teamEditProjectBooking(pid){
         if(r && r.ok){ console.log('[REMC Backup] Excel backup uploaded to cloud.'); _bkWarned=false; }
         else if(!_bkWarned){
           _bkWarned = true;
-          console.log('[REMC Backup] Cloud backup not saved (status ' + (r?r.status:'?') + '). This is optional — you can still download a backup in Settings → Backup. To enable it, create a public Storage bucket named "remc-backups".');
+          r.text().then(function(t){
+            console.log('[REMC Backup] Cloud backup not saved (HTTP ' + r.status + '): ' + String(t).slice(0,200)
+              + ' -- This is optional. To enable it, create a public Storage bucket named "remc-backups".');
+          }).catch(function(){
+            console.log('[REMC Backup] Cloud backup not saved (HTTP ' + r.status + '). This is optional.');
+          });
         }
       }).catch(function(){
         if(!_bkWarned){
@@ -11651,7 +12223,7 @@ function teamEditProjectBooking(pid){
     _refreshing = true;
     sb.from('remc_state').select('data,updated_at').eq('id', WS).maybeSingle().then(function(res){
       _refreshing = false;
-      if(!res || res.error){ _cloudFail(); return; }
+      if(!res || res.error){ _cloudFail(res && res.error && (res.error.message||res.error)); return; }
       _cloudOk();                                      // reached the cloud → healthy, clear any stale offline
       if(!res.data || !res.data.data) return;
       var stamp = String(res.data.updated_at||'');
@@ -11660,7 +12232,7 @@ function teamEditProjectBooking(pid){
       var d = res.data.data;
       if(d.__client === CLIENT_ID) return;             // our own write
       applyRemoteAndRender(d);
-    }).catch(function(){ _refreshing = false; _cloudFail(); });
+    }).catch(function(e){ _refreshing = false; _cloudFail((e&&(e.message||e))||'network'); });
   }
   function startAutoRefresh(){
     if(_refreshTimer) return;
@@ -11845,10 +12417,10 @@ function teamEditProjectBooking(pid){
         var data = (res && res.data && res.data.data) ? res.data.data : {};
         data[k] = valueStr; data['__client'] = CLIENT_ID;
         sb.from('remc_state').upsert({ id:WS, data:data, updated_at:new Date().toISOString() }).then(function(r2){
-          if(r2 && r2.error) _cloudFail(); else _cloudOk();
+          if(r2 && r2.error) _cloudFail(r2.error.message||r2.error); else _cloudOk();
           if(cb) cb(r2 && r2.error ? (r2.error.message||'error') : null);
         });
-      }).catch(function(){ _cloudFail(); if(cb) cb('network'); });
+      }).catch(function(e){ _cloudFail((e&&(e.message||e))||'network'); if(cb) cb('network'); });
     }catch(e){ if(cb) cb(String(e)); }
   };
   window.remcCloudActive = true;
@@ -11914,6 +12486,7 @@ function teamEditProjectBooking(pid){
     { key:'team',         label:'👥 Team Planning' },
     { key:'employees',    label:'👷 Employees' },
     { key:'projects',     label:'📁 Projects' },
+    { key:'operations',   label:'🚧 Operations' },
     { key:'jobscheduler', label:'📅 Job Scheduler' },
     { key:'settings',     label:'⚙️ Settings' }
   ];
@@ -12978,6 +13551,955 @@ function teamEditProjectBooking(pid){
   function init(){ renderStatus(); restore(); }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', init); else init();
   setInterval(tick, 60000);
+})();
+</script>
+
+
+<!-- ══════════════ OPERATIONS PAGE — engine ══════════════ -->
+<script>
+(function(){
+  'use strict';
+
+  var K_TESTS='remc_compaction_tests', K_TR='remc_machine_transfers', K_SUBS='remc_sub_bookings',
+      K_SEQ='remc_sub_sequence', K_LOG='remc_activity_log', K_OLDSUBS='remc_proj_subs';
+
+  var DEFAULT_SEQ = ['Survey / Set Out','Clear & Grub','Bulk Earthworks','Detailed Excavation',
+    'Sewer / Drainage','Water Service','Power & Comms Conduit','Gas','Subgrade Preparation',
+    'Compaction Test','Kerbing','Road Base','Asphalt / Sealing','Concrete / Footpath','Landscaping','As-Built Survey'];
+
+  var TAB='overview', CAL=new Date(), TFILTER='upcoming', RFILTER='open', SFILTER='open';
+  var EDIT_TEST=null, EDIT_TR=null, EDIT_SUB=null, RES_REF=null, SEQ_EDIT=false;
+
+  // ───────── storage ─────────
+  function j(k,def){ try{ var v=JSON.parse(localStorage.getItem(k)||def); return v==null?JSON.parse(def):v; }catch(e){ return JSON.parse(def); } }
+  function obj(k){ var v=j(k,'{}'); return (v && typeof v==='object' && !Array.isArray(v)) ? v : {}; }
+  function arr(k){ var v=j(k,'[]'); return Array.isArray(v)? v : []; }
+  function save(k,val){
+    var s=JSON.stringify(val);
+    try{ localStorage.setItem(k,s); }catch(e){ alert('Could not save — browser storage is full.'); return false; }
+    try{ if(typeof window.remcCloudUpsertKey==='function') window.remcCloudUpsertKey(k,s); }catch(e){}
+    flashSaved(); return true;
+  }
+  function flashSaved(){
+    var el=document.getElementById('op-saved'); if(!el) return;
+    el.style.opacity='1'; clearTimeout(el._t); el._t=setTimeout(function(){ el.style.opacity='0'; },1800);
+  }
+  function logIt(kind, action, pid, detail){
+    try{
+      var list=arr(K_LOG);
+      var p=projById(pid);
+      list.push({ id:'log_'+Date.now()+'_'+Math.random().toString(36).slice(2,6), at:new Date().toISOString(),
+        by:'Office', user:String(window.REMC_ME||''), app:'PC', projectId:String(pid),
+        projectName: p?(p.name||('Project '+pid)):('Project '+pid), kind:kind, action:action, detail:detail||'' });
+      if(list.length>2000) list=list.slice(-2000);
+      save(K_LOG,list);
+    }catch(e){}
+  }
+
+  // ───────── helpers ─────────
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function projects(){
+    if(typeof PROJ_DATA!=='undefined' && Array.isArray(PROJ_DATA) && PROJ_DATA.length) return PROJ_DATA;
+    return arr('remc_projects');
+  }
+  function projById(id){ return projects().find(function(p){ return String(p.id)===String(id); }) || null; }
+  function projName(id){ var p=projById(id); return p ? (p.name||('Project '+id)) : ('Project '+id); }
+  function projJob(id){ var p=projById(id); return p ? (p.jobNumber||'') : ''; }
+  function pad(n){ return String(n).padStart(2,'0'); }
+  function dkey(d){ return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
+  function today(){ return dkey(new Date()); }
+  function parseK(s){ var p=String(s||'').split('-'); return new Date(+p[0],(+p[1]||1)-1,+p[2]||1); }
+  var MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var DAYN=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  var MONFULL=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  function fmt(s){ if(!s) return 'No date'; var d=parseK(s); return DAYN[d.getDay()]+' '+d.getDate()+' '+MON[d.getMonth()]; }
+  function relDay(s){
+    if(!s) return '';
+    var t=today();
+    if(s===t) return 'Today';
+    var diff=Math.round((parseK(s)-parseK(t))/86400000);
+    if(diff===1) return 'Tomorrow';
+    if(diff===-1) return 'Yesterday';
+    if(diff>1) return 'in '+diff+' days';
+    return Math.abs(diff)+' days ago';
+  }
+  function nid(pre){ return pre+'_'+Date.now()+'_'+Math.random().toString(36).slice(2,6); }
+  function uniq(a){ var s={},o=[]; a.forEach(function(x){ x=String(x||'').trim(); if(x&&!s[x.toLowerCase()]){ s[x.toLowerCase()]=1; o.push(x);} }); return o.sort(); }
+
+  // flatten a {projectId:[items]} store into a list with projectId attached
+  function flat(store){
+    var out=[];
+    Object.keys(store||{}).forEach(function(pid){
+      (Array.isArray(store[pid])?store[pid]:[]).forEach(function(it){
+        var c={}; for(var k in it) c[k]=it[k]; c._pid=String(pid); out.push(c);
+      });
+    });
+    return out;
+  }
+  function putBack(store, pid, id, mutate){
+    var list=Array.isArray(store[String(pid)])?store[String(pid)]:[];
+    for(var i=0;i<list.length;i++){ if(String(list[i].id)===String(id)){ mutate(list[i]); return true; } }
+    return false;
+  }
+
+  // ───────── status logic ─────────
+  // ---- Incoming test requests from supervisors ----
+  // A test booked on the phone is only a REQUEST. It stays out of the calendar
+  // until somebody in the office confirms it.
+  var REQ_LABEL = { pending:'Pending', emailed:'Emailed', booked:'Booked', followup:'Need follow up' };
+  var REQ_PILL  = { pending:'ops-p-pending', emailed:'ops-p-emailed', booked:'ops-p-booked', followup:'ops-p-followup' };
+  function fromSupervisor(t){
+    if(String(t.au_app||'')==='Mobile') return true;
+    var by=String(t.bookedBy||'');
+    return !!by && by.indexOf('Office')<0;
+  }
+  function isConfirmed(t){ return !fromSupervisor(t) || !!(t.office && t.office.confirmed); }
+  function reqStatus(t){ var v=(t.office&&t.office.status)||'pending'; return REQ_LABEL[v]?v:'pending'; }
+  function reqSince(t){
+    var d=(t.office&&t.office.receivedAt)||t.createdAt||'';
+    if(!d) return '';
+    try{ var x=new Date(d); return DAYN[x.getDay()]+' '+x.getDate()+' '+MON[x.getMonth()]+', '+pad(x.getHours())+':'+pad(x.getMinutes()); }catch(e){ return ''; }
+  }
+  function reqAgeDays(t){
+    var d=(t.office&&t.office.receivedAt)||t.createdAt||'';
+    if(!d) return 0;
+    try{ return Math.floor((Date.now()-new Date(d).getTime())/86400000); }catch(e){ return 0; }
+  }
+  function testState(t){
+    if(t.result==='pass') return 'pass';
+    if(t.result==='fail') return 'fail';
+    if(!t.date) return 'nodate';
+    if(t.date < today()) return 'await';
+    if(t.date === today()) return 'today';
+    return 'booked';
+  }
+  function testChipClass(t){ var s=testState(t); return (s==='pass'||s==='fail')?s:(s==='await'?'await':'booked'); }
+  function trDate(r){ return r.officeDate || r.date || ''; }
+  function trState(r){
+    var st=r.status||'requested';
+    if(st==='done') return 'done';
+    var d=trDate(r);
+    if(!d) return 'nodate';
+    if(d < today()) return 'overdue';
+    if(d === today()) return 'today';
+    return st==='scheduled' ? 'scheduled' : 'requested';
+  }
+  function subState(s){
+    if(s.req) return 'request';
+    if(!s.date) return 'nodate';
+    if(s.date === today()) return 'today';
+    if(s.date < today()) return 'past';
+    return s.status==='booked' ? 'booked' : 'pending';
+  }
+
+  // ───────── sequence ─────────
+  function seq(){ var a=arr(K_SEQ); return a.length? a : DEFAULT_SEQ.slice(); }
+  function seqIndex(product){
+    var s=seq(), p=String(product||'').trim().toLowerCase();
+    if(!p) return -1;
+    for(var i=0;i<s.length;i++){ if(String(s[i]).trim().toLowerCase()===p) return i; }
+    for(var k=0;k<s.length;k++){ var q=String(s[k]).trim().toLowerCase();
+      if(q && (p.indexOf(q)>=0 || q.indexOf(p)>=0)) return k; }
+    return -1;
+  }
+  // returns a map id -> reason for every out-of-order booking in one project
+  function seqIssues(list){
+    var bad={}, known=list.filter(function(s){ return s.date && seqIndex(s.product)>=0; })
+      .map(function(s){ var c={}; for(var k in s) c[k]=s[k]; c._si=seqIndex(s.product); return c; });
+    for(var i=0;i<known.length;i++){
+      for(var k2=0;k2<known.length;k2++){
+        var a=known[i], b=known[k2];
+        if(a._si < b._si && a.date > b.date){
+          bad[a.id] = 'Should come before ' + (b.product||'') + ' (' + fmt(b.date) + ')';
+          bad[b.id] = 'Should come after ' + (a.product||'') + ' (' + fmt(a.date) + ')';
+        }
+      }
+    }
+    return bad;
+  }
+
+  // ═════════ TABS ═════════
+  window.opTab=function(name){
+    TAB=name;
+    document.querySelectorAll('#page-operations .ops-tab').forEach(function(el){
+      el.classList.toggle('active', el.getAttribute('data-optab')===name);
+    });
+    document.querySelectorAll('#page-operations .ops-panel').forEach(function(el){
+      el.classList.toggle('active', el.id==='op-panel-'+name);
+    });
+    opRender();
+  };
+
+  window.opRender=function(){
+    try{
+      renderOverview();
+      renderTests();
+      renderTransfers();
+      renderSubs();
+      renderCounts();
+    }catch(e){ console.error('[Operations]', e); }
+  };
+  window.opRenderTests=function(){ renderTests(); };
+  window.opRenderTransfers=function(){ renderTransfers(); };
+  window.opRenderSubs=function(){ renderSubs(); };
+
+  function renderCounts(){
+    var t=flat(obj(K_TESTS)), r=flat(obj(K_TR)), s=flat(obj(K_SUBS));
+    var tPend=t.filter(function(x){ return !isConfirmed(x); }).length;
+    var tOpen=tPend + t.filter(function(x){ if(!isConfirmed(x)) return false;
+      var st=testState(x); return st==='booked'||st==='today'||st==='await'||st==='nodate'; }).length;
+    var rOpen=r.filter(function(x){ return trState(x)!=='done'; }).length;
+    var sOpen=s.filter(function(x){ var st=subState(x); return st!=='past'; }).length;
+    var alerts=buildAlerts().length;
+    setCount('op-cnt-overview', alerts, alerts>0);
+    setCount('op-cnt-tests', tOpen, tPend>0);
+    setCount('op-cnt-transfers', rOpen, false);
+    setCount('op-cnt-subs', sOpen, false);
+  }
+  function setCount(id,n,alert){
+    var el=document.getElementById(id); if(!el) return;
+    el.textContent=n; el.classList.toggle('alert', !!alert);
+  }
+
+  // ═════════ OVERVIEW ═════════
+  function buildAlerts(){
+    var out=[], t=today();
+    var tests=flat(obj(K_TESTS)), trs=flat(obj(K_TR)), subs=flat(obj(K_SUBS));
+
+    tests.forEach(function(x){
+      if(!isConfirmed(x)){
+        var rs=reqStatus(x), age=reqAgeDays(x);
+        out.push({ g:'inbox', tone:'amber', icon:'\uD83D\uDCE5',
+          title:(x.type||'Test')+' \u2014 '+projName(x._pid),
+          meta:'Wanted for '+fmt(x.date)+' \u00B7 sent by '+(x.bookedBy||'supervisor')
+            +' \u00B7 '+REQ_LABEL[rs]+(age>2?(' \u00B7 waiting '+age+' days'):''),
+          kind:'testreq', ref:x });
+        return;
+      }
+      var st=testState(x);
+      if(st==='today') out.push({g:'today',tone:'red',icon:'\uD83E\uDDEA',title:(x.type||'Test')+' — '+projName(x._pid),
+        meta:'Today'+(x.company?(' \u00B7 '+x.company):' \u00B7 no company booked'), kind:'test', ref:x});
+      else if(st==='await') out.push({g:'attn',tone:'amber',icon:'\u23F3',title:(x.type||'Test')+' — '+projName(x._pid),
+        meta:'Done '+fmt(x.date)+' ('+relDay(x.date)+') \u00B7 result still missing', kind:'test', ref:x});
+      else if(st==='nodate') out.push({g:'attn',tone:'amber',icon:'\uD83D\uDCC5',title:(x.type||'Test')+' — '+projName(x._pid),
+        meta:'No date booked yet', kind:'test', ref:x});
+      else if((st==='booked') && !x.company) out.push({g:'attn',tone:'amber',icon:'\uD83C\uDFE2',title:(x.type||'Test')+' — '+projName(x._pid),
+        meta:fmt(x.date)+' \u00B7 no company booked to do it', kind:'test', ref:x});
+    });
+
+    trs.forEach(function(x){
+      var st=trState(x);
+      var what=(x.machine||'Machine')+(x.action==='transfer'?(' \u2192 '+(x.toName||'')):' (remove from site)');
+      if(st==='today') out.push({g:'today',tone:'red',icon:'\uD83D\uDE9A',title:what,
+        meta:'Today \u00B7 from '+(x.fromName||projName(x._pid)), kind:'transfer', ref:x});
+      else if(st==='overdue') out.push({g:'attn',tone:'red',icon:'\u26A0\uFE0F',title:what,
+        meta:'Was due '+fmt(trDate(x))+' ('+relDay(trDate(x))+') \u2014 needs rescheduling', kind:'transfer', ref:x});
+      else if(st==='nodate') out.push({g:'attn',tone:'amber',icon:'\uD83D\uDCC5',title:what,
+        meta:'Requested by '+(x.bookedBy||'supervisor')+' \u00B7 no date set', kind:'transfer', ref:x});
+      else if(st==='requested') out.push({g:'attn',tone:'amber',icon:'\uD83D\uDCE9',title:what,
+        meta:'Requested for '+fmt(trDate(x))+' \u00B7 not confirmed by the office yet', kind:'transfer', ref:x});
+    });
+
+    var byProj={};
+    subs.forEach(function(x){ (byProj[x._pid]=byProj[x._pid]||[]).push(x); });
+    Object.keys(byProj).forEach(function(pid){
+      var bad=seqIssues(byProj[pid]);
+      byProj[pid].forEach(function(x){
+        var st=subState(x);
+        if(st==='today') out.push({g:'today',tone:'red',icon:'\uD83D\uDC77',title:(x.product||'Subcontractor')+' — '+projName(pid),
+          meta:'Today \u00B7 '+(x.name||'no company')+' \u00B7 '+(x.status==='booked'?'Booked':'Pending'), kind:'sub', ref:x});
+        else if(st==='request') out.push({g:'attn',tone:'red',icon:'\u26A0\uFE0F',title:(x.product||'Subcontractor')+' — '+projName(pid),
+          meta:(x.req.type==='postpone' ? ('Supervisor asked to postpone to '+fmt(x.req.date)) : 'Supervisor asked to cancel')
+            +' \u00B7 by '+(x.req.by||'supervisor'), kind:'subreq', ref:x});
+        if(bad[x.id]) out.push({g:'seq',tone:'amber',icon:'\uD83D\uDD00',title:(x.product||'Subcontractor')+' — '+projName(pid),
+          meta:fmt(x.date)+' \u00B7 '+bad[x.id], kind:'sub', ref:x});
+      });
+    });
+
+    return out;
+  }
+
+  function renderOverview(){
+    var alerts=buildAlerts();
+    var t=today();
+    var tests=flat(obj(K_TESTS)), trs=flat(obj(K_TR)), subs=flat(obj(K_SUBS));
+
+    var todayCount=alerts.filter(function(a){ return a.g==='today'; }).length;
+    var attnCount=alerts.filter(function(a){ return a.g==='attn'; }).length;
+    var seqCount=alerts.filter(function(a){ return a.g==='seq'; }).length;
+    var awaitCount=tests.filter(function(x){ return isConfirmed(x) && testState(x)==='await'; }).length;
+    var inboxCount=alerts.filter(function(a){ return a.g==='inbox'; }).length;
+
+    var st=document.getElementById('op-ov-stats');
+    if(st) st.innerHTML=
+      card('amber','To confirm', inboxCount, 'test requests from supervisors')
+     +card('red','Happening today', todayCount, 'tests, transfers and subs')
+     +card('amber','Needs attention', attnCount, 'missing dates, results or confirmations')
+     +card('blue','Awaiting test results', awaitCount, 'test done, result not back yet')
+     +card('green','Sequence issues', seqCount, 'subcontractors booked out of order');
+    if(st) st.style.gridTemplateColumns='repeat(5,1fr)';
+
+    var box=document.getElementById('op-ov-groups'); if(!box) return;
+    var html='';
+    html+=group('\uD83D\uDCE5 Waiting for you to confirm', 'amber', alerts.filter(function(a){return a.g==='inbox';}),
+      'No test requests waiting.');
+    html+=group('\uD83D\uDD34 Today \u2014 '+fmt(t), 'red', alerts.filter(function(a){return a.g==='today';}),
+      'Nothing scheduled for today.');
+    html+=group('\uD83D\uDFE0 Needs attention', 'amber', alerts.filter(function(a){return a.g==='attn';}),
+      'Everything is confirmed and up to date.');
+    html+=group('\uD83D\uDD00 Out of sequence', 'blue', alerts.filter(function(a){return a.g==='seq';}),
+      'All subcontractor bookings follow the work sequence.');
+    box.innerHTML=html;
+  }
+  function card(tone,lbl,val,sub){
+    return '<div class="ops-stat '+tone+'"><div class="ops-stat-lbl">'+esc(lbl)+'</div>'
+      +'<div class="ops-stat-val">'+val+'</div><div class="ops-stat-sub">'+esc(sub)+'</div></div>';
+  }
+  function group(title, tone, items, emptyMsg){
+    var body = items.length ? items.map(function(a){ return alertRow(a); }).join('')
+      : '<div class="ops-empty">'+esc(emptyMsg)+'</div>';
+    return '<div class="ops-group"><div class="ops-group-head">'
+      +'<div class="ops-group-title '+tone+'">'+title+'</div>'
+      +'<div class="ops-group-count">'+items.length+'</div></div>'
+      +'<div class="ops-group-body">'+body+'</div></div>';
+  }
+  function alertRow(a){
+    var act='';
+    if(a.kind==='test') act='<button class="ops-btn sm" onclick="opResOpen(\''+esc(a.ref._pid)+'\',\''+esc(a.ref.id)+'\')">Result</button>'
+      +'<button class="ops-btn sm" onclick="opTestOpen(\''+esc(a.ref._pid)+'\',\''+esc(a.ref.id)+'\')">Edit</button>';
+    if(a.kind==='testreq') act='<button class="ops-btn sm primary" onclick="opTab(\'tests\')">Open inbox</button>';
+    if(a.kind==='transfer') act='<button class="ops-btn sm" onclick="opTrOpen(\''+esc(a.ref._pid)+'\',\''+esc(a.ref.id)+'\')">Schedule</button>';
+    if(a.kind==='sub') act='<button class="ops-btn sm" onclick="opSubOpen(\''+esc(a.ref._pid)+'\',\''+esc(a.ref.id)+'\')">Edit</button>';
+    if(a.kind==='subreq') act='<button class="ops-btn sm primary" onclick="opSubReqAccept(\''+esc(a.ref._pid)+'\',\''+esc(a.ref.id)+'\')">Accept</button>'
+      +'<button class="ops-btn sm" onclick="opSubReqReject(\''+esc(a.ref._pid)+'\',\''+esc(a.ref.id)+'\')">Decline</button>';
+    return '<div class="ops-item '+a.tone+'"><div class="ops-item-icon">'+a.icon+'</div>'
+      +'<div class="ops-item-main"><div class="ops-item-title">'+esc(a.title)+'</div>'
+      +'<div class="ops-item-meta">'+esc(a.meta)+'</div></div>'
+      +'<div class="ops-item-actions">'+act+'</div></div>';
+  }
+
+  // ═════════ TESTS ═════════
+  window.opCalMove=function(n){ CAL=new Date(CAL.getFullYear(), CAL.getMonth()+n, 1); renderTests(); };
+  window.opCalToday=function(){ CAL=new Date(); renderTests(); };
+  window.opTestFilter=function(f){
+    TFILTER=f;
+    document.querySelectorAll('#op-panel-tests [data-tf]').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-tf')===f); });
+    renderTests();
+  };
+
+  function renderTests(){
+    var store=obj(K_TESTS), all=flat(store);
+    var q=String((document.getElementById('op-test-search')||{}).value||'').trim().toLowerCase();
+    if(q) all=all.filter(function(x){
+      return (projName(x._pid)+' '+(x.type||'')+' '+(x.company||'')+' '+(x.notes||'')).toLowerCase().indexOf(q)>=0; });
+
+    // Requests waiting for the office stay OUT of the calendar and the list.
+    var incoming = all.filter(function(x){ return !isConfirmed(x); })
+      .sort(function(a,b){ return String((a.office&&a.office.receivedAt)||a.createdAt||'') < String((b.office&&b.office.receivedAt)||b.createdAt||'') ? 1 : -1; });
+    var list = all.filter(isConfirmed);
+    renderInbox(incoming);
+
+    // calendar
+    var mLbl=document.getElementById('op-cal-month');
+    if(mLbl) mLbl.textContent=MONFULL[CAL.getMonth()]+' '+CAL.getFullYear();
+    var grid=document.getElementById('op-cal-grid');
+    if(grid){
+      var first=new Date(CAL.getFullYear(), CAL.getMonth(), 1);
+      var offset=(first.getDay()+6)%7;              // week starts Monday
+      var start=new Date(first); start.setDate(first.getDate()-offset);
+      var byDay={};
+      list.forEach(function(x){ if(x.date) (byDay[x.date]=byDay[x.date]||[]).push(x); });
+      var cells='';
+      for(var i=0;i<42;i++){
+        var d=new Date(start); d.setDate(start.getDate()+i);
+        var k=dkey(d), other=(d.getMonth()!==CAL.getMonth()), wk=(d.getDay()===0||d.getDay()===6);
+        var cls='ops-cal-day'+(other?' other':'')+(wk?' wkend':'')+(k===today()?' today':'');
+        var chips=(byDay[k]||[]).map(function(x){
+          return '<div class="ops-chip '+testChipClass(x)+'" onclick="opResOpen(\''+esc(x._pid)+'\',\''+esc(x.id)+'\')" title="'+esc((x.type||'')+' — '+projName(x._pid)+(x.company?(' — '+x.company):''))+'">'
+            +'<div class="ops-chip-proj">'+esc(projName(x._pid))+'</div>'
+            +'<div class="ops-chip-line">'+esc(x.type||'Test')+'</div>'
+            +'<div class="ops-chip-line">'+esc(x.company||'\u2014 no company')+'</div></div>';
+        }).join('');
+        cells+='<div class="'+cls+'"><div class="ops-cal-num"><span>'+d.getDate()+'</span></div>'+chips+'</div>';
+      }
+      grid.innerHTML=cells;
+    }
+
+    // list
+    var box=document.getElementById('op-test-list'); if(!box) return;
+    var f=list.filter(function(x){
+      var s=testState(x);
+      if(TFILTER==='upcoming') return s==='booked'||s==='today'||s==='nodate';
+      if(TFILTER==='await') return s==='await';
+      if(TFILTER==='done') return s==='pass'||s==='fail';
+      return true;
+    }).sort(function(a,b){ return String(a.date||'9999')<String(b.date||'9999')?-1:1; });
+
+    if(!f.length){ box.innerHTML='<div class="ops-empty-big">No tests in this view.</div>'; return; }
+    box.innerHTML='<div class="ops-group"><div class="ops-group-body">'+f.map(function(x){
+      var s=testState(x), tone = s==='today'?'red' : s==='await'?'amber' : s==='fail'?'red' : s==='pass'?'green' : s==='nodate'?'amber':'blue';
+      var pill = s==='today'?'<span class="ops-pill ops-p-today">Today</span>'
+        : s==='await'?'<span class="ops-pill ops-p-await">Awaiting result</span>'
+        : s==='pass'?'<span class="ops-pill ops-p-pass">Passed</span>'
+        : s==='fail'?'<span class="ops-pill ops-p-fail">Failed</span>'
+        : s==='nodate'?'<span class="ops-pill ops-p-grey">No date</span>'
+        : '<span class="ops-pill ops-p-booked">Booked</span>';
+      return '<div class="ops-item '+tone+'"><div class="ops-item-icon">\uD83E\uDDEA</div><div class="ops-item-main">'
+        +'<div class="ops-item-title">'+esc(x.type||'Test')+' \u00B7 '+esc(projName(x._pid))
+        +(projJob(x._pid)?(' <span style="color:var(--red);font-size:11px">'+esc(projJob(x._pid))+'</span>'):'')+'</div>'
+        +'<div class="ops-item-meta">'+esc(fmt(x.date))+(x.date?(' \u00B7 '+esc(relDay(x.date))):'')
+        +' \u00B7 '+(x.company?esc(x.company):'<span style="color:var(--amber);font-weight:700">no company booked</span>')
+        +(x.bookedBy?(' \u00B7 booked by '+esc(x.bookedBy)):'')+'</div>'
+        +(x.notes?('<div class="ops-item-note">'+esc(x.notes)+'</div>'):'')
+        +(x.resultNotes?('<div class="ops-item-note">Result: '+esc(x.resultNotes)+'</div>'):'')
+        +'</div><div class="ops-item-actions">'+pill
+        +'<button class="ops-btn sm" onclick="opResOpen(\''+esc(x._pid)+'\',\''+esc(x.id)+'\')">Result</button>'
+        +'<button class="ops-btn sm" onclick="opTestOpen(\''+esc(x._pid)+'\',\''+esc(x.id)+'\')">Edit</button>'
+        +'<button class="ops-btn sm" onclick="opTestDelete(\''+esc(x._pid)+'\',\''+esc(x.id)+'\')">\u2715</button>'
+        +'</div></div>';
+    }).join('')+'</div></div>';
+  }
+
+  function renderInbox(incoming){
+    var box=document.getElementById('op-test-inbox'); if(!box) return;
+    if(!incoming.length){ box.innerHTML=''; return; }
+    box.innerHTML='<div class="ops-inbox"><div class="ops-inbox-head">'
+      +'<div class="ops-inbox-title">\uD83D\uDCE5 Incoming test requests</div>'
+      +'<div class="ops-inbox-sub">Sent by supervisors \u2014 they do not show on the calendar until you confirm them.</div>'
+      +'<div class="ops-group-count" style="margin-left:auto">'+incoming.length+'</div></div>'
+      +'<div class="ops-inbox-body">'+incoming.map(inboxRow).join('')+'</div></div>';
+  }
+  function inboxRow(x){
+    var st=reqStatus(x), age=reqAgeDays(x);
+    var opts=Object.keys(REQ_LABEL).map(function(k){
+      return '<option value="'+k+'"'+(k===st?' selected':'')+'>'+esc(REQ_LABEL[k])+'</option>'; }).join('');
+    var isNew = !(x.office && x.office.status);
+    return '<div class="ops-item amber"><div class="ops-item-icon">\uD83D\uDCE5</div>'
+      +'<div class="ops-item-main">'
+      +'<div class="ops-item-title">'+esc(x.type||'Test')+' \u00B7 '+esc(projName(x._pid))
+      +(projJob(x._pid)?(' <span style="color:var(--red);font-size:11px">'+esc(projJob(x._pid))+'</span>'):'')+'</div>'
+      +'<div class="ops-item-meta">Wanted for <strong>'+esc(fmt(x.date))+'</strong>'
+      +(x.date?(' \u00B7 '+esc(relDay(x.date))):'')
+      +' \u00B7 sent by '+esc(x.bookedBy||'supervisor')+'</div>'
+      +'<div class="ops-item-meta" style="color:var(--muted)">Received '+esc(reqSince(x)||'\u2014')
+      +(age>2?(' \u00B7 <span style="color:var(--red);font-weight:700">waiting '+age+' days</span>'):'')+'</div>'
+      +(x.notes?('<div class="ops-item-note">'+esc(x.notes)+'</div>'):'')
+      +'<div class="ops-row">'
+      +'<span class="ops-row-lbl">Status</span>'
+      +'<select class="ops-sel" onchange="opReqStatus(\''+esc(x._pid)+'\',\''+esc(x.id)+'\',this.value)">'+opts+'</select>'
+      +'<span class="ops-row-lbl">Company</span>'
+      +'<input class="ops-inp-sm" placeholder="who will do it" value="'+esc(x.company||'')+'" '
+      +'onchange="opReqCompany(\''+esc(x._pid)+'\',\''+esc(x.id)+'\',this.value)">'
+      +'<span class="ops-row-lbl">Date</span>'
+      +'<input class="ops-inp-sm" style="width:135px" type="date" value="'+esc(x.date||'')+'" '
+      +'onchange="opReqDate(\''+esc(x._pid)+'\',\''+esc(x.id)+'\',this.value)">'
+      +'<button class="ops-btn sm primary" onclick="opReqConfirm(\''+esc(x._pid)+'\',\''+esc(x.id)+'\')">\u2713 Confirm</button>'
+      +'<button class="ops-btn sm" onclick="opReqDecline(\''+esc(x._pid)+'\',\''+esc(x.id)+'\')">Decline</button>'
+      +'</div></div>'
+      +'<div class="ops-item-actions">'
+      +(isNew?'<span class="ops-pill ops-p-new">New</span>':'')
+      +'<span class="ops-pill '+REQ_PILL[st]+'">'+esc(REQ_LABEL[st])+'</span>'
+      +'</div></div>';
+  }
+
+  function reqTouch(pid,id,mutate,logAction,logDetail){
+    var store=obj(K_TESTS), t=null;
+    putBack(store,pid,id,function(x){
+      t=x;
+      if(!x.office) x.office={ confirmed:false, status:'pending', receivedAt:x.createdAt||new Date().toISOString() };
+      mutate(x);
+      x.au_eby='Office'; x.au_eat=new Date().toISOString(); x.au_eapp='PC';
+    });
+    if(!t) return null;
+    if(save(K_TESTS,store) && logAction) logIt('test',logAction,pid,logDetail(t));
+    return t;
+  }
+  window.opReqStatus=function(pid,id,v){
+    reqTouch(pid,id,function(x){ x.office.status=v; },'request_status',
+      function(t){ return (t.type||'Test')+' \u00B7 marked as '+(REQ_LABEL[v]||v); });
+    opRender();
+  };
+  window.opReqCompany=function(pid,id,v){
+    reqTouch(pid,id,function(x){ x.company=String(v||'').trim(); },null,null);
+    opRender();
+  };
+  window.opReqDate=function(pid,id,v){
+    reqTouch(pid,id,function(x){ if(!x.office.wantedDate) x.office.wantedDate=x.date; x.date=v; },null,null);
+    opRender();
+  };
+  window.opReqConfirm=function(pid,id){
+    var cur=(obj(K_TESTS)[String(pid)]||[]).find(function(x){ return String(x.id)===String(id); });
+    if(!cur) return;
+    if(!cur.date){ alert('Please set a date before confirming this test.'); return; }
+    if(!String(cur.company||'').trim()
+       && !confirm('No company is set for this test yet.\n\nConfirm it anyway?')) return;
+    reqTouch(pid,id,function(x){
+      x.office.confirmed=true; x.office.status='booked';
+      x.office.confirmedAt=new Date().toISOString();
+      x.office.confirmedBy=String(window.REMC_ME||'Office');
+    },'request_confirmed',function(t){
+      return (t.type||'Test')+' \u00B7 confirmed for '+fmt(t.date)+(t.company?(' \u00B7 '+t.company):'')
+        +(t.office && t.office.wantedDate && t.office.wantedDate!==t.date ? (' \u00B7 moved from '+fmt(t.office.wantedDate)) : '');
+    });
+    opRender();
+  };
+  window.opReqDecline=function(pid,id){
+    if(!confirm('Decline this test request?\n\nIt will be removed and the supervisor will see it in the history.')) return;
+    var store=obj(K_TESTS);
+    var t=(store[String(pid)]||[]).find(function(x){ return String(x.id)===String(id); });
+    store[String(pid)]=(store[String(pid)]||[]).filter(function(x){ return String(x.id)!==String(id); });
+    if(save(K_TESTS,store)) logIt('test','request_declined',pid,((t&&t.type)||'Test')+' \u00B7 declined by the office');
+    opRender();
+  };
+
+  function fillProjSelect(id, val){
+    var s=document.getElementById(id); if(!s) return;
+    var ps=projects().slice().sort(function(a,b){ return String(a.name||'').localeCompare(String(b.name||'')); });
+    s.innerHTML='<option value="">— Choose a project —</option>'+ps.map(function(p){
+      return '<option value="'+esc(p.id)+'">'+esc((p.jobNumber?(p.jobNumber+' \u00B7 '):'')+(p.name||('Project '+p.id)))+'</option>';
+    }).join('');
+    if(val!=null) s.value=String(val);
+  }
+  function fillDatalist(id, values){
+    var d=document.getElementById(id); if(!d) return;
+    d.innerHTML=uniq(values).map(function(v){ return '<option value="'+esc(v)+'">'; }).join('');
+  }
+
+  window.opTestOpen=function(pid,id){
+    EDIT_TEST = (pid!=null && id) ? {pid:String(pid), id:String(id)} : null;
+    fillProjSelect('op-test-proj', pid);
+    fillDatalist('op-test-companies', flat(obj(K_TESTS)).map(function(x){ return x.company; }));
+    var t=null;
+    if(EDIT_TEST){ t=(obj(K_TESTS)[EDIT_TEST.pid]||[]).find(function(x){ return String(x.id)===EDIT_TEST.id; }); }
+    document.getElementById('op-test-modal-title').textContent = t ? 'Edit compaction test' : 'Book a compaction test';
+    setVal('op-test-date', t?t.date:'');
+    setVal('op-test-type', t?t.type:'');
+    setVal('op-test-company', t?(t.company||''):'');
+    setVal('op-test-notes', t?(t.notes||''):'');
+    document.getElementById('op-test-modal').classList.add('open');
+  };
+  window.opTestClose=function(){ document.getElementById('op-test-modal').classList.remove('open'); EDIT_TEST=null; };
+  window.opTestSave=function(){
+    var pid=getVal('op-test-proj'), date=getVal('op-test-date'), type=getVal('op-test-type').trim(),
+        company=getVal('op-test-company').trim(), notes=getVal('op-test-notes').trim();
+    if(!pid){ alert('Please choose a project.'); return; }
+    if(!type){ alert('Please enter the test type.'); return; }
+    var store=obj(K_TESTS);
+    if(EDIT_TEST){
+      var old=(store[EDIT_TEST.pid]||[]).find(function(x){ return String(x.id)===EDIT_TEST.id; });
+      var changes=[];
+      if(old){
+        if(old.date!==date) changes.push('date '+fmt(old.date)+' \u2192 '+fmt(date));
+        if(old.type!==type) changes.push('type '+(old.type||'')+' \u2192 '+type);
+        if((old.company||'')!==company) changes.push('company '+(old.company||'none')+' \u2192 '+(company||'none'));
+      }
+      if(String(EDIT_TEST.pid)!==String(pid)){
+        store[EDIT_TEST.pid]=(store[EDIT_TEST.pid]||[]).filter(function(x){ return String(x.id)!==EDIT_TEST.id; });
+        if(!store[String(pid)]) store[String(pid)]=[];
+        old.date=date; old.type=type; old.company=company; old.notes=notes;
+        store[String(pid)].push(old);
+      } else {
+        putBack(store, pid, EDIT_TEST.id, function(x){ x.date=date; x.type=type; x.company=company; x.notes=notes;
+          x.au_eby='Office'; x.au_eat=new Date().toISOString(); x.au_eapp='PC'; });
+      }
+      if(save(K_TESTS,store)) logIt('test','edited',pid,(type||'Test')+(changes.length?(' \u00B7 '+changes.join(', ')):''));
+    } else {
+      if(!store[String(pid)]) store[String(pid)]=[];
+      store[String(pid)].push({ id:nid('ct'), date:date, type:type, company:company, notes:notes,
+        createdAt:new Date().toISOString(), bookedBy:'Office', au_user:String(window.REMC_ME||''), au_app:'PC',
+        office:{ confirmed:true, status:'booked', receivedAt:new Date().toISOString(),
+                 confirmedAt:new Date().toISOString(), confirmedBy:String(window.REMC_ME||'Office') } });
+      if(save(K_TESTS,store)) logIt('test','created',pid,type+(date?(' \u00B7 '+fmt(date)):'')+(company?(' \u00B7 '+company):''));
+    }
+    opTestClose(); opRender();
+  };
+  window.opTestDelete=function(pid,id){
+    if(!confirm('Remove this compaction test?')) return;
+    var store=obj(K_TESTS);
+    var t=(store[String(pid)]||[]).find(function(x){ return String(x.id)===String(id); });
+    store[String(pid)]=(store[String(pid)]||[]).filter(function(x){ return String(x.id)!==String(id); });
+    if(save(K_TESTS,store)) logIt('test','deleted',pid,(t&&t.type)||'Test');
+    opRender();
+  };
+
+  window.opResOpen=function(pid,id){
+    var t=(obj(K_TESTS)[String(pid)]||[]).find(function(x){ return String(x.id)===String(id); });
+    if(!t) return;
+    RES_REF={pid:String(pid), id:String(id)};
+    document.getElementById('op-res-info').innerHTML=
+      '<strong>'+esc(t.type||'Test')+'</strong> \u00B7 '+esc(projName(pid))+'<br>'
+      +esc(fmt(t.date))+(t.company?(' \u00B7 '+esc(t.company)):' \u00B7 no company booked');
+    setVal('op-res-value', t.result||'');
+    setVal('op-res-notes', t.resultNotes||'');
+    document.getElementById('op-res-modal').classList.add('open');
+  };
+  window.opResClose=function(){ document.getElementById('op-res-modal').classList.remove('open'); RES_REF=null; };
+  window.opResSave=function(){
+    if(!RES_REF) return;
+    var v=getVal('op-res-value'), n=getVal('op-res-notes').trim();
+    var store=obj(K_TESTS), t=null;
+    putBack(store, RES_REF.pid, RES_REF.id, function(x){
+      t=x; x.result=v||''; x.resultNotes=n;
+      x.resultAt = v ? new Date().toISOString() : '';
+      x.au_eby='Office'; x.au_eat=new Date().toISOString(); x.au_eapp='PC';
+    });
+    if(save(K_TESTS,store)) logIt('test', v?('result_'+v):'result_cleared', RES_REF.pid,
+      ((t&&t.type)||'Test')+(v?(' \u00B7 '+(v==='pass'?'Passed':'Failed')):' \u00B7 awaiting result')+(n?(' \u00B7 '+n):''));
+    opResClose(); opRender();
+  };
+
+  // ═════════ TRANSFERS ═════════
+  window.opTrFilter=function(f){
+    RFILTER=f;
+    document.querySelectorAll('#op-panel-transfers [data-rf]').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-rf')===f); });
+    renderTransfers();
+  };
+  window.opTrActionChange=function(){
+    var a=getVal('op-tr-action');
+    var w=document.getElementById('op-tr-to-wrap');
+    if(w) w.style.display = (a==='transfer') ? '' : 'none';
+  };
+
+  function renderTransfers(){
+    var list=flat(obj(K_TR));
+    var q=String((document.getElementById('op-tr-search')||{}).value||'').trim().toLowerCase();
+    if(q) list=list.filter(function(x){
+      return ((x.machine||'')+' '+(x.fromName||'')+' '+(x.toName||'')+' '+projName(x._pid)+' '+(x.notes||'')).toLowerCase().indexOf(q)>=0; });
+
+    var f=list.filter(function(x){
+      var s=trState(x);
+      if(RFILTER==='open') return s!=='done';
+      if(RFILTER==='today') return s==='today';
+      if(RFILTER==='done') return s==='done';
+      return true;
+    }).sort(function(a,b){
+      var ad=trDate(a)||'9999', bd=trDate(b)||'9999';
+      return ad<bd?-1:(ad>bd?1:0);
+    });
+
+    var box=document.getElementById('op-tr-list'); if(!box) return;
+    if(!f.length){ box.innerHTML='<div class="ops-empty-big">No machine transfers in this view.</div>'; return; }
+    box.innerHTML='<div class="ops-group"><div class="ops-group-body">'+f.map(function(x){
+      var s=trState(x);
+      var tone = (s==='today'||s==='overdue')?'red' : (s==='nodate'||s==='requested')?'amber' : s==='done'?'grey':'blue';
+      var pill = s==='today'?'<span class="ops-pill ops-p-today">Today</span>'
+        : s==='overdue'?'<span class="ops-pill ops-p-fail">Overdue</span>'
+        : s==='nodate'?'<span class="ops-pill ops-p-grey">No date</span>'
+        : s==='requested'?'<span class="ops-pill ops-p-pending">Requested</span>'
+        : s==='done'?'<span class="ops-pill ops-p-done">Done</span>'
+        : '<span class="ops-pill ops-p-booked">Scheduled</span>';
+      var route = x.action==='transfer'
+        ? esc(x.fromName||projName(x._pid))+' \u2192 <strong>'+esc(x.toName||'?')+'</strong>'
+        : 'Remove from '+esc(x.fromName||projName(x._pid));
+      return '<div class="ops-item '+tone+'"><div class="ops-item-icon">'+(x.action==='transfer'?'\uD83D\uDE9A':'\u21A9\uFE0F')+'</div>'
+        +'<div class="ops-item-main"><div class="ops-item-title">'+esc(x.machine||'Machine')+'</div>'
+        +'<div class="ops-item-meta">'+route+'</div>'
+        +'<div class="ops-item-meta">'+esc(fmt(trDate(x)))+(trDate(x)?(' \u00B7 '+esc(relDay(trDate(x)))):'')
+        +(x.officeDate && x.date && x.officeDate!==x.date ? (' \u00B7 <span style="color:var(--amber);font-weight:700">rescheduled from '+esc(fmt(x.date))+'</span>') : '')
+        +(x.bookedBy?(' \u00B7 requested by '+esc(x.bookedBy)):'')+'</div>'
+        +(x.notes?('<div class="ops-item-note">Site: '+esc(x.notes)+'</div>'):'')
+        +(x.officeNotes?('<div class="ops-item-note">Office: '+esc(x.officeNotes)+'</div>'):'')
+        +'</div><div class="ops-item-actions">'+pill
+        +(s!=='done'?'<button class="ops-btn sm" onclick="opTrDone(\''+esc(x._pid)+'\',\''+esc(x.id)+'\')">Mark done</button>':'')
+        +'<button class="ops-btn sm" onclick="opTrOpen(\''+esc(x._pid)+'\',\''+esc(x.id)+'\')">Edit</button>'
+        +'<button class="ops-btn sm" onclick="opTrDelete(\''+esc(x._pid)+'\',\''+esc(x.id)+'\')">\u2715</button>'
+        +'</div></div>';
+    }).join('')+'</div></div>';
+  }
+
+  window.opTrOpen=function(pid,id){
+    EDIT_TR = (pid!=null && id) ? {pid:String(pid), id:String(id)} : null;
+    fillProjSelect('op-tr-from', pid);
+    fillProjSelect('op-tr-to', '');
+    var machines=arr('remc_machine_names');
+    if(!machines.length) machines=['5T Excavator','8T Excavator','13T Excavator','20T Excavator','30T Excavator','Loader','Dozer','Skid Steer'];
+    fillDatalist('op-tr-machines', machines);
+    var r=null;
+    if(EDIT_TR){ r=(obj(K_TR)[EDIT_TR.pid]||[]).find(function(x){ return String(x.id)===EDIT_TR.id; }); }
+    document.getElementById('op-tr-modal-title').textContent = r ? 'Edit machine transfer' : 'New machine transfer';
+    setVal('op-tr-machine', r?r.machine:'');
+    setVal('op-tr-action', r?(r.action||'transfer'):'transfer');
+    setVal('op-tr-to', r?(r.toId||''):'');
+    setVal('op-tr-date', r?trDate(r):'');
+    setVal('op-tr-status', r?(r.status||'requested'):'scheduled');
+    setVal('op-tr-notes', r?(r.officeNotes||''):'');
+    opTrActionChange();
+    document.getElementById('op-tr-modal').classList.add('open');
+  };
+  window.opTrClose=function(){ document.getElementById('op-tr-modal').classList.remove('open'); EDIT_TR=null; };
+  window.opTrSave=function(){
+    var fromId=getVal('op-tr-from'), machine=getVal('op-tr-machine').trim(), action=getVal('op-tr-action'),
+        toId=getVal('op-tr-to'), date=getVal('op-tr-date'), status=getVal('op-tr-status'), notes=getVal('op-tr-notes').trim();
+    if(!fromId){ alert('Please choose the site the machine is on.'); return; }
+    if(!machine){ alert('Please enter which machine.'); return; }
+    if(action==='transfer' && !toId){ alert('Please choose the destination site.'); return; }
+    var fp=projById(fromId), tp=toId?projById(toId):null;
+    var store=obj(K_TR);
+    if(EDIT_TR){
+      var old=(store[EDIT_TR.pid]||[]).find(function(x){ return String(x.id)===EDIT_TR.id; });
+      var ch=[];
+      if(old){
+        if(trDate(old)!==date) ch.push('date '+fmt(trDate(old))+' \u2192 '+fmt(date));
+        if((old.status||'requested')!==status) ch.push('status \u2192 '+status);
+        if((old.machine||'')!==machine) ch.push('machine '+(old.machine||'')+' \u2192 '+machine);
+      }
+      putBack(store, EDIT_TR.pid, EDIT_TR.id, function(x){
+        x.machine=machine; x.action=action; x.officeDate=date; x.status=status; x.officeNotes=notes;
+        if(action==='transfer'){ x.toId=String(toId); x.toName=tp?(tp.name||('Project '+toId)):''; x.toAddr=(tp&&tp.address)||''; }
+        else { delete x.toId; delete x.toName; delete x.toAddr; }
+        x.au_eby='Office'; x.au_eat=new Date().toISOString(); x.au_eapp='PC';
+      });
+      if(save(K_TR,store)) logIt('transfer','edited',EDIT_TR.pid, machine+(ch.length?(' \u00B7 '+ch.join(', ')):''));
+    } else {
+      if(!store[String(fromId)]) store[String(fromId)]=[];
+      var rec={ id:nid('mt'), machine:machine, action:action,
+        fromId:String(fromId), fromName:fp?(fp.name||('Project '+fromId)):'', fromAddr:(fp&&fp.address)||'',
+        date:date, officeDate:date, status:status, officeNotes:notes,
+        createdAt:new Date().toISOString(), bookedBy:'Office', au_user:String(window.REMC_ME||''), au_app:'PC' };
+      if(action==='transfer'){ rec.toId=String(toId); rec.toName=tp?(tp.name||('Project '+toId)):''; rec.toAddr=(tp&&tp.address)||''; }
+      store[String(fromId)].push(rec);
+      if(save(K_TR,store)) logIt('transfer','created',fromId, machine+(action==='transfer'?(' \u2192 '+rec.toName):' (remove)')+(date?(' \u00B7 '+fmt(date)):''));
+    }
+    opTrClose(); opRender();
+  };
+  window.opTrDone=function(pid,id){
+    var store=obj(K_TR), m='';
+    putBack(store,pid,id,function(x){ m=x.machine||'Machine'; x.status='done'; x.doneAt=new Date().toISOString(); x.au_eby='Office'; x.au_eapp='PC'; });
+    if(save(K_TR,store)) logIt('transfer','completed',pid,m);
+    opRender();
+  };
+  window.opTrDelete=function(pid,id){
+    if(!confirm('Remove this transfer request?')) return;
+    var store=obj(K_TR);
+    var r=(store[String(pid)]||[]).find(function(x){ return String(x.id)===String(id); });
+    store[String(pid)]=(store[String(pid)]||[]).filter(function(x){ return String(x.id)!==String(id); });
+    if(save(K_TR,store)) logIt('transfer','deleted',pid,(r&&r.machine)||'Machine');
+    opRender();
+  };
+
+  // ═════════ SUBCONTRACTORS ═════════
+  window.opSubFilter=function(f){
+    SFILTER=f;
+    document.querySelectorAll('#op-panel-subs [data-sf]').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-sf')===f); });
+    renderSubs();
+  };
+  window.opSeqToggle=function(){
+    SEQ_EDIT=!SEQ_EDIT;
+    var a=document.getElementById('op-seq-add'); if(a) a.style.display=SEQ_EDIT?'':'none';
+    var b=document.getElementById('op-seq-toggle'); if(b) b.textContent=SEQ_EDIT?'Done':'Edit';
+    renderSeq();
+  };
+  window.opSeqAdd=function(){
+    var el=document.getElementById('op-seq-new'); if(!el) return;
+    var v=String(el.value||'').trim(); if(!v) return;
+    var s=seq(); s.push(v); save(K_SEQ,s); el.value=''; renderSeq(); renderSubs(); renderOverview(); renderCounts();
+  };
+  window.opSeqRemove=function(i){ var s=seq(); s.splice(i,1); save(K_SEQ,s); renderSeq(); renderSubs(); renderOverview(); renderCounts(); };
+  window.opSeqReset=function(){
+    if(!confirm('Reset the work sequence back to the default list?')) return;
+    save(K_SEQ, DEFAULT_SEQ.slice()); renderSeq(); renderSubs(); renderOverview(); renderCounts();
+  };
+  function renderSeq(){
+    var box=document.getElementById('op-seq-list'); if(!box) return;
+    box.innerHTML=seq().map(function(s,i){
+      return '<div class="ops-seq-item"><span class="ops-seq-n">'+(i+1)+'</span>'+esc(s)
+        +(SEQ_EDIT?('<button class="ops-seq-x" onclick="opSeqRemove('+i+')">\u2715</button>'):'')+'</div>';
+    }).join('');
+  }
+
+  function renderSubs(){
+    renderSeq();
+    var store=obj(K_SUBS), list=flat(store);
+    var q=String((document.getElementById('op-sub-search')||{}).value||'').trim().toLowerCase();
+    if(q) list=list.filter(function(x){
+      return ((x.product||'')+' '+(x.name||'')+' '+projName(x._pid)+' '+(x.notes||'')).toLowerCase().indexOf(q)>=0; });
+
+    var byProj={};
+    list.forEach(function(x){ (byProj[x._pid]=byProj[x._pid]||[]).push(x); });
+
+    var box=document.getElementById('op-sub-list'); if(!box) return;
+    var pids=Object.keys(byProj).sort(function(a,b){ return projName(a).localeCompare(projName(b)); });
+    var html='';
+    pids.forEach(function(pid){
+      var all=byProj[pid].slice().sort(function(a,b){ return String(a.date||'9999')<String(b.date||'9999')?-1:1; });
+      var bad=seqIssues(byProj[pid]);
+      var rows=all.filter(function(x){
+        var s=subState(x);
+        if(SFILTER==='open') return s!=='past';
+        if(SFILTER==='issues') return !!bad[x.id] || s==='request' || s==='nodate';
+        return true;
+      });
+      if(!rows.length) return;
+      html+='<div class="ops-proj-block"><div class="ops-proj-head">'
+        +(projJob(pid)?('<span class="ops-proj-job">'+esc(projJob(pid))+'</span>'):'')
+        +'<span class="ops-proj-name">'+esc(projName(pid))+'</span>'
+        +'<span class="ops-group-count" style="margin-left:auto">'+rows.length+'</span></div>';
+      html+=rows.map(function(x){
+        var s=subState(x), issue=bad[x.id];
+        var tone = s==='today'?'red' : s==='request'?'red' : issue?'amber' : s==='nodate'?'amber' : s==='past'?'grey' : s==='booked'?'green':'blue';
+        var pill = s==='today'?'<span class="ops-pill ops-p-today">Today</span>'
+          : s==='nodate'?'<span class="ops-pill ops-p-grey">No date</span>'
+          : x.status==='booked'?'<span class="ops-pill ops-p-done">Booked</span>'
+          : '<span class="ops-pill ops-p-pending">Pending</span>';
+        var reqBox='';
+        if(x.req){
+          reqBox='<div class="ops-req">\u26A0\uFE0F '
+            +(x.req.type==='postpone' ? ('Supervisor asked to postpone to '+esc(fmt(x.req.date))) : 'Supervisor asked to cancel')
+            +' \u00B7 '+esc(x.req.by||'supervisor')
+            +'<button class="ops-btn sm primary" onclick="opSubReqAccept(\''+esc(pid)+'\',\''+esc(x.id)+'\')">Accept</button>'
+            +'<button class="ops-btn sm" onclick="opSubReqReject(\''+esc(pid)+'\',\''+esc(x.id)+'\')">Decline</button></div>';
+        }
+        return '<div class="ops-item '+tone+'"><div class="ops-item-icon">\uD83D\uDC77</div><div class="ops-item-main">'
+          +'<div class="ops-item-title">'+esc(x.product||'Subcontractor')+'</div>'
+          +'<div class="ops-item-meta">'+esc(x.name||'no company')+' \u00B7 '+esc(fmt(x.date))
+          +(x.date?(' \u00B7 '+esc(relDay(x.date))):'')+'</div>'
+          +(x.notes?('<div class="ops-item-note">'+esc(x.notes)+'</div>'):'')
+          +(issue?('<div class="ops-warn">\uD83D\uDD00 '+esc(issue)+'</div>'):'')
+          +reqBox
+          +'</div><div class="ops-item-actions">'+pill
+          +'<button class="ops-btn sm" onclick="opSubOpen(\''+esc(pid)+'\',\''+esc(x.id)+'\')">Edit</button>'
+          +'<button class="ops-btn sm" onclick="opSubDelete(\''+esc(pid)+'\',\''+esc(x.id)+'\')">\u2715</button>'
+          +'</div></div>';
+      }).join('');
+      html+='</div>';
+    });
+    box.innerHTML = html || '<div class="ops-empty-big">No subcontractor bookings in this view.<br><span style="font-size:12px">Use <strong>+ Book a subcontractor</strong> to add one \u2014 it shows up straight away on the supervisor app.</span></div>';
+  }
+
+  window.opSubOpen=function(pid,id){
+    EDIT_SUB = (pid!=null && id) ? {pid:String(pid), id:String(id)} : null;
+    fillProjSelect('op-sub-proj', pid);
+    fillDatalist('op-sub-trades', seq().concat(flat(obj(K_SUBS)).map(function(x){ return x.product; })));
+    fillDatalist('op-sub-companies', flat(obj(K_SUBS)).map(function(x){ return x.name; }));
+    var s=null;
+    if(EDIT_SUB){ s=(obj(K_SUBS)[EDIT_SUB.pid]||[]).find(function(x){ return String(x.id)===EDIT_SUB.id; }); }
+    document.getElementById('op-sub-modal-title').textContent = s ? 'Edit subcontractor booking' : 'Book a subcontractor';
+    setVal('op-sub-product', s?(s.product||''):'');
+    setVal('op-sub-name', s?(s.name||''):'');
+    setVal('op-sub-date', s?(s.date||''):'');
+    setVal('op-sub-status', s?(s.status||'pending'):'pending');
+    setVal('op-sub-notes', s?(s.notes||''):'');
+    var w=document.getElementById('op-sub-seqwarn'); if(w) w.innerHTML='';
+    document.getElementById('op-sub-modal').classList.add('open');
+  };
+  window.opSubClose=function(){ document.getElementById('op-sub-modal').classList.remove('open'); EDIT_SUB=null; };
+  window.opSubSave=function(){
+    var pid=getVal('op-sub-proj'), product=getVal('op-sub-product').trim(), name=getVal('op-sub-name').trim(),
+        date=getVal('op-sub-date'), status=getVal('op-sub-status'), notes=getVal('op-sub-notes').trim();
+    if(!pid){ alert('Please choose a project.'); return; }
+    if(!product){ alert('Please enter the trade or work.'); return; }
+    var store=obj(K_SUBS);
+    if(EDIT_SUB){
+      var old=(store[EDIT_SUB.pid]||[]).find(function(x){ return String(x.id)===EDIT_SUB.id; });
+      var ch=[];
+      if(old){
+        if((old.date||'')!==date) ch.push('date '+fmt(old.date)+' \u2192 '+fmt(date));
+        if((old.name||'')!==name) ch.push('company '+(old.name||'none')+' \u2192 '+(name||'none'));
+        if((old.status||'')!==status) ch.push('status \u2192 '+status);
+      }
+      if(String(EDIT_SUB.pid)!==String(pid)){
+        store[EDIT_SUB.pid]=(store[EDIT_SUB.pid]||[]).filter(function(x){ return String(x.id)!==EDIT_SUB.id; });
+        if(!store[String(pid)]) store[String(pid)]=[];
+        old.product=product; old.name=name; old.date=date; old.status=status; old.notes=notes;
+        store[String(pid)].push(old);
+      } else {
+        putBack(store, pid, EDIT_SUB.id, function(x){
+          x.product=product; x.name=name; x.date=date; x.status=status; x.notes=notes;
+          x.au_eby='Office'; x.au_eat=new Date().toISOString(); x.au_eapp='PC'; });
+      }
+      if(save(K_SUBS,store)) logIt('sub','edited',pid, product+(ch.length?(' \u00B7 '+ch.join(', ')):''));
+    } else {
+      if(!store[String(pid)]) store[String(pid)]=[];
+      store[String(pid)].push({ id:nid('sb'), product:product, name:name, date:date, status:status, notes:notes,
+        createdAt:new Date().toISOString(), bookedBy:'Office', au_user:String(window.REMC_ME||''), au_app:'PC' });
+      if(save(K_SUBS,store)) logIt('sub','created',pid, product+' \u00B7 '+(name||'no company')+(date?(' \u00B7 '+fmt(date)):''));
+    }
+    opSubClose(); opRender();
+  };
+  window.opSubDelete=function(pid,id){
+    if(!confirm('Remove this subcontractor booking?')) return;
+    var store=obj(K_SUBS);
+    var s=(store[String(pid)]||[]).find(function(x){ return String(x.id)===String(id); });
+    store[String(pid)]=(store[String(pid)]||[]).filter(function(x){ return String(x.id)!==String(id); });
+    if(save(K_SUBS,store)) logIt('sub','deleted',pid,(s&&s.product)||'Subcontractor');
+    opRender();
+  };
+  window.opSubReqAccept=function(pid,id){
+    var store=obj(K_SUBS), msg='';
+    var s=(store[String(pid)]||[]).find(function(x){ return String(x.id)===String(id); });
+    if(!s || !s.req) return;
+    if(s.req.type==='cancel'){
+      if(!confirm('Cancel this subcontractor booking, as the supervisor asked?')) return;
+      msg=(s.product||'Subcontractor')+' \u00B7 cancelled at supervisor request';
+      store[String(pid)]=(store[String(pid)]||[]).filter(function(x){ return String(x.id)!==String(id); });
+      if(save(K_SUBS,store)) logIt('sub','cancel_approved',pid,msg);
+    } else {
+      var nd=s.req.date||'';
+      msg=(s.product||'Subcontractor')+' \u00B7 postponed '+fmt(s.date)+' \u2192 '+fmt(nd);
+      putBack(store,pid,id,function(x){ x.date=nd; delete x.req; x.au_eby='Office'; x.au_eat=new Date().toISOString(); x.au_eapp='PC'; });
+      if(save(K_SUBS,store)) logIt('sub','postpone_approved',pid,msg);
+    }
+    opRender();
+  };
+  window.opSubReqReject=function(pid,id){
+    var store=obj(K_SUBS), msg='';
+    putBack(store,pid,id,function(x){ msg=(x.product||'Subcontractor'); delete x.req;
+      x.au_eby='Office'; x.au_eat=new Date().toISOString(); x.au_eapp='PC'; });
+    if(save(K_SUBS,store)) logIt('sub','request_declined',pid,msg+' \u00B7 request declined, booking stays');
+    opRender();
+  };
+
+  // Bring across the subcontractor list imported in Settings (old format) into bookings
+  window.opSubImport=function(){
+    var oldStore=obj(K_OLDSUBS);
+    var pids=Object.keys(oldStore);
+    if(!pids.length){ alert('There is no subcontractor list to import.\n\nUpload one first in Settings \u2192 Subcontractors.'); return; }
+    var store=obj(K_SUBS), added=0, skipped=0;
+    pids.forEach(function(pid){
+      var src=Array.isArray(oldStore[pid])?oldStore[pid]:[];
+      if(!store[String(pid)]) store[String(pid)]=[];
+      src.forEach(function(o){
+        var product=String(o.trade||'').trim(), name=String(o.company||'').trim(), date=String(o.date||'').trim();
+        if(!product){ skipped++; return; }
+        var dup=store[String(pid)].some(function(x){
+          return String(x.product||'').trim().toLowerCase()===product.toLowerCase() && String(x.date||'')===date; });
+        if(dup){ skipped++; return; }
+        store[String(pid)].push({ id:nid('sb'), product:product, name:name, date:date,
+          status:(o.status==='booked'?'booked':'pending'), notes:String(o.notes||''),
+          createdAt:new Date().toISOString(), bookedBy:'Office (import)', au_app:'PC', _imported:true });
+        added++;
+      });
+    });
+    if(!added){ alert('Nothing new to import \u2014 all '+skipped+' rows are already in the list.'); return; }
+    if(save(K_SUBS,store)) alert('Imported '+added+' subcontractor booking'+(added===1?'':'s')+'.'
+      +(skipped?('\n'+skipped+' row'+(skipped===1?' was':'s were')+' skipped (already there or no trade).'):'')
+      +'\n\nThey are now visible on the supervisor app too.');
+    opRender();
+  };
+
+  // ───────── small dom helpers ─────────
+  function getVal(id){ var e=document.getElementById(id); return e? String(e.value||'') : ''; }
+  function setVal(id,v){ var e=document.getElementById(id); if(e) e.value = (v==null?'':v); }
+
+  // close modals when clicking the dark background
+  ['op-test-modal','op-res-modal','op-tr-modal','op-sub-modal'].forEach(function(id){
+    document.addEventListener('click', function(ev){
+      var ov=document.getElementById(id);
+      if(ov && ev.target===ov) ov.classList.remove('open');
+    });
+  });
+
+  // first paint + refresh when cloud data arrives
+  function boot(){
+    try{ renderSeq(); opRender(); }catch(e){}
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+  window.addEventListener('focus', function(){ if(document.getElementById('page-operations') && document.getElementById('page-operations').classList.contains('active')) opRender(); });
+  setInterval(function(){
+    var p=document.getElementById('page-operations');
+    if(p && p.classList.contains('active')) opRender();
+  }, 30000);
+
 })();
 </script>
 

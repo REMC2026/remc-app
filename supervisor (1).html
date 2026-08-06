@@ -294,7 +294,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
 <body>
 
 <!-- ☁️ Same database as the main software. Paste the SAME anon key you used in the main app. -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.9"></script>
 <script>
   window.REMC_SUP_CLOUD = {
     url:      "https://etupmtayutnupkgbrxkg.supabase.co",
@@ -313,7 +313,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     <label style="display:flex;align-items:center;gap:8px;font-size:14px;color:var(--mid);margin:2px 0 12px;cursor:pointer;user-select:none"><input id="lg-remember" type="checkbox" style="width:17px;height:17px;cursor:pointer">Keep me signed in (auto-login on this device)</label>
     <button id="lg-btn">Sign in</button>
     <div class="login-msg" id="lg-msg"></div>
-    <button type="button" onclick="openSettings()" style="margin-top:14px;background:none;border:none;color:#8b95a8;font-size:13px;cursor:pointer;text-decoration:underline">⚙️ Connection settings</button>
+    <button type="button" onclick="openSettings()" style="display:none;margin-top:14px;background:none;border:none;color:#8b95a8;font-size:13px;cursor:pointer;text-decoration:underline">⚙️ Connection settings</button>
   </div>
 </div>
 
@@ -346,7 +346,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
       <div class="who-sub">Supervisor</div>
     </div>
     <button class="notif-btn" id="notif-btn" onclick="openNotif()" title="Notifications">🔔<span class="notif-badge" id="notif-badge" style="display:none">0</span></button>
-    <button class="notif-btn" id="settings-btn" onclick="openSettings()" title="Connection settings">⚙️</button>
+    <button class="notif-btn" id="settings-btn" onclick="openSettings()" title="Connection settings" style="display:none">⚙️</button>
     <button class="logout" id="logout">Log out</button>
   </div>
 
@@ -663,7 +663,42 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     if(_beMode()==='server'){ var u=_beUrl(); if(!u) return false; sb=_serverClient(u); return true; }
     if(typeof supabase==='undefined' || !supabase.createClient) return false;
     if(!CFG.url || String(CFG.anonKey||'').indexOf('PASTE_')>=0) return false;
-    sb = supabase.createClient(CFG.url, CFG.anonKey);
+  // --- Safe fetch -------------------------------------------------------
+  // Some browser extensions (and some embedded viewers) intercept fetch and
+  // hand the request to another window using postMessage. A Headers object
+  // cannot be structured-cloned, so those requests die with
+  // "DataCloneError: Headers object could not be cloned".
+  // Giving supabase-js a fetch that only ever uses plain-object headers keeps
+  // the request cloneable, so it goes through normally.
+  function remcSafeFetch(input, init){
+    init = init || {};
+    var url, base = {};
+    if (input && typeof input === 'object' && typeof input.url === 'string'){ url = input.url; base = input; }
+    else { url = String(input); }
+    var headers = {};
+    function absorb(src){
+      if(!src) return;
+      try{
+        if(typeof src.forEach === 'function' && typeof src.append === 'function'){
+          src.forEach(function(v,k){ headers[k] = v; });            // a Headers object
+        } else if (Array.isArray(src)) {
+          src.forEach(function(p){ if(p && p.length > 1) headers[p[0]] = p[1]; });
+        } else {
+          Object.keys(src).forEach(function(k){ headers[k] = src[k]; });
+        }
+      }catch(e){}
+    }
+    absorb(base.headers); absorb(init.headers);
+    var opts = { method: init.method || base.method || 'GET', headers: headers };
+    if (init.body !== undefined && init.body !== null) opts.body = init.body;
+    if (init.signal) opts.signal = init.signal;
+    if (init.credentials || base.credentials) opts.credentials = init.credentials || base.credentials;
+    if (init.mode) opts.mode = init.mode;
+    if (init.cache) opts.cache = init.cache;
+    return fetch(url, opts);
+  }
+  try{ window.remcSafeFetch = remcSafeFetch; }catch(e){}
+    sb = supabase.createClient(CFG.url, CFG.anonKey, { global: { fetch: remcSafeFetch } });
     return true;
   }
   function _beSelectedMode(){ var rs=document.getElementsByName('be-mode'); for(var i=0;i<rs.length;i++){ if(rs[i].checked) return rs[i].value; } return 'cloud'; }
