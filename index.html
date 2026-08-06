@@ -1524,6 +1524,20 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
   .ops-cal-month{font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;min-width:190px}
   .ops-nav-btn{width:30px;height:30px;border:1px solid var(--border);background:var(--surface);border-radius:7px;cursor:pointer;font-size:14px;color:var(--mid);display:flex;align-items:center;justify-content:center;transition:all .12s}
   .ops-nav-btn:hover{background:var(--surface2);border-color:var(--border2);color:var(--text)}
+  .ops-inbox{background:var(--surface);border:1px solid rgba(217,119,6,.35);border-radius:12px;box-shadow:var(--shadow);margin-bottom:16px;overflow:hidden}
+  .ops-inbox-head{padding:11px 16px;background:#fffbeb;border-bottom:1px solid rgba(217,119,6,.25);display:flex;align-items:center;gap:10px}
+  .ops-inbox-title{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#92400e}
+  .ops-inbox-sub{font-size:11px;color:#a16207}
+  .ops-inbox-body{padding:10px 12px}
+  .ops-sel{background:var(--surface);border:1.5px solid var(--border);border-radius:6px;padding:4px 8px;font-size:11px;font-family:'Barlow',sans-serif;font-weight:700;color:var(--text);outline:none;cursor:pointer}
+  .ops-sel:focus{border-color:var(--red)}
+  .ops-inp-sm{background:var(--surface);border:1.5px solid var(--border);border-radius:6px;padding:4px 9px;font-size:11px;font-family:'Barlow',sans-serif;color:var(--text);outline:none;width:170px}
+  .ops-inp-sm:focus{border-color:var(--red)}
+  .ops-row{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:8px;padding-top:8px;border-top:1px dashed var(--border)}
+  .ops-row-lbl{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--muted)}
+  .ops-p-emailed{background:#e0e7ff;color:#4338ca;border-color:#c7d2fe}
+  .ops-p-followup{background:#ffedd5;color:#c2410c;border-color:#fed7aa}
+  .ops-p-new{background:#fee2e2;color:var(--red);border-color:#fecaca}
   .ops-cal{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--shadow);margin-bottom:18px}
   .ops-cal-head{display:grid;grid-template-columns:repeat(7,1fr);background:var(--surface2);border-bottom:2px solid var(--border2)}
   .ops-cal-hd{padding:8px 4px;text-align:center;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted)}
@@ -1627,6 +1641,8 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
           <div class="ops-lg"><span class="ops-lg-dot" style="background:var(--green-light);border-color:rgba(22,163,74,.4)"></span> Passed</div>
           <div class="ops-lg"><span class="ops-lg-dot" style="background:#fee2e2;border-color:#fecaca"></span> Failed</div>
         </div>
+
+        <div id="op-test-inbox"></div>
 
         <div class="ops-cal">
           <div class="ops-cal-head">
@@ -13627,6 +13643,28 @@ function teamEditProjectBooking(pid){
   }
 
   // ───────── status logic ─────────
+  // ---- Incoming test requests from supervisors ----
+  // A test booked on the phone is only a REQUEST. It stays out of the calendar
+  // until somebody in the office confirms it.
+  var REQ_LABEL = { pending:'Pending', emailed:'Emailed', booked:'Booked', followup:'Need follow up' };
+  var REQ_PILL  = { pending:'ops-p-pending', emailed:'ops-p-emailed', booked:'ops-p-booked', followup:'ops-p-followup' };
+  function fromSupervisor(t){
+    if(String(t.au_app||'')==='Mobile') return true;
+    var by=String(t.bookedBy||'');
+    return !!by && by.indexOf('Office')<0;
+  }
+  function isConfirmed(t){ return !fromSupervisor(t) || !!(t.office && t.office.confirmed); }
+  function reqStatus(t){ var v=(t.office&&t.office.status)||'pending'; return REQ_LABEL[v]?v:'pending'; }
+  function reqSince(t){
+    var d=(t.office&&t.office.receivedAt)||t.createdAt||'';
+    if(!d) return '';
+    try{ var x=new Date(d); return DAYN[x.getDay()]+' '+x.getDate()+' '+MON[x.getMonth()]+', '+pad(x.getHours())+':'+pad(x.getMinutes()); }catch(e){ return ''; }
+  }
+  function reqAgeDays(t){
+    var d=(t.office&&t.office.receivedAt)||t.createdAt||'';
+    if(!d) return 0;
+    try{ return Math.floor((Date.now()-new Date(d).getTime())/86400000); }catch(e){ return 0; }
+  }
   function testState(t){
     if(t.result==='pass') return 'pass';
     if(t.result==='fail') return 'fail';
@@ -13707,12 +13745,14 @@ function teamEditProjectBooking(pid){
 
   function renderCounts(){
     var t=flat(obj(K_TESTS)), r=flat(obj(K_TR)), s=flat(obj(K_SUBS));
-    var tOpen=t.filter(function(x){ var st=testState(x); return st==='booked'||st==='today'||st==='await'||st==='nodate'; }).length;
+    var tPend=t.filter(function(x){ return !isConfirmed(x); }).length;
+    var tOpen=tPend + t.filter(function(x){ if(!isConfirmed(x)) return false;
+      var st=testState(x); return st==='booked'||st==='today'||st==='await'||st==='nodate'; }).length;
     var rOpen=r.filter(function(x){ return trState(x)!=='done'; }).length;
     var sOpen=s.filter(function(x){ var st=subState(x); return st!=='past'; }).length;
     var alerts=buildAlerts().length;
     setCount('op-cnt-overview', alerts, alerts>0);
-    setCount('op-cnt-tests', tOpen, false);
+    setCount('op-cnt-tests', tOpen, tPend>0);
     setCount('op-cnt-transfers', rOpen, false);
     setCount('op-cnt-subs', sOpen, false);
   }
@@ -13727,6 +13767,15 @@ function teamEditProjectBooking(pid){
     var tests=flat(obj(K_TESTS)), trs=flat(obj(K_TR)), subs=flat(obj(K_SUBS));
 
     tests.forEach(function(x){
+      if(!isConfirmed(x)){
+        var rs=reqStatus(x), age=reqAgeDays(x);
+        out.push({ g:'inbox', tone:'amber', icon:'\uD83D\uDCE5',
+          title:(x.type||'Test')+' \u2014 '+projName(x._pid),
+          meta:'Wanted for '+fmt(x.date)+' \u00B7 sent by '+(x.bookedBy||'supervisor')
+            +' \u00B7 '+REQ_LABEL[rs]+(age>2?(' \u00B7 waiting '+age+' days'):''),
+          kind:'testreq', ref:x });
+        return;
+      }
       var st=testState(x);
       if(st==='today') out.push({g:'today',tone:'red',icon:'\uD83E\uDDEA',title:(x.type||'Test')+' — '+projName(x._pid),
         meta:'Today'+(x.company?(' \u00B7 '+x.company):' \u00B7 no company booked'), kind:'test', ref:x});
@@ -13778,17 +13827,22 @@ function teamEditProjectBooking(pid){
     var todayCount=alerts.filter(function(a){ return a.g==='today'; }).length;
     var attnCount=alerts.filter(function(a){ return a.g==='attn'; }).length;
     var seqCount=alerts.filter(function(a){ return a.g==='seq'; }).length;
-    var awaitCount=tests.filter(function(x){ return testState(x)==='await'; }).length;
+    var awaitCount=tests.filter(function(x){ return isConfirmed(x) && testState(x)==='await'; }).length;
+    var inboxCount=alerts.filter(function(a){ return a.g==='inbox'; }).length;
 
     var st=document.getElementById('op-ov-stats');
     if(st) st.innerHTML=
-      card('red','Happening today', todayCount, 'tests, transfers and subs')
+      card('amber','To confirm', inboxCount, 'test requests from supervisors')
+     +card('red','Happening today', todayCount, 'tests, transfers and subs')
      +card('amber','Needs attention', attnCount, 'missing dates, results or confirmations')
      +card('blue','Awaiting test results', awaitCount, 'test done, result not back yet')
      +card('green','Sequence issues', seqCount, 'subcontractors booked out of order');
+    if(st) st.style.gridTemplateColumns='repeat(5,1fr)';
 
     var box=document.getElementById('op-ov-groups'); if(!box) return;
     var html='';
+    html+=group('\uD83D\uDCE5 Waiting for you to confirm', 'amber', alerts.filter(function(a){return a.g==='inbox';}),
+      'No test requests waiting.');
     html+=group('\uD83D\uDD34 Today \u2014 '+fmt(t), 'red', alerts.filter(function(a){return a.g==='today';}),
       'Nothing scheduled for today.');
     html+=group('\uD83D\uDFE0 Needs attention', 'amber', alerts.filter(function(a){return a.g==='attn';}),
@@ -13813,6 +13867,7 @@ function teamEditProjectBooking(pid){
     var act='';
     if(a.kind==='test') act='<button class="ops-btn sm" onclick="opResOpen(\''+esc(a.ref._pid)+'\',\''+esc(a.ref.id)+'\')">Result</button>'
       +'<button class="ops-btn sm" onclick="opTestOpen(\''+esc(a.ref._pid)+'\',\''+esc(a.ref.id)+'\')">Edit</button>';
+    if(a.kind==='testreq') act='<button class="ops-btn sm primary" onclick="opTab(\'tests\')">Open inbox</button>';
     if(a.kind==='transfer') act='<button class="ops-btn sm" onclick="opTrOpen(\''+esc(a.ref._pid)+'\',\''+esc(a.ref.id)+'\')">Schedule</button>';
     if(a.kind==='sub') act='<button class="ops-btn sm" onclick="opSubOpen(\''+esc(a.ref._pid)+'\',\''+esc(a.ref.id)+'\')">Edit</button>';
     if(a.kind==='subreq') act='<button class="ops-btn sm primary" onclick="opSubReqAccept(\''+esc(a.ref._pid)+'\',\''+esc(a.ref.id)+'\')">Accept</button>'
@@ -13833,10 +13888,16 @@ function teamEditProjectBooking(pid){
   };
 
   function renderTests(){
-    var store=obj(K_TESTS), list=flat(store);
+    var store=obj(K_TESTS), all=flat(store);
     var q=String((document.getElementById('op-test-search')||{}).value||'').trim().toLowerCase();
-    if(q) list=list.filter(function(x){
+    if(q) all=all.filter(function(x){
       return (projName(x._pid)+' '+(x.type||'')+' '+(x.company||'')+' '+(x.notes||'')).toLowerCase().indexOf(q)>=0; });
+
+    // Requests waiting for the office stay OUT of the calendar and the list.
+    var incoming = all.filter(function(x){ return !isConfirmed(x); })
+      .sort(function(a,b){ return String((a.office&&a.office.receivedAt)||a.createdAt||'') < String((b.office&&b.office.receivedAt)||b.createdAt||'') ? 1 : -1; });
+    var list = all.filter(isConfirmed);
+    renderInbox(incoming);
 
     // calendar
     var mLbl=document.getElementById('op-cal-month');
@@ -13899,6 +13960,98 @@ function teamEditProjectBooking(pid){
     }).join('')+'</div></div>';
   }
 
+  function renderInbox(incoming){
+    var box=document.getElementById('op-test-inbox'); if(!box) return;
+    if(!incoming.length){ box.innerHTML=''; return; }
+    box.innerHTML='<div class="ops-inbox"><div class="ops-inbox-head">'
+      +'<div class="ops-inbox-title">\uD83D\uDCE5 Incoming test requests</div>'
+      +'<div class="ops-inbox-sub">Sent by supervisors \u2014 they do not show on the calendar until you confirm them.</div>'
+      +'<div class="ops-group-count" style="margin-left:auto">'+incoming.length+'</div></div>'
+      +'<div class="ops-inbox-body">'+incoming.map(inboxRow).join('')+'</div></div>';
+  }
+  function inboxRow(x){
+    var st=reqStatus(x), age=reqAgeDays(x);
+    var opts=Object.keys(REQ_LABEL).map(function(k){
+      return '<option value="'+k+'"'+(k===st?' selected':'')+'>'+esc(REQ_LABEL[k])+'</option>'; }).join('');
+    var isNew = !(x.office && x.office.status);
+    return '<div class="ops-item amber"><div class="ops-item-icon">\uD83D\uDCE5</div>'
+      +'<div class="ops-item-main">'
+      +'<div class="ops-item-title">'+esc(x.type||'Test')+' \u00B7 '+esc(projName(x._pid))
+      +(projJob(x._pid)?(' <span style="color:var(--red);font-size:11px">'+esc(projJob(x._pid))+'</span>'):'')+'</div>'
+      +'<div class="ops-item-meta">Wanted for <strong>'+esc(fmt(x.date))+'</strong>'
+      +(x.date?(' \u00B7 '+esc(relDay(x.date))):'')
+      +' \u00B7 sent by '+esc(x.bookedBy||'supervisor')+'</div>'
+      +'<div class="ops-item-meta" style="color:var(--muted)">Received '+esc(reqSince(x)||'\u2014')
+      +(age>2?(' \u00B7 <span style="color:var(--red);font-weight:700">waiting '+age+' days</span>'):'')+'</div>'
+      +(x.notes?('<div class="ops-item-note">'+esc(x.notes)+'</div>'):'')
+      +'<div class="ops-row">'
+      +'<span class="ops-row-lbl">Status</span>'
+      +'<select class="ops-sel" onchange="opReqStatus(\''+esc(x._pid)+'\',\''+esc(x.id)+'\',this.value)">'+opts+'</select>'
+      +'<span class="ops-row-lbl">Company</span>'
+      +'<input class="ops-inp-sm" placeholder="who will do it" value="'+esc(x.company||'')+'" '
+      +'onchange="opReqCompany(\''+esc(x._pid)+'\',\''+esc(x.id)+'\',this.value)">'
+      +'<span class="ops-row-lbl">Date</span>'
+      +'<input class="ops-inp-sm" style="width:135px" type="date" value="'+esc(x.date||'')+'" '
+      +'onchange="opReqDate(\''+esc(x._pid)+'\',\''+esc(x.id)+'\',this.value)">'
+      +'<button class="ops-btn sm primary" onclick="opReqConfirm(\''+esc(x._pid)+'\',\''+esc(x.id)+'\')">\u2713 Confirm</button>'
+      +'<button class="ops-btn sm" onclick="opReqDecline(\''+esc(x._pid)+'\',\''+esc(x.id)+'\')">Decline</button>'
+      +'</div></div>'
+      +'<div class="ops-item-actions">'
+      +(isNew?'<span class="ops-pill ops-p-new">New</span>':'')
+      +'<span class="ops-pill '+REQ_PILL[st]+'">'+esc(REQ_LABEL[st])+'</span>'
+      +'</div></div>';
+  }
+
+  function reqTouch(pid,id,mutate,logAction,logDetail){
+    var store=obj(K_TESTS), t=null;
+    putBack(store,pid,id,function(x){
+      t=x;
+      if(!x.office) x.office={ confirmed:false, status:'pending', receivedAt:x.createdAt||new Date().toISOString() };
+      mutate(x);
+      x.au_eby='Office'; x.au_eat=new Date().toISOString(); x.au_eapp='PC';
+    });
+    if(!t) return null;
+    if(save(K_TESTS,store) && logAction) logIt('test',logAction,pid,logDetail(t));
+    return t;
+  }
+  window.opReqStatus=function(pid,id,v){
+    reqTouch(pid,id,function(x){ x.office.status=v; },'request_status',
+      function(t){ return (t.type||'Test')+' \u00B7 marked as '+(REQ_LABEL[v]||v); });
+    opRender();
+  };
+  window.opReqCompany=function(pid,id,v){
+    reqTouch(pid,id,function(x){ x.company=String(v||'').trim(); },null,null);
+    opRender();
+  };
+  window.opReqDate=function(pid,id,v){
+    reqTouch(pid,id,function(x){ if(!x.office.wantedDate) x.office.wantedDate=x.date; x.date=v; },null,null);
+    opRender();
+  };
+  window.opReqConfirm=function(pid,id){
+    var cur=(obj(K_TESTS)[String(pid)]||[]).find(function(x){ return String(x.id)===String(id); });
+    if(!cur) return;
+    if(!cur.date){ alert('Please set a date before confirming this test.'); return; }
+    if(!String(cur.company||'').trim()
+       && !confirm('No company is set for this test yet.\n\nConfirm it anyway?')) return;
+    reqTouch(pid,id,function(x){
+      x.office.confirmed=true; x.office.status='booked';
+      x.office.confirmedAt=new Date().toISOString();
+      x.office.confirmedBy=String(window.REMC_ME||'Office');
+    },'request_confirmed',function(t){
+      return (t.type||'Test')+' \u00B7 confirmed for '+fmt(t.date)+(t.company?(' \u00B7 '+t.company):'')
+        +(t.office && t.office.wantedDate && t.office.wantedDate!==t.date ? (' \u00B7 moved from '+fmt(t.office.wantedDate)) : '');
+    });
+    opRender();
+  };
+  window.opReqDecline=function(pid,id){
+    if(!confirm('Decline this test request?\n\nIt will be removed and the supervisor will see it in the history.')) return;
+    var store=obj(K_TESTS);
+    var t=(store[String(pid)]||[]).find(function(x){ return String(x.id)===String(id); });
+    store[String(pid)]=(store[String(pid)]||[]).filter(function(x){ return String(x.id)!==String(id); });
+    if(save(K_TESTS,store)) logIt('test','request_declined',pid,((t&&t.type)||'Test')+' \u00B7 declined by the office');
+    opRender();
+  };
+
   function fillProjSelect(id, val){
     var s=document.getElementById(id); if(!s) return;
     var ps=projects().slice().sort(function(a,b){ return String(a.name||'').localeCompare(String(b.name||'')); });
@@ -13953,7 +14106,9 @@ function teamEditProjectBooking(pid){
     } else {
       if(!store[String(pid)]) store[String(pid)]=[];
       store[String(pid)].push({ id:nid('ct'), date:date, type:type, company:company, notes:notes,
-        createdAt:new Date().toISOString(), bookedBy:'Office', au_user:String(window.REMC_ME||''), au_app:'PC' });
+        createdAt:new Date().toISOString(), bookedBy:'Office', au_user:String(window.REMC_ME||''), au_app:'PC',
+        office:{ confirmed:true, status:'booked', receivedAt:new Date().toISOString(),
+                 confirmedAt:new Date().toISOString(), confirmedBy:String(window.REMC_ME||'Office') } });
       if(save(K_TESTS,store)) logIt('test','created',pid,type+(date?(' \u00B7 '+fmt(date)):'')+(company?(' \u00B7 '+company):''));
     }
     opTestClose(); opRender();
