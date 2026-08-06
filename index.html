@@ -1601,7 +1601,9 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
       <div class="ops-header">
         <div>
           <div class="ops-title">Operations</div>
-          <div class="ops-sub">Compaction tests, machine transfers and subcontractor bookings</div>
+          <div class="ops-sub">Compaction tests, machine transfers and subcontractor bookings
+            <span style="margin-left:8px;font-size:10px;font-weight:700;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:1px 7px">build 2026-08-06b</span>
+          </div>
         </div>
         <div style="display:flex;gap:8px;align-items:center">
           <span id="op-saved" style="font-size:11px;font-weight:700;color:var(--green);opacity:0;transition:opacity .4s">Saved</span>
@@ -2642,7 +2644,8 @@ function tick() {
 // One-time build check
 if (!window._buildChecked) {
   window._buildChecked = true;
-  console.log("%c REMC v1.1 loaded successfully ", "background:#16a34a;color:white;font-size:14px;padding:4px 8px;border-radius:4px");
+  window.REMC_BUILD = "2026-08-06b";
+  console.log("%c REMC v1.1 \u00B7 build " + window.REMC_BUILD + " loaded successfully ", "background:#16a34a;color:white;font-size:14px;padding:4px 8px;border-radius:4px");
 }
 
 const n = new Date();
