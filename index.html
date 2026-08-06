@@ -194,7 +194,7 @@ body.hide-residential .overview-layout{grid-template-columns:200px 1fr 180px}
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <!-- ☁️ CLOUD (Supabase) — library + config. Leave the PASTE_ values to run fully offline. -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.9"></script>
   <script>
     // Paste your Supabase Project URL and anon (public) key here to turn on cloud sync + login.
     // While these say PASTE_..., the app works exactly as before (offline, local only).
@@ -932,7 +932,6 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
                       <span id="plan-day-label" style="font-size:12px;font-weight:600;color:var(--muted)"></span>
                       <span id="plan-active-count" style="font-size:11px;color:var(--muted)"></span>
                     </div>
-                    <span id="plan-active-count" style="font-size:11px;color:var(--muted)"></span>
                   </div>
 
                   <!-- Project picker modal -->
@@ -12117,10 +12116,33 @@ function teamEditProjectBooking(pid){
       // (The Supabase storage client can trigger a "Headers could not be cloned"
       //  postMessage error in some browsers / with certain extensions.)
       var endpoint = String(CFG.url).replace(/\/$/,'') + '/storage/v1/object/remc-backups/remc-latest.xlsx';
+      // Newer Supabase projects use publishable keys (sb_publishable_...). Those are
+      // NOT JWTs, so putting one in an Authorization: Bearer header is rejected
+      // outright (400/401). The official client assembles the right headers by
+      // itself, so use it whenever it is available and only hand-roll as a
+      // fallback -- without the illegal Authorization header.
+      var _sb = null; try{ _sb = window.REMC_SB; }catch(e){}
+      if (_sb && _sb.storage && typeof _sb.storage.from === 'function' && !_sb.__server) {
+        _sb.storage.from('remc-backups').upload('remc-latest.xlsx', blob, {
+          upsert: true, cacheControl: '3600',
+          contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        }).then(function(res){
+          if (res && !res.error){ console.log('[REMC Backup] Excel backup uploaded to cloud.'); _bkWarned = false; }
+          else if (!_bkWarned){
+            _bkWarned = true;
+            console.log('[REMC Backup] Cloud backup not saved: ' + ((res && res.error && res.error.message) || 'unknown')
+              + '. This is optional -- you can still download a backup in Settings > Backup.'
+              + ' To enable it, create a public Storage bucket named "remc-backups".');
+          }
+        }).catch(function(err){
+          if (!_bkWarned){ _bkWarned = true;
+            console.log('[REMC Backup] Cloud backup not saved: ' + ((err && err.message) || 'network') + '. This is optional.'); }
+        });
+        return;
+      }
       fetch(endpoint, {
         method: 'POST',
         headers: {
-          'Authorization': 'Bearer ' + CFG.anonKey,
           'apikey': CFG.anonKey,
           'x-upsert': 'true',
           'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -12131,7 +12153,12 @@ function teamEditProjectBooking(pid){
         if(r && r.ok){ console.log('[REMC Backup] Excel backup uploaded to cloud.'); _bkWarned=false; }
         else if(!_bkWarned){
           _bkWarned = true;
-          console.log('[REMC Backup] Cloud backup not saved (status ' + (r?r.status:'?') + '). This is optional — you can still download a backup in Settings → Backup. To enable it, create a public Storage bucket named "remc-backups".');
+          r.text().then(function(t){
+            console.log('[REMC Backup] Cloud backup not saved (HTTP ' + r.status + '): ' + String(t).slice(0,200)
+              + ' -- This is optional. To enable it, create a public Storage bucket named "remc-backups".');
+          }).catch(function(){
+            console.log('[REMC Backup] Cloud backup not saved (HTTP ' + r.status + '). This is optional.');
+          });
         }
       }).catch(function(){
         if(!_bkWarned){
