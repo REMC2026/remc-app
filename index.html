@@ -1524,7 +1524,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
   .ops-cal-month{font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;min-width:190px}
   .ops-nav-btn{width:30px;height:30px;border:1px solid var(--border);background:var(--surface);border-radius:7px;cursor:pointer;font-size:14px;color:var(--mid);display:flex;align-items:center;justify-content:center;transition:all .12s}
   .ops-nav-btn:hover{background:var(--surface2);border-color:var(--border2);color:var(--text)}
-  .ops-board{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px;align-items:start}
+  .ops-board{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-bottom:18px;align-items:start}
   .ops-col{background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);overflow:hidden;border-top:3px solid var(--border2)}
   .ops-col.red{border-top-color:var(--red)}
   .ops-col.amber{border-top-color:var(--amber)}
@@ -1551,7 +1551,10 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
   .ops-card-ctl{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;padding-top:7px;border-top:1px dashed var(--border);align-items:center}
   .ops-col-empty{padding:22px 12px;text-align:center;color:var(--muted);font-size:11.5px}
   .ops-late{color:var(--red);font-weight:800}
-  @media (max-width:1100px){ .ops-board{grid-template-columns:1fr} }
+  .ops-col.green{border-top-color:var(--green)}
+  .ops-col-title.green{color:var(--green)}
+  @media (max-width:1500px){ .ops-board{grid-template-columns:repeat(2,1fr)} }
+  @media (max-width:900px){ .ops-board{grid-template-columns:1fr} }
   .ops-inbox{background:var(--surface);border:1px solid rgba(217,119,6,.35);border-radius:12px;box-shadow:var(--shadow);margin-bottom:16px;overflow:hidden}
   .ops-inbox-head{padding:11px 16px;background:#fffbeb;border-bottom:1px solid rgba(217,119,6,.25);display:flex;align-items:center;gap:10px}
   .ops-inbox-title{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#92400e}
@@ -1630,7 +1633,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
         <div>
           <div class="ops-title">Operations</div>
           <div class="ops-sub">Compaction tests, machine transfers and subcontractor bookings
-            <span style="margin-left:8px;font-size:10px;font-weight:700;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:1px 7px">build 2026-08-06c</span>
+            <span style="margin-left:8px;font-size:10px;font-weight:700;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:1px 7px">build 2026-08-06d</span>
           </div>
         </div>
         <div style="display:flex;gap:8px;align-items:center">
@@ -2672,7 +2675,7 @@ function tick() {
 // One-time build check
 if (!window._buildChecked) {
   window._buildChecked = true;
-  window.REMC_BUILD = "2026-08-06c";
+  window.REMC_BUILD = "2026-08-06d";
   console.log("%c REMC v1.1 \u00B7 build " + window.REMC_BUILD + " loaded successfully ", "background:#16a34a;color:white;font-size:14px;padding:4px 8px;border-radius:4px");
 }
 
@@ -14012,12 +14015,16 @@ function teamEditProjectBooking(pid){
     var incoming = all.filter(function(x){ return !isConfirmed(x); });
     var colNew  = incoming.filter(function(x){ return reqStatus(x)==='new'; }).sort(byReceived);
     var colWork = incoming.filter(function(x){ return reqStatus(x)!=='new'; }).sort(byReceived);
+    var colBook = all.filter(function(x){ return isConfirmed(x) && !x.result && x.date && x.date >= today(); })
+                     .sort(function(a,b){ return String(a.date)<String(b.date)?-1:1; });
     var colRes  = all.filter(awaitingResult).sort(function(a,b){ return String(a.date)<String(b.date)?-1:1; });
     box.innerHTML='<div class="ops-board">'
       + col('red','\uD83D\uDCE5 To book', 'Sent by the supervisors. Nobody has acted on these yet.',
             colNew, reqCard, 'Nothing new from the supervisors.', true)
       + col('amber','\u23F3 Pending confirmation', 'We contacted the company \u2014 waiting for them to confirm.',
             colWork, reqCard, 'Nothing waiting on a company.', false)
+      + col('green','\u2705 Booked', 'Confirmed and on the calendar. Waiting for the day to come round.',
+            colBook, bookedCard, 'Nothing booked ahead.', false)
       + col('blue','\uD83E\uDDEA Pending result', 'The test day has passed and the result has not come back.',
             colRes, resultCard, 'No results outstanding.', false)
       + '</div>';
@@ -14057,8 +14064,30 @@ function teamEditProjectBooking(pid){
       +'onchange="opReqCompany(\''+esc(x._pid)+'\',\''+esc(x.id)+'\',this.value)">'
       +'<input class="ops-inp-sm" style="width:132px" type="date" value="'+esc(x.date||'')+'" '
       +'onchange="opReqDate(\''+esc(x._pid)+'\',\''+esc(x.id)+'\',this.value)">'
-      +'<button class="ops-btn sm primary" onclick="opReqConfirm(\''+esc(x._pid)+'\',\''+esc(x.id)+'\')">\u2713 Confirm</button>'
+      +(st==='new'
+        ? '<button class="ops-btn sm primary" onclick="opReqStart(\''+esc(x._pid)+'\',\''+esc(x.id)+'\')">Start booking \u2192</button>'
+        : '<button class="ops-btn sm primary" onclick="opReqConfirm(\''+esc(x._pid)+'\',\''+esc(x.id)+'\')">\u2713 Confirm</button>')
       +'<button class="ops-btn sm" onclick="opReqDecline(\''+esc(x._pid)+'\',\''+esc(x.id)+'\')">Decline</button>'
+      +'</div></div>';
+  }
+
+  function bookedCard(x){
+    var t=today(), isToday=(x.date===t);
+    return '<div class="ops-card" style="border-left-color:'+(isToday?'var(--red)':'var(--green)')+'">'
+      +'<div class="ops-card-top"><div class="ops-card-title">'+esc(x.type||'Test')+'</div>'
+      +(isToday?'<span class="ops-pill ops-p-today">Today</span>'
+               :'<span class="ops-pill ops-p-done">Booked</span>')+'</div>'
+      +'<div class="ops-card-proj">'+esc(projName(x._pid))
+      +(projJob(x._pid)?(' \u00B7 <span style="color:var(--red)">'+esc(projJob(x._pid))+'</span>'):'')+'</div>'
+      +'<div class="ops-card-meta"><strong>'+esc(fmt(x.date))+'</strong>'
+      +(x.date?(' \u00B7 '+esc(relDay(x.date))):'')+'<br>'
+      +(x.company?esc(x.company):'<span style="color:var(--amber);font-weight:700">no company yet</span>')
+      +(x.office&&x.office.confirmedBy?('<br>Confirmed by '+esc(x.office.confirmedBy)):'')+'</div>'
+      +(x.notes?('<div class="ops-card-note">'+esc(x.notes)+'</div>'):'')
+      +'<div class="ops-card-ctl">'
+      +'<button class="ops-btn sm" onclick="opResOpen(\''+esc(x._pid)+'\',\''+esc(x.id)+'\')">Record result</button>'
+      +'<button class="ops-btn sm" onclick="opTestOpen(\''+esc(x._pid)+'\',\''+esc(x.id)+'\')">Edit</button>'
+      +'<button class="ops-btn sm" onclick="opReqReopen(\''+esc(x._pid)+'\',\''+esc(x.id)+'\')">Undo confirm</button>'
       +'</div></div>';
   }
 
@@ -14103,9 +14132,28 @@ function teamEditProjectBooking(pid){
     reqTouch(pid,id,function(x){ if(!x.office.wantedDate) x.office.wantedDate=x.date; x.date=v; },null,null);
     opRender();
   };
+  // Move a brand new request into the booking stage. Confirming straight from
+  // 'No action yet' would skip the whole workflow, so it goes through here.
+  window.opReqStart=function(pid,id){
+    reqTouch(pid,id,function(x){ x.office.status='awaiting'; },'request_status',
+      function(t){ return (t.type||'Test')+' \u00B7 booking started, waiting on the company'; });
+    opRender();
+  };
+  // Put a confirmed test back into the booking columns.
+  window.opReqReopen=function(pid,id){
+    if(!confirm('Take this test off the calendar and put it back in Pending confirmation?')) return;
+    reqTouch(pid,id,function(x){ x.office.confirmed=false; x.office.status='awaiting';
+      delete x.office.confirmedAt; delete x.office.confirmedBy; },'request_reopened',
+      function(t){ return (t.type||'Test')+' \u00B7 taken back off the calendar'; });
+    opRender();
+  };
   window.opReqConfirm=function(pid,id){
     var cur=(obj(K_TESTS)[String(pid)]||[]).find(function(x){ return String(x.id)===String(id); });
     if(!cur) return;
+    if(!isConfirmed(cur) && reqStatus(cur)==='new'){
+      alert('This request has not been worked on yet.\n\nUse "Start booking" first, then confirm it once the company has come back to you.');
+      return;
+    }
     if(!cur.date){ alert('Please set a date before confirming this test.'); return; }
     if(!String(cur.company||'').trim()
        && !confirm('No company is set for this test yet.\n\nConfirm it anyway?')) return;
