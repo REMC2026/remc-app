@@ -383,7 +383,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     <div class="cloud" id="cloud">•</div>
     <div class="who">
       <div class="who-name" id="who-name"></div>
-      <div class="who-sub">Supervisor <span class="build-tag">build 2026-08-06o</span></div>
+      <div class="who-sub">Supervisor <span class="build-tag">build 2026-08-06p</span></div>
     </div>
     <button class="notif-btn" id="notif-btn" onclick="openNotif()" title="Notifications">🔔<span class="notif-badge" id="notif-badge" style="display:none">0</span></button>
     <button class="notif-btn" id="cloud-check-btn" onclick="supCloudCheck()" title="Check the cloud connection">🩺</button>
@@ -810,7 +810,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
   };
   var MATREQS={};
   var MATERIAL_TYPES=['Clean Sand','Dirty Sand','Clay','Rocks','Concrete','Tree','Grass','Rubbish','Mix Material'];
-  window.REMC_BUILD='2026-08-06o';
+  window.REMC_BUILD='2026-08-06p';
   try{ console.log('%c REMC Supervisor \u00B7 build '+window.REMC_BUILD+' ','background:#16a34a;color:#fff;padding:3px 7px;border-radius:4px'); }catch(e){}
   function parseData(){
     function j(k,def){ try{ return JSON.parse(DATA[k]||def); }catch(e){ return JSON.parse(def); } }
@@ -1015,7 +1015,8 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
       d['__client'] = CLIENT;
       sb.from('remc_state').upsert({ id:WS, data:d, updated_at:new Date().toISOString() }).then(function(r2){
         if(r2 && r2.error){ _cloudFail(); if(cb) cb(r2.error.message||'error'); }
-        else { DATA=d; _cloudOk(); try{ refreshOpenScreens(); }catch(e){} if(cb) cb(null); }
+        else { DATA=d; _cloudOk(); _forgetLastSeen();
+               try{ refreshOpenScreens(); }catch(e){} if(cb) cb(null); }
       }).catch(function(e){ _cloudFail(); if(cb) cb((e&&e.message)||'network'); });
     }).catch(function(e){ _cloudFail(); if(cb) cb((e&&e.message)||'network'); });
   }
@@ -1129,6 +1130,9 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
   // ---- Safety net: realtime can drop (phone sleeps, wifi changes, app in background).
   // Poll for changes and refresh whenever the app comes back to the foreground.
   var _lastSeen='', _refreshTimer=null, _refreshing=false;
+  // A save from this phone changes the document, so the next check must not
+  // mistake our own write for "nothing new" and skip a real update.
+  function _forgetLastSeen(){ _lastSeen=''; }
   function refreshFromCloud(){
     if(_refreshing || !sb || !ME) return;
     _refreshing=true;
@@ -1150,9 +1154,26 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
       }).catch(function(){ _refreshing=false; _cloudFail(); });
     }).catch(function(){ _refreshing=false; _cloudFail(); });
   }
+  // How often to check depends on what the supervisor is doing. Checking is
+  // only a timestamp - a few bytes - so it can be frequent while a screen is
+  // open. The document itself is still only downloaded when it really changed.
+  function _pollGap(){
+    try{
+      var open=document.querySelector('.test-ov.open, .projcal-ov.open, .notif-ov.open');
+      if(open) return 5000;                     // watching a screen: check every 5s
+    }catch(e){}
+    return 20000;                               // just the project list: every 20s
+  }
+  function _scheduleRefresh(){
+    clearTimeout(_refreshTimer);
+    _refreshTimer=setTimeout(function(){
+      if(!document.hidden) refreshFromCloud();
+      _scheduleRefresh();
+    }, _pollGap());
+  }
   function startAutoRefresh(){
     if(_refreshTimer) return;
-    _refreshTimer=setInterval(function(){ if(!document.hidden) refreshFromCloud(); }, 20000);
+    _scheduleRefresh();
     document.addEventListener('visibilitychange', function(){ if(!document.hidden) refreshFromCloud(); });
     window.addEventListener('focus', refreshFromCloud);
     window.addEventListener('online', refreshFromCloud);

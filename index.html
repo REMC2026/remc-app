@@ -1758,7 +1758,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
         <div>
           <div class="ops-title">Operations</div>
           <div class="ops-sub">Compaction tests, machine transfers and subcontractor bookings
-            <span style="margin-left:8px;font-size:10px;font-weight:700;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:1px 7px">build 2026-08-06o</span>
+            <span style="margin-left:8px;font-size:10px;font-weight:700;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:1px 7px">build 2026-08-06p</span>
           </div>
         </div>
         <div style="display:flex;gap:8px;align-items:center">
@@ -2830,7 +2830,7 @@ function tick() {
 // One-time build check
 if (!window._buildChecked) {
   window._buildChecked = true;
-  window.REMC_BUILD = "2026-08-06o";
+  window.REMC_BUILD = "2026-08-06p";
   console.log("%c REMC v1.1 \u00B7 build " + window.REMC_BUILD + " loaded successfully ", "background:#16a34a;color:white;font-size:14px;padding:4px 8px;border-radius:4px");
 }
 
@@ -12653,7 +12653,25 @@ function teamEditProjectBooking(pid){
 
   // Directly write a single key into the shared cloud document (read-modify-write).
   // Used to reliably push the supervisor list regardless of debounce timing.
+  // Saves run one at a time. Two read-modify-writes overlapping would let the
+  // second one overwrite the first, silently undoing a change that was just made.
+  var _upsertQueue = Promise.resolve();
   window.remcCloudUpsertKey = function(k, valueStr, cb){
+    _upsertQueue = _upsertQueue.then(function(){
+      return new Promise(function(done){
+        var finished = false;
+        function finish(err){
+          if(finished) return; finished = true;
+          try{ if(cb) cb(err||null); }catch(e){}
+          done();
+        }
+        // never let one stuck save block every later one
+        setTimeout(function(){ finish('timeout'); }, 15000);
+        _remcUpsertNow(k, valueStr, finish);
+      });
+    });
+  };
+  function _remcUpsertNow(k, valueStr, cb){
     try{
       sb.from('remc_state').select('data').eq('id', WS).maybeSingle().then(function(res){
         // A read that failed must NEVER turn into a write. Writing here would
@@ -12682,7 +12700,7 @@ function teamEditProjectBooking(pid){
         }).catch(function(e){ _cloudFail((e&&(e.message||e))||'network'); if(cb) cb('network'); });
       }).catch(function(e){ _cloudFail((e&&(e.message||e))||'network'); if(cb) cb('network'); });
     }catch(e){ if(cb) cb(String(e)); }
-  };
+  }
 
   // Rebuild the shared document from this PC. Use after a wipe: everything the
   // office has locally goes back up, without deleting anything already there.
