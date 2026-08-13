@@ -327,6 +327,8 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
   .mat-moved{background:#fef3c7;color:#92400e;font-weight:700;padding:1px 6px;border-radius:4px}
   .pmat{background:#f7fee7;color:#4d7c0f;border:1px solid #d9f99d;border-radius:8px;padding:8px 12px;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer}
   .mdot{color:#dc2626;font-size:15px;line-height:1}
+  .build-tag{font-size:9px;font-weight:700;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:0 5px;margin-left:4px;white-space:nowrap}
+  .mat-fresh{font-size:11px;color:var(--muted);text-align:center;padding:4px 0 10px}
 </style>
 </head>
 <body>
@@ -381,7 +383,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     <div class="cloud" id="cloud">•</div>
     <div class="who">
       <div class="who-name" id="who-name"></div>
-      <div class="who-sub">Supervisor</div>
+      <div class="who-sub">Supervisor <span class="build-tag">build 2026-08-06m</span></div>
     </div>
     <button class="notif-btn" id="notif-btn" onclick="openNotif()" title="Notifications">🔔<span class="notif-badge" id="notif-badge" style="display:none">0</span></button>
     <button class="notif-btn" id="cloud-check-btn" onclick="supCloudCheck()" title="Check the cloud connection">🩺</button>
@@ -808,6 +810,8 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
   };
   var MATREQS={};
   var MATERIAL_TYPES=['Clean Sand','Dirty Sand','Clay','Rocks','Concrete','Tree','Grass','Rubbish','Mix Material'];
+  window.REMC_BUILD='2026-08-06m';
+  try{ console.log('%c REMC Supervisor \u00B7 build '+window.REMC_BUILD+' ','background:#16a34a;color:#fff;padding:3px 7px;border-radius:4px'); }catch(e){}
   function parseData(){
     function j(k,def){ try{ return JSON.parse(DATA[k]||def); }catch(e){ return JSON.parse(def); } }
     PROJECTS = j('remc_projects','[]'); if(!Array.isArray(PROJECTS)) PROJECTS=[];
@@ -2349,6 +2353,9 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     matDir(null);                            // open with neither one selected
     renderMatList();
     $('mat-ov').classList.add('open');
+    // Pull straight away, so an answer the office gave while this phone was idle
+    // is on screen the moment the list opens instead of up to 20 seconds later.
+    try{ refreshFromCloud(); }catch(e){}
   };
   window.closeMaterial=function(){ $('mat-ov').classList.remove('open'); MAT_PID=null; };
   window.saveMaterial=function(){
@@ -2389,7 +2396,12 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
       host.innerHTML='<div class="pc-empty" style="padding:26px 16px;text-align:center;color:var(--muted)">No material requests yet for this job.</div>';
       return;
     }
-    host.innerHTML=list.map(function(m){
+    var stampNow=new Date();
+    host.innerHTML='<div class="mat-fresh">Updated '
+      +String(stampNow.getHours()).padStart(2,'0')+':'+String(stampNow.getMinutes()).padStart(2,'0')
+      +':'+String(stampNow.getSeconds()).padStart(2,'0')
+      +' \u00B7 <a href="javascript:void(0)" onclick="matRefresh()" style="color:var(--blue);font-weight:700">Check now</a></div>'
+      +list.map(function(m){
       var st=matStatus(m), o=m.office||{};
       var when = (st==='approved' && o.date && o.date!==m.date)
         ? ('<span class="mat-moved">Moved to '+esc(_dLabel(o.date))+'</span>')
@@ -2405,6 +2417,10 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
         +'</div>';
     }).join('');
   }
+  window.matRefresh=function(){
+    try{ refreshFromCloud(); }catch(e){}
+    setTimeout(function(){ try{ renderMatList(); }catch(e){} }, 900);
+  };
   function _dLabel(d){
     if(!d) return 'No date';
     try{ var x=new Date(d+'T00:00:00');
