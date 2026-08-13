@@ -1758,7 +1758,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
         <div>
           <div class="ops-title">Operations</div>
           <div class="ops-sub">Compaction tests, machine transfers and subcontractor bookings
-            <span style="margin-left:8px;font-size:10px;font-weight:700;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:1px 7px">build 2026-08-06m</span>
+            <span style="margin-left:8px;font-size:10px;font-weight:700;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:1px 7px">build 2026-08-06n</span>
           </div>
         </div>
         <div style="display:flex;gap:8px;align-items:center">
@@ -2830,7 +2830,7 @@ function tick() {
 // One-time build check
 if (!window._buildChecked) {
   window._buildChecked = true;
-  window.REMC_BUILD = "2026-08-06m";
+  window.REMC_BUILD = "2026-08-06n";
   console.log("%c REMC v1.1 \u00B7 build " + window.REMC_BUILD + " loaded successfully ", "background:#16a34a;color:white;font-size:14px;padding:4px 8px;border-radius:4px");
 }
 
@@ -12623,14 +12623,59 @@ function teamEditProjectBooking(pid){
   window.remcCloudUpsertKey = function(k, valueStr, cb){
     try{
       sb.from('remc_state').select('data').eq('id', WS).maybeSingle().then(function(res){
-        var data = (res && res.data && res.data.data) ? res.data.data : {};
+        // A read that failed must NEVER turn into a write. Writing here would
+        // replace the whole shared document with this single key and wipe
+        // supervisors, projects and everything else.
+        if(res && res.error){
+          _cloudFail(res.error.message||res.error);
+          if(cb) cb(res.error.message||'error');
+          return;
+        }
+        var data = (res && res.data && res.data.data) ? res.data.data : null;
+        if(!data || typeof data !== 'object' || Array.isArray(data)){
+          // No usable document came back. Rather than send one lonely key,
+          // send this PC's full snapshot so nothing is lost.
+          try{ data = collectState(); }catch(e){ data = null; }
+          if(!data || !Object.keys(data).length){
+            _cloudFail('cloud document unreadable - not saving');
+            if(cb) cb('empty');
+            return;
+          }
+        }
         data[k] = valueStr; data['__client'] = CLIENT_ID;
         sb.from('remc_state').upsert({ id:WS, data:data, updated_at:new Date().toISOString() }).then(function(r2){
           if(r2 && r2.error) _cloudFail(r2.error.message||r2.error); else _cloudOk();
           if(cb) cb(r2 && r2.error ? (r2.error.message||'error') : null);
-        });
+        }).catch(function(e){ _cloudFail((e&&(e.message||e))||'network'); if(cb) cb('network'); });
       }).catch(function(e){ _cloudFail((e&&(e.message||e))||'network'); if(cb) cb('network'); });
     }catch(e){ if(cb) cb(String(e)); }
+  };
+
+  // Rebuild the shared document from this PC. Use after a wipe: everything the
+  // office has locally goes back up, without deleting anything already there.
+  window.remcCloudRepair = function(){
+    if(!sb){ alert('Cloud is not connected.'); return; }
+    var mine = {};
+    try{ mine = collectState(); }catch(e){}
+    var n = Object.keys(mine).length;
+    if(!n){ alert('This PC has no data to send.'); return; }
+    if(!confirm('Send this PC\'s '+n+' data sets back up to the cloud?\n\n'
+      +'Nothing already in the cloud is deleted - anything missing is put back.')) return;
+    sb.from('remc_state').select('data').eq('id', WS).maybeSingle().then(function(res){
+      var cloud = (res && !res.error && res.data && res.data.data) ? res.data.data : {};
+      var added = [], merged = {};
+      Object.keys(cloud).forEach(function(x){ merged[x] = cloud[x]; });
+      Object.keys(mine).forEach(function(x){
+        if(merged[x] === undefined || merged[x] === null || merged[x] === '' ){ merged[x] = mine[x]; added.push(x); }
+      });
+      merged['__client'] = CLIENT_ID;
+      sb.from('remc_state').upsert({ id:WS, data:merged, updated_at:new Date().toISOString() }).then(function(r2){
+        if(r2 && r2.error){ alert('Could not repair: '+(r2.error.message||r2.error)); return; }
+        _cloudOk();
+        alert('Cloud repaired.\n\nDocument now has '+Object.keys(merged).length+' data sets.\n'
+          +(added.length ? ('Put back: '+added.join(', ')) : 'Nothing was missing.'));
+      });
+    }).catch(function(e){ alert('Could not repair: '+((e&&e.message)||'network')); });
   };
   window.remcCloudActive = true;
 
@@ -13132,7 +13177,9 @@ function teamEditProjectBooking(pid){
       +   '<div style="flex:1;min-width:120px"><div class="map-lbl">Password</div><input id="sup-add-pass" class="map-sel" value="REMC123"></div>'
       +   '<button class="step-btn-pri" id="sup-add-btn">Add</button>'
       + '</div></div></div>'
-      + '<div style="font-size:11px;color:var(--muted);margin:2px 0 12px;display:flex;align-items:center;gap:6px"><span style="color:#16a34a">☁️</span> Supervisors are saved and kept in sync automatically.</div>'
+      + '<div style="font-size:11px;color:var(--muted);margin:2px 0 12px;display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span style="color:#16a34a">☁️</span> Supervisors are saved and kept in sync automatically.'
+      +   '<button onclick="remcCloudRepair()" style="margin-left:auto;padding:5px 12px;background:var(--surface);border:1.5px solid var(--border);border-radius:7px;font-family:inherit;font-size:11px;font-weight:700;color:var(--mid);cursor:pointer" title="Put anything missing from the cloud back, from this PC">🔧 Repair cloud data</button>'
+      + '</div>'
       + '<div id="sup-list"></div>'
       + '</div>';
     empPanel.parentNode.insertBefore(panel, empPanel.nextSibling);
