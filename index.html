@@ -1758,7 +1758,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
         <div>
           <div class="ops-title">Operations</div>
           <div class="ops-sub">Compaction tests, machine transfers and subcontractor bookings
-            <span style="margin-left:8px;font-size:10px;font-weight:700;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:1px 7px">build 2026-08-06n</span>
+            <span style="margin-left:8px;font-size:10px;font-weight:700;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:1px 7px">build 2026-08-06o</span>
           </div>
         </div>
         <div style="display:flex;gap:8px;align-items:center">
@@ -2830,7 +2830,7 @@ function tick() {
 // One-time build check
 if (!window._buildChecked) {
   window._buildChecked = true;
-  window.REMC_BUILD = "2026-08-06n";
+  window.REMC_BUILD = "2026-08-06o";
   console.log("%c REMC v1.1 \u00B7 build " + window.REMC_BUILD + " loaded successfully ", "background:#16a34a;color:white;font-size:14px;padding:4px 8px;border-radius:4px");
 }
 
@@ -12265,6 +12265,7 @@ function teamEditProjectBooking(pid){
       // of a document we could not read can wipe what another device just saved.
       if(res && res.error){ _cloudFail(res.error.message||res.error); return; }
       var base = (res && res.data && res.data.data) ? res.data.data : null;
+      if(base) selfHeal(base);
       if(!base || !Object.keys(base).length){ base = collectState(); }   // first ever write
       else if(dirty.length){
         dirty.forEach(function(k){
@@ -12390,7 +12391,39 @@ function teamEditProjectBooking(pid){
   var _rem = localStorage.removeItem.bind(localStorage);
   localStorage.removeItem = function(k){ _rem(k); if(!_applying && k && k.indexOf('remc_')===0){ _dirty[k]=1; schedulePush(); } };
 
+  var _healDone = false;
+  function selfHeal(cloudDoc){
+    if(_healDone) return;                       // once per session, never a loop
+    _healDone = true;
+    try{
+      if(!cloudDoc || typeof cloudDoc !== 'object') return;
+      var mine = collectState();
+      var mineKeys = Object.keys(mine);
+      if(mineKeys.length < 3) return;           // this PC has nothing worth restoring
+      var missing = mineKeys.filter(function(k){
+        if(k === '__client') return false;
+        var v = cloudDoc[k];
+        if(v !== undefined && v !== null && v !== '') return false;   // already there
+        var m = mine[k];
+        // only bother with data sets that actually hold something
+        return m && m !== '[]' && m !== '{}' && m !== 'null';
+      });
+      if(!missing.length) return;
+      var fixed = {};
+      Object.keys(cloudDoc).forEach(function(k){ fixed[k] = cloudDoc[k]; });
+      missing.forEach(function(k){ fixed[k] = mine[k]; });
+      fixed['__client'] = CLIENT_ID;
+      sb.from('remc_state').upsert({ id:WS, data:fixed, updated_at:new Date().toISOString() })
+        .then(function(r){
+          if(r && r.error) return;
+          console.log('[REMC Cloud] put back ' + missing.length + ' missing data set(s): ' + missing.join(', '));
+          try{ showToast('Restored ' + missing.length + ' missing data set' + (missing.length===1?'':'s') + ' to the cloud'); }catch(e){}
+        }).catch(function(){});
+    }catch(e){}
+  }
+
   function applyRemoteAndRender(d){
+    selfHeal(d);
     applyState(d);
     // Soft refresh: bring in the new data and re-render the CURRENT page — do NOT reload the whole app
     try{
