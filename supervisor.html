@@ -289,6 +289,28 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
 #sup-toast .sp{width:18px;height:18px;border:2.5px solid rgba(255,255,255,0.35);border-top-color:#fff;border-radius:50%;animation:supspin .7s linear infinite;flex-shrink:0}
 @keyframes supspin{to{transform:rotate(360deg)}}
 #sup-toast .tick{font-size:18px;flex-shrink:0}
+  .mat-dir{display:flex;gap:8px}
+  .mat-dir-btn{flex:1;padding:11px 8px;border:1.5px solid var(--border);background:var(--card);border-radius:10px;
+    font-family:inherit;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer;transition:all .15s}
+  .mat-dir-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+  .mat-qty{display:flex;gap:8px}
+  .mat-qty input{flex:1;min-width:0}
+  .mat-qty select{width:110px;flex-shrink:0}
+  .mat-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:9px;border-left:3px solid var(--muted)}
+  .mat-card.pending{border-left-color:#d97706}
+  .mat-card.approved{border-left-color:#16a34a}
+  .mat-card.declined{border-left-color:#dc2626}
+  .mat-top{display:flex;align-items:flex-start;gap:8px;margin-bottom:5px}
+  .mat-name{font-size:14px;font-weight:800;flex:1;min-width:0}
+  .mat-badge{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;padding:2px 8px;border-radius:5px;white-space:nowrap}
+  .mat-b-pending{background:#fef3c7;color:#92400e}
+  .mat-b-approved{background:#dcfce7;color:#15803d}
+  .mat-b-declined{background:#fee2e2;color:#b91c1c}
+  .mat-meta{font-size:12px;color:var(--muted);line-height:1.6}
+  .mat-note{font-size:12px;color:var(--muted);font-style:italic;margin-top:4px}
+  .mat-moved{background:#fef3c7;color:#92400e;font-weight:700;padding:1px 6px;border-radius:4px}
+  .pmat{background:#fff7ed;border-color:#fed7aa;color:#c2410c}
+  .mdot{color:#dc2626;font-size:15px;line-height:1}
 </style>
 </head>
 <body>
@@ -471,6 +493,44 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
       <button class="btn btn-save" id="t-save" onclick="saveTest()">+ Add test</button>
     </div>
     <div class="test-list" id="test-list"></div>
+  </div>
+</div>
+
+<div class="test-ov" id="mat-ov">
+  <div class="projcal-top">
+    <button class="back" onclick="closeMaterial()">&lsaquo; Close</button>
+    <div class="projcal-title" id="mat-title">Material In / Out</div>
+  </div>
+  <div class="test-body">
+    <div class="test-form">
+      <div class="th">&#128667; Request material in or out</div>
+      <div class="fld"><label>What do you need? <span class="req">*</span></label>
+        <div class="mat-dir">
+          <button type="button" class="mat-dir-btn active" id="m-dir-import" onclick="matDir('import')">&#11015; Bring material IN</button>
+          <button type="button" class="mat-dir-btn" id="m-dir-remove" onclick="matDir('remove')">&#11014; Take material OUT</button>
+        </div>
+      </div>
+      <div class="fld"><label>Material <span class="req">*</span></label>
+        <select id="m-material" onchange="matTypeChange()"></select>
+        <input id="m-material-other" placeholder="Type the material…" style="display:none;margin-top:6px" oninput="updateMatSave()">
+      </div>
+      <div class="fld"><label>Quantity <span class="req">*</span></label>
+        <div class="mat-qty">
+          <input id="m-qty" type="number" min="0" step="any" placeholder="e.g. 250" oninput="updateMatSave()">
+          <select id="m-unit">
+            <option value="m3">m&sup3;</option>
+            <option value="t">Tonnes</option>
+          </select>
+        </div>
+      </div>
+      <div class="fld"><label>Date needed <span class="req">*</span></label>
+        <input id="m-date" type="date" oninput="updateMatSave()" onchange="updateMatSave()"></div>
+      <div class="fld"><label>Comments <span class="opt">(optional)</span></label>
+        <textarea id="m-comments" rows="2" placeholder="Access, truck size, where to stockpile…"></textarea></div>
+      <button class="btn btn-save" id="m-save" onclick="saveMaterial()">+ Send request</button>
+      <div class="notif-hint" style="margin-top:8px">The office has to approve this before it happens.</div>
+    </div>
+    <div class="test-list" id="mat-list"></div>
   </div>
 </div>
 
@@ -729,6 +789,8 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     try{ localStorage.setItem('remc_sup_backend', m); localStorage.setItem('remc_sup_server_url', u); }catch(e){}
     location.reload();
   };
+  var MATREQS={};
+  var MATERIAL_TYPES=['Clean Sand','Dirty Sand','Clay','Rocks','Concrete','Tree','Grass','Rubbish','Mix Material'];
   function parseData(){
     function j(k,def){ try{ return JSON.parse(DATA[k]||def); }catch(e){ return JSON.parse(def); } }
     PROJECTS = j('remc_projects','[]'); if(!Array.isArray(PROJECTS)) PROJECTS=[];
@@ -742,6 +804,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     SUBCONS  = j('remc_sub_bookings','{}'); if(!SUBCONS || typeof SUBCONS!=='object' || Array.isArray(SUBCONS)) SUBCONS={};
     PROJDOCS = j('remc_proj_docs','{}'); if(!PROJDOCS || typeof PROJDOCS!=='object' || Array.isArray(PROJDOCS)) PROJDOCS={};
     ACTIVITY = j('remc_activity_log','[]'); if(!Array.isArray(ACTIVITY)) ACTIVITY=[];
+    MATREQS  = j('remc_material_requests','{}'); if(!MATREQS || typeof MATREQS!=='object' || Array.isArray(MATREQS)) MATREQS={};
     fillMachineList();
   }
   // Fill the Machine dropdown with the machines uploaded in App 1 (falls back to a default list)
@@ -884,6 +947,20 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
       d['__client'] = CLIENT;
       sb.from('remc_state').upsert({ id:WS, data:d, updated_at:new Date().toISOString() }).then(function(r2){
         if(r2 && r2.error){ _cloudFail(); if(cb) cb(r2.error.message); }
+        else { DATA=d; _cloudOk(); if(cb) cb(null); }
+      }).catch(function(e){ _cloudFail(); if(cb) cb((e&&e.message)||'network'); });
+    }).catch(function(e){ _cloudFail(); if(cb) cb((e&&e.message)||'network'); });
+  }
+  function pushMaterials(cb){
+    if(!ensureClient()){ if(cb) cb('noconfig'); return; }
+    setCloud('saving…','#fef3c7','#92400e');
+    sb.from('remc_state').select('data').eq('id',WS).maybeSingle().then(function(res){
+      if(res && res.error){ _cloudFail(); if(cb) cb(res.error.message||'error'); return; }
+      var d = (res && res.data && res.data.data) ? res.data.data : {};
+      d['remc_material_requests'] = JSON.stringify(MATREQS);
+      d['__client'] = CLIENT;
+      sb.from('remc_state').upsert({ id:WS, data:d, updated_at:new Date().toISOString() }).then(function(r2){
+        if(r2 && r2.error){ _cloudFail(); if(cb) cb(r2.error.message||'error'); }
         else { DATA=d; _cloudOk(); if(cb) cb(null); }
       }).catch(function(e){ _cloudFail(); if(cb) cb((e&&e.message)||'network'); });
     }).catch(function(e){ _cloudFail(); if(cb) cb((e&&e.message)||'network'); });
@@ -1149,6 +1226,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
         +   '<button class="pcal" onclick="openProjCal(\''+esc(p.id)+'\')">📅 Calendar</button>'
         +   '<button class="ptest" onclick="openTest(\''+esc(p.id)+'\')">🧪 Test</button>'
         +   '<button class="ptransfer" onclick="openTransfer(\''+esc(p.id)+'\')">🚚 Transfer</button>'
+        +   '<button class="pmat" onclick="openMaterial(\''+esc(p.id)+'\')">🚛 Material'+_matDot(p.id)+'</button>'
         +   '<button class="pvar" onclick="openVariation(\''+esc(p.id)+'\')">🔧 Variation</button>'
         +   '<button class="psub" onclick="openSubs(\''+esc(p.id)+'\')">👷 Subs</button>'
         +   '<button class="pallow" onclick="openAllow(\''+esc(p.id)+'\')">📋 Allowances</button>'
@@ -2020,12 +2098,29 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
       'test|created':['🧪','Compaction test booked'], 'test|deleted':['🗑️','Test removed'],
       'transfer|transfer_requested':['🚚','Machine transfer requested'], 'transfer|removal_requested':['🚚','Machine removal requested'], 'transfer|deleted':['🗑️','Transfer request removed'],
       'variation|created':['🔧','Variation added'], 'variation|updated':['🔧','Variation updated'], 'variation|deleted':['🗑️','Variation removed'],
+      'material|requested':['🚛','Material requested'],
+      'material|approved':['✅','Material request approved'],
+      'material|declined':['❌','Material request declined'],
       'sub|scheduled':['👷','Subcontractor scheduled'], 'sub|postpone_requested':['👷','Subcontractor postpone requested'], 'sub|cancel_requested':['👷','Subcontractor cancel requested'], 'sub|request_cleared':['👷','Subcontractor request cleared']
     };
     return m[kind+'|'+action] || ['•', action];
   }
   function buildHistory(pid){
     var pidS=String(pid); var evs=[]; var _obs=_getObs();
+    (MATREQS[pidS]||[]).forEach(function(m){
+      var q=(m.dir==='import'?'IN':'OUT')+' \u00B7 '+(m.material||'')+' \u00B7 '+matQtyText(m);
+      evs.push({ at:(m.createdAt||''), by:(m.bookedBy||''), user:(m.au_user||''), app:(m.au_app||'Mobile'),
+                 kind:'material', action:'requested', detail:q+' \u00B7 for '+_dLabel(m.date) });
+      var o=m.office||{};
+      if(o.status==='approved'){
+        evs.push({ at:(o.at||''), by:(o.by||'Office'), user:'', app:'PC', kind:'material', action:'approved',
+          detail:q+' \u00B7 '+((o.date&&o.date!==m.date) ? ('moved to '+_dLabel(o.date)+' (you asked for '+_dLabel(m.date)+')')
+                                                         : ('on '+_dLabel(o.date||m.date))) });
+      } else if(o.status==='declined'){
+        evs.push({ at:(o.at||''), by:(o.by||'Office'), user:'', app:'PC', kind:'material', action:'declined',
+          detail:q+(o.reason?(' \u00B7 '+o.reason):'') });
+      }
+    });
     (BOOKINGS||[]).filter(function(b){return String(b.projectId)===pidS;}).forEach(function(b){
       evs.push({ at:(b.au_at||b.createdAt||''), by:(b.au_by||b.bookedBy||''), user:(b.au_user||''), app:(b.au_app||''), kind:'booking', action:'created', detail:_bkDetail(b) });
       var _o=_obs[String(b.id)];
@@ -2126,6 +2221,124 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
         + '</div>';
     }).join('');
   }
+  // ─────────── Material requests ───────────
+  var MAT_PID=null, MAT_DIR='import';
+  function matList(pid){ var a=MATREQS[String(pid)]; return Array.isArray(a)?a:[]; }
+  function matStatus(m){ var v=(m.office&&m.office.status)||'pending';
+    return (v==='approved'||v==='declined') ? v : 'pending'; }
+  function _matDot(pid){
+    // a red dot while anything on this project is still waiting on the office
+    return matList(pid).some(function(m){ return matStatus(m)==='pending'; }) ? ' <span class="mdot">\u25CF</span>' : '';
+  }
+  function matQtyText(m){
+    var q=Number(m.qty||0);
+    return (isFinite(q)?q:0) + ' ' + (m.unit==='t' ? (q===1?'tonne':'tonnes') : 'm\u00B3');
+  }
+  window.matDir=function(d){
+    MAT_DIR=d;
+    var a=$('m-dir-import'), b=$('m-dir-remove');
+    if(a) a.classList.toggle('active', d==='import');
+    if(b) b.classList.toggle('active', d==='remove');
+    updateMatSave();
+  };
+  window.matTypeChange=function(){
+    var sel=$('m-material'), other=$('m-material-other');
+    if(!sel||!other) return;
+    other.style.display = (sel.value==='__other') ? '' : 'none';
+    if(sel.value==='__other') other.focus();
+    updateMatSave();
+  };
+  window.updateMatSave=function(){
+    var btn=$('m-save'); if(!btn) return;
+    btn.disabled = !matFormValue();
+  };
+  function matFormValue(){
+    var sel=$('m-material'), other=$('m-material-other');
+    var mat = sel ? (sel.value==='__other' ? String((other&&other.value)||'').trim() : sel.value) : '';
+    var qty = parseFloat(($('m-qty')||{}).value||'');
+    var date = String(($('m-date')||{}).value||'');
+    if(!mat || !date || !(qty>0)) return null;
+    return { material:mat, qty:qty, unit:String(($('m-unit')||{}).value||'m3'), date:date,
+             comments:String(($('m-comments')||{}).value||'').trim() };
+  }
+  window.openMaterial=function(pid){
+    MAT_PID=String(pid);
+    var p=(PROJECTS||[]).find(function(x){ return String(x.id)===MAT_PID; });
+    var t=$('mat-title'); if(t) t.textContent = p ? (p.name||('Project '+pid)) : 'Material In / Out';
+    var sel=$('m-material');
+    if(sel) sel.innerHTML = MATERIAL_TYPES.map(function(m){ return '<option value="'+esc(m)+'">'+esc(m)+'</option>'; }).join('')
+      + '<option value="__other">Other (type it in)…</option>';
+    var o=$('m-material-other'); if(o){ o.value=''; o.style.display='none'; }
+    if($('m-qty')) $('m-qty').value='';
+    if($('m-unit')) $('m-unit').value='m3';
+    if($('m-date')) $('m-date').value='';
+    if($('m-comments')) $('m-comments').value='';
+    matDir('import');
+    renderMatList();
+    $('mat-ov').classList.add('open');
+  };
+  window.closeMaterial=function(){ $('mat-ov').classList.remove('open'); MAT_PID=null; };
+  window.saveMaterial=function(){
+    if(!MAT_PID) return;
+    var v=matFormValue();
+    if(!v){ alert('Please fill in the material, quantity and date.'); return; }
+    if(!MATREQS[MAT_PID]) MATREQS[MAT_PID]=[];
+    MATREQS[MAT_PID].push({
+      id:'mrq_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
+      dir:MAT_DIR, material:v.material, qty:v.qty, unit:v.unit, date:v.date, comments:v.comments,
+      createdAt:new Date().toISOString(), bookedBy:((ME&&ME.name)||(ME&&ME.username)||'Supervisor'),
+      au_user:((ME&&ME.username)||''), au_app:'Mobile',
+      office:{ status:'pending' }
+    });
+    var btn=$('m-save'); if(btn){ btn.disabled=true; btn.textContent='Sending…'; }
+    pushMaterials(function(err){
+      if(btn){ btn.textContent='+ Send request'; btn.disabled=false; }
+      if(err){ alert('Could not send the request: '+err+'\n\nIt is saved on this phone and will go up when the connection is back.'); }
+      if($('m-qty')) $('m-qty').value='';
+      if($('m-date')) $('m-date').value='';
+      if($('m-comments')) $('m-comments').value='';
+      updateMatSave(); renderMatList(); render();
+    });
+  };
+  window.deleteMaterial=function(id){
+    if(!MAT_PID) return;
+    var m=matList(MAT_PID).find(function(x){ return String(x.id)===String(id); });
+    if(m && matStatus(m)!=='pending'){ alert('The office has already answered this one, so it cannot be removed.'); return; }
+    if(!confirm('Cancel this material request?')) return;
+    MATREQS[MAT_PID]=matList(MAT_PID).filter(function(x){ return String(x.id)!==String(id); });
+    pushMaterials(function(){ renderMatList(); render(); });
+  };
+  function renderMatList(){
+    var host=$('mat-list'); if(!host) return;
+    var list=matList(MAT_PID).slice().sort(function(a,b){ return String(a.createdAt)<String(b.createdAt)?1:-1; });
+    if(!list.length){
+      host.innerHTML='<div class="pc-empty" style="padding:26px 16px;text-align:center;color:var(--muted)">No material requests yet for this job.</div>';
+      return;
+    }
+    host.innerHTML=list.map(function(m){
+      var st=matStatus(m), o=m.office||{};
+      var when = (st==='approved' && o.date && o.date!==m.date)
+        ? ('<span class="mat-moved">Moved to '+esc(_dLabel(o.date))+'</span>')
+        : esc(_dLabel(m.date));
+      return '<div class="mat-card '+st+'">'
+        +'<div class="mat-top"><div class="mat-name">'+(m.dir==='import'?'\u2B07 IN':'\u2B06 OUT')+' \u00B7 '+esc(m.material)+'</div>'
+        +'<span class="mat-badge mat-b-'+st+'">'+(st==='pending'?'Waiting':st==='approved'?'Approved':'Declined')+'</span></div>'
+        +'<div class="mat-meta"><strong>'+esc(matQtyText(m))+'</strong><br>'+when
+        +(st==='approved'&&o.by?('<br>Approved by '+esc(o.by)):'')
+        +(st==='declined'&&o.reason?('<br>Reason: '+esc(o.reason)):'')+'</div>'
+        +(m.comments?('<div class="mat-note">'+esc(m.comments)+'</div>'):'')
+        +(st==='pending'?('<button type="button" class="v-file-view" style="margin-top:8px" onclick="deleteMaterial(\''+esc(m.id)+'\')">Cancel request</button>'):'')
+        +'</div>';
+    }).join('');
+  }
+  function _dLabel(d){
+    if(!d) return 'No date';
+    try{ var x=new Date(d+'T00:00:00');
+      return ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][x.getDay()]+' '+x.getDate()+' '
+        +['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][x.getMonth()];
+    }catch(e){ return String(d); }
+  }
+
   window.openNotif=function(){
     renderNotif();
     $('notif-ov').classList.add('open');
