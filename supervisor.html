@@ -974,11 +974,44 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     sb.from('remc_state').select('data').eq('id',WS).maybeSingle().then(function(res){
       if(res && res.error){ _cloudFail(); if(cb) cb(res.error.message||'error'); return; }
       var d = (res && res.data && res.data.data) ? res.data.data : {};
-      d['remc_material_requests'] = JSON.stringify(MATREQS);
+      // The office decides approved / declined. Never write over that with a
+      // copy this phone may have been holding since before the office answered.
+      var cloudMat = {};
+      try{ cloudMat = JSON.parse(d['remc_material_requests'] || '{}') || {}; }catch(e){ cloudMat = {}; }
+      var merged = {};
+      Object.keys(MATREQS).forEach(function(pid){
+        var mine = Array.isArray(MATREQS[pid]) ? MATREQS[pid] : [];
+        var theirs = Array.isArray(cloudMat[pid]) ? cloudMat[pid] : [];
+        var byId = {};
+        theirs.forEach(function(x){ if(x && x.id) byId[String(x.id)] = x; });
+        merged[pid] = mine.map(function(m){
+          var up = byId[String(m.id)];
+          if(!up) return m;                        // brand new on this phone
+          var c = {}; for(var k in m) c[k] = m[k];
+          if(up.office) c.office = up.office;      // the office answer always wins
+          return c;
+        });
+        // Anything the office (or another phone) added that this one has not seen.
+        // A request the office has already answered is never dropped. One that is
+        // still waiting and is missing here means this phone cancelled it, so it
+        // stays gone.
+        theirs.forEach(function(x){
+          if(!x || !x.id) return;
+          if(mine.some(function(m){ return String(m.id) === String(x.id); })) return;
+          var answered = x.office && (x.office.status === 'approved' || x.office.status === 'declined');
+          if(answered) merged[pid].push(x);
+        });
+      });
+      // whole projects this phone knows nothing about must survive too
+      Object.keys(cloudMat).forEach(function(pid){
+        if(!merged[pid]) merged[pid] = cloudMat[pid];
+      });
+      MATREQS = merged;
+      d['remc_material_requests'] = JSON.stringify(merged);
       d['__client'] = CLIENT;
       sb.from('remc_state').upsert({ id:WS, data:d, updated_at:new Date().toISOString() }).then(function(r2){
         if(r2 && r2.error){ _cloudFail(); if(cb) cb(r2.error.message||'error'); }
-        else { DATA=d; _cloudOk(); if(cb) cb(null); }
+        else { DATA=d; _cloudOk(); try{ refreshOpenScreens(); }catch(e){} if(cb) cb(null); }
       }).catch(function(e){ _cloudFail(); if(cb) cb((e&&e.message)||'network'); });
     }).catch(function(e){ _cloudFail(); if(cb) cb((e&&e.message)||'network'); });
   }
@@ -2296,6 +2329,11 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     return { material:mat, qty:qty, unit:String(($('m-unit')||{}).value||'m3'), date:date,
              comments:String(($('m-comments')||{}).value||'').trim() };
   }
+  // Coming back to the app after it was in the background: pull first, so an
+  // answer that landed while the phone was asleep is on screen straight away.
+  document.addEventListener('visibilitychange', function(){
+    if(!document.hidden){ try{ refreshFromCloud(); }catch(e){} }
+  });
   window.openMaterial=function(pid){
     MAT_PID=String(pid);
     var p=(PROJECTS||[]).find(function(x){ return String(x.id)===MAT_PID; });
