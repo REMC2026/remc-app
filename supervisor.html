@@ -289,14 +289,30 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
 #sup-toast .sp{width:18px;height:18px;border:2.5px solid rgba(255,255,255,0.35);border-top-color:#fff;border-radius:50%;animation:supspin .7s linear infinite;flex-shrink:0}
 @keyframes supspin{to{transform:rotate(360deg)}}
 #sup-toast .tick{font-size:18px;flex-shrink:0}
+  /* The whole screen turns light green for material coming IN and light red
+     for material going OUT, so there is never any doubt which one is selected. */
+  #mat-ov{transition:background .2s}
+  #mat-ov.imp{background:#f0fdf4}
+  #mat-ov.rem{background:#fef2f2}
+  #mat-ov.imp .test-form{border-color:#bbf7d0;background:#fbfffc}
+  #mat-ov.rem .test-form{border-color:#fecaca;background:#fffbfb}
+  #mat-ov.imp .th{color:#15803d}
+  #mat-ov.rem .th{color:#b91c1c}
   .mat-dir{display:flex;gap:8px}
-  .mat-dir-btn{flex:1;padding:11px 8px;border:1.5px solid var(--border);background:var(--card);border-radius:10px;
-    font-family:inherit;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer;transition:all .15s}
-  .mat-dir-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+  .mat-dir-btn{flex:1;padding:13px 8px;border:2px solid var(--border);background:var(--surface);border-radius:10px;
+    font-family:inherit;font-size:13px;font-weight:800;color:var(--mid);cursor:pointer;transition:all .15s}
+  .mat-dir-btn:hover{border-color:var(--border2)}
+  .mat-dir-btn.on-imp{background:#16a34a;border-color:#16a34a;color:#fff;box-shadow:0 3px 10px rgba(22,163,74,.3)}
+  .mat-dir-btn.on-rem{background:#dc2626;border-color:#dc2626;color:#fff;box-shadow:0 3px 10px rgba(220,38,38,.3)}
+  .mat-ask{background:#fffbeb;border:1px solid #fde68a;color:#92400e;border-radius:9px;padding:9px 12px;
+    font-size:12.5px;font-weight:700;margin-bottom:12px}
+  #m-save:disabled{opacity:.45;cursor:not-allowed}
+  #mat-ov.imp #m-save:not(:disabled){background:#16a34a}
+  #mat-ov.rem #m-save:not(:disabled){background:#dc2626}
   .mat-qty{display:flex;gap:8px}
   .mat-qty input{flex:1;min-width:0}
   .mat-qty select{width:110px;flex-shrink:0}
-  .mat-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:9px;border-left:3px solid var(--muted)}
+  .mat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:9px;border-left:3px solid var(--muted)}
   .mat-card.pending{border-left-color:#d97706}
   .mat-card.approved{border-left-color:#16a34a}
   .mat-card.declined{border-left-color:#dc2626}
@@ -309,7 +325,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
   .mat-meta{font-size:12px;color:var(--muted);line-height:1.6}
   .mat-note{font-size:12px;color:var(--muted);font-style:italic;margin-top:4px}
   .mat-moved{background:#fef3c7;color:#92400e;font-weight:700;padding:1px 6px;border-radius:4px}
-  .pmat{background:#fff7ed;border-color:#fed7aa;color:#c2410c}
+  .pmat{background:#f7fee7;color:#4d7c0f;border:1px solid #d9f99d;border-radius:8px;padding:8px 12px;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer}
   .mdot{color:#dc2626;font-size:15px;line-height:1}
 </style>
 </head>
@@ -504,9 +520,10 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
   <div class="test-body">
     <div class="test-form">
       <div class="th">&#128667; Request material in or out</div>
+      <div class="mat-ask" id="m-ask">&#9757; Start by choosing whether the material is coming in or going out.</div>
       <div class="fld"><label>What do you need? <span class="req">*</span></label>
         <div class="mat-dir">
-          <button type="button" class="mat-dir-btn active" id="m-dir-import" onclick="matDir('import')">&#11015; Bring material IN</button>
+          <button type="button" class="mat-dir-btn" id="m-dir-import" onclick="matDir('import')">&#11015; Bring material IN</button>
           <button type="button" class="mat-dir-btn" id="m-dir-remove" onclick="matDir('remove')">&#11014; Take material OUT</button>
         </div>
       </div>
@@ -1065,7 +1082,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
       sb.channel('sup_'+WS).on('postgres_changes', {event:'*',schema:'public',table:'remc_state',filter:'id=eq.'+WS}, function(payload){
         var d = payload && payload.new && payload.new.data;
         if(!d || d.__client===CLIENT) return;
-        DATA=d; parseData(); render();
+        DATA=d; parseData(); render(); refreshOpenScreens();
         try{ updateNotifBadge(); notifCheckAndFire(); }catch(e){}
       }).subscribe();
     }
@@ -1091,7 +1108,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
         _lastSeen=stamp;
         var d=r2.data.data;
         if(d.__client===CLIENT) return;
-        DATA=d; parseData(); render();
+        DATA=d; parseData(); render(); refreshOpenScreens();
         try{ updateNotifBadge(); notifCheckAndFire(); }catch(e){}
       }).catch(function(){ _refreshing=false; _cloudFail(); });
     }).catch(function(){ _refreshing=false; _cloudFail(); });
@@ -2221,8 +2238,19 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
         + '</div>';
     }).join('');
   }
+  // When fresh data lands from the cloud, any screen the supervisor already has
+  // open has to be redrawn too. Without this an approved or declined request
+  // kept showing "Waiting" until the screen was closed and reopened.
+  function refreshOpenScreens(){
+    try{
+      var ov=$('mat-ov');
+      if(ov && ov.classList.contains('open') && MAT_PID) renderMatList();
+    }catch(e){}
+    try{ updateNotifBadge(); }catch(e){}
+  }
+
   // ─────────── Material requests ───────────
-  var MAT_PID=null, MAT_DIR='import';
+  var MAT_PID=null, MAT_DIR=null;   // nothing is chosen until the supervisor picks
   function matList(pid){ var a=MATREQS[String(pid)]; return Array.isArray(a)?a:[]; }
   function matStatus(m){ var v=(m.office&&m.office.status)||'pending';
     return (v==='approved'||v==='declined') ? v : 'pending'; }
@@ -2236,9 +2264,15 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
   }
   window.matDir=function(d){
     MAT_DIR=d;
-    var a=$('m-dir-import'), b=$('m-dir-remove');
-    if(a) a.classList.toggle('active', d==='import');
-    if(b) b.classList.toggle('active', d==='remove');
+    var a=$('m-dir-import'), b=$('m-dir-remove'), ov=$('mat-ov'), ask=$('m-ask'), save=$('m-save');
+    if(a){ a.classList.remove('on-imp'); if(d==='import') a.classList.add('on-imp'); }
+    if(b){ b.classList.remove('on-rem'); if(d==='remove') b.classList.add('on-rem'); }
+    if(ov){ ov.classList.remove('imp','rem'); if(d==='import') ov.classList.add('imp');
+            else if(d==='remove') ov.classList.add('rem'); }
+    if(ask) ask.style.display = d ? 'none' : '';
+    if(save) save.textContent = d==='remove' ? '+ Send removal request'
+                              : d==='import' ? '+ Send delivery request'
+                                             : '+ Send request';
     updateMatSave();
   };
   window.matTypeChange=function(){
@@ -2253,6 +2287,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     btn.disabled = !matFormValue();
   };
   function matFormValue(){
+    if(!MAT_DIR) return null;               // nothing can be sent before IN or OUT is picked
     var sel=$('m-material'), other=$('m-material-other');
     var mat = sel ? (sel.value==='__other' ? String((other&&other.value)||'').trim() : sel.value) : '';
     var qty = parseFloat(($('m-qty')||{}).value||'');
@@ -2273,13 +2308,14 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     if($('m-unit')) $('m-unit').value='m3';
     if($('m-date')) $('m-date').value='';
     if($('m-comments')) $('m-comments').value='';
-    matDir('import');
+    matDir(null);                            // open with neither one selected
     renderMatList();
     $('mat-ov').classList.add('open');
   };
   window.closeMaterial=function(){ $('mat-ov').classList.remove('open'); MAT_PID=null; };
   window.saveMaterial=function(){
     if(!MAT_PID) return;
+    if(!MAT_DIR){ alert('Please choose first: is the material coming IN or going OUT?'); return; }
     var v=matFormValue();
     if(!v){ alert('Please fill in the material, quantity and date.'); return; }
     if(!MATREQS[MAT_PID]) MATREQS[MAT_PID]=[];

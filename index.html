@@ -1667,7 +1667,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
   .rq-day.today .rq-dnum{color:var(--red)}
   .rq-chip{border-radius:4px;padding:2px 4px;margin-bottom:2px;font-size:9px;line-height:1.3;cursor:pointer;border:1px solid;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .rq-chip.in{background:var(--green-light);color:#15803d;border-color:rgba(22,163,74,.3)}
-  .rq-chip.out{background:var(--amber-light);color:#92400e;border-color:rgba(217,119,6,.3)}
+  .rq-chip.out{background:#fee2e2;color:#b91c1c;border-color:#fecaca}
   .rq-chip.pend{background:var(--surface2);color:var(--mid);border-color:var(--border2);border-style:dashed}
   .rq-sec{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--shadow);margin-bottom:14px}
   .rq-sec-head{padding:11px 16px;border-bottom:1px solid var(--border);background:var(--surface2);display:flex;align-items:center;gap:10px}
@@ -1713,7 +1713,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
         <button class="ops-btn sm" onclick="rqToday()">Today</button>
         <div class="ops-legend" style="margin-bottom:0;margin-left:12px">
           <div class="ops-lg"><span class="ops-lg-dot" style="background:var(--green-light);border-color:rgba(22,163,74,.4)"></span> Coming in</div>
-          <div class="ops-lg"><span class="ops-lg-dot" style="background:var(--amber-light);border-color:rgba(217,119,6,.4)"></span> Going out</div>
+          <div class="ops-lg"><span class="ops-lg-dot" style="background:#fee2e2;border-color:#fecaca"></span> Going out</div>
           <div class="ops-lg"><span class="ops-lg-dot" style="background:var(--surface2);border-color:var(--border2)"></span> Not approved yet</div>
         </div>
       </div>
@@ -1758,7 +1758,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
         <div>
           <div class="ops-title">Operations</div>
           <div class="ops-sub">Compaction tests, machine transfers and subcontractor bookings
-            <span style="margin-left:8px;font-size:10px;font-weight:700;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:1px 7px">build 2026-08-06j</span>
+            <span style="margin-left:8px;font-size:10px;font-weight:700;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:1px 7px">build 2026-08-06l</span>
           </div>
         </div>
         <div style="display:flex;gap:8px;align-items:center">
@@ -2830,7 +2830,7 @@ function tick() {
 // One-time build check
 if (!window._buildChecked) {
   window._buildChecked = true;
-  window.REMC_BUILD = "2026-08-06j";
+  window.REMC_BUILD = "2026-08-06l";
   console.log("%c REMC v1.1 \u00B7 build " + window.REMC_BUILD + " loaded successfully ", "background:#16a34a;color:white;font-size:14px;padding:4px 8px;border-radius:4px");
 }
 
@@ -13917,7 +13917,9 @@ function teamEditProjectBooking(pid){
     var first=new Date(d.getFullYear(), d.getMonth(), 1);
     var off=(first.getDay()+6)%7, start=new Date(first); start.setDate(first.getDate()-off);
     var by={};
-    list.forEach(function(m){ var k=useDate(m); if(k) (by[k]=by[k]||[]).push(m); });
+    // A declined request is never going to happen, so it must not appear here.
+    list.filter(function(m){ return status(m)!=='declined'; })
+        .forEach(function(m){ var k=useDate(m); if(k) (by[k]=by[k]||[]).push(m); });
     var cells='';
     for(var i=0;i<42;i++){
       var c=new Date(start); c.setDate(start.getDate()+i);
