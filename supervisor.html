@@ -327,6 +327,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
   .mat-moved{background:#fef3c7;color:#92400e;font-weight:700;padding:1px 6px;border-radius:4px}
   .pmat{background:#f7fee7;color:#4d7c0f;border:1px solid #d9f99d;border-radius:8px;padding:8px 12px;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer}
   .mdot{color:#dc2626;font-size:15px;line-height:1}
+  .mat-carrier{display:inline-block;font-size:11.5px;font-weight:700;background:#eff6ff;color:#1d4ed8;border:1px solid rgba(37,99,235,.22);border-radius:5px;padding:1px 7px;margin-top:3px}
   .build-tag{font-size:9px;font-weight:700;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:0 5px;margin-left:4px;white-space:nowrap}
   .mat-fresh{font-size:11px;color:var(--muted);text-align:center;padding:4px 0 10px}
 </style>
@@ -383,7 +384,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     <div class="cloud" id="cloud">•</div>
     <div class="who">
       <div class="who-name" id="who-name"></div>
-      <div class="who-sub">Supervisor <span class="build-tag">build 2026-08-06s</span></div>
+      <div class="who-sub">Supervisor <span class="build-tag">build 2026-08-06t</span></div>
     </div>
     <button class="notif-btn" id="notif-btn" onclick="openNotif()" title="Notifications">🔔<span class="notif-badge" id="notif-badge" style="display:none">0</span></button>
     <button class="notif-btn" id="cloud-check-btn" onclick="supCloudCheck()" title="Check the cloud connection">🩺</button>
@@ -810,7 +811,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
   };
   var MATREQS={};
   var MATERIAL_TYPES=['Clean Sand','Dirty Sand','Clay','Rocks','Concrete','Tree','Grass','Rubbish','Mix Material'];
-  window.REMC_BUILD='2026-08-06s';
+  window.REMC_BUILD='2026-08-06t';
   try{ console.log('%c REMC Supervisor \u00B7 build '+window.REMC_BUILD+' ','background:#16a34a;color:#fff;padding:3px 7px;border-radius:4px'); }catch(e){}
   function parseData(){
     function j(k,def){ try{ return JSON.parse(DATA[k]||def); }catch(e){ return JSON.parse(def); } }
@@ -2452,7 +2453,8 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
   function matSignature(){
     try{ return JSON.stringify(matList(MAT_PID).map(function(m){
       var o=m.office||{};
-      return [m.id, o.status||'pending', o.date||'', o.reason||'', m.date, m.qty, m.material].join('|');
+      return [m.id, o.status||'pending', o.date||'', o.reason||'', m.date, m.qty, m.material,
+              JSON.stringify(o.carrier||'')].join('|');
     })); }catch(e){ return ''; }
   }
   function matWatch(){
@@ -2485,6 +2487,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
         +'<div class="mat-top"><div class="mat-name">'+(m.dir==='import'?'\u2B07 IN':'\u2B06 OUT')+' \u00B7 '+esc(m.material)+'</div>'
         +'<span class="mat-badge mat-b-'+st+'">'+(st==='pending'?'Waiting':st==='approved'?'Approved':'Declined')+'</span></div>'
         +'<div class="mat-meta"><strong>'+esc(matQtyText(m))+'</strong><br>'+when
+        +(st==='approved'&&matCarrier(m)?('<br><span class="mat-carrier">'+esc(matCarrier(m))+'</span>'):'')
         +(st==='approved'&&o.by?('<br>Approved by '+esc(o.by)):'')
         +(st==='declined'&&o.reason?('<br>Reason: '+esc(o.reason)):'')+'</div>'
         +(m.comments?('<div class="mat-note">'+esc(m.comments)+'</div>'):'')
@@ -2496,6 +2499,15 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     try{ refreshFromCloud(); }catch(e){}
     setTimeout(function(){ try{ renderMatList(); }catch(e){} }, 900);
   };
+  // Who the office has sent to do the cart, so the supervisor knows who to
+  // expect at the gate.
+  function matCarrier(m){
+    var c=(m.office&&m.office.carrier)||null;
+    if(!c || !c.type) return '';
+    if(c.type==='sub') return '\uD83C\uDFE2 '+(c.company||'Subcontractor');
+    var bits=[]; if(c.truck) bits.push(c.truck); if(c.driver) bits.push(c.driver);
+    return '\uD83D\uDE9A '+(bits.length?bits.join(' \u00B7 '):'Our truck');
+  }
   function _dLabel(d){
     if(!d) return 'No date';
     try{ var x=new Date(d+'T00:00:00');

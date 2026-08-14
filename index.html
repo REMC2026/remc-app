@@ -238,6 +238,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
       <div class="nav-item" onclick="showPage('settings')">⚙️ Settings</div>
     </div>
     <div class="nav-right">
+      <div class="build-tag" id="topbuild" title="Software version. If this does not match the file you uploaded, the browser is still using an old copy - press Ctrl+Shift+R.">build 2026-08-06t</div>
       <div class="nav-date" id="topdate">—</div>
       <button id="remc-logout-btn" onclick="remcLogout()" title="Sign out of this device" style="font-family:Barlow,sans-serif;font-size:12px;font-weight:700;color:var(--mid);background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:5px 12px;cursor:pointer;display:none">Log out</button>
       <div class="nav-vis-btn" id="navVisBtn" onclick="toggleNavVisPanel()" title="Customize menu tabs">
@@ -1679,6 +1680,16 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
   .rq-sec-body::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
   .rq-sec-body::-webkit-scrollbar-thumb:hover{background:var(--muted)}
   .rq-more{font-size:11px;font-weight:700;color:var(--muted);margin-left:8px}
+  .build-tag{font-size:10px;font-weight:700;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:2px 7px;white-space:nowrap}
+  .rq-who{display:flex;gap:7px;flex-wrap:wrap}
+  .rq-who-btn{flex:1;min-width:120px;padding:9px 10px;border:1.5px solid var(--border);background:var(--surface);
+    border-radius:9px;font-family:'Barlow',sans-serif;font-size:12.5px;font-weight:700;color:var(--mid);cursor:pointer;transition:all .15s}
+  .rq-who-btn:hover{border-color:var(--border2);color:var(--text)}
+  .rq-who-btn.on{background:var(--blue);border-color:var(--blue);color:#fff;box-shadow:0 2px 8px rgba(37,99,235,.25)}
+  .rq-carrier{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;
+    background:var(--blue-light);color:#1d4ed8;border:1px solid rgba(37,99,235,.22);border-radius:5px;padding:1px 7px;margin-top:3px}
+  .rq-carrier.sub{background:#f0fdfa;color:#0f766e;border-color:#99f6e4}
+  .rq-carrier.none{background:var(--amber-light);color:var(--amber);border-color:rgba(217,119,6,.25)}
   .rq-day{cursor:pointer;transition:background .1s}
   .rq-day:hover{background:#f8fafc}
   .rq-day.sel{background:#eff6ff;box-shadow:inset 0 0 0 2px var(--blue)}
@@ -1768,6 +1779,29 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
             <div class="ops-hint" id="rq-date-hint"></div>
           </div>
           <div class="proj-form-group" style="grid-column:1/-1">
+            <label>Who is doing the cart?</label>
+            <div class="rq-who">
+              <button type="button" class="rq-who-btn" id="rq-who-own" onclick="rqWho('own')">&#128666; Our truck</button>
+              <button type="button" class="rq-who-btn" id="rq-who-sub" onclick="rqWho('sub')">&#127970; Subcontractor</button>
+              <button type="button" class="rq-who-btn" id="rq-who-none" onclick="rqWho('')">Not decided yet</button>
+            </div>
+          </div>
+          <div class="proj-form-group rq-own-only" style="display:none">
+            <label>Truck</label>
+            <input id="rq-truck" list="rq-trucks" placeholder="e.g. Truck &amp; Dog 1">
+            <datalist id="rq-trucks"></datalist>
+          </div>
+          <div class="proj-form-group rq-own-only" style="display:none">
+            <label>Driver</label>
+            <input id="rq-driver" list="rq-drivers" placeholder="e.g. Mark Davies">
+            <datalist id="rq-drivers"></datalist>
+          </div>
+          <div class="proj-form-group rq-sub-only" style="display:none;grid-column:1/-1">
+            <label>Company</label>
+            <input id="rq-company" list="rq-companies" placeholder="e.g. Perth Haulage Pty Ltd">
+            <datalist id="rq-companies"></datalist>
+          </div>
+          <div class="proj-form-group" style="grid-column:1/-1">
             <label>Note back to the supervisor</label>
             <input id="rq-note" placeholder="Truck booked for 7am, use the north gate…">
           </div>
@@ -1789,7 +1823,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
         <div>
           <div class="ops-title">Operations</div>
           <div class="ops-sub">Compaction tests, machine transfers and subcontractor bookings
-            <span style="margin-left:8px;font-size:10px;font-weight:700;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:1px 7px">build 2026-08-06s</span>
+            <span style="margin-left:8px;font-size:10px;font-weight:700;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:1px 7px">build 2026-08-06t</span>
           </div>
         </div>
         <div style="display:flex;gap:8px;align-items:center">
@@ -2861,7 +2895,7 @@ function tick() {
 // One-time build check
 if (!window._buildChecked) {
   window._buildChecked = true;
-  window.REMC_BUILD = "2026-08-06s";
+  window.REMC_BUILD = "2026-08-06t";
   console.log("%c REMC v1.1 \u00B7 build " + window.REMC_BUILD + " loaded successfully ", "background:#16a34a;color:white;font-size:14px;padding:4px 8px;border-radius:4px");
 }
 
@@ -14055,6 +14089,43 @@ function teamEditProjectBooking(pid){
     }catch(e){ console.error('[Requests]', e); }
   };
 
+  // Who is carting the material: one of our own trucks with a driver, or an
+  // outside company. Left blank until the office decides.
+  var WHO='';
+  window.rqWho=function(t){
+    WHO=t;
+    ['own','sub','none'].forEach(function(k){
+      var b=document.getElementById('rq-who-'+k);
+      if(b) b.classList.toggle('on', (k==='none'?'':k)===t);
+    });
+    document.querySelectorAll('.rq-own-only').forEach(function(el){ el.style.display = (t==='own')?'':'none'; });
+    document.querySelectorAll('.rq-sub-only').forEach(function(el){ el.style.display = (t==='sub')?'':'none'; });
+  };
+  function carrierOf(m){ return (m.office && m.office.carrier) || null; }
+  function carrierText(m){
+    var c=carrierOf(m);
+    if(!c || !c.type) return '';
+    if(c.type==='sub') return c.company || 'Subcontractor';
+    var bits=[]; if(c.truck) bits.push(c.truck); if(c.driver) bits.push(c.driver);
+    return bits.length ? bits.join(' \u00B7 ') : 'Our truck';
+  }
+  function carrierHtml(m){
+    var st=status(m);
+    if(st!=='approved') return '';
+    var c=carrierOf(m);
+    if(!c || !c.type) return '<div><span class="rq-carrier none">\u26A0 No truck assigned</span></div>';
+    return '<div><span class="rq-carrier'+(c.type==='sub'?' sub':'')+'">'
+      +(c.type==='sub'?'\uD83C\uDFE2':'\uD83D\uDE9A')+' '+esc(carrierText(m))+'</span></div>';
+  }
+  function fillList(id, values){
+    var d=document.getElementById(id); if(!d) return;
+    var seen={}, out=[];
+    values.forEach(function(v){ v=String(v||'').trim();
+      if(v && !seen[v.toLowerCase()]){ seen[v.toLowerCase()]=1; out.push(v); } });
+    out.sort();
+    d.innerHTML=out.map(function(v){ return '<option value="'+esc(v)+'">'; }).join('');
+  }
+
   window.rqDay=function(k){ SELDAY = (SELDAY===k) ? null : k; rqRender(); };
 
   // Balance for one day: what comes in, what goes out and the difference.
@@ -14094,6 +14165,8 @@ function teamEditProjectBooking(pid){
         +'<span style="font-size:13px;font-weight:800;color:'+(m.dir==='import'?'var(--green)':'var(--red)')+'">'
         +(m.dir==='import'?'+':'\u2212')+esc(qty(m))+'</span>'
         +'<span style="font-size:11.5px;color:var(--mid)">'+esc(pName(m._pid))+'</span>'
+        +(carrierText(m)?('<span style="font-size:11px;color:var(--blue);font-weight:700">'
+           +((carrierOf(m)||{}).type==='sub'?'\uD83C\uDFE2':'\uD83D\uDE9A')+' '+esc(carrierText(m))+'</span>'):'')
         +'<span style="margin-left:auto">'+(pend
           ? '<span class="ops-pill ops-p-pending">Not approved</span>'
           : '<span class="ops-pill ops-p-done">Approved</span>')+'</span>'
@@ -14181,6 +14254,7 @@ function teamEditProjectBooking(pid){
       +(stt==='approved'&&o.by?('<br>Approved by '+esc(o.by)+' \u00B7 '+esc(when(o.at))):'')
       +(stt==='declined'?('<br>Declined by '+esc(o.by||'Office')+' \u00B7 '+esc(when(o.at))
         +(o.reason?(' \u00B7 '+esc(o.reason)):'')):'')+'</div>'
+      +carrierHtml(m)
       +(m.comments?('<div class="rq-n">'+esc(m.comments)+'</div>'):'')
       +'</div><div class="rq-act">'
       +(actions
@@ -14207,8 +14281,38 @@ function teamEditProjectBooking(pid){
     if(h) h.textContent='The supervisor asked for '+fmt(m.date)+'. Change it here if it has to happen another day.';
     var n=document.getElementById('rq-note');
     if(n) n.value=(m.office&&m.office.reason)||'';
+
+    // suggestions: trucks from the machine list, drivers from the employees,
+    // companies from whoever has been used before
+    var machines=arr('remc_machine_names');
+    var trucky=machines.filter(function(x){ return /truck|dog|tipper|semi|float|haul/i.test(String(x)); });
+    fillList('rq-trucks', (trucky.length?trucky:machines).concat(
+      all().map(function(x){ return (carrierOf(x)||{}).truck; })));
+    var staff=[]; try{ staff=arr('remc_staff').map(function(e){ return e && e.name; }); }catch(e){}
+    fillList('rq-drivers', staff.concat(all().map(function(x){ return (carrierOf(x)||{}).driver; })));
+    fillList('rq-companies', all().map(function(x){ return (carrierOf(x)||{}).company; }));
+
+    var c=carrierOf(m)||{};
+    setV('rq-truck', c.truck||'');
+    setV('rq-driver', c.driver||'');
+    setV('rq-company', c.company||'');
+    rqWho(c.type||'');
+
     document.getElementById('rq-modal').classList.add('open');
   };
+  function setV(id,v){ var e=document.getElementById(id); if(e) e.value=(v==null?'':v); }
+  function readCarrier(){
+    if(WHO==='own'){
+      return { type:'own',
+        truck:String((document.getElementById('rq-truck')||{}).value||'').trim(),
+        driver:String((document.getElementById('rq-driver')||{}).value||'').trim() };
+    }
+    if(WHO==='sub'){
+      return { type:'sub',
+        company:String((document.getElementById('rq-company')||{}).value||'').trim() };
+    }
+    return { type:'' };
+  }
   window.rqClose=function(){ document.getElementById('rq-modal').classList.remove('open'); REF=null; };
 
   function touch(mut){
@@ -14228,12 +14332,18 @@ function teamEditProjectBooking(pid){
     var d=String((document.getElementById('rq-date')||{}).value||'');
     if(!d){ alert('Please set the date this will happen.'); return; }
     var note=String((document.getElementById('rq-note')||{}).value||'').trim();
+    var carrier=readCarrier();
+    if(carrier.type==='sub' && !carrier.company){ alert('Please say which company is doing it.'); return; }
+    if(carrier.type==='own' && !carrier.truck && !carrier.driver
+       && !confirm('No truck or driver chosen yet.\n\nApprove anyway?')) return;
     var ref=REF, m=touch(function(x){
       x.office.status='approved'; x.office.date=d; x.office.reason=note;
+      x.office.carrier=carrier;
       x.office.by=String(window.REMC_ME||'Office'); x.office.at=new Date().toISOString();
     });
     if(m) log('approved', ref.pid, (m.dir==='import'?'IN':'OUT')+' \u00B7 '+(m.material||'')+' \u00B7 '+qty(m)
-      +' \u00B7 '+(d!==m.date ? ('moved '+fmt(m.date)+' \u2192 '+fmt(d)) : ('on '+fmt(d)))+(note?(' \u00B7 '+note):''));
+      +' \u00B7 '+(d!==m.date ? ('moved '+fmt(m.date)+' \u2192 '+fmt(d)) : ('on '+fmt(d)))
+      +(carrierText(m)?(' \u00B7 by '+carrierText(m)):'')+(note?(' \u00B7 '+note):''));
     rqClose(); rqRender(); rqMarkSeen();
   };
   window.rqDecline=function(){
