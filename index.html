@@ -238,7 +238,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
       <div class="nav-item" onclick="showPage('settings')">⚙️ Settings</div>
     </div>
     <div class="nav-right">
-      <div class="build-tag" id="topbuild" title="Software version. If this does not match the file you uploaded, the browser is still using an old copy - press Ctrl+Shift+R.">build 2026-08-07i</div>
+      <div class="build-tag" id="topbuild" title="Software version. If this does not match the file you uploaded, the browser is still using an old copy - press Ctrl+Shift+R.">build 2026-08-07k</div>
       <div class="nav-date" id="topdate">—</div>
       <button id="remc-logout-btn" onclick="remcLogout()" title="Sign out of this device" style="font-family:Barlow,sans-serif;font-size:12px;font-weight:700;color:var(--mid);background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:5px 12px;cursor:pointer;display:none">Log out</button>
       <div class="nav-vis-btn" id="navVisBtn" onclick="toggleNavVisPanel()" title="Customize menu tabs">
@@ -1463,6 +1463,9 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
   .ops-b2.no:hover{background:#fee2e2;border-color:var(--red)}
   .ops-b2.back{color:var(--muted)}
   .ops-b2.plain{color:var(--mid)}
+  .ops-undo{margin-top:6px;text-align:center;font-size:11px;font-weight:700;color:var(--muted);
+    cursor:pointer;padding:3px;border-radius:6px}
+  .ops-undo:hover{color:var(--red);background:var(--surface2)}
   .ops-fields{display:flex;gap:6px;margin-top:8px}
   .ops-fields .ops-inp-sm{flex:1;min-width:0}
   .ops-fields .ops-inp-sm[type=date]{flex:0 0 130px}
@@ -1890,7 +1893,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
         <div>
           <div class="ops-title">Site Coordination</div>
           <div class="ops-sub">Booking compaction tests, moving machines between sites and scheduling subcontractors
-            <span style="margin-left:8px;font-size:10px;font-weight:700;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:1px 7px">build 2026-08-07i</span>
+            <span style="margin-left:8px;font-size:10px;font-weight:700;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:1px 7px">build 2026-08-07k</span>
           </div>
         </div>
         <div style="display:flex;gap:8px;align-items:center">
@@ -2959,7 +2962,7 @@ function tick() {
 // One-time build check
 if (!window._buildChecked) {
   window._buildChecked = true;
-  window.REMC_BUILD = "2026-08-07i";
+  window.REMC_BUILD = "2026-08-07k";
   console.log("%c REMC v1.1 \u00B7 build " + window.REMC_BUILD + " loaded successfully ", "background:#16a34a;color:white;font-size:14px;padding:4px 8px;border-radius:4px");
 }
 
@@ -15102,7 +15105,24 @@ function teamEditProjectBooking(pid){
     var by=String(t.bookedBy||'');
     return !!by && by.indexOf('Office')<0;
   }
-  function isConfirmed(t){ return !fromSupervisor(t) || !!(t.office && t.office.confirmed); }
+  // The single source of truth for where a test sits:
+  //   'new'    -> To book
+  //   'work'   -> Pending confirmation
+  //   'booked' -> Pending result, and on the calendar
+  //   'done'   -> finished, off the board
+  function testStage(t){
+    var o=(t && t.office) || {};
+    if(o.done) return 'done';
+    var st=o.status||'';
+    if(st==='done') return 'done';
+    if(st==='booked') return o.confirmed===false ? 'work' : 'booked';
+    if(st==='new') return 'new';
+    if(st==='emailed' || st==='awaiting' || st==='followup' || st==='pending') return 'work';
+    // No status recorded at all: office bookings made before this existed are
+    // already booked; anything from a supervisor still has to be dealt with.
+    return fromSupervisor(t) ? 'new' : 'booked';
+  }
+  function isConfirmed(t){ var g=testStage(t); return g==='booked' || g==='done'; }
   function reqStatus(t){
     var v=(t.office&&t.office.status)||'new';
     if(v==='pending') v='new';                 // records saved before this change
@@ -15110,9 +15130,9 @@ function teamEditProjectBooking(pid){
   }
   // Booked with the company, waiting for the day and then for the report.
   // Stays here until the office marks the whole thing finished.
-  function awaitingResult(t){
-    return isConfirmed(t) && !isDone(t);
-  }
+  // Pending result holds booked tests and nothing else. Undo a booking and it
+  // leaves this column the moment the board is redrawn.
+  function awaitingResult(t){ return testStage(t)==='booked'; }
   function isDone(t){ return !!(t.office && t.office.done); }
   function resultFile(t){ return (t.office && t.office.file) || null; }
   function reqSince(t){
@@ -15417,9 +15437,9 @@ function teamEditProjectBooking(pid){
 
   function renderBoard(all){
     var box=document.getElementById('op-test-board'); if(!box) return;
-    var incoming = all.filter(function(x){ return !isConfirmed(x); });
-    var colNew  = incoming.filter(function(x){ return reqStatus(x)==='new'; }).sort(byReceived);
-    var colWork = incoming.filter(function(x){ return reqStatus(x)!=='new'; }).sort(byReceived);
+    var colNew  = all.filter(function(x){ return testStage(x)==='new'; }).sort(byReceived);
+    var colWork = all.filter(function(x){ return testStage(x)==='work'; }).sort(byReceived);
+    var incoming = colNew.concat(colWork);
     var colRes  = all.filter(awaitingResult).sort(function(a,b){ return String(a.date)<String(b.date)?-1:1; });
     var incoming2 = incoming;
     box.innerHTML='<div class="ops-board">'
@@ -15492,6 +15512,12 @@ function teamEditProjectBooking(pid){
       +'</div></div>';
   }
 
+  // Pressed the wrong one? This clears the answer and puts the card back to
+  // Passed / Refused. Kept as a small link so the two main buttons stay clear.
+  function undoLink(pid,id){
+    return '<div class="ops-undo" onclick="opResultSet(\''+pid+'\',\''+id+'\',\'\')" '
+      +'title="Clear the answer and choose again">\u2190 Wrong answer? Change it</div>';
+  }
   function resultCard(x){
     var pid=esc(x._pid), id=esc(x.id);
     var res=x.result||'', f=resultFile(x);
@@ -15526,11 +15552,12 @@ function teamEditProjectBooking(pid){
         +'<div class="ops-two">'
         +(f
           ? '<button class="ops-b2 go" onclick="opTestDone(\''+pid+'\',\''+id+'\')">\u2713 Done</button>'
-          : '<button class="ops-b2 go" onclick="opFileAdd(\''+pid+'\',\''+id+'\')">\uD83D\uDCCE Attach report</button>')
-        +(f
-          ? '<button class="ops-b2 back" onclick="opResultSet(\''+pid+'\',\''+id+'\',\'\')">\u2190 Back</button>'
-          : '<button class="ops-b2 plain" onclick="opTestDone(\''+pid+'\',\''+id+'\')">Done, no file</button>')
-        +'</div></div>';
+            +'<button class="ops-b2 plain" onclick="opFileAdd(\''+pid+'\',\''+id+'\')">\uD83D\uDCCE Replace</button>'
+          : '<button class="ops-b2 go" onclick="opFileAdd(\''+pid+'\',\''+id+'\')">\uD83D\uDCCE Attach report</button>'
+            +'<button class="ops-b2 plain" onclick="opTestDone(\''+pid+'\',\''+id+'\')">Done, no file</button>')
+        +'</div>'
+        +undoLink(pid,id)
+        +'</div>';
     }
 
     // Refused. Either book it again, or close it off as it is.
@@ -15543,7 +15570,9 @@ function teamEditProjectBooking(pid){
       +'<div class="ops-two">'
       +'<button class="ops-b2 go" onclick="opTestRedo(\''+pid+'\',\''+id+'\')">\u21BA Do it again</button>'
       +'<button class="ops-b2 plain" onclick="opTestDone(\''+pid+'\',\''+id+'\')">Close it off</button>'
-      +'</div></div>';
+      +'</div>'
+      +undoLink(pid,id)
+      +'</div>';
   }
 
   // Every step of a test is written into its own little event list, so the
@@ -15616,9 +15645,10 @@ function teamEditProjectBooking(pid){
   // Put a confirmed test back into the booking columns.
   window.opReqReopen=function(pid,id){
     if(!confirm('Take this test off the calendar and put it back in Pending confirmation?')) return;
-    reqTouch(pid,id,function(x){ x.office.confirmed=false; x.office.status='awaiting';
+    reqTouch(pid,id,function(x){
+      x.office.confirmed=false; x.office.status='emailed'; x.office.done=false;
       delete x.office.confirmedAt; delete x.office.confirmedBy;
-      addEvent(x,'reopened','Taken back off the calendar'); },'request_reopened',
+      addEvent(x,'reopened','Booking undone \u2014 back to Pending confirmation'); },'request_reopened',
       function(t){ return (t.type||'Test')+' \u00B7 taken back off the calendar'; });
     opRender();
   };
