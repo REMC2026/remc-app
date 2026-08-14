@@ -238,7 +238,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
       <div class="nav-item" onclick="showPage('settings')">⚙️ Settings</div>
     </div>
     <div class="nav-right">
-      <div class="build-tag" id="topbuild" title="Software version. If this does not match the file you uploaded, the browser is still using an old copy - press Ctrl+Shift+R.">build 2026-08-06v</div>
+      <div class="build-tag" id="topbuild" title="Software version. If this does not match the file you uploaded, the browser is still using an old copy - press Ctrl+Shift+R.">build 2026-08-07e</div>
       <div class="nav-date" id="topdate">—</div>
       <button id="remc-logout-btn" onclick="remcLogout()" title="Sign out of this device" style="font-family:Barlow,sans-serif;font-size:12px;font-weight:700;color:var(--mid);background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:5px 12px;cursor:pointer;display:none">Log out</button>
       <div class="nav-vis-btn" id="navVisBtn" onclick="toggleNavVisPanel()" title="Customize menu tabs">
@@ -370,150 +370,25 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
 
       <div class="matbal-header">
         <div>
-          <div class="matbal-title">⚖️ Material Balance</div>
-          <div style="font-size:13px;color:var(--muted);margin-top:2px">Track material IN and OUT across all projects
+          <div class="matbal-title">&#9878;&#65039; Material Balance</div>
+          <div style="font-size:13px;color:var(--muted);margin-top:2px">
+            Every approved material movement, straight from the Requests page
           </div>
         </div>
-        <div class="period-tabs">
-          <button class="period-tab active" onclick="setPeriod('daily',this)">Daily</button>
-          <button class="period-tab" onclick="setPeriod('weekly',this)">Weekly</button>
-          <button class="period-tab" onclick="setPeriod('monthly',this)">Monthly</button>
-          <button class="period-tab" onclick="setPeriod('annual',this)">Annual</button>
-        </div>
-      </div>
-
-      <!-- SUMMARY -->
-      <div class="bal-summary">
-        <div class="bal-card">
-          <div class="bal-card-lbl">Total IN Today</div>
-          <div class="bal-card-val val-green" id="total-in">3,140 m³</div>
-          <div class="bal-card-sub">material receiving</div>
-        </div>
-        <div class="bal-card">
-          <div class="bal-card-lbl">Total OUT Today</div>
-          <div class="bal-card-val val-red" id="total-out">2,750 m³</div>
-          <div class="bal-card-sub">material excavating</div>
-        </div>
-        <div class="bal-card">
-          <div class="bal-card-lbl">Net Balance</div>
-          <div class="bal-card-val val-green" id="net-bal">+390 m³</div>
-          <div class="bal-card-sub">surplus today</div>
-        </div>
-        <div class="bal-card">
-          <div class="bal-card-lbl">Active Sites</div>
-          <div class="bal-card-val val-blue">5</div>
-          <div class="bal-card-sub">with material movement</div>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <div class="period-tabs">
+            <button class="period-tab active" onclick="setPeriod('daily',this)">Daily</button>
+            <button class="period-tab" onclick="setPeriod('weekly',this)">Weekly</button>
+            <button class="period-tab" onclick="setPeriod('monthly',this)">Monthly</button>
+            <button class="period-tab" onclick="setPeriod('annual',this)">Annual</button>
+          </div>
+          <button class="ops-btn" onclick="showPage('requests')">&#128203; Open Requests</button>
         </div>
       </div>
 
-      <!-- BALANCE TABLE -->
-      <div class="bal-grid">
+      <div class="bal-summary" id="mb-summary"></div>
+      <div id="mb-body"></div>
 
-        <!-- COMMERCIAL -->
-        <div class="bal-col">
-          <div class="bal-col-head com">🏢 Commercial</div>
-          <div class="bal-row-head">
-            <div>Project</div>
-            <div>⬇ IN</div>
-            <div>⬆ OUT</div>
-            <div>Balance</div>
-          </div>
-          <div class="bal-row" data-proj="cockburn" onmouseenter="hoverProject('cockburn')"
-            onmouseleave="unhoverProject('cockburn')" ondblclick="highlightProject('cockburn')">
-            <div>
-              <div class="br-name">Cockburn Central</div>
-              <div class="br-addr">Cockburn, WA</div>
-            </div>
-            <div class="br-in"><span class="arrow-in">↑</span><span class="val">0 m³</span></div>
-            <div class="br-out"><span class="arrow-out">↓</span><span class="val">2,400 m³</span></div>
-            <div class="br-bal"><span class="val-neg">-2,400</span></div>
-          </div>
-          <div class="bal-row" data-proj="harbor" onmouseenter="hoverProject('harbor')"
-            onmouseleave="unhoverProject('harbor')" ondblclick="highlightProject('harbor')">
-            <div>
-              <div class="br-name">Harbor Tower</div>
-              <div class="br-addr">Fremantle, WA</div>
-            </div>
-            <div class="br-in"><span class="arrow-in">↑</span><span class="val">1,800 m³</span></div>
-            <div class="br-out"><span class="arrow-out">↓</span><span class="val">0 m³</span></div>
-            <div class="br-bal"><span class="val-pos">+1,800</span></div>
-          </div>
-          <div class="bal-row" style="opacity:0.5" data-proj="midtown" onmouseenter="hoverProject('midtown')"
-            onmouseleave="unhoverProject('midtown')" ondblclick="highlightProject('midtown')">
-            <div>
-              <div class="br-name">Midtown Office</div>
-              <div class="br-addr">Perth CBD</div>
-            </div>
-            <div class="br-in"><span style="color:var(--muted)">—</span></div>
-            <div class="br-out"><span style="color:var(--muted)">—</span></div>
-            <div class="br-bal"><span class="val-zero">0</span></div>
-          </div>
-        </div>
-
-        <!-- RESIDENTIAL -->
-        <div class="bal-col">
-          <div class="bal-col-head res">🏠 Residential</div>
-          <div class="bal-row-head">
-            <div>Project</div>
-            <div>⬇ IN</div>
-            <div>⬆ OUT</div>
-            <div>Balance</div>
-          </div>
-          <div class="bal-row" data-proj="lennard" onmouseenter="hoverProject('lennard')"
-            onmouseleave="unhoverProject('lennard')" ondblclick="highlightProject('lennard')">
-            <div>
-              <div class="br-name">#1 Lennard St</div>
-              <div class="br-addr">Herne Hill</div>
-            </div>
-            <div class="br-in"><span class="arrow-in">↑</span><span class="val">420 m³</span></div>
-            <div class="br-out"><span class="arrow-out">↓</span><span class="val">0 m³</span></div>
-            <div class="br-bal"><span class="val-pos">+420</span></div>
-          </div>
-          <div class="bal-row" data-proj="belford" onmouseenter="hoverProject('belford')"
-            onmouseleave="unhoverProject('belford')" ondblclick="highlightProject('belford')">
-            <div>
-              <div class="br-name">#10 Belford St</div>
-              <div class="br-addr">City Beach</div>
-            </div>
-            <div class="br-in"><span class="arrow-in">↑</span><span class="val">380 m³</span></div>
-            <div class="br-out"><span class="arrow-out">↓</span><span class="val">150 m³</span></div>
-            <div class="br-bal"><span class="val-pos">+230</span></div>
-          </div>
-          <div class="bal-row" data-proj="quay" onmouseenter="hoverProject('quay')"
-            onmouseleave="unhoverProject('quay')" ondblclick="highlightProject('quay')">
-            <div>
-              <div class="br-name">#1 Quay Court</div>
-              <div class="br-addr">Sorrento</div>
-            </div>
-            <div class="br-in"><span class="arrow-in">↑</span><span class="val">540 m³</span></div>
-            <div class="br-out"><span class="arrow-out">↓</span><span class="val">200 m³</span></div>
-            <div class="br-bal"><span class="val-pos">+340</span></div>
-          </div>
-          <div class="bal-row" style="opacity:0.5" data-proj="hester" onmouseenter="hoverProject('hester')"
-            onmouseleave="unhoverProject('hester')" ondblclick="highlightProject('hester')">
-            <div>
-              <div class="br-name">#1 Hester Rd</div>
-              <div class="br-addr">Wellard</div>
-            </div>
-            <div class="br-in"><span style="color:var(--muted)">—</span></div>
-            <div class="br-out"><span style="color:var(--muted)">—</span></div>
-            <div class="br-bal"><span class="val-zero">0</span></div>
-          </div>
-          <div class="bal-row" style="opacity:0.5" data-proj="rosebery" onmouseenter="hoverProject('rosebery')"
-            onmouseleave="unhoverProject('rosebery')" ondblclick="highlightProject('rosebery')">
-            <div>
-              <div class="br-name">#1 Rosebery St</div>
-              <div class="br-addr">Bayswater</div>
-            </div>
-            <div class="br-in"><span style="color:var(--muted)">—</span></div>
-            <div class="br-out"><span style="color:var(--muted)">—</span></div>
-            <div class="br-bal"><span class="val-zero">0</span></div>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- MAP SECTION -->
       <div class="map-section">
         <div class="map-header">
           <div class="map-title">📍 Project Locations — Perth Metro</div>
@@ -544,7 +419,6 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
     </div>
   </div>
 
-  <!-- ══ PAGE: QUOTATIONS ══ -->
   <div class="page" id="page-quotations">
     <div class="quot-page">
 
@@ -1575,6 +1449,14 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
   .ops-card-ctl{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;padding-top:7px;border-top:1px dashed var(--border);align-items:center}
   .ops-col-empty{padding:22px 12px;text-align:center;color:var(--muted);font-size:11.5px}
   .ops-late{color:var(--red);font-weight:800}
+  .ops-p-booked{background:#e0e7ff;color:#4338ca;border-color:#c7d2fe}
+  .ops-file{display:flex;align-items:center;gap:7px;margin-top:7px;padding:5px 9px;background:var(--surface2);
+    border:1px solid var(--border);border-radius:7px;font-size:11.5px}
+  .ops-file-n{flex:1;min-width:0;font-weight:700;color:var(--blue);cursor:pointer;white-space:nowrap;
+    overflow:hidden;text-overflow:ellipsis}
+  .ops-file-n:hover{text-decoration:underline}
+  .ops-file-x{background:none;border:none;color:var(--muted);cursor:pointer;font-size:12px;padding:0}
+  .ops-file-x:hover{color:var(--red)}
   .ops-col.green{border-top-color:var(--green)}
   .ops-col-title.green{color:var(--green)}
   @media (max-width:1200px){ .ops-board{grid-template-columns:repeat(2,1fr)} }
@@ -1593,10 +1475,29 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
   .ops-p-emailed{background:#e0e7ff;color:#4338ca;border-color:#c7d2fe}
   .ops-p-followup{background:#ffedd5;color:#c2410c;border-color:#fed7aa}
   .ops-p-new{background:#fee2e2;color:var(--red);border-color:#fecaca}
+  .ops-cals{display:grid;gap:12px;margin-bottom:18px}
+  .ops-cals.m1{grid-template-columns:1fr}
+  .ops-cals.m2{grid-template-columns:repeat(2,1fr)}
+  .ops-cals.m3{grid-template-columns:repeat(3,1fr)}
+  .ops-cals.m4{grid-template-columns:repeat(2,1fr)}
+  .ops-cal-title{padding:8px 13px;background:var(--surface2);border-bottom:1px solid var(--border);
+    font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:.5px}
+  .ops-cal-title.now{color:var(--red)}
+  .ops-months{display:flex;align-items:center;gap:3px;background:var(--surface);border:1px solid var(--border);
+    border-radius:8px;padding:3px 3px 3px 9px;box-shadow:var(--shadow)}
+  .ops-months-lbl{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-right:3px}
+  .ops-mbtn{width:26px;height:24px;border:none;background:none;border-radius:6px;font-family:'Barlow',sans-serif;
+    font-size:12px;font-weight:800;color:var(--muted);cursor:pointer;transition:all .12s}
+  .ops-mbtn:hover{background:var(--surface2);color:var(--mid)}
+  .ops-mbtn.active{background:var(--red);color:#fff}
+  @media (max-width:1400px){ .ops-cals.m3,.ops-cals.m4{grid-template-columns:repeat(2,1fr)} }
+  @media (max-width:980px){ .ops-cals.m2,.ops-cals.m3,.ops-cals.m4{grid-template-columns:1fr} }
   .ops-cal{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--shadow);margin-bottom:18px}
   .ops-cal-head{display:grid;grid-template-columns:repeat(7,1fr);background:var(--surface2);border-bottom:2px solid var(--border2)}
   .ops-cal-hd{padding:8px 4px;text-align:center;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted)}
   .ops-cal-grid{display:grid;grid-template-columns:repeat(7,1fr)}
+  .ops-cals.m2 .ops-cal-day,.ops-cals.m3 .ops-cal-day,.ops-cals.m4 .ops-cal-day{min-height:82px}
+  .ops-cals.m3 .ops-chip,.ops-cals.m4 .ops-chip{font-size:9px;padding:2px 4px}
   .ops-cal-day{min-height:104px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);padding:5px 5px 6px;overflow:hidden}
   .ops-cal-day:nth-child(7n){border-right:none}
   .ops-cal-day.other{background:var(--bg);opacity:.45}
@@ -1686,6 +1587,87 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
   .rq-more{font-size:11px;font-weight:700;color:var(--muted);margin-left:8px}
   .build-tag{font-size:10px;font-weight:700;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:2px 7px;white-space:nowrap}
   .rq-who{display:flex;gap:7px;flex-wrap:wrap}
+  .pt-row{display:flex;align-items:flex-start;gap:9px;padding:8px 10px;border:1px solid var(--border);
+    border-radius:8px;margin-bottom:6px;background:var(--surface);border-left:3px solid var(--border2)}
+  .pt-row:last-child{margin-bottom:0}
+  .pt-row.pass{border-left-color:var(--green)}
+  .pt-row.fail{border-left-color:var(--red)}
+  .pt-row.wait{border-left-color:var(--blue)}
+  .pt-row.book{border-left-color:var(--amber)}
+  .pt-main{flex:1;min-width:0}
+  .pt-t{font-size:12.5px;font-weight:800;margin-bottom:2px}
+  .pt-m{font-size:11px;color:var(--muted);line-height:1.5}
+  .pt-badge{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;padding:2px 7px;
+    border-radius:5px;white-space:nowrap;border:1px solid}
+  .pt-b-pass{background:var(--green-light);color:#15803d;border-color:rgba(22,163,74,.25)}
+  .pt-b-fail{background:#fee2e2;color:#b91c1c;border-color:#fecaca}
+  .pt-b-wait{background:var(--blue-light);color:#1d4ed8;border-color:rgba(37,99,235,.22)}
+  .pt-b-book{background:var(--amber-light);color:#92400e;border-color:rgba(217,119,6,.25)}
+  .pt-file{display:inline-flex;align-items:center;gap:5px;margin-top:5px;padding:3px 9px;background:var(--surface2);
+    border:1px solid var(--border);border-radius:6px;font-size:11px;font-weight:700;color:var(--blue);cursor:pointer}
+  .pt-file:hover{background:var(--blue-light)}
+  .pt-sum{display:flex;gap:14px;flex-wrap:wrap;padding:7px 10px;background:var(--surface2);
+    border:1px solid var(--border);border-radius:8px;margin-top:7px;font-size:11px;font-weight:700;color:var(--mid)}
+  .pt-sum b{font-family:'Barlow Condensed',sans-serif;font-size:14px}
+  .pa-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+  .pa-title{font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:1.2px;color:var(--mid)}
+  .pa-add{margin-left:auto;padding:4px 12px;background:var(--blue);color:#fff;border:none;border-radius:6px;
+    font-family:'Barlow',sans-serif;font-size:11px;font-weight:800;cursor:pointer}
+  .pa-add:hover{background:#1d4ed8}
+  .pa-tbl{border:1px solid var(--border);border-radius:9px;overflow:hidden;background:var(--surface)}
+  .pa-th,.pa-tr{display:grid;grid-template-columns:1fr 86px 74px 92px 30px;gap:6px;align-items:center;padding:7px 10px}
+  .pa-th{background:var(--surface2);border-bottom:1.5px solid var(--border2);font-size:8.5px;font-weight:800;
+    text-transform:uppercase;letter-spacing:1px;color:var(--muted)}
+  .pa-tr{border-bottom:1px solid var(--border);border-left:3px solid transparent}
+  .pa-tr:last-child{border-bottom:none}
+  .pa-tr.in{border-left-color:var(--green);background:#f8fefb}
+  .pa-tr.out{border-left-color:var(--red);background:#fffafa}
+  .pa-inp{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:5px 8px;
+    font-size:12px;font-family:'Barlow',sans-serif;color:var(--text);outline:none}
+  .pa-inp:focus{border-color:var(--blue)}
+  .pa-inp.num{text-align:right}
+  .pa-sel{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:5px 6px;
+    font-size:11.5px;font-family:'Barlow',sans-serif;font-weight:700;color:var(--text);outline:none;cursor:pointer}
+  .pa-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;padding:0}
+  .pa-del:hover{color:var(--red)}
+  .pa-sum{display:flex;gap:16px;flex-wrap:wrap;padding:8px 11px;background:var(--surface2);
+    border-top:1px solid var(--border);font-size:11px;font-weight:700;color:var(--mid)}
+  .pa-sum b{font-family:'Barlow Condensed',sans-serif;font-size:14px}
+  .pa-sum b.in{color:var(--green)} .pa-sum b.out{color:var(--red)}
+  .pa-empty{padding:16px 12px;text-align:center;color:var(--muted);font-size:12px}
+  .sb-tot{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border-bottom:1px solid var(--border)}
+  .sb-tot-cell{background:var(--surface);padding:16px 18px}
+  .sb-tot-lbl{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:5px}
+  .sb-tot-val{font-family:'Barlow Condensed',sans-serif;font-size:30px;font-weight:800;line-height:1}
+  .sb-tot-val.in{color:var(--green)} .sb-tot-val.out{color:var(--red)} .sb-tot-val.zero{color:var(--muted)}
+  .sb-tot-unit{font-size:15px;font-weight:700;color:var(--muted);margin-left:4px}
+  .sb-tot-sub{font-size:11px;color:var(--muted);margin-top:4px}
+  .sb-bar{display:flex;align-items:center;gap:14px;padding:12px 18px;border-bottom:1px solid var(--border);background:var(--surface2);flex-wrap:wrap}
+  .sb-check{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--mid);cursor:pointer}
+  .sb-help{font-size:11.5px;color:var(--muted);margin-left:auto}
+  .sb-head{display:grid;grid-template-columns:1fr 210px 130px 150px;gap:10px;padding:8px 18px;background:var(--surface2);
+    border-bottom:2px solid var(--border2);font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted)}
+  .sb-row{display:grid;grid-template-columns:1fr 210px 130px 150px;gap:10px;padding:11px 18px;align-items:center;
+    border-bottom:1px solid var(--border);border-left:4px solid transparent}
+  .sb-row:hover{background:var(--surface2)}
+  .sb-row.needin{border-left-color:var(--green);background:#f6fefa}
+  .sb-row.needout{border-left-color:var(--red);background:#fffafa}
+  .sb-row.needin:hover{background:#eefdf4} .sb-row.needout:hover{background:#fff5f5}
+  .sb-name{font-size:13px;font-weight:800}
+  .sb-job{font-size:11px;color:var(--red);font-weight:800;font-family:'Barlow Condensed',sans-serif}
+  .sb-inputs{display:flex;gap:6px;align-items:center}
+  .sb-in{width:88px;background:var(--surface);border:1.5px solid var(--border);border-radius:7px;padding:6px 9px;
+    font-size:12px;font-family:'Barlow',sans-serif;color:var(--text);outline:none;text-align:right}
+  .sb-in:focus{border-color:var(--blue)}
+  .sb-in.imp:focus{border-color:var(--green)} .sb-in.rem:focus{border-color:var(--red)}
+  .sb-tag{font-size:9px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
+  .sb-done{font-size:12px;font-weight:700;color:var(--mid)}
+  .sb-left{font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:800}
+  .sb-left.in{color:var(--green)} .sb-left.out{color:var(--red)} .sb-left.done{color:var(--muted)}
+  .sb-left-sub{font-size:10.5px;font-weight:600;color:var(--muted)}
+  .sb-none{padding:40px 20px;text-align:center;color:var(--muted);font-size:13px}
+  @media (max-width:900px){ .sb-tot{grid-template-columns:1fr} .sb-head{display:none}
+    .sb-row{grid-template-columns:1fr;gap:6px} }
   .rq-dest{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;
     border-radius:5px;padding:1px 7px;margin-top:3px;margin-right:5px;border:1px solid}
   .rq-dest.proj{background:#eef2ff;color:#4338ca;border-color:#c7d2fe}
@@ -1694,7 +1676,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
   .rq-dest.supplier{background:#fefce8;color:#a16207;border-color:#fde68a}
   .rq-money{font-family:'Barlow Condensed',sans-serif;font-weight:800}
   .rq-money.cost{color:var(--red)} .rq-money.income{color:var(--green)}
-  .rq-cash{display:flex;gap:18px;flex-wrap:wrap;padding:9px 16px;border-top:1px solid var(--border);
+  .rq-cash{display:flex;gap:16px;flex-wrap:wrap;padding:6px 14px;border-top:1px solid var(--border);
     background:var(--surface2);font-size:11.5px;font-weight:700;color:var(--mid)}
   .rq-cash b{font-family:'Barlow Condensed',sans-serif;font-size:15px}
   .rq-who-btn{flex:1;min-width:120px;padding:9px 10px;border:1.5px solid var(--border);background:var(--surface);
@@ -1710,25 +1692,25 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
   .rq-day.sel{background:#eff6ff;box-shadow:inset 0 0 0 2px var(--blue)}
   .rq-day.sel.today{box-shadow:inset 0 0 0 2px var(--blue),inset 0 0 0 4px rgba(225,29,29,.25)}
   .rq-bal{background:var(--surface);margin-bottom:0;overflow:hidden}
-  .rq-bal-head{padding:11px 16px;background:var(--surface2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-  .rq-bal-day{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:800;text-transform:uppercase;letter-spacing:.5px}
-  .rq-bal-tag{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;padding:2px 8px;border-radius:5px;background:#fee2e2;color:var(--red);border:1px solid #fecaca}
-  .rq-bal-hint{font-size:11px;color:var(--muted);margin-left:auto}
+  .rq-bal-head{padding:7px 14px;background:var(--surface2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .rq-bal-day{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:.5px}
+  .rq-bal-tag{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;padding:2px 8px;border-radius:5px;background:#fee2e2;color:var(--red);border:1px solid #fecaca}
+  .rq-bal-hint{font-size:10px;color:var(--muted);margin-left:auto}
   .rq-bal-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border)}
-  .rq-bal-cell{background:var(--surface);padding:14px 16px}
-  .rq-bal-lbl{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:5px;display:flex;align-items:center;gap:5px}
-  .rq-bal-val{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:800;line-height:1}
+  .rq-bal-cell{background:var(--surface);padding:9px 14px}
+  .rq-bal-lbl{font-size:8.5px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);margin-bottom:2px;display:flex;align-items:center;gap:5px}
+  .rq-bal-val{font-family:'Barlow Condensed',sans-serif;font-size:21px;font-weight:800;line-height:1}
   .rq-bal-val.in{color:var(--green)} .rq-bal-val.out{color:var(--red)}
   .rq-bal-val.pos{color:var(--green)} .rq-bal-val.neg{color:var(--red)} .rq-bal-val.zero{color:var(--muted)}
-  .rq-bal-unit{font-size:14px;font-weight:700;color:var(--muted);margin-left:3px}
-  .rq-bal-sub{font-size:11px;color:var(--muted);margin-top:4px}
-  .rq-bal-list{padding:10px 12px;border-top:1px solid var(--border);max-height:240px;overflow-y:auto;overscroll-behavior:contain}
-  .rq-bal-row{display:flex;align-items:center;gap:10px;padding:8px 11px;border:1px solid var(--border);border-radius:8px;margin-bottom:6px;border-left:3px solid var(--border2);cursor:pointer}
+  .rq-bal-unit{font-size:11px;font-weight:700;color:var(--muted);margin-left:3px}
+  .rq-bal-sub{font-size:10px;color:var(--muted);margin-top:2px}
+  .rq-bal-list{padding:7px 10px;border-top:1px solid var(--border);max-height:170px;overflow-y:auto;overscroll-behavior:contain}
+  .rq-bal-row{display:flex;align-items:center;gap:9px;padding:6px 10px;border:1px solid var(--border);border-radius:8px;margin-bottom:6px;border-left:3px solid var(--border2);cursor:pointer}
   .rq-bal-row:last-child{margin-bottom:0}
   .rq-bal-row:hover{border-color:var(--border2);background:var(--surface2)}
   .rq-bal-row.in{border-left-color:var(--green)} .rq-bal-row.out{border-left-color:var(--red)}
   .rq-bal-row.pend{border-left-color:var(--muted);border-left-style:dashed}
-  .rq-bal-none{padding:20px;text-align:center;color:var(--muted);font-size:12.5px}
+  .rq-bal-none{padding:11px;text-align:center;color:var(--muted);font-size:11.5px}
   @media (max-width:820px){ .rq-bal-grid{grid-template-columns:1fr} }
   .rq-item{display:flex;align-items:flex-start;gap:11px;padding:11px 13px;border:1px solid var(--border);border-radius:9px;margin-bottom:7px;border-left:3px solid var(--border2)}
   .rq-item:last-child{margin-bottom:0}
@@ -1757,6 +1739,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
         <div style="display:flex;gap:8px;align-items:center">
           <input class="ops-search" id="rq-q" placeholder="Search project, material…" oninput="rqRender()">
           <select class="ops-sel" id="rq-proj" onchange="rqRender()" style="padding:7px 11px;font-size:12px"></select>
+          <button class="ops-btn primary" onclick="sbOpen()">&#127958; Sand Balance</button>
           <button class="ops-btn" onclick="rqRender()">&#8635; Refresh</button>
         </div>
       </div>
@@ -1780,6 +1763,26 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
 
       <div class="rq-two" id="rq-cals"></div>
       <div id="rq-lists"></div>
+    </div>
+  </div>
+
+  <!-- SAND BALANCE -->
+  <div class="proj-modal-overlay" id="sb-modal">
+    <div class="proj-modal" style="width:1050px;max-width:96vw">
+      <div class="proj-modal-header"><span>&#127958; Sand Balance &mdash; every job</span>
+        <button class="proj-modal-close" onclick="sbClose()">&#10005;</button></div>
+      <div class="proj-modal-body" style="max-height:74vh;overflow-y:auto;padding:0">
+        <div class="sb-tot" id="sb-tot"></div>
+        <div class="sb-bar">
+          <input class="ops-search" id="sb-q" placeholder="Search a job…" oninput="sbRender()" style="width:230px">
+          <label class="sb-check"><input type="checkbox" id="sb-onlyset" onchange="sbRender()"> Only jobs with a figure set</label>
+          <div class="sb-help">Green = sand has to come in, red = sand has to go out. Figures come from each job's Allowance lines (Projects &rarr; open a job).</div>
+        </div>
+        <div id="sb-list"></div>
+      </div>
+      <div class="proj-modal-footer">
+        <button class="proj-modal-cancel" onclick="sbClose()">Close</button>
+      </div>
     </div>
   </div>
 
@@ -1867,9 +1870,9 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
 
       <div class="ops-header">
         <div>
-          <div class="ops-title">Operations</div>
-          <div class="ops-sub">Compaction tests, machine transfers and subcontractor bookings
-            <span style="margin-left:8px;font-size:10px;font-weight:700;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:1px 7px">build 2026-08-06v</span>
+          <div class="ops-title">Site Coordination</div>
+          <div class="ops-sub">Booking compaction tests, moving machines between sites and scheduling subcontractors
+            <span style="margin-left:8px;font-size:10px;font-weight:700;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:1px 7px">build 2026-08-07e</span>
           </div>
         </div>
         <div style="display:flex;gap:8px;align-items:center">
@@ -1887,7 +1890,6 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
 
       <!-- ─────────── OVERVIEW ─────────── -->
       <div class="ops-panel active" id="op-panel-overview">
-        <div class="ops-stats" id="op-ov-stats"></div>
         <div id="op-ov-groups"></div>
       </div>
 
@@ -1901,6 +1903,13 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
             <div class="ops-cal-month" id="op-cal-month">—</div>
             <button class="ops-nav-btn" onclick="opCalMove(1)">&#8250;</button>
             <button class="ops-btn sm" onclick="opCalToday()">Today</button>
+            <div class="ops-months">
+              <span class="ops-months-lbl">Months</span>
+              <button class="ops-mbtn" data-mn="1" onclick="opCalMonths(1)">1</button>
+              <button class="ops-mbtn" data-mn="2" onclick="opCalMonths(2)">2</button>
+              <button class="ops-mbtn active" data-mn="3" onclick="opCalMonths(3)">3</button>
+              <button class="ops-mbtn" data-mn="4" onclick="opCalMonths(4)">4</button>
+            </div>
           </div>
           <input class="ops-search" id="op-test-search" placeholder="Search project, type or company…" oninput="opRenderTests()" style="margin-left:auto">
         </div>
@@ -1914,13 +1923,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
 
         <div id="op-test-board"></div>
 
-        <div class="ops-cal">
-          <div class="ops-cal-head">
-            <div class="ops-cal-hd">Mon</div><div class="ops-cal-hd">Tue</div><div class="ops-cal-hd">Wed</div>
-            <div class="ops-cal-hd">Thu</div><div class="ops-cal-hd">Fri</div><div class="ops-cal-hd">Sat</div><div class="ops-cal-hd">Sun</div>
-          </div>
-          <div class="ops-cal-grid" id="op-cal-grid"></div>
-        </div>
+        <div class="ops-cals" id="op-cals"></div>
 
         <div id="op-test-list" style="display:none"></div>
       </div>
@@ -2941,7 +2944,7 @@ function tick() {
 // One-time build check
 if (!window._buildChecked) {
   window._buildChecked = true;
-  window.REMC_BUILD = "2026-08-06v";
+  window.REMC_BUILD = "2026-08-07e";
   console.log("%c REMC v1.1 \u00B7 build " + window.REMC_BUILD + " loaded successfully ", "background:#16a34a;color:white;font-size:14px;padding:4px 8px;border-radius:4px");
 }
 
@@ -3409,6 +3412,9 @@ else { if (typeof renderDayView === 'function') renderDayView(); }
 } catch(e){}
 }, 50);
 }
+if (name === 'material') {
+try{ renderMaterialBalance(); }catch(e){ console.warn('material balance:', e); }
+}
 if (name === 'materials') {
 renderMaterials();
 }
@@ -3417,23 +3423,144 @@ renderQuotations();
 }
 }
 
-const periodData = {
-daily: { in: '3,140 m³', out: '2,750 m³', bal: '+390 m³', balClass: 'val-green', balSub: 'surplus today' },
-weekly: { in: '18,420 m³', out: '15,800 m³', bal: '+2,620 m³', balClass: 'val-green', balSub: 'surplus this week' },
-monthly: { in: '74,500 m³', out: '68,200 m³', bal: '+6,300 m³', balClass: 'val-green', balSub: 'surplus this month' },
-annual: { in: '612,000 m³', out: '589,000 m³', bal: '+23,000 m³', balClass: 'val-green', balSub: 'surplus this year' },
-};
-function setPeriod(p, el) {
-document.querySelectorAll('.period-tab').forEach(t => t.classList.remove('active'));
-el.classList.add('active');
-const d = periodData[p];
-document.getElementById('total-in').textContent = d.in;
-document.getElementById('total-out').textContent = d.out;
-const nb = document.getElementById('net-bal');
-nb.textContent = d.bal;
-nb.className = 'bal-card-val ' + d.balClass;
-nb.nextElementSibling.textContent = d.balSub;
+// ── Material Balance: a mirror of the Requests page ─────────────────────────
+// Nothing is entered here. Every figure is worked out from the approved
+// material requests, so this page and Requests can never disagree.
+var MB_PERIOD = 'daily';
+
+function mbAll(){
+  var out=[];
+  try{
+    var st=JSON.parse(localStorage.getItem('remc_material_requests')||'{}');
+    if(!st || typeof st!=='object' || Array.isArray(st)) return out;
+    Object.keys(st).forEach(function(pid){
+      (Array.isArray(st[pid])?st[pid]:[]).forEach(function(m){
+        var c={}; for(var k in m) c[k]=m[k]; c._pid=String(pid); out.push(c);
+      });
+    });
+  }catch(e){}
+  return out;
 }
+function mbApproved(m){ return m && m.office && m.office.status==='approved'; }
+function mbDate(m){ return (m.office && m.office.date) || m.date || ''; }
+function mbM3(m){
+  var n=Number(m.qty||0); if(!isFinite(n)) n=0;
+  return (m.unit==='t') ? n/1.5 : n;      // about 1.5 tonnes per m3
+}
+function mbPad(n){ return String(n).padStart(2,'0'); }
+function mbKey(d){ return d.getFullYear()+'-'+mbPad(d.getMonth()+1)+'-'+mbPad(d.getDate()); }
+function mbRange(period){
+  var now=new Date(), from=new Date(now), to=new Date(now);
+  if(period==='weekly'){ from.setDate(now.getDate()-((now.getDay()+6)%7)); to=new Date(from); to.setDate(from.getDate()+6); }
+  else if(period==='monthly'){ from=new Date(now.getFullYear(), now.getMonth(), 1); to=new Date(now.getFullYear(), now.getMonth()+1, 0); }
+  else if(period==='annual'){ from=new Date(now.getFullYear(),0,1); to=new Date(now.getFullYear(),11,31); }
+  return { from:mbKey(from), to:mbKey(to) };
+}
+function mbLabel(period){
+  return period==='weekly' ? 'this week' : period==='monthly' ? 'this month'
+       : period==='annual' ? 'this year' : 'today';
+}
+function mbNum(n){ return Math.round(n).toLocaleString('en-AU'); }
+function mbProj(id){
+  var list=(typeof PROJ_DATA!=='undefined' && Array.isArray(PROJ_DATA)) ? PROJ_DATA : [];
+  return list.find(function(p){ return String(p.id)===String(id); }) || null;
+}
+function mbEsc(x){ return String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+  .replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function setPeriod(p, el){
+  MB_PERIOD = p;
+  try{
+    document.querySelectorAll('.period-tab').forEach(function(t){ t.classList.remove('active'); });
+    if(el) el.classList.add('active');
+  }catch(e){}
+  renderMaterialBalance();
+}
+
+function renderMaterialBalance(){
+  var sum=document.getElementById('mb-summary'), body=document.getElementById('mb-body');
+  if(!sum || !body) return;
+
+  var r=mbRange(MB_PERIOD);
+  var rows=mbAll().filter(function(m){
+    if(!mbApproved(m)) return false;
+    var d=mbDate(m); if(!d) return false;
+    return d>=r.from && d<=r.to;
+  });
+
+  var totIn=0, totOut=0, byProj={};
+  rows.forEach(function(m){
+    var v=mbM3(m);
+    if(m.dir==='import') totIn+=v; else totOut+=v;
+    var k=String(m._pid);
+    if(!byProj[k]) byProj[k]={ inV:0, outV:0, n:0 };
+    if(m.dir==='import') byProj[k].inV+=v; else byProj[k].outV+=v;
+    byProj[k].n++;
+  });
+  var net=totIn-totOut;
+  var sites=Object.keys(byProj).length;
+
+  sum.innerHTML =
+     card('Total IN '+mbLabel(MB_PERIOD), mbNum(totIn)+' m\u00B3', 'val-green', 'material receiving')
+    +card('Total OUT '+mbLabel(MB_PERIOD), mbNum(totOut)+' m\u00B3', 'val-red', 'material leaving site')
+    +card('Net Balance', (net>0?'+':'')+mbNum(net)+' m\u00B3',
+          net>0?'val-green':(net<0?'val-red':'val-blue'),
+          net>0?('surplus '+mbLabel(MB_PERIOD)):(net<0?('shortfall '+mbLabel(MB_PERIOD)):'in and out are level'))
+    +card('Active Sites', String(sites), 'val-blue', 'with material movement');
+
+  function card(lbl,val,cls,sub){
+    return '<div class="bal-card"><div class="bal-card-lbl">'+mbEsc(lbl)+'</div>'
+      +'<div class="bal-card-val '+cls+'">'+mbEsc(val)+'</div>'
+      +'<div class="bal-card-sub">'+mbEsc(sub)+'</div></div>';
+  }
+
+  if(!rows.length){
+    body.innerHTML='<div class="quot-empty">'
+      +'<div style="font-size:15px;font-weight:700;margin-bottom:6px">No approved movements '+mbEsc(mbLabel(MB_PERIOD))+'</div>'
+      +'<div style="font-size:13px">Material shows up here once the office approves it on the '
+      +'<a href="javascript:void(0)" onclick="showPage(\'requests\')" style="color:var(--red);font-weight:700">Requests</a> page.</div></div>';
+    return;
+  }
+
+  // split the same way the Projects page does
+  var groups={ commercial:[], residential:[] };
+  Object.keys(byProj).forEach(function(pid){
+    var p=mbProj(pid);
+    var type=String((p&&p.type)||'').toLowerCase();
+    (type==='commercial' ? groups.commercial : groups.residential).push({ pid:pid, p:p, d:byProj[pid] });
+  });
+  Object.keys(groups).forEach(function(k){
+    groups[k].sort(function(a,b){
+      return String((a.p&&a.p.name)||'').localeCompare(String((b.p&&b.p.name)||'')); });
+  });
+
+  body.innerHTML='<div class="bal-grid">'
+    + column('\uD83C\uDFE2 Commercial', 'com', groups.commercial)
+    + column('\uD83C\uDFE0 Residential', 'res', groups.residential)
+    + '</div>';
+
+  function column(title, cls, items){
+    var h='<div class="bal-col"><div class="bal-col-head '+cls+'">'+title+'</div>'
+      +'<div class="bal-row-head"><div>Project</div><div>\u2B07 IN</div><div>\u2B06 OUT</div><div>Balance</div></div>';
+    if(!items.length){
+      h+='<div style="padding:22px;text-align:center;color:var(--muted);font-size:12.5px">Nothing moved '+mbEsc(mbLabel(MB_PERIOD))+'.</div>';
+    } else {
+      h+=items.map(function(it){
+        var b=it.d.inV-it.d.outV;
+        return '<div class="bal-row">'
+          +'<div><div class="br-name">'+mbEsc((it.p&&it.p.name)||('Project '+it.pid))+'</div>'
+          +'<div class="br-addr">'+mbEsc((it.p&&(it.p.jobNumber||it.p.address))||'')+'</div></div>'
+          +'<div class="br-in"><span class="arrow-in">\u2191</span><span class="val">'+mbNum(it.d.inV)+' m\u00B3</span></div>'
+          +'<div class="br-out"><span class="arrow-out">\u2193</span><span class="val">'+mbNum(it.d.outV)+' m\u00B3</span></div>'
+          +'<div class="br-bal"><span class="'+(b>0?'val-pos':(b<0?'val-neg':'val-zero'))+'">'
+            +(b>0?'+':'')+mbNum(b)+'</span></div>'
+          +'</div>';
+      }).join('');
+    }
+    return h+'</div>';
+  }
+}
+window.renderMaterialBalance = renderMaterialBalance;
 
 var MAT_DATA = [];
 var MAT_FILTER = 'all';
@@ -7185,7 +7312,7 @@ var NAV_TABS = [
 { key: 'team',        label: 'Team Planning',     icon: '👥', onclick: "showPage('team')" },
 { key: 'employees',   label: 'Employees',         icon: '👷', onclick: "showPage('employees')" },
 { key: 'projects',    label: 'Projects',          icon: '📁', onclick: "showPage('projects')" },
-{ key: 'operations',  label: 'Operations',        icon: '🚧', onclick: "showPage('operations')" },
+{ key: 'operations',  label: 'Site Coordination', icon: '🧭', onclick: "showPage('operations')" },
 { key: 'jobscheduler', label: 'Job Scheduler', icon: '', onclick: "showPage('jobscheduler')" },
 { key: 'settings',    label: 'Settings',          icon: '⚙️',  onclick: "showPage('settings')" },
 ];
@@ -9884,6 +10011,162 @@ setTimeout(function() {
   } catch(e) {}
 }, 200);
 
+// ── Compaction tests on the project page ────────────────────────────────────
+// A read-only mirror of what Site Coordination holds, so anyone opening a job
+// can see which tests are booked, how they went, and open the report.
+function ptTests(pid){
+  try{
+    var o=JSON.parse(localStorage.getItem('remc_compaction_tests')||'{}');
+    var a=o[String(pid)];
+    return Array.isArray(a)?a:[];
+  }catch(e){ return []; }
+}
+function ptFmt(d){
+  if(!d) return 'No date';
+  try{
+    var x=new Date(d+'T00:00:00');
+    return ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][x.getDay()]+' '+x.getDate()+' '
+      +['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][x.getMonth()]
+      +' '+x.getFullYear();
+  }catch(e){ return String(d); }
+}
+function ptEsc(x){ return String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+  .replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+window.ptOpenFile=function(pid,id){
+  var t=ptTests(pid).find(function(x){ return String(x.id)===String(id); });
+  var f=t && t.office && t.office.file;
+  if(f && f.url) window.open(f.url,'_blank');
+  else alert('No file link saved for this test.');
+};
+function ptRender(pid){
+  var host=document.getElementById('pd-tests'); if(!host) return;
+  var list=ptTests(pid).slice().sort(function(a,b){
+    return String(b.date||'')<String(a.date||'') ? -1 : 1; });   // newest first
+
+  var nPass=0,nFail=0,nWait=0,nBook=0;
+  var rows=list.map(function(t){
+    var o=t.office||{};
+    var done=!!o.done, res=t.result||'';
+    var cls, badge;
+    if(res==='pass'){ cls='pass'; badge='<span class="pt-badge pt-b-pass">Passed</span>'; nPass++; }
+    else if(res==='fail'||res==='redo'){ cls='fail';
+      badge='<span class="pt-badge pt-b-fail">'+(res==='redo'?'Redo':'Failed')+'</span>'; nFail++; }
+    else if(o.confirmed){ cls='wait'; badge='<span class="pt-badge pt-b-wait">Awaiting result</span>'; nWait++; }
+    else { cls='book'; badge='<span class="pt-badge pt-b-book">Being booked</span>'; nBook++; }
+
+    var f=o.file;
+    return '<div class="pt-row '+cls+'">'
+      +'<span style="font-size:14px">\uD83E\uDDEA</span>'
+      +'<div class="pt-main"><div class="pt-t">'+ptEsc(t.type||'Test')+'</div>'
+      +'<div class="pt-m">'+ptEsc(ptFmt(t.date))
+      +(t.company?(' \u00B7 '+ptEsc(t.company)):' \u00B7 no company yet')
+      +(done?' \u00B7 completed':'')+'</div>'
+      +(t.resultNotes?('<div class="pt-m" style="font-style:italic">'+ptEsc(t.resultNotes)+'</div>'):'')
+      +(f ? ('<div class="pt-file" onclick="ptOpenFile(\''+ptEsc(pid)+'\',\''+ptEsc(t.id)+'\')">'
+             +'\uD83D\uDCCE '+ptEsc(f.name||'Report')+'</div>') : '')
+      +'</div>'+badge+'</div>';
+  }).join('');
+
+  host.innerHTML='<div class="pa-head"><div class="pa-title">\uD83E\uDDEA Compaction tests</div>'
+    +'<button class="pa-add" style="background:var(--surface2);color:var(--mid);border:1px solid var(--border)" '
+    +'onclick="showPage(\'operations\')">Manage in Site Coordination</button></div>'
+    +(list.length
+      ? (rows + '<div class="pt-sum">'
+         +'<span>Passed: <b style="color:var(--green)">'+nPass+'</b></span>'
+         +'<span>Failed: <b style="color:var(--red)">'+nFail+'</b></span>'
+         +'<span>Awaiting result: <b style="color:var(--blue)">'+nWait+'</b></span>'
+         +'<span>Being booked: <b style="color:var(--amber)">'+nBook+'</b></span></div>')
+      : '<div class="pa-empty">No compaction tests on this job yet.</div>');
+}
+window.ptRender = ptRender;
+
+// ── Project Allowances: the actual line items ───────────────────────────────
+// The PDF stays where it is; these are the figures typed out of it so the rest
+// of the system (Sand Balance, Requests) can work with them.
+var PA_KEY = 'remc_proj_allowances';
+var PA_UNITS = ['m3','t','ea','loads'];
+function paLoad(){ try{ var o=JSON.parse(localStorage.getItem(PA_KEY)||'{}');
+  return (o && typeof o==='object' && !Array.isArray(o)) ? o : {}; }catch(e){ return {}; } }
+function paSave(o){
+  try{ localStorage.setItem(PA_KEY, JSON.stringify(o)); }catch(e){ alert('Browser storage is full.'); return; }
+  try{ if(typeof window.remcCloudUpsertKey==='function') window.remcCloudUpsertKey(PA_KEY, JSON.stringify(o)); }catch(e){}
+}
+function paItems(pid){ var a=paLoad()[String(pid)]; return Array.isArray(a)?a:[]; }
+function paEsc(x){ return String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+  .replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+// everything in cubic metres so totals can be added up
+function paToM3(qty, unit){
+  var n=Number(qty||0); if(!isFinite(n)) return 0;
+  if(unit==='t') return n/1.5;          // about 1.5 tonnes per m3 of sand
+  if(unit==='loads') return n*12;       // a typical truck and dog load
+  if(unit==='ea') return 0;             // counted items carry no volume
+  return n;
+}
+window.paAdd = function(pid){
+  var st=paLoad(), k=String(pid);
+  if(!Array.isArray(st[k])) st[k]=[];
+  st[k].push({ id:'pa_'+Date.now()+'_'+Math.random().toString(36).slice(2,5),
+               item:'', dir:'in', qty:0, unit:'m3' });
+  paSave(st); paRender(pid);
+};
+window.paSet = function(pid, id, field, val){
+  var st=paLoad(), list=st[String(pid)]||[];
+  for(var i=0;i<list.length;i++){
+    if(String(list[i].id)===String(id)){
+      if(field==='qty'){ var n=Number(val); list[i].qty = (isFinite(n)&&n>=0)?n:0; }
+      else list[i][field]=String(val||'');
+      break;
+    }
+  }
+  paSave(st); paRender(pid);
+};
+window.paDel = function(pid, id){
+  var st=paLoad(), k=String(pid);
+  st[k]=(st[k]||[]).filter(function(x){ return String(x.id)!==String(id); });
+  if(!st[k].length) delete st[k];
+  paSave(st); paRender(pid);
+};
+function paRender(pid){
+  var host=document.getElementById('pd-allow-items'); if(!host) return;
+  var list=paItems(pid);
+  var inM=0,outM=0;
+  list.forEach(function(it){
+    var v=paToM3(it.qty,it.unit);
+    if(it.dir==='out') outM+=v; else inM+=v;
+  });
+  var rows = list.length ? list.map(function(it){
+    return '<div class="pa-tr '+(it.dir==='out'?'out':'in')+'">'
+      +'<input class="pa-inp" value="'+paEsc(it.item)+'" placeholder="e.g. Clean sand to pad"'
+        +' onchange="paSet(\''+paEsc(pid)+'\',\''+paEsc(it.id)+'\',\'item\',this.value)">'
+      +'<input class="pa-inp num" type="number" min="0" step="any" value="'+(it.qty||'')+'" placeholder="0"'
+        +' onchange="paSet(\''+paEsc(pid)+'\',\''+paEsc(it.id)+'\',\'qty\',this.value)">'
+      +'<select class="pa-sel" onchange="paSet(\''+paEsc(pid)+'\',\''+paEsc(it.id)+'\',\'unit\',this.value)">'
+        +PA_UNITS.map(function(u){ return '<option value="'+u+'"'+(u===it.unit?' selected':'')+'>'
+          +(u==='m3'?'m\u00B3':u==='t'?'tonnes':u==='ea'?'each':'loads')+'</option>'; }).join('')
+      +'</select>'
+      +'<select class="pa-sel" onchange="paSet(\''+paEsc(pid)+'\',\''+paEsc(it.id)+'\',\'dir\',this.value)">'
+        +'<option value="in"'+(it.dir!=='out'?' selected':'')+'>&#11015; Bring in</option>'
+        +'<option value="out"'+(it.dir==='out'?' selected':'')+'>&#11014; Take out</option>'
+      +'</select>'
+      +'<button class="pa-del" title="Remove this line"'
+        +' onclick="if(confirm(\'Remove this line?\'))paDel(\''+paEsc(pid)+'\',\''+paEsc(it.id)+'\')">&#10005;</button>'
+      +'</div>';
+  }).join('') : '<div class="pa-empty">No allowance lines yet. Tap <b>+ Add line</b> and copy the figures from the PDF above.</div>';
+
+  host.innerHTML='<div class="pa-head"><div class="pa-title">&#128290; Allowance quantities</div>'
+    +'<button class="pa-add" onclick="paAdd(\''+paEsc(pid)+'\')">+ Add line</button></div>'
+    +'<div class="pa-tbl">'
+    +'<div class="pa-th"><div>Item</div><div style="text-align:right">Qty</div><div>Unit</div><div>In / Out</div><div></div></div>'
+    +rows
+    +((inM||outM) ? ('<div class="pa-sum">'
+        +'<span>Total to bring in: <b class="in">'+Math.round(inM)+'</b> m\u00B3</span>'
+        +'<span>Total to take out: <b class="out">'+Math.round(outM)+'</b> m\u00B3</span>'
+        +'<span>Balance: <b class="'+((inM-outM)>=0?'in':'out')+'">'
+          +((inM-outM)>0?'+':'')+Math.round(inM-outM)+'</b> m\u00B3</span></div>') : '')
+    +'</div>';
+}
+window.paRender = paRender;
+
 // ── Project Plans & Documents (categorized) ──────────────────────────────────
 var PD_DOCS_KEY = 'remc_proj_docs';
 function pdLoadDocs() { try { return JSON.parse(localStorage.getItem(PD_DOCS_KEY)||'{}'); } catch(e){ return {}; } }
@@ -10042,6 +10325,7 @@ function pdDocAttachLink() {
   _pdDocCustomLabel = null;
   pdSaveDocs(store);
   pdRenderDocs(id);
+  try{ paRender(id); }catch(e){ console.warn('paRender error:', e); }
 }
 
 function pdDocAttachFile() {
@@ -10075,6 +10359,7 @@ function pdDocFileChosen(e) {
     _pdDocCustomLabel = null;
     pdSaveDocs(store);
     pdRenderDocs(id);
+  try{ paRender(id); }catch(e){ console.warn('paRender error:', e); }
   };
   reader.readAsDataURL(file);
   e.target.value = '';
@@ -10119,6 +10404,7 @@ function pdDocRemove(id, cat, slotKey) {
   }
   pdSaveDocs(store);
   pdRenderDocs(id);
+  try{ paRender(id); }catch(e){ console.warn('paRender error:', e); }
 }
 
 function pdDocAdd(cat) {
@@ -11165,6 +11451,8 @@ function projDetailOpen(id) {
   // Load drawing, docs, timeline
   try { pdLoadDrawing(id); } catch(e) { console.warn('pdLoadDrawing error:', e); }
   try { pdRenderDocs(id); } catch(e) { console.warn('pdRenderDocs error:', e); }
+  try { paRender(id); } catch(e) { console.warn('paRender error:', e); }
+  try { ptRender(id); } catch(e) { console.warn('ptRender error:', e); }
   try { pdRenderTimeline(id); } catch(e) { console.warn('pdRenderTimeline error:', e); }
 
   m.style.display = 'flex';
@@ -12093,7 +12381,9 @@ function teamEditProjectBooking(pid){
     <!-- Q4 BOTTOM-RIGHT: Project Plans & Documents -->
     <div style="background:var(--surface);overflow-y:auto;padding:16px 18px">
       <div style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;color:var(--blue);margin-bottom:10px">&#128203; Project Allowances</div>
-      <div id="pd-docs-allowances" style="margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border)"></div>
+      <div id="pd-docs-allowances" style="margin-bottom:12px"></div>
+      <div id="pd-allow-items" style="margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border)"></div>
+      <div id="pd-tests" style="margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border)"></div>
       <div style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;color:var(--blue);margin-bottom:14px">&#128194; Project Plans & Documents</div>
       <div style="margin-bottom:14px">
         <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--text);padding:6px 10px;background:var(--surface2);border-radius:6px;margin-bottom:8px;display:flex;align-items:center;gap:6px"><span style="font-size:14px">&#127959;</span> Civil Plans</div>
@@ -12923,7 +13213,7 @@ function teamEditProjectBooking(pid){
     { key:'team',         label:'👥 Team Planning' },
     { key:'employees',    label:'👷 Employees' },
     { key:'projects',     label:'📁 Projects' },
-    { key:'operations',   label:'🚧 Operations' },
+    { key:'operations',   label:'🧭 Site Coordination' },
     { key:'requests',     label:'📋 Requests' },
     { key:'jobscheduler', label:'📅 Job Scheduler' },
     { key:'settings',     label:'⚙️ Settings' }
@@ -14385,6 +14675,143 @@ function teamEditProjectBooking(pid){
       +'</div></div>';
   }
 
+  // ─────────── Sand Balance ───────────
+  // How much sand each job still needs brought in or taken away.
+  // The Project Allowances PDF holds these figures on paper; the numbers are
+  // typed in here once so the whole system can work with them.
+  var K_SAND='remc_sand_allowance';
+  function sandAll(){ return obj(K_SAND); }
+  // The allowance lines typed on the project are the real source. The old
+  // quick-entry figures are still honoured for anything set before this existed.
+  function paLines(pid){
+    try{
+      var o=JSON.parse(localStorage.getItem('remc_proj_allowances')||'{}');
+      var a=o[String(pid)];
+      return Array.isArray(a)?a:[];
+    }catch(e){ return []; }
+  }
+  function paVol(q,u){
+    var n=Number(q||0); if(!isFinite(n)) return 0;
+    if(u==='t') return n/1.5;
+    if(u==='loads') return n*12;
+    if(u==='ea') return 0;
+    return n;
+  }
+  function sandOf(pid){
+    var lines=paLines(pid);
+    if(lines.length){
+      var i=0,o=0;
+      lines.forEach(function(l){ var v=paVol(l.qty,l.unit); if(l.dir==='out') o+=v; else i+=v; });
+      return { imp:Math.round(i), rem:Math.round(o), fromLines:true };
+    }
+    var q=sandAll()[String(pid)]||{};
+    return { imp:Number(q.imp||0)||0, rem:Number(q.rem||0)||0, fromLines:false };
+  }
+  window.sbSet=function(pid, which, val){
+    var st=sandAll(), k=String(pid);
+    if(!st[k]) st[k]={};
+    var n=Number(val); if(!isFinite(n)||n<0) n=0;
+    st[k][which]=n;
+    if(!st[k].imp && !st[k].rem) delete st[k];
+    save(K_SAND, st);
+    sbRender();
+  };
+  // How much has actually been carted so far, from the approved requests
+  function sandMoved(pid){
+    var i=0,o=0;
+    all().forEach(function(m){
+      if(String(m._pid)!==String(pid)) return;
+      if(status(m)!=='approved') return;
+      var n=Number(m.qty||0); if(!isFinite(n)) n=0;
+      if(m.unit==='t') n=n/1.5;                 // rough: 1.5 t per m3 of sand
+      if(m.dir==='import') i+=n; else o+=n;
+    });
+    return { inM:Math.round(i), outM:Math.round(o) };
+  }
+  function n0(x){ return Math.round(Number(x||0)); }
+
+  window.sbOpen=function(){ document.getElementById('sb-modal').classList.add('open'); sbRender(); };
+  window.sbClose=function(){ document.getElementById('sb-modal').classList.remove('open'); };
+  window.sbRender=function(){
+    var box=document.getElementById('sb-list'); if(!box) return;
+    var q=String((document.getElementById('sb-q')||{}).value||'').trim().toLowerCase();
+    var onlySet=!!(document.getElementById('sb-onlyset')||{}).checked;
+
+    var rows=projects().slice().sort(function(a,b){
+      return String(a.name||'').localeCompare(String(b.name||'')); })
+      .map(function(p){
+        var a=sandOf(p.id), mv=sandMoved(p.id);
+        var leftIn = a.imp - mv.inM;            // still to bring in
+        var leftOut= a.rem - mv.outM;           // still to take away
+        return { p:p, a:a, mv:mv, leftIn:leftIn, leftOut:leftOut,
+                 hasFigure:(a.imp>0 || a.rem>0) };
+      })
+      .filter(function(r){
+        if(onlySet && !r.hasFigure) return false;
+        if(q && ((r.p.name||'')+' '+(r.p.jobNumber||'')).toLowerCase().indexOf(q)<0) return false;
+        return true;
+      });
+
+    // totals across every job
+    var totIn=0, totOut=0;
+    rows.forEach(function(r){
+      if(r.leftIn>0) totIn+=r.leftIn;
+      if(r.leftOut>0) totOut+=r.leftOut;
+    });
+    var net=totIn-totOut;
+    var tot=document.getElementById('sb-tot');
+    if(tot) tot.innerHTML=
+       '<div class="sb-tot-cell"><div class="sb-tot-lbl">\u2B07 Sand still to bring in</div>'
+        +'<div class="sb-tot-val '+(totIn?'in':'zero')+'">'+n0(totIn)+'<span class="sb-tot-unit">m\u00B3</span></div>'
+        +'<div class="sb-tot-sub">'+rows.filter(function(r){return r.leftIn>0;}).length+' job(s) short of sand</div></div>'
+      +'<div class="sb-tot-cell"><div class="sb-tot-lbl">\u2B06 Sand still to take away</div>'
+        +'<div class="sb-tot-val '+(totOut?'out':'zero')+'">'+n0(totOut)+'<span class="sb-tot-unit">m\u00B3</span></div>'
+        +'<div class="sb-tot-sub">'+rows.filter(function(r){return r.leftOut>0;}).length+' job(s) with sand to shift</div></div>'
+      +'<div class="sb-tot-cell"><div class="sb-tot-lbl">\u2696 Across all jobs</div>'
+        +'<div class="sb-tot-val '+(net>0?'in':(net<0?'out':'zero'))+'">'
+          +(net>0?'+':'')+n0(net)+'<span class="sb-tot-unit">m\u00B3</span></div>'
+        +'<div class="sb-tot-sub">'
+          +(net>0 ? 'more sand needed than we have spare'
+                  : (net<0 ? 'more spare sand than we need \u2014 move it between jobs'
+                           : 'in and out cancel each other out'))+'</div></div>';
+
+    if(!rows.length){ box.innerHTML='<div class="sb-none">No jobs match.</div>'; return; }
+
+    box.innerHTML='<div class="sb-head"><div>Job</div><div>How much it needs (m\u00B3)</div>'
+      +'<div>Carted so far</div><div>Still to go</div></div>'
+      +rows.map(function(r){
+        var cls = r.leftIn>0 ? 'needin' : (r.leftOut>0 ? 'needout' : '');
+        var left, sub, lcls;
+        if(r.leftIn>0){ left='\u2B07 '+n0(r.leftIn)+' m\u00B3'; sub='to bring in'; lcls='in'; }
+        else if(r.leftOut>0){ left='\u2B06 '+n0(r.leftOut)+' m\u00B3'; sub='to take away'; lcls='out'; }
+        else if(r.hasFigure){ left='\u2713 Done'; sub='nothing left to cart'; lcls='done'; }
+        else { left='\u2014'; sub='no figure set yet'; lcls='done'; }
+        return '<div class="sb-row '+cls+'">'
+          +'<div><div class="sb-name">'+esc(r.p.name||('Project '+r.p.id))+'</div>'
+            +(r.p.jobNumber?('<div class="sb-job">'+esc(r.p.jobNumber)+'</div>'):'')+'</div>'
+          +'<div class="sb-inputs">'
+            +(r.a.fromLines
+              ? ('<span class="sb-tag">In</span><b style="color:var(--green)">'+n0(r.a.imp)+'</b>'
+                +'<span class="sb-tag" style="margin-left:8px">Out</span><b style="color:var(--red)">'+n0(r.a.rem)+'</b>'
+                +'<span class="sb-tag" style="margin-left:8px;color:var(--blue)">from allowances</span>')
+              : ('<span class="sb-tag">In</span>'
+                +'<input class="sb-in imp" type="number" min="0" step="1" value="'+(r.a.imp||'')+'" placeholder="0" '
+                  +'onchange="sbSet(\''+esc(r.p.id)+'\',\'imp\',this.value)">'
+                +'<span class="sb-tag">Out</span>'
+                +'<input class="sb-in rem" type="number" min="0" step="1" value="'+(r.a.rem||'')+'" placeholder="0" '
+                  +'onchange="sbSet(\''+esc(r.p.id)+'\',\'rem\',this.value)">'))
+          +'</div>'
+          +'<div class="sb-done">'
+            +(r.mv.inM?('<span style="color:var(--green)">\u2B07 '+n0(r.mv.inM)+'</span>'):'')
+            +(r.mv.inM&&r.mv.outM?' &middot; ':'')
+            +(r.mv.outM?('<span style="color:var(--red)">\u2B06 '+n0(r.mv.outM)+'</span>'):'')
+            +((!r.mv.inM&&!r.mv.outM)?'<span style="color:var(--muted)">nothing yet</span>':'')
+          +'</div>'
+          +'<div><div class="sb-left '+lcls+'">'+left+'</div><div class="sb-left-sub">'+sub+'</div></div>'
+          +'</div>';
+      }).join('');
+  };
+
   window.rqOpen=function(pid,id){
     var m=(obj(K_MAT)[String(pid)]||[]).find(function(x){ return String(x.id)===String(id); });
     if(!m) return;
@@ -14521,9 +14948,11 @@ function teamEditProjectBooking(pid){
     rqClose(); rqRender(); rqMarkSeen();
   };
 
-  document.addEventListener('click', function(ev){
-    var ov=document.getElementById('rq-modal');
-    if(ov && ev.target===ov) ov.classList.remove('open');
+  ['rq-modal','sb-modal'].forEach(function(id){
+    document.addEventListener('click', function(ev){
+      var ov=document.getElementById(id);
+      if(ov && ev.target===ov) ov.classList.remove('open');
+    });
   });
 
   function boot(){ try{ rqRender(); }catch(e){} }
@@ -14548,6 +14977,11 @@ function teamEditProjectBooking(pid){
     'Compaction Test','Kerbing','Road Base','Asphalt / Sealing','Concrete / Footpath','Landscaping','As-Built Survey'];
 
   var TAB='overview', CAL=new Date(), TFILTER='upcoming', RFILTER='open', SFILTER='open';
+  // How many months to show side by side, 1 to 4. Remembered between visits.
+  var CAL_MONTHS=(function(){
+    try{ var n=parseInt(localStorage.getItem('remc_cal_months'),10);
+      return (n>=1 && n<=4) ? n : 3; }catch(e){ return 3; }
+  })();
   var EDIT_TEST=null, EDIT_TR=null, EDIT_SUB=null, RES_REF=null, SEQ_EDIT=false;
 
   // ───────── storage ─────────
@@ -14633,9 +15067,9 @@ function teamEditProjectBooking(pid){
   //   followup  -> they went quiet, chase them
   // Confirming puts it on the calendar and the status becomes 'booked'.
   var REQ_LABEL = { 'new':'No action yet', emailed:'Emailed', awaiting:'Pending confirmation',
-                    followup:'Need follow up', booked:'Confirmed' };
+                    followup:'Need follow up', booked:'Booked', done:'Completed' };
   var REQ_PILL  = { 'new':'ops-p-new', emailed:'ops-p-emailed', awaiting:'ops-p-await',
-                    followup:'ops-p-followup', booked:'ops-p-done' };
+                    followup:'ops-p-followup', booked:'ops-p-booked', done:'ops-p-done' };
   var REQ_PICK  = ['new','emailed','awaiting','followup'];
   function fromSupervisor(t){
     if(String(t.au_app||'')==='Mobile') return true;
@@ -14648,10 +15082,13 @@ function teamEditProjectBooking(pid){
     if(v==='pending') v='new';                 // records saved before this change
     return REQ_LABEL[v] ? v : 'new';
   }
-  // A confirmed test whose day has gone by without a result coming back.
+  // Booked with the company, waiting for the day and then for the report.
+  // Stays here until the office marks the whole thing finished.
   function awaitingResult(t){
-    return isConfirmed(t) && !t.result && t.date && t.date < today();
+    return isConfirmed(t) && !isDone(t);
   }
+  function isDone(t){ return !!(t.office && t.office.done); }
+  function resultFile(t){ return (t.office && t.office.file) || null; }
   function reqSince(t){
     var d=(t.office&&t.office.receivedAt)||t.createdAt||'';
     if(!d) return '';
@@ -14777,41 +15214,32 @@ function teamEditProjectBooking(pid){
       var st=testState(x);
       if(st==='today') out.push({g:'today',tone:'red',icon:'\uD83E\uDDEA',title:(x.type||'Test')+' — '+projName(x._pid),
         meta:'Today'+(x.company?(' \u00B7 '+x.company):' \u00B7 no company booked'), kind:'test', ref:x});
-      else if(st==='await') out.push({g:'attn',tone:'amber',icon:'\u23F3',title:(x.type||'Test')+' — '+projName(x._pid),
-        meta:'Done '+fmt(x.date)+' ('+relDay(x.date)+') \u00B7 result still missing', kind:'test', ref:x});
-      else if(st==='nodate') out.push({g:'attn',tone:'amber',icon:'\uD83D\uDCC5',title:(x.type||'Test')+' — '+projName(x._pid),
-        meta:'No date booked yet', kind:'test', ref:x});
-      else if((st==='booked') && !x.company) out.push({g:'attn',tone:'amber',icon:'\uD83C\uDFE2',title:(x.type||'Test')+' — '+projName(x._pid),
-        meta:fmt(x.date)+' \u00B7 no company booked to do it', kind:'test', ref:x});
-    });
+          });
 
     trs.forEach(function(x){
       var st=trState(x);
       var what=(x.machine||'Machine')+(x.action==='transfer'?(' \u2192 '+(x.toName||'')):' (remove from site)');
       if(st==='today') out.push({g:'today',tone:'red',icon:'\uD83D\uDE9A',title:what,
         meta:'Today \u00B7 from '+(x.fromName||projName(x._pid)), kind:'transfer', ref:x});
-      else if(st==='overdue') out.push({g:'attn',tone:'red',icon:'\u26A0\uFE0F',title:what,
+      else if(st==='overdue') out.push({g:'inbox',tone:'red',icon:'\uD83D\uDE9A',title:what,
         meta:'Was due '+fmt(trDate(x))+' ('+relDay(trDate(x))+') \u2014 needs rescheduling', kind:'transfer', ref:x});
-      else if(st==='nodate') out.push({g:'attn',tone:'amber',icon:'\uD83D\uDCC5',title:what,
+      else if(st==='nodate') out.push({g:'inbox',tone:'amber',icon:'\uD83D\uDE9A',title:what,
         meta:'Requested by '+(x.bookedBy||'supervisor')+' \u00B7 no date set', kind:'transfer', ref:x});
-      else if(st==='requested') out.push({g:'attn',tone:'amber',icon:'\uD83D\uDCE9',title:what,
-        meta:'Requested for '+fmt(trDate(x))+' \u00B7 not confirmed by the office yet', kind:'transfer', ref:x});
+      else if(st==='requested') out.push({g:'inbox',tone:'amber',icon:'\uD83D\uDE9A',title:what,
+        meta:'Requested for '+fmt(trDate(x))+' \u00B7 waiting for you to confirm', kind:'transfer', ref:x});
     });
 
     var byProj={};
     subs.forEach(function(x){ (byProj[x._pid]=byProj[x._pid]||[]).push(x); });
     Object.keys(byProj).forEach(function(pid){
-      var bad=seqIssues(byProj[pid]);
       byProj[pid].forEach(function(x){
         var st=subState(x);
         if(st==='today') out.push({g:'today',tone:'red',icon:'\uD83D\uDC77',title:(x.product||'Subcontractor')+' — '+projName(pid),
           meta:'Today \u00B7 '+(x.name||'no company')+' \u00B7 '+(x.status==='booked'?'Booked':'Pending'), kind:'sub', ref:x});
-        else if(st==='request') out.push({g:'attn',tone:'red',icon:'\u26A0\uFE0F',title:(x.product||'Subcontractor')+' — '+projName(pid),
+        else if(st==='request') out.push({g:'inbox',tone:'red',icon:'\uD83D\uDC77',title:(x.product||'Subcontractor')+' — '+projName(pid),
           meta:(x.req.type==='postpone' ? ('Supervisor asked to postpone to '+fmt(x.req.date)) : 'Supervisor asked to cancel')
             +' \u00B7 by '+(x.req.by||'supervisor'), kind:'subreq', ref:x});
-        if(bad[x.id]) out.push({g:'seq',tone:'amber',icon:'\uD83D\uDD00',title:(x.product||'Subcontractor')+' — '+projName(pid),
-          meta:fmt(x.date)+' \u00B7 '+bad[x.id], kind:'sub', ref:x});
-      });
+              });
     });
 
     return out;
@@ -14819,36 +15247,18 @@ function teamEditProjectBooking(pid){
 
   function renderOverview(){
     var alerts=buildAlerts();
-    var t=today();
-    var tests=flat(obj(K_TESTS)), trs=flat(obj(K_TR)), subs=flat(obj(K_SUBS));
-
-    var todayCount=alerts.filter(function(a){ return a.g==='today'; }).length;
-    var attnCount=alerts.filter(function(a){ return a.g==='attn'; }).length;
-    var seqCount=alerts.filter(function(a){ return a.g==='seq'; }).length;
-    var awaitCount=tests.filter(function(x){ return isConfirmed(x) && testState(x)==='await'; }).length;
-    var inboxCount=alerts.filter(function(a){ return a.g==='inbox'; }).length;
-
-    var st=document.getElementById('op-ov-stats');
-    if(st) st.innerHTML=
-      card('amber','To confirm', inboxCount, 'test requests from supervisors')
-     +card('red','Happening today', todayCount, 'tests, transfers and subs')
-     +card('amber','Needs attention', attnCount, 'missing dates, results or confirmations')
-     +card('blue','Awaiting test results', awaitCount, 'test done, result not back yet')
-     +card('green','Sequence issues', seqCount, 'subcontractors booked out of order');
-    if(st) st.style.gridTemplateColumns='repeat(5,1fr)';
-
     var box=document.getElementById('op-ov-groups'); if(!box) return;
-    var html='';
-    html+=group('\uD83D\uDCE5 Waiting for you to confirm', 'amber', alerts.filter(function(a){return a.g==='inbox';}),
-      'No test requests waiting.');
-    html+=group('\uD83D\uDD34 Today \u2014 '+fmt(t), 'red', alerts.filter(function(a){return a.g==='today';}),
-      'Nothing scheduled for today.');
-    html+=group('\uD83D\uDFE0 Needs attention', 'amber', alerts.filter(function(a){return a.g==='attn';}),
-      'Everything is confirmed and up to date.');
-    html+=group('\uD83D\uDD00 Out of sequence', 'blue', alerts.filter(function(a){return a.g==='seq';}),
-      'All subcontractor bookings follow the work sequence.');
-    box.innerHTML=html;
+    // Two lists only: what needs a decision from you, and what is happening
+    // today. Both cover all three areas - tests, machine transfers and subs.
+    box.innerHTML=
+       group('\uD83D\uDCE5 Waiting for you to confirm', 'amber',
+             alerts.filter(function(a){ return a.g==='inbox'; }),
+             'Nothing waiting on you. All caught up.')
+      +group('\uD83D\uDD34 Today \u2014 '+fmt(today()), 'red',
+             alerts.filter(function(a){ return a.g==='today'; }),
+             'Nothing scheduled for today.');
   }
+
   function card(tone,lbl,val,sub){
     return '<div class="ops-stat '+tone+'"><div class="ops-stat-lbl">'+esc(lbl)+'</div>'
       +'<div class="ops-stat-val">'+val+'</div><div class="ops-stat-sub">'+esc(sub)+'</div></div>';
@@ -14878,6 +15288,17 @@ function teamEditProjectBooking(pid){
 
   // ═════════ TESTS ═════════
   window.opCalMove=function(n){ CAL=new Date(CAL.getFullYear(), CAL.getMonth()+n, 1); renderTests(); };
+  window.opCalMonths=function(n){
+    n=parseInt(n,10);
+    if(!isFinite(n)) n=3;                    // nonsense falls back to the default
+    n=Math.max(1, Math.min(4, n));           // anything else is clamped, 0 becomes 1
+    CAL_MONTHS=n;
+    try{ localStorage.setItem('remc_cal_months', String(n)); }catch(e){}
+    document.querySelectorAll('#op-panel-tests .ops-mbtn').forEach(function(b){
+      b.classList.toggle('active', Number(b.getAttribute('data-mn'))===n);
+    });
+    renderTests();
+  };
   window.opCalToday=function(){ CAL=new Date(); renderTests(); };
   window.opTestFilter=function(f){
     TFILTER=f;
@@ -14895,31 +15316,32 @@ function teamEditProjectBooking(pid){
     var list = all.filter(isConfirmed);
     renderBoard(all);
 
-    // calendar
+    // calendar - one block per month, side by side
+    var byDay={};
+    list.forEach(function(x){ if(x.date) (byDay[x.date]=byDay[x.date]||[]).push(x); });
+
     var mLbl=document.getElementById('op-cal-month');
-    if(mLbl) mLbl.textContent=MONFULL[CAL.getMonth()]+' '+CAL.getFullYear();
-    var grid=document.getElementById('op-cal-grid');
-    if(grid){
-      var first=new Date(CAL.getFullYear(), CAL.getMonth(), 1);
-      var offset=(first.getDay()+6)%7;              // week starts Monday
-      var start=new Date(first); start.setDate(first.getDate()-offset);
-      var byDay={};
-      list.forEach(function(x){ if(x.date) (byDay[x.date]=byDay[x.date]||[]).push(x); });
-      var cells='';
-      for(var i=0;i<42;i++){
-        var d=new Date(start); d.setDate(start.getDate()+i);
-        var k=dkey(d), other=(d.getMonth()!==CAL.getMonth()), wk=(d.getDay()===0||d.getDay()===6);
-        var cls='ops-cal-day'+(other?' other':'')+(wk?' wkend':'')+(k===today()?' today':'');
-        var chips=(byDay[k]||[]).map(function(x){
-          return '<div class="ops-chip '+testChipClass(x)+'" onclick="opResOpen(\''+esc(x._pid)+'\',\''+esc(x.id)+'\')" title="'+esc((x.type||'')+' — '+projName(x._pid)+(x.company?(' — '+x.company):''))+'">'
-            +'<div class="ops-chip-proj">'+esc(projName(x._pid))+'</div>'
-            +'<div class="ops-chip-line">'+esc(x.type||'Test')+'</div>'
-            +'<div class="ops-chip-line">'+esc(x.company||'\u2014 no company')+'</div></div>';
-        }).join('');
-        cells+='<div class="'+cls+'"><div class="ops-cal-num"><span>'+d.getDate()+'</span></div>'+chips+'</div>';
-      }
-      grid.innerHTML=cells;
+    if(mLbl){
+      var last=new Date(CAL.getFullYear(), CAL.getMonth()+CAL_MONTHS-1, 1);
+      mLbl.textContent = (CAL_MONTHS===1)
+        ? (MONFULL[CAL.getMonth()]+' '+CAL.getFullYear())
+        : (MONFULL[CAL.getMonth()]+' \u2013 '+MONFULL[last.getMonth()]+' '+last.getFullYear());
     }
+
+    var cals=document.getElementById('op-cals');
+    if(cals){
+      cals.className='ops-cals m'+CAL_MONTHS;
+      var html='';
+      for(var mi=0; mi<CAL_MONTHS; mi++){
+        var mDate=new Date(CAL.getFullYear(), CAL.getMonth()+mi, 1);
+        html+=monthBlock(mDate, byDay);
+      }
+      cals.innerHTML=html;
+    }
+
+    document.querySelectorAll('#op-panel-tests .ops-mbtn').forEach(function(b){
+      b.classList.toggle('active', Number(b.getAttribute('data-mn'))===CAL_MONTHS);
+    });
 
     // list
     var box=document.getElementById('op-test-list'); if(!box) return;
@@ -14963,12 +15385,13 @@ function teamEditProjectBooking(pid){
     var colNew  = incoming.filter(function(x){ return reqStatus(x)==='new'; }).sort(byReceived);
     var colWork = incoming.filter(function(x){ return reqStatus(x)!=='new'; }).sort(byReceived);
     var colRes  = all.filter(awaitingResult).sort(function(a,b){ return String(a.date)<String(b.date)?-1:1; });
+    var incoming2 = incoming;
     box.innerHTML='<div class="ops-board">'
       + col('red','\uD83D\uDCE5 To book', 'Sent by the supervisors. Nobody has acted on these yet.',
             colNew, reqCard, 'Nothing new from the supervisors.', true)
       + col('amber','\u23F3 Pending confirmation', 'We contacted the company \u2014 waiting for them to confirm.',
             colWork, reqCard, 'Nothing waiting on a company.', false)
-      + col('blue','\uD83E\uDDEA Pending result', 'The test day has passed and the result has not come back.',
+      + col('blue','\uD83E\uDDEA Pending result', 'Booked with the company. Waiting for the test and the report.',
             colRes, resultCard, 'No results outstanding.', false)
       + '</div>';
   }
@@ -15007,30 +15430,54 @@ function teamEditProjectBooking(pid){
       +'onchange="opReqCompany(\''+esc(x._pid)+'\',\''+esc(x.id)+'\',this.value)">'
       +(st==='new' ? ''
         : '<input class="ops-inp-sm" style="width:132px" type="date" value="'+esc(x.date||'')+'" '
-          +'onchange="opReqDate(\''+esc(x._pid)+'\',\''+esc(x.id)+'\',this.value)">')
+          +'onchange="opReqDate(\''+esc(x._pid)+'\',\''+esc(x.id)+'\',this.value)" '
+          +'title="The company may not have the day the supervisor asked for. Change it here.">')
       +(st==='new'
         ? '<button class="ops-btn sm primary" onclick="opReqStart(\''+esc(x._pid)+'\',\''+esc(x.id)+'\')">Start booking \u2192</button>'
-        : '<button class="ops-btn sm primary" onclick="opReqConfirm(\''+esc(x._pid)+'\',\''+esc(x.id)+'\')">\u2713 Confirm</button>')
+        : '<button class="ops-btn sm primary" onclick="opReqBooked(\''+esc(x._pid)+'\',\''+esc(x.id)+'\')" '
+          +'title="The company confirmed. Move it to Pending result.">\u2713 Booked</button>')
       +'<button class="ops-btn sm" onclick="opReqDecline(\''+esc(x._pid)+'\',\''+esc(x.id)+'\')">Decline</button>'
       +'</div></div>';
   }
 
   function resultCard(x){
-    var late=Math.max(0, Math.round((parseK(today())-parseK(x.date))/86400000));
+    var t=today(), waiting = x.date && x.date < t;
+    var late = waiting ? Math.max(0, Math.round((parseK(t)-parseK(x.date))/86400000)) : 0;
+    var res = x.result||'';
+    var f = resultFile(x);
+    var pill = res==='pass' ? '<span class="ops-pill ops-p-pass">Passed</span>'
+             : res==='fail' ? '<span class="ops-pill ops-p-fail">Failed</span>'
+             : res==='redo' ? '<span class="ops-pill ops-p-followup">Redo</span>'
+             : waiting ? '<span class="ops-pill ops-p-await">Awaiting result</span>'
+                       : '<span class="ops-pill ops-p-booked">Booked</span>';
+    var when = waiting
+      ? ('Tested '+esc(fmt(x.date))+(late>0?(' \u00B7 <span class="'+(late>3?'ops-late':'')+'">'+late+' day'+(late===1?'':'s')+' ago</span>'):''))
+      : ('Booked for <strong>'+esc(fmt(x.date))+'</strong>'+(x.date?(' \u00B7 '+esc(relDay(x.date))):''));
     return '<div class="ops-card blue">'
-      +'<div class="ops-card-top"><div class="ops-card-title">'+esc(x.type||'Test')+'</div>'
-      +'<span class="ops-pill ops-p-await">Awaiting result</span></div>'
+      +'<div class="ops-card-top"><div class="ops-card-title">'+esc(x.type||'Test')+'</div>'+pill+'</div>'
       +'<div class="ops-card-proj">'+esc(projName(x._pid))
       +(projJob(x._pid)?(' \u00B7 <span style="color:var(--red)">'+esc(projJob(x._pid))+'</span>'):'')+'</div>'
-      +'<div class="ops-card-meta">Done '+esc(fmt(x.date))
-      +(late>0?(' \u00B7 <span class="'+(late>3?'ops-late':'')+'">'+late+' day'+(late===1?'':'s')+' ago</span>'):'')+'<br>'
+      +'<div class="ops-card-meta">'+when+'<br>'
       +(x.company?esc(x.company):'<span style="color:var(--amber);font-weight:700">no company recorded</span>')+'</div>'
       +(x.notes?('<div class="ops-card-note">'+esc(x.notes)+'</div>'):'')
+      +(x.resultNotes?('<div class="ops-card-note">Result: '+esc(x.resultNotes)+'</div>'):'')
+      +(f ? ('<div class="ops-file"><span>\uD83D\uDCCE</span>'
+             +'<span class="ops-file-n" onclick="opFileOpen(\''+esc(x._pid)+'\',\''+esc(x.id)+'\')">'+esc(f.name||'Result file')+'</span>'
+             +'<button class="ops-file-x" title="Remove this file" onclick="opFileRemove(\''+esc(x._pid)+'\',\''+esc(x.id)+'\')">\u2715</button></div>')
+           : '')
       +'<div class="ops-card-ctl">'
-      +'<button class="ops-btn sm primary" onclick="opResOpen(\''+esc(x._pid)+'\',\''+esc(x.id)+'\')">Record result</button>'
-      +'<button class="ops-btn sm" onclick="opTestOpen(\''+esc(x._pid)+'\',\''+esc(x.id)+'\')">Edit</button>'
+      +'<select class="ops-sel" onchange="opResultSet(\''+esc(x._pid)+'\',\''+esc(x.id)+'\',this.value)">'
+        +'<option value=""'+(!res?' selected':'')+'>Result not in yet</option>'
+        +'<option value="pass"'+(res==='pass'?' selected':'')+'>Passed</option>'
+        +'<option value="fail"'+(res==='fail'?' selected':'')+'>Failed</option>'
+        +'<option value="redo"'+(res==='redo'?' selected':'')+'>Failed \u2014 redo the test</option>'
+      +'</select>'
+      +'<button class="ops-btn sm" onclick="opFileAdd(\''+esc(x._pid)+'\',\''+esc(x.id)+'\')">\uD83D\uDCCE '+(f?'Replace report':'Attach report')+'</button>'
+      +'<button class="ops-btn sm" onclick="opResOpen(\''+esc(x._pid)+'\',\''+esc(x.id)+'\')">Notes</button>'
+      +(res ? '<button class="ops-btn sm primary" onclick="opTestDone(\''+esc(x._pid)+'\',\''+esc(x.id)+'\')">\u2713 Done</button>' : '')
       +'</div></div>';
   }
+
   // Every step of a test is written into its own little event list, so the
   // History panel can show the whole story: who asked, when, what the office
   // did, when it was confirmed and when the result landed.
@@ -15106,6 +15553,54 @@ function teamEditProjectBooking(pid){
       function(t){ return (t.type||'Test')+' \u00B7 taken back off the calendar'; });
     opRender();
   };
+  // The company confirmed. Straight into Pending result: the day is set and now
+  // we wait for the test to be done and the report to come back.
+  window.opReqBooked=function(pid,id){
+    var cur=(obj(K_TESTS)[String(pid)]||[]).find(function(x){ return String(x.id)===String(id); });
+    if(!cur) return;
+    if(!cur.date){ alert('Please set the date the company agreed to before marking it Booked.'); return; }
+    if(!String(cur.company||'').trim()
+       && !confirm('No company is set for this test yet.\n\nMark it Booked anyway?')) return;
+    reqTouch(pid,id,function(x){
+      x.office.confirmed=true; x.office.status='booked';
+      x.office.confirmedAt=new Date().toISOString();
+      x.office.confirmedBy=String(window.REMC_ME||'Office');
+      addEvent(x,'confirmed','Booked for '+fmt(x.date)+(x.company?(' with '+x.company):''));
+    },'request_confirmed',function(t){
+      return (t.type||'Test')+' \u00B7 booked for '+fmt(t.date)+(t.company?(' \u00B7 '+t.company):'')
+        +(t.office && t.office.wantedDate && t.office.wantedDate!==t.date ? (' \u00B7 moved from '+fmt(t.office.wantedDate)) : '');
+    });
+    opRender();
+  };
+  // Record what the company came back with, without opening anything.
+  window.opResultSet=function(pid,id,v){
+    reqTouch(pid,id,function(x){
+      x.result=v||'';
+      x.resultAt = v ? new Date().toISOString() : '';
+      addEvent(x,'result', v ? ('Result received: '+(v==='pass'?'Passed':v==='redo'?'Failed, redo needed':'Failed'))
+                             : 'Result cleared');
+    },'result_'+(v||'cleared'), function(t){
+      return (t.type||'Test')+' \u00B7 '+(v==='pass'?'Passed':v==='redo'?'Failed \u2014 redo':v==='fail'?'Failed':'result cleared');
+    });
+    opRender();
+  };
+  // Close the whole thing off. It leaves the board and lives on in the
+  // calendar, the history and the project.
+  window.opTestDone=function(pid,id){
+    var cur=(obj(K_TESTS)[String(pid)]||[]).find(function(x){ return String(x.id)===String(id); });
+    if(!cur) return;
+    if(!cur.result){ alert('Please record the result first: Passed, Failed, or Failed \u2014 redo.'); return; }
+    if(!resultFile(cur) && !confirm('No report file attached.\n\nFinish this test anyway?')) return;
+    reqTouch(pid,id,function(x){
+      x.office.done=true; x.office.status='done';
+      x.office.doneAt=new Date().toISOString();
+      x.office.doneBy=String(window.REMC_ME||'Office');
+      addEvent(x,'done','Test completed and closed off');
+    },'completed', function(t){
+      return (t.type||'Test')+' \u00B7 completed \u00B7 '+(t.result==='pass'?'Passed':t.result==='redo'?'Failed, redo':'Failed');
+    });
+    opRender();
+  };
   window.opReqConfirm=function(pid,id){
     var cur=(obj(K_TESTS)[String(pid)]||[]).find(function(x){ return String(x.id)===String(id); });
     if(!cur) return;
@@ -15135,6 +15630,34 @@ function teamEditProjectBooking(pid){
     if(save(K_TESTS,store)) logIt('test','request_declined',pid,((t&&t.type)||'Test')+' \u00B7 declined by the office');
     opRender();
   };
+
+  function monthBlock(d, byDay){
+    var first=new Date(d.getFullYear(), d.getMonth(), 1);
+    var offset=(first.getDay()+6)%7;              // week starts Monday
+    var start=new Date(first); start.setDate(first.getDate()-offset);
+    var isNow=(d.getFullYear()===new Date().getFullYear() && d.getMonth()===new Date().getMonth());
+    var cells='';
+    for(var i=0;i<42;i++){
+      var c=new Date(start); c.setDate(start.getDate()+i);
+      var k=dkey(c), other=(c.getMonth()!==d.getMonth()), wk=(c.getDay()===0||c.getDay()===6);
+      var cls='ops-cal-day'+(other?' other':'')+(wk?' wkend':'')+(k===today()?' today':'');
+      var chips=(byDay[k]||[]).map(function(x){
+        return '<div class="ops-chip '+testChipClass(x)+'" onclick="opResOpen(\''+esc(x._pid)+'\',\''+esc(x.id)+'\')" '
+          +'title="'+esc((x.type||'')+' \u2014 '+projName(x._pid)+(x.company?(' \u2014 '+x.company):''))+'">'
+          +'<div class="ops-chip-proj">'+esc(projName(x._pid))+'</div>'
+          +'<div class="ops-chip-line">'+esc(x.type||'Test')+'</div>'
+          +'<div class="ops-chip-line">'+esc(x.company||'\u2014 no company')+'</div></div>';
+      }).join('');
+      cells+='<div class="'+cls+'"><div class="ops-cal-num"><span>'+c.getDate()+'</span></div>'+chips+'</div>';
+    }
+    return '<div class="ops-cal">'
+      +'<div class="ops-cal-title'+(isNow?' now':'')+'">'+MONFULL[d.getMonth()]+' '+d.getFullYear()+'</div>'
+      +'<div class="ops-cal-head">'
+      +'<div class="ops-cal-hd">Mon</div><div class="ops-cal-hd">Tue</div><div class="ops-cal-hd">Wed</div>'
+      +'<div class="ops-cal-hd">Thu</div><div class="ops-cal-hd">Fri</div><div class="ops-cal-hd">Sat</div>'
+      +'<div class="ops-cal-hd">Sun</div></div>'
+      +'<div class="ops-cal-grid">'+cells+'</div></div>';
+  }
 
   function fillProjSelect(id, val){
     var s=document.getElementById(id); if(!s) return;
@@ -15575,6 +16098,61 @@ function teamEditProjectBooking(pid){
     opRender();
   };
 
+  // ─────────── Report files ───────────
+  // The file itself goes to cloud storage; only a short link is kept in the
+  // shared document. Putting files in the document itself is what blew the
+  // free data allowance before.
+  window.opFileAdd=function(pid,id){
+    var inp=document.createElement('input');
+    inp.type='file';
+    inp.accept='.pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx';
+    inp.onchange=function(){
+      var f=inp.files && inp.files[0]; if(!f) return;
+      if(f.size > 15*1024*1024){ alert('That file is bigger than 15 MB. Please attach a smaller one.'); return; }
+      opFileUpload(pid,id,f);
+    };
+    inp.click();
+  };
+  function opFileUpload(pid,id,file){
+    var sb=null; try{ sb=window.REMC_SB; }catch(e){}
+    if(!sb || !sb.storage || typeof sb.storage.from!=='function'){
+      var url=prompt('Cloud storage is not available right now.\n\nPaste a link to the report instead (Dropbox, Drive, etc):','');
+      if(!url) return;
+      saveFileRef(pid,id,{ name:file.name, url:String(url).trim(), link:true });
+      return;
+    }
+    var path='test-reports/'+String(pid)+'/'+id+'_'+Date.now()+'_'+file.name.replace(/[^A-Za-z0-9._-]/g,'_');
+    sb.storage.from('remc-media').upload(path, file, { upsert:true, contentType:file.type||'application/octet-stream' })
+      .then(function(res){
+        if(res && res.error){ alert('Could not upload: '+(res.error.message||res.error)); return; }
+        var pub='';
+        try{ pub=sb.storage.from('remc-media').getPublicUrl(path).data.publicUrl; }catch(e){}
+        saveFileRef(pid,id,{ name:file.name, url:pub, path:path });
+      })
+      .catch(function(e){ alert('Could not upload: '+((e&&e.message)||'network')); });
+  }
+  function saveFileRef(pid,id,ref){
+    reqTouch(pid,id,function(x){
+      x.office.file=ref;
+      addEvent(x,'file','Report attached: '+(ref.name||'file'));
+    },'report_attached', function(t){ return (t.type||'Test')+' \u00B7 report attached'; });
+    opRender();
+  }
+  window.opFileOpen=function(pid,id){
+    var t=(obj(K_TESTS)[String(pid)]||[]).find(function(x){ return String(x.id)===String(id); });
+    var f=t && resultFile(t);
+    if(f && f.url) window.open(f.url,'_blank');
+    else alert('This file has no link saved.');
+  };
+  window.opFileRemove=function(pid,id){
+    if(!confirm('Remove the attached report?')) return;
+    reqTouch(pid,id,function(x){
+      delete x.office.file;
+      addEvent(x,'file','Report removed');
+    },'report_removed', function(t){ return (t.type||'Test')+' \u00B7 report removed'; });
+    opRender();
+  };
+
   // ───────── History ─────────
   var EV_DOT = { requested:'red', status:'amber', company:'amber', date:'amber',
                  confirmed:'green', reopened:'amber', result:'blue' };
@@ -15727,14 +16305,14 @@ function teamEditProjectBooking(pid){
       var c=document.createElement('span');
       c.className='nav-count';
       c.textContent=alerts.length;
-      c.title=alerts.length+' item'+(alerts.length===1?'':'s')+' waiting in Operations';
+      c.title=alerts.length+' item'+(alerts.length===1?'':'s')+' waiting in Site Coordination';
       item.appendChild(c);
     }
     if(fresh){
       var n=document.createElement('span');
       n.className='nav-new';
       n.textContent='New';
-      n.title=fresh+' new alert'+(fresh===1?'':'s')+' since you last opened Operations';
+      n.title=fresh+' new alert'+(fresh===1?'':'s')+' since you last opened Site Coordination';
       item.appendChild(n);
     }
   };
