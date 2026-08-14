@@ -383,7 +383,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     <div class="cloud" id="cloud">•</div>
     <div class="who">
       <div class="who-name" id="who-name"></div>
-      <div class="who-sub">Supervisor <span class="build-tag">build 2026-08-06p</span></div>
+      <div class="who-sub">Supervisor <span class="build-tag">build 2026-08-06q</span></div>
     </div>
     <button class="notif-btn" id="notif-btn" onclick="openNotif()" title="Notifications">🔔<span class="notif-badge" id="notif-badge" style="display:none">0</span></button>
     <button class="notif-btn" id="cloud-check-btn" onclick="supCloudCheck()" title="Check the cloud connection">🩺</button>
@@ -810,7 +810,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
   };
   var MATREQS={};
   var MATERIAL_TYPES=['Clean Sand','Dirty Sand','Clay','Rocks','Concrete','Tree','Grass','Rubbish','Mix Material'];
-  window.REMC_BUILD='2026-08-06p';
+  window.REMC_BUILD='2026-08-06q';
   try{ console.log('%c REMC Supervisor \u00B7 build '+window.REMC_BUILD+' ','background:#16a34a;color:#fff;padding:3px 7px;border-radius:4px'); }catch(e){}
   function parseData(){
     function j(k,def){ try{ return JSON.parse(DATA[k]||def); }catch(e){ return JSON.parse(def); } }
@@ -1015,7 +1015,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
       d['__client'] = CLIENT;
       sb.from('remc_state').upsert({ id:WS, data:d, updated_at:new Date().toISOString() }).then(function(r2){
         if(r2 && r2.error){ _cloudFail(); if(cb) cb(r2.error.message||'error'); }
-        else { DATA=d; _cloudOk(); _forgetLastSeen();
+        else { DATA=d; _cloudOk(); _forgetLastSeen(); _recheckSoon();
                try{ refreshOpenScreens(); }catch(e){} if(cb) cb(null); }
       }).catch(function(e){ _cloudFail(); if(cb) cb((e&&e.message)||'network'); });
     }).catch(function(e){ _cloudFail(); if(cb) cb((e&&e.message)||'network'); });
@@ -1120,8 +1120,8 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
       sb.channel('sup_'+WS).on('postgres_changes', {event:'*',schema:'public',table:'remc_state',filter:'id=eq.'+WS}, function(payload){
         var d = payload && payload.new && payload.new.data;
         if(!d || d.__client===CLIENT) return;
-        DATA=d; parseData(); render(); refreshOpenScreens();
-        try{ updateNotifBadge(); notifCheckAndFire(); }catch(e){}
+        DATA=d;
+        applyIncoming();
       }).subscribe();
     }
     startAutoRefresh();
@@ -1129,13 +1129,25 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
 
   // ---- Safety net: realtime can drop (phone sleeps, wifi changes, app in background).
   // Poll for changes and refresh whenever the app comes back to the foreground.
-  var _lastSeen='', _refreshTimer=null, _refreshing=false;
+  var _lastSeen='', _refreshTimer=null, _refreshing=false, _refreshStarted=false;
   // A save from this phone changes the document, so the next check must not
   // mistake our own write for "nothing new" and skip a real update.
   function _forgetLastSeen(){ _lastSeen=''; }
+  // Ask again shortly after saving. Cheap (a timestamp) and it closes the gap
+  // where the office answered while this phone was mid-save.
+  function _recheckSoon(){ setTimeout(function(){ try{ refreshFromCloud(); }catch(e){} }, 1200); }
+  var _refreshWatchdog=null;
   function refreshFromCloud(){
+    try{ _refreshFromCloud(); }catch(e){ _refreshing=false; console.warn('[REMC] check failed', e); }
+  }
+  function _refreshFromCloud(){
     if(_refreshing || !sb || !ME) return;
     _refreshing=true;
+    // If a request never settles - dropped wifi, a phone that slept mid-call -
+    // the busy flag would stay set and checking would stop for good. Always let
+    // go after 12 seconds so the next check can run.
+    clearTimeout(_refreshWatchdog);
+    _refreshWatchdog=setTimeout(function(){ _refreshing=false; }, 12000);
     // Step 1 - ask ONLY for the timestamp. A few bytes, not the whole document.
     sb.from('remc_state').select('updated_at').eq('id',WS).maybeSingle().then(function(res){
       if(!res || res.error){ _refreshing=false; _cloudFail(); return; }
@@ -1149,8 +1161,8 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
         _lastSeen=stamp;
         var d=r2.data.data;
         if(d.__client===CLIENT) return;
-        DATA=d; parseData(); render(); refreshOpenScreens();
-        try{ updateNotifBadge(); notifCheckAndFire(); }catch(e){}
+        DATA=d;
+        applyIncoming();
       }).catch(function(){ _refreshing=false; _cloudFail(); });
     }).catch(function(){ _refreshing=false; _cloudFail(); });
   }
@@ -1164,16 +1176,30 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     }catch(e){}
     return 20000;                               // just the project list: every 20s
   }
-  function _scheduleRefresh(){
-    clearTimeout(_refreshTimer);
-    _refreshTimer=setTimeout(function(){
-      if(!document.hidden) refreshFromCloud();
-      _scheduleRefresh();
-    }, _pollGap());
+  // One steady heartbeat instead of a chain of rescheduled timers. A chain can
+  // break - one throw and the app stops watching the cloud for ever, which is
+  // what was happening. A plain interval cannot break: it just keeps ticking.
+  var _lastCheck=0;
+  function _pollGap(){
+    try{
+      if(document.querySelector('.test-ov.open, .projcal-ov.open, .notif-ov.open')) return 4000;
+    }catch(e){}
+    return 20000;
+  }
+  function _heartbeat(){
+    try{
+      if(document.hidden) return;
+      var gap=_pollGap();
+      if(Date.now()-_lastCheck < gap) return;
+      _lastCheck=Date.now();
+      refreshFromCloud();
+    }catch(e){ console.warn('[REMC] heartbeat', e); }
   }
   function startAutoRefresh(){
-    if(_refreshTimer) return;
-    _scheduleRefresh();
+    if(_refreshStarted) return;
+    _refreshStarted = true;
+    setInterval(_heartbeat, 1000);
+    _heartbeat();
     document.addEventListener('visibilitychange', function(){ if(!document.hidden) refreshFromCloud(); });
     window.addEventListener('focus', refreshFromCloud);
     window.addEventListener('online', refreshFromCloud);
@@ -2299,6 +2325,16 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
   // When fresh data lands from the cloud, any screen the supervisor already has
   // open has to be redrawn too. Without this an approved or declined request
   // kept showing "Waiting" until the screen was closed and reopened.
+  // Each step stands on its own. A failure in one is reported and the rest
+  // still run, so a stale screen can never be caused by an unrelated error.
+  function applyIncoming(){
+    try{ parseData(); }catch(e){ console.warn('[REMC] parseData failed', e); }
+    try{ render(); }catch(e){ console.warn('[REMC] render failed', e); }
+    try{ refreshOpenScreens(); }catch(e){ console.warn('[REMC] screen refresh failed', e); }
+    try{ updateNotifBadge(); }catch(e){ console.warn('[REMC] badge failed', e); }
+    try{ notifCheckAndFire(); }catch(e){ console.warn('[REMC] notify failed', e); }
+  }
+
   function refreshOpenScreens(){
     try{
       var ov=$('mat-ov');
@@ -2410,8 +2446,26 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     MATREQS[MAT_PID]=matList(MAT_PID).filter(function(x){ return String(x.id)!==String(id); });
     pushMaterials(function(){ renderMatList(); render(); });
   };
+  // Redraw only when something actually changed, so this costs nothing when
+  // it is idle and cannot flicker or fight with typing.
+  var _matSig='';
+  function matSignature(){
+    try{ return JSON.stringify(matList(MAT_PID).map(function(m){
+      var o=m.office||{};
+      return [m.id, o.status||'pending', o.date||'', o.reason||'', m.date, m.qty, m.material].join('|');
+    })); }catch(e){ return ''; }
+  }
+  function matWatch(){
+    var ov=$('mat-ov');
+    if(!ov || !ov.classList.contains('open') || !MAT_PID){ _matSig=''; return; }
+    var sig=matSignature();
+    if(sig!==_matSig){ _matSig=sig; renderMatList(); }
+  }
+  setInterval(matWatch, 1500);
+
   function renderMatList(){
     var host=$('mat-list'); if(!host) return;
+    _matSig=matSignature();
     var list=matList(MAT_PID).slice().sort(function(a,b){ return String(a.createdAt)<String(b.createdAt)?1:-1; });
     if(!list.length){
       host.innerHTML='<div class="pc-empty" style="padding:26px 16px;text-align:center;color:var(--muted)">No material requests yet for this job.</div>';

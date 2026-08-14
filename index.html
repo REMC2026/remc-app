@@ -1758,7 +1758,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
         <div>
           <div class="ops-title">Operations</div>
           <div class="ops-sub">Compaction tests, machine transfers and subcontractor bookings
-            <span style="margin-left:8px;font-size:10px;font-weight:700;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:1px 7px">build 2026-08-06p</span>
+            <span style="margin-left:8px;font-size:10px;font-weight:700;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:1px 7px">build 2026-08-06q</span>
           </div>
         </div>
         <div style="display:flex;gap:8px;align-items:center">
@@ -2830,7 +2830,7 @@ function tick() {
 // One-time build check
 if (!window._buildChecked) {
   window._buildChecked = true;
-  window.REMC_BUILD = "2026-08-06p";
+  window.REMC_BUILD = "2026-08-06q";
   console.log("%c REMC v1.1 \u00B7 build " + window.REMC_BUILD + " loaded successfully ", "background:#16a34a;color:white;font-size:14px;padding:4px 8px;border-radius:4px");
 }
 
@@ -12456,6 +12456,9 @@ function teamEditProjectBooking(pid){
   // Poll for changes and refresh whenever the window regains focus, so a device is never left with stale data.
   var _lastSeen = '', _refreshTimer = null, _refreshing = false;
   function refreshFromCloud(){
+    try{ _refreshFromCloud(); }catch(e){ _refreshing=false; console.warn('[REMC Cloud] check failed', e); }
+  }
+  function _refreshFromCloud(){
     if(_refreshing || !sb) return;
     _refreshing = true;
     // Step 1 - ask ONLY for the timestamp. A few bytes, not the whole document.
@@ -12476,9 +12479,27 @@ function teamEditProjectBooking(pid){
       }).catch(function(e){ _refreshing = false; _cloudFail((e&&(e.message||e))||'network'); });
     }).catch(function(e){ _refreshing = false; _cloudFail((e&&(e.message||e))||'network'); });
   }
+  // Steady heartbeat. Checking is only a timestamp, so it can be frequent on the
+  // pages where the office is watching for the supervisors' requests.
+  var _lastCheck = 0;
+  function _pollGap(){
+    try{
+      var p = (typeof _currentPage !== 'undefined') ? _currentPage : '';
+      if(p === 'requests' || p === 'operations') return 4000;   // watching for updates
+    }catch(e){}
+    return 20000;
+  }
+  function _heartbeat(){
+    try{
+      if(document.hidden) return;
+      if(Date.now() - _lastCheck < _pollGap()) return;
+      _lastCheck = Date.now();
+      refreshFromCloud();
+    }catch(e){ console.warn('[REMC Cloud] heartbeat', e); }
+  }
   function startAutoRefresh(){
     if(_refreshTimer) return;
-    _refreshTimer = setInterval(function(){ if(!document.hidden) refreshFromCloud(); }, 20000);
+    _refreshTimer = setInterval(_heartbeat, 1000);
     document.addEventListener('visibilitychange', function(){ if(!document.hidden) refreshFromCloud(); });
     window.addEventListener('focus', refreshFromCloud);
     window.addEventListener('online', refreshFromCloud);
