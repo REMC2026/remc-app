@@ -238,7 +238,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
       <div class="nav-item" onclick="showPage('settings')">⚙️ Settings</div>
     </div>
     <div class="nav-right">
-      <div class="build-tag" id="topbuild" title="Software version. If this does not match the file you uploaded, the browser is still using an old copy - press Ctrl+Shift+R.">build 2026-08-06t</div>
+      <div class="build-tag" id="topbuild" title="Software version. If this does not match the file you uploaded, the browser is still using an old copy - press Ctrl+Shift+R.">build 2026-08-06v</div>
       <div class="nav-date" id="topdate">—</div>
       <button id="remc-logout-btn" onclick="remcLogout()" title="Sign out of this device" style="font-family:Barlow,sans-serif;font-size:12px;font-weight:700;color:var(--mid);background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:5px 12px;cursor:pointer;display:none">Log out</button>
       <div class="nav-vis-btn" id="navVisBtn" onclick="toggleNavVisPanel()" title="Customize menu tabs">
@@ -1653,7 +1653,11 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
   <!-- ══════════════════════ REQUESTS PAGE ══════════════════════ -->
   <style>
   .rq-page{padding:20px 24px;max-width:1600px;margin:0 auto;height:calc(100vh - 56px);overflow-y:auto}
-  .rq-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+  .rq-top{background:var(--surface);border:1px solid var(--border);border-radius:12px;
+    box-shadow:var(--shadow);margin-bottom:18px;overflow:hidden}
+  .rq-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);
+    border-bottom:1px solid var(--border)}
+  .rq-top .ops-stat{border-radius:0;box-shadow:none;border:none;border-left:3px solid var(--border2)}
   .rq-two{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
   .rq-mon{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--shadow)}
   .rq-mon-head{padding:9px 14px;background:var(--surface2);border-bottom:1px solid var(--border);font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;display:flex;align-items:center;gap:8px}
@@ -1682,6 +1686,17 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
   .rq-more{font-size:11px;font-weight:700;color:var(--muted);margin-left:8px}
   .build-tag{font-size:10px;font-weight:700;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:2px 7px;white-space:nowrap}
   .rq-who{display:flex;gap:7px;flex-wrap:wrap}
+  .rq-dest{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;
+    border-radius:5px;padding:1px 7px;margin-top:3px;margin-right:5px;border:1px solid}
+  .rq-dest.proj{background:#eef2ff;color:#4338ca;border-color:#c7d2fe}
+  .rq-dest.tip{background:var(--surface2);color:var(--mid);border-color:var(--border2)}
+  .rq-dest.sale{background:var(--green-light);color:#15803d;border-color:rgba(22,163,74,.25)}
+  .rq-dest.supplier{background:#fefce8;color:#a16207;border-color:#fde68a}
+  .rq-money{font-family:'Barlow Condensed',sans-serif;font-weight:800}
+  .rq-money.cost{color:var(--red)} .rq-money.income{color:var(--green)}
+  .rq-cash{display:flex;gap:18px;flex-wrap:wrap;padding:9px 16px;border-top:1px solid var(--border);
+    background:var(--surface2);font-size:11.5px;font-weight:700;color:var(--mid)}
+  .rq-cash b{font-family:'Barlow Condensed',sans-serif;font-size:15px}
   .rq-who-btn{flex:1;min-width:120px;padding:9px 10px;border:1.5px solid var(--border);background:var(--surface);
     border-radius:9px;font-family:'Barlow',sans-serif;font-size:12.5px;font-weight:700;color:var(--mid);cursor:pointer;transition:all .15s}
   .rq-who-btn:hover{border-color:var(--border2);color:var(--text)}
@@ -1694,7 +1709,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
   .rq-day:hover{background:#f8fafc}
   .rq-day.sel{background:#eff6ff;box-shadow:inset 0 0 0 2px var(--blue)}
   .rq-day.sel.today{box-shadow:inset 0 0 0 2px var(--blue),inset 0 0 0 4px rgba(225,29,29,.25)}
-  .rq-bal{background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);margin-bottom:18px;overflow:hidden}
+  .rq-bal{background:var(--surface);margin-bottom:0;overflow:hidden}
   .rq-bal-head{padding:11px 16px;background:var(--surface2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-wrap:wrap}
   .rq-bal-day{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:800;text-transform:uppercase;letter-spacing:.5px}
   .rq-bal-tag{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;padding:2px 8px;border-radius:5px;background:#fee2e2;color:var(--red);border:1px solid #fecaca}
@@ -1729,6 +1744,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
   .rq-tot{display:flex;gap:16px;flex-wrap:wrap;padding:8px 14px;background:var(--surface2);border-top:1px solid var(--border);font-size:11.5px;font-weight:700;color:var(--mid)}
   .rq-tot b{font-family:'Barlow Condensed',sans-serif;font-size:15px;color:var(--text)}
   @media (max-width:1100px){ .rq-two{grid-template-columns:1fr} .rq-stats{grid-template-columns:1fr 1fr} }
+  @media (max-width:620px){ .rq-stats{grid-template-columns:1fr} }
   </style>
 
   <div class="page" id="page-requests">
@@ -1745,7 +1761,10 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
         </div>
       </div>
 
-      <div class="rq-stats" id="rq-stats"></div>
+      <div class="rq-top">
+        <div class="rq-stats" id="rq-stats"></div>
+        <div id="rq-day"></div>
+      </div>
 
       <div class="ops-toolbar" style="margin-bottom:10px">
         <button class="ops-nav-btn" onclick="rqMove(-1)">&lsaquo;</button>
@@ -1760,7 +1779,6 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
       </div>
 
       <div class="rq-two" id="rq-cals"></div>
-      <div id="rq-day"></div>
       <div id="rq-lists"></div>
     </div>
   </div>
@@ -1777,6 +1795,34 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
             <label>Date it will happen</label>
             <input type="date" id="rq-date">
             <div class="ops-hint" id="rq-date-hint"></div>
+          </div>
+          <div class="proj-form-group" style="grid-column:1/-1">
+            <label id="rq-dest-label">Where is it going?</label>
+            <div class="rq-who">
+              <button type="button" class="rq-who-btn" id="rq-dest-project" onclick="rqDest('project')">&#128193; Another job</button>
+              <button type="button" class="rq-who-btn" id="rq-dest-tip" onclick="rqDest('tip')">&#128465; Disposal site</button>
+              <button type="button" class="rq-who-btn" id="rq-dest-sale" onclick="rqDest('sale')">&#128176; Sold to a company</button>
+              <button type="button" class="rq-who-btn" id="rq-dest-supplier" onclick="rqDest('supplier')">&#127981; Supplier</button>
+              <button type="button" class="rq-who-btn" id="rq-dest-none" onclick="rqDest('')">Not decided yet</button>
+            </div>
+          </div>
+          <div class="proj-form-group rq-dest-proj" style="display:none;grid-column:1/-1">
+            <label>Which job</label>
+            <select id="rq-dest-pid"></select>
+            <div class="ops-hint">Moving material between our own jobs. No money changes hands.</div>
+          </div>
+          <div class="proj-form-group rq-dest-name" style="display:none">
+            <label id="rq-dest-name-label">Place</label>
+            <input id="rq-dest-where" list="rq-dest-list" placeholder="e.g. Red Hill Waste Facility">
+            <datalist id="rq-dest-list"></datalist>
+          </div>
+          <div class="proj-form-group rq-dest-name" style="display:none">
+            <label id="rq-dest-amount-label">Amount</label>
+            <div style="display:flex;align-items:center;gap:6px">
+              <span style="font-weight:800;color:var(--mid)">$</span>
+              <input id="rq-dest-amount" type="number" min="0" step="0.01" placeholder="0.00" style="flex:1">
+            </div>
+            <div class="ops-hint" id="rq-dest-amount-hint"></div>
           </div>
           <div class="proj-form-group" style="grid-column:1/-1">
             <label>Who is doing the cart?</label>
@@ -1823,7 +1869,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
         <div>
           <div class="ops-title">Operations</div>
           <div class="ops-sub">Compaction tests, machine transfers and subcontractor bookings
-            <span style="margin-left:8px;font-size:10px;font-weight:700;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:1px 7px">build 2026-08-06t</span>
+            <span style="margin-left:8px;font-size:10px;font-weight:700;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:1px 7px">build 2026-08-06v</span>
           </div>
         </div>
         <div style="display:flex;gap:8px;align-items:center">
@@ -2895,7 +2941,7 @@ function tick() {
 // One-time build check
 if (!window._buildChecked) {
   window._buildChecked = true;
-  window.REMC_BUILD = "2026-08-06t";
+  window.REMC_BUILD = "2026-08-06v";
   console.log("%c REMC v1.1 \u00B7 build " + window.REMC_BUILD + " loaded successfully ", "background:#16a34a;color:white;font-size:14px;padding:4px 8px;border-radius:4px");
 }
 
@@ -14089,6 +14135,63 @@ function teamEditProjectBooking(pid){
     }catch(e){ console.error('[Requests]', e); }
   };
 
+  // Where the material ends up (or comes from). Four kinds:
+  //   project  - moved to one of our own jobs, no money
+  //   tip      - taken to a disposal site, we pay to dump it
+  //   sale     - sold to another company, they pay us
+  //   supplier - bought in from a quarry or yard, we pay for it
+  var DEST='';
+  window.rqDest=function(t){
+    DEST=t;
+    ['project','tip','sale','supplier','none'].forEach(function(k){
+      var b=document.getElementById('rq-dest-'+k);
+      if(b) b.classList.toggle('on', (k==='none'?'':k)===t);
+    });
+    document.querySelectorAll('.rq-dest-proj').forEach(function(el){ el.style.display=(t==='project')?'':'none'; });
+    var named = (t==='tip'||t==='sale'||t==='supplier');
+    document.querySelectorAll('.rq-dest-name').forEach(function(el){ el.style.display=named?'':'none'; });
+    var nl=document.getElementById('rq-dest-name-label');
+    var al=document.getElementById('rq-dest-amount-label');
+    var ah=document.getElementById('rq-dest-amount-hint');
+    if(t==='tip'){
+      if(nl) nl.textContent='Disposal site';
+      if(al) al.textContent='Cost charged to us';
+      if(ah) ah.textContent='What the tip charges for taking it.';
+    } else if(t==='sale'){
+      if(nl) nl.textContent='Company buying it';
+      if(al) al.textContent='Amount they pay us';
+      if(ah) ah.textContent='What we invoice them for the material.';
+    } else if(t==='supplier'){
+      if(nl) nl.textContent='Supplier';
+      if(al) al.textContent='Cost charged to us';
+      if(ah) ah.textContent='What we pay for the material.';
+    }
+    fillList('rq-dest-list', all().map(function(x){ var d=destOf(x); return d && d.type===t ? d.name : ''; }));
+  };
+  function destOf(m){ return (m.office && m.office.dest) || null; }
+  function money(n){
+    n=Number(n||0); if(!isFinite(n)||!n) return '';
+    return '$'+n.toLocaleString('en-AU',{minimumFractionDigits:2, maximumFractionDigits:2});
+  }
+  function destText(m){
+    var d=destOf(m); if(!d || !d.type) return '';
+    if(d.type==='project') return pName(d.projectId);
+    return d.name || (d.type==='tip'?'Disposal site':d.type==='sale'?'Buyer':'Supplier');
+  }
+  function destHtml(m){
+    var d=destOf(m); if(!d || !d.type) return '';
+    var ic = d.type==='project'?'\uD83D\uDCC1' : d.type==='tip'?'\uD83D\uDDD1'
+           : d.type==='sale'?'\uD83D\uDCB0' : '\uD83C\uDFED';
+    var lbl = m.dir==='import' ? 'from' : 'to';
+    var cash='';
+    if(d.amount){
+      cash = d.type==='sale'
+        ? ' <span class="rq-money income">+'+money(d.amount)+'</span>'
+        : ' <span class="rq-money cost">\u2212'+money(d.amount)+'</span>';
+    }
+    return '<div><span class="rq-dest '+d.type+'">'+ic+' '+esc(lbl)+' '+esc(destText(m))+'</span>'+cash+'</div>';
+  }
+
   // Who is carting the material: one of our own trucks with a driver, or an
   // outside company. Left blank until the office decides.
   var WHO='';
@@ -14186,7 +14289,25 @@ function teamEditProjectBooking(pid){
       +'<div class="rq-bal-cell"><div class="rq-bal-lbl">\u2696 Balance</div>'
         +amount(netM,netT,netCls)+'<div class="rq-bal-sub">'+esc(netSub)+'</div></div>'
       +'</div>'
+      +cashStrip(okDay)
       +'<div class="rq-bal-list">'+rows+'</div></div>';
+  }
+  // What the day costs and what it brings in. Tipping and buying are money out,
+  // selling material is money in. Moving between our own jobs costs nothing here.
+  function cashStrip(items){
+    var cost=0, income=0;
+    items.forEach(function(m){
+      var d=destOf(m); if(!d || !d.amount) return;
+      if(d.type==='sale') income+=Number(d.amount)||0;
+      else if(d.type==='tip' || d.type==='supplier') cost+=Number(d.amount)||0;
+    });
+    if(!cost && !income) return '';
+    var net=income-cost;
+    return '<div class="rq-cash">'
+      +'<span>Money out: <b class="rq-money cost">'+esc(money(cost)||'$0.00')+'</b></span>'
+      +'<span>Money in: <b class="rq-money income">'+esc(money(income)||'$0.00')+'</b></span>'
+      +'<span>Net: <b class="rq-money '+(net<0?'cost':'income')+'">'
+        +(net<0?'\u2212':'+')+esc(money(Math.abs(net))||'$0.00')+'</b></span></div>';
   }
   function fmtLong(k){
     if(!k) return '';
@@ -14254,6 +14375,7 @@ function teamEditProjectBooking(pid){
       +(stt==='approved'&&o.by?('<br>Approved by '+esc(o.by)+' \u00B7 '+esc(when(o.at))):'')
       +(stt==='declined'?('<br>Declined by '+esc(o.by||'Office')+' \u00B7 '+esc(when(o.at))
         +(o.reason?(' \u00B7 '+esc(o.reason)):'')):'')+'</div>'
+      +destHtml(m)
       +carrierHtml(m)
       +(m.comments?('<div class="rq-n">'+esc(m.comments)+'</div>'):'')
       +'</div><div class="rq-act">'
@@ -14292,6 +14414,29 @@ function teamEditProjectBooking(pid){
     fillList('rq-drivers', staff.concat(all().map(function(x){ return (carrierOf(x)||{}).driver; })));
     fillList('rq-companies', all().map(function(x){ return (carrierOf(x)||{}).company; }));
 
+    // destination: which buttons make sense depends on the direction
+    var isIn = (m.dir==='import');
+    var dl=document.getElementById('rq-dest-label');
+    if(dl) dl.textContent = isIn ? 'Where is it coming from?' : 'Where is it going?';
+    var bSale=document.getElementById('rq-dest-sale');
+    var bTip=document.getElementById('rq-dest-tip');
+    var bSup=document.getElementById('rq-dest-supplier');
+    if(bSale) bSale.style.display = isIn ? 'none' : '';
+    if(bTip)  bTip.style.display  = isIn ? 'none' : '';
+    if(bSup)  bSup.style.display  = isIn ? '' : 'none';
+    var ps=document.getElementById('rq-dest-pid');
+    if(ps){
+      ps.innerHTML=projects().slice()
+        .sort(function(a,b){ return String(a.name||'').localeCompare(String(b.name||'')); })
+        .map(function(pp){ return '<option value="'+esc(pp.id)+'">'
+          +esc((pp.jobNumber?(pp.jobNumber+' \u00B7 '):'')+(pp.name||('Project '+pp.id)))+'</option>'; }).join('');
+    }
+    var dd=destOf(m)||{};
+    if(ps && dd.projectId) ps.value=String(dd.projectId);
+    setV('rq-dest-where', dd.name||'');
+    setV('rq-dest-amount', dd.amount||'');
+    rqDest(dd.type||'');
+
     var c=carrierOf(m)||{};
     setV('rq-truck', c.truck||'');
     setV('rq-driver', c.driver||'');
@@ -14301,6 +14446,18 @@ function teamEditProjectBooking(pid){
     document.getElementById('rq-modal').classList.add('open');
   };
   function setV(id,v){ var e=document.getElementById(id); if(e) e.value=(v==null?'':v); }
+  function readDest(){
+    if(DEST==='project'){
+      var pid=String((document.getElementById('rq-dest-pid')||{}).value||'');
+      return { type:'project', projectId:pid };
+    }
+    if(DEST==='tip' || DEST==='sale' || DEST==='supplier'){
+      return { type:DEST,
+        name:String((document.getElementById('rq-dest-where')||{}).value||'').trim(),
+        amount:Number((document.getElementById('rq-dest-amount')||{}).value||0) || 0 };
+    }
+    return { type:'' };
+  }
   function readCarrier(){
     if(WHO==='own'){
       return { type:'own',
@@ -14332,17 +14489,24 @@ function teamEditProjectBooking(pid){
     var d=String((document.getElementById('rq-date')||{}).value||'');
     if(!d){ alert('Please set the date this will happen.'); return; }
     var note=String((document.getElementById('rq-note')||{}).value||'').trim();
+    var dest=readDest();
+    if(dest.type==='project' && !dest.projectId){ alert('Please choose which job it is going to.'); return; }
+    if((dest.type==='tip'||dest.type==='sale'||dest.type==='supplier') && !dest.name){
+      alert('Please name the '+(dest.type==='tip'?'disposal site':dest.type==='sale'?'company buying it':'supplier')+'.');
+      return;
+    }
     var carrier=readCarrier();
     if(carrier.type==='sub' && !carrier.company){ alert('Please say which company is doing it.'); return; }
     if(carrier.type==='own' && !carrier.truck && !carrier.driver
        && !confirm('No truck or driver chosen yet.\n\nApprove anyway?')) return;
     var ref=REF, m=touch(function(x){
       x.office.status='approved'; x.office.date=d; x.office.reason=note;
-      x.office.carrier=carrier;
+      x.office.carrier=carrier; x.office.dest=dest;
       x.office.by=String(window.REMC_ME||'Office'); x.office.at=new Date().toISOString();
     });
     if(m) log('approved', ref.pid, (m.dir==='import'?'IN':'OUT')+' \u00B7 '+(m.material||'')+' \u00B7 '+qty(m)
       +' \u00B7 '+(d!==m.date ? ('moved '+fmt(m.date)+' \u2192 '+fmt(d)) : ('on '+fmt(d)))
+      +(destText(m)?(' \u00B7 '+(m.dir==='import'?'from ':'to ')+destText(m)):'')
       +(carrierText(m)?(' \u00B7 by '+carrierText(m)):'')+(note?(' \u00B7 '+note):''));
     rqClose(); rqRender(); rqMarkSeen();
   };
