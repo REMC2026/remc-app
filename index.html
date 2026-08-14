@@ -1673,7 +1673,37 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
   .rq-sec-head{padding:11px 16px;border-bottom:1px solid var(--border);background:var(--surface2);display:flex;align-items:center;gap:10px}
   .rq-sec-title{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:800;text-transform:uppercase;letter-spacing:.5px}
   .rq-sec-title.amber{color:var(--amber)} .rq-sec-title.green{color:var(--green)} .rq-sec-title.red{color:var(--red)}
-  .rq-sec-body{padding:10px 12px}
+  .rq-sec-body{padding:10px 12px;max-height:320px;overflow-y:auto;overscroll-behavior:contain}
+  .rq-sec-body::-webkit-scrollbar{width:7px}
+  .rq-sec-body::-webkit-scrollbar-track{background:var(--surface2);border-radius:4px}
+  .rq-sec-body::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+  .rq-sec-body::-webkit-scrollbar-thumb:hover{background:var(--muted)}
+  .rq-more{font-size:11px;font-weight:700;color:var(--muted);margin-left:8px}
+  .rq-day{cursor:pointer;transition:background .1s}
+  .rq-day:hover{background:#f8fafc}
+  .rq-day.sel{background:#eff6ff;box-shadow:inset 0 0 0 2px var(--blue)}
+  .rq-day.sel.today{box-shadow:inset 0 0 0 2px var(--blue),inset 0 0 0 4px rgba(225,29,29,.25)}
+  .rq-bal{background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);margin-bottom:18px;overflow:hidden}
+  .rq-bal-head{padding:11px 16px;background:var(--surface2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .rq-bal-day{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:800;text-transform:uppercase;letter-spacing:.5px}
+  .rq-bal-tag{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;padding:2px 8px;border-radius:5px;background:#fee2e2;color:var(--red);border:1px solid #fecaca}
+  .rq-bal-hint{font-size:11px;color:var(--muted);margin-left:auto}
+  .rq-bal-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border)}
+  .rq-bal-cell{background:var(--surface);padding:14px 16px}
+  .rq-bal-lbl{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:5px;display:flex;align-items:center;gap:5px}
+  .rq-bal-val{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:800;line-height:1}
+  .rq-bal-val.in{color:var(--green)} .rq-bal-val.out{color:var(--red)}
+  .rq-bal-val.pos{color:var(--green)} .rq-bal-val.neg{color:var(--red)} .rq-bal-val.zero{color:var(--muted)}
+  .rq-bal-unit{font-size:14px;font-weight:700;color:var(--muted);margin-left:3px}
+  .rq-bal-sub{font-size:11px;color:var(--muted);margin-top:4px}
+  .rq-bal-list{padding:10px 12px;border-top:1px solid var(--border);max-height:240px;overflow-y:auto;overscroll-behavior:contain}
+  .rq-bal-row{display:flex;align-items:center;gap:10px;padding:8px 11px;border:1px solid var(--border);border-radius:8px;margin-bottom:6px;border-left:3px solid var(--border2);cursor:pointer}
+  .rq-bal-row:last-child{margin-bottom:0}
+  .rq-bal-row:hover{border-color:var(--border2);background:var(--surface2)}
+  .rq-bal-row.in{border-left-color:var(--green)} .rq-bal-row.out{border-left-color:var(--red)}
+  .rq-bal-row.pend{border-left-color:var(--muted);border-left-style:dashed}
+  .rq-bal-none{padding:20px;text-align:center;color:var(--muted);font-size:12.5px}
+  @media (max-width:820px){ .rq-bal-grid{grid-template-columns:1fr} }
   .rq-item{display:flex;align-items:flex-start;gap:11px;padding:11px 13px;border:1px solid var(--border);border-radius:9px;margin-bottom:7px;border-left:3px solid var(--border2)}
   .rq-item:last-child{margin-bottom:0}
   .rq-item.pend{border-left-color:var(--amber);background:#fffdf6}
@@ -1719,6 +1749,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
       </div>
 
       <div class="rq-two" id="rq-cals"></div>
+      <div id="rq-day"></div>
       <div id="rq-lists"></div>
     </div>
   </div>
@@ -1758,7 +1789,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
         <div>
           <div class="ops-title">Operations</div>
           <div class="ops-sub">Compaction tests, machine transfers and subcontractor bookings
-            <span style="margin-left:8px;font-size:10px;font-weight:700;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:1px 7px">build 2026-08-06q</span>
+            <span style="margin-left:8px;font-size:10px;font-weight:700;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:1px 7px">build 2026-08-06s</span>
           </div>
         </div>
         <div style="display:flex;gap:8px;align-items:center">
@@ -2830,7 +2861,7 @@ function tick() {
 // One-time build check
 if (!window._buildChecked) {
   window._buildChecked = true;
-  window.REMC_BUILD = "2026-08-06q";
+  window.REMC_BUILD = "2026-08-06s";
   console.log("%c REMC v1.1 \u00B7 build " + window.REMC_BUILD + " loaded successfully ", "background:#16a34a;color:white;font-size:14px;padding:4px 8px;border-radius:4px");
 }
 
@@ -13888,7 +13919,7 @@ function teamEditProjectBooking(pid){
 (function(){
   'use strict';
   var K_MAT='remc_material_requests', K_LOG='remc_activity_log', K_SEEN='remc_rq_seen';
-  var MON=new Date(), REF=null;
+  var MON=new Date(), REF=null, SELDAY=null;
   var MN=['January','February','March','April','May','June','July','August','September','October','November','December'];
   var MS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   var DN=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
@@ -14013,6 +14044,8 @@ function teamEditProjectBooking(pid){
       if(lbl) lbl.textContent=MN[MON.getMonth()]+' \u2013 '+MN[m2.getMonth()]+' '+m2.getFullYear();
       if(cals) cals.innerHTML=month(MON,f)+month(m2,f);
 
+      renderDay(f);
+
       var box=document.getElementById('rq-lists');
       if(box) box.innerHTML=
          section('\u23F3 Waiting for approval','amber',pend,true,'Nothing waiting. All caught up.')
@@ -14021,6 +14054,72 @@ function teamEditProjectBooking(pid){
         +section('\u274C Declined','red',decl,false,'Nothing declined.');
     }catch(e){ console.error('[Requests]', e); }
   };
+
+  window.rqDay=function(k){ SELDAY = (SELDAY===k) ? null : k; rqRender(); };
+
+  // Balance for one day: what comes in, what goes out and the difference.
+  // Declined requests are not counted - they are not going to happen.
+  function renderDay(list){
+    var box=document.getElementById('rq-day'); if(!box) return;
+    var day = SELDAY || today();
+    var onDay = list.filter(function(m){ return status(m)!=='declined' && useDate(m)===day; });
+    var okDay = onDay.filter(function(m){ return status(m)==='approved'; });
+    var waiting = onDay.filter(function(m){ return status(m)==='pending'; });
+
+    var inM=0,outM=0,inT=0,outT=0;
+    okDay.forEach(function(m){
+      var n=Number(m.qty||0); if(!isFinite(n)) n=0;
+      if(m.unit==='t'){ if(m.dir==='import') inT+=n; else outT+=n; }
+      else { if(m.dir==='import') inM+=n; else outM+=n; }
+    });
+    var netM=inM-outM, netT=inT-outT;
+    var netCls = (netM>0||netT>0) ? 'pos' : ((netM<0||netT<0) ? 'neg' : 'zero');
+    var netSub = netM===0 && netT===0 ? 'nothing moving'
+      : (netM>0||netT>0 ? 'more coming in than going out' : 'more going out than coming in');
+
+    function amount(m3, t, cls){
+      if(!m3 && !t) return '<div class="rq-bal-val zero">0<span class="rq-bal-unit">m\u00B3</span></div>';
+      var out='';
+      if(m3) out+='<div class="rq-bal-val '+cls+'">'+(m3>0&&cls==='pos'?'+':'')+m3+'<span class="rq-bal-unit">m\u00B3</span></div>';
+      if(t) out+='<div class="rq-bal-val '+cls+'" style="font-size:20px">'+(t>0&&cls==='pos'?'+':'')+t+'<span class="rq-bal-unit">t</span></div>';
+      return out;
+    }
+
+    var rows = onDay.length ? onDay.map(function(m){
+      var st=status(m), pend=(st==='pending');
+      return '<div class="rq-bal-row '+(pend?'pend':(m.dir==='import'?'in':'out'))+'" '
+        +'onclick="rqOpen(\''+esc(m._pid)+'\',\''+esc(m.id)+'\')">'
+        +'<span style="font-size:15px">'+(m.dir==='import'?'\u2B07':'\u2B06')+'</span>'
+        +'<span style="font-size:12.5px;font-weight:800;min-width:150px">'+esc(m.material||'')+'</span>'
+        +'<span style="font-size:13px;font-weight:800;color:'+(m.dir==='import'?'var(--green)':'var(--red)')+'">'
+        +(m.dir==='import'?'+':'\u2212')+esc(qty(m))+'</span>'
+        +'<span style="font-size:11.5px;color:var(--mid)">'+esc(pName(m._pid))+'</span>'
+        +'<span style="margin-left:auto">'+(pend
+          ? '<span class="ops-pill ops-p-pending">Not approved</span>'
+          : '<span class="ops-pill ops-p-done">Approved</span>')+'</span>'
+        +'</div>';
+    }).join('') : '<div class="rq-bal-none">Nothing moving on this day.</div>';
+
+    box.innerHTML='<div class="rq-bal"><div class="rq-bal-head">'
+      +'<div class="rq-bal-day">'+esc(fmtLong(day))+'</div>'
+      +(day===today()?'<span class="rq-bal-tag">Today</span>':'')
+      +(waiting.length?('<span class="ops-pill ops-p-pending">'+waiting.length+' not approved yet</span>'):'')
+      +'<div class="rq-bal-hint">'+(SELDAY?'Click the day again to go back to today':'Click any day on the calendar')+'</div></div>'
+      +'<div class="rq-bal-grid">'
+      +'<div class="rq-bal-cell"><div class="rq-bal-lbl">\u2B07 Coming in</div>'
+        +amount(inM,inT,'in')+'<div class="rq-bal-sub">'+okDay.filter(function(m){return m.dir==='import';}).length+' delivery(s)</div></div>'
+      +'<div class="rq-bal-cell"><div class="rq-bal-lbl">\u2B06 Going out</div>'
+        +amount(outM,outT,'out')+'<div class="rq-bal-sub">'+okDay.filter(function(m){return m.dir!=='import';}).length+' removal(s)</div></div>'
+      +'<div class="rq-bal-cell"><div class="rq-bal-lbl">\u2696 Balance</div>'
+        +amount(netM,netT,netCls)+'<div class="rq-bal-sub">'+esc(netSub)+'</div></div>'
+      +'</div>'
+      +'<div class="rq-bal-list">'+rows+'</div></div>';
+  }
+  function fmtLong(k){
+    if(!k) return '';
+    var d=pk(k);
+    return DN[d.getDay()]+' '+d.getDate()+' '+MN[d.getMonth()]+' '+d.getFullYear();
+  }
 
   function card(tone,l,v,sub){
     return '<div class="ops-stat '+tone+'"><div class="ops-stat-lbl">'+esc(l)+'</div>'
@@ -14045,11 +14144,12 @@ function teamEditProjectBooking(pid){
       var k=dk(c), other=(c.getMonth()!==d.getMonth());
       var chips=(by[k]||[]).map(function(m){
         var cls = status(m)==='pending' ? 'pend' : (m.dir==='import'?'in':'out');
-        return '<div class="rq-chip '+cls+'" onclick="rqOpen(\''+esc(m._pid)+'\',\''+esc(m.id)+'\')" '
+        return '<div class="rq-chip '+cls+'" onclick="event.stopPropagation();rqOpen(\''+esc(m._pid)+'\',\''+esc(m.id)+'\')" '
           +'title="'+esc((m.dir==='import'?'IN':'OUT')+' \u00B7 '+(m.material||'')+' \u00B7 '+qty(m)+' \u00B7 '+pName(m._pid))+'">'
           +(m.dir==='import'?'\u2B07':'\u2B06')+' '+esc(m.material||'')+'</div>';
       }).join('');
-      cells+='<div class="rq-day'+(other?' other':'')+(k===today()?' today':'')+'">'
+      cells+='<div class="rq-day'+(other?' other':'')+(k===today()?' today':'')
+        +(k===SELDAY?' sel':'')+'" onclick="rqDay(\''+k+'\')">'
         +'<div class="rq-dnum">'+c.getDate()+'</div>'+chips+'</div>';
     }
     return '<div class="rq-mon"><div class="rq-mon-head">'+MN[d.getMonth()]+' '+d.getFullYear()+'</div>'
@@ -14062,6 +14162,7 @@ function teamEditProjectBooking(pid){
       : '<div class="ops-empty">'+esc(empty)+'</div>';
     return '<div class="rq-sec"><div class="rq-sec-head">'
       +'<div class="rq-sec-title '+tone+'">'+title+'</div>'
+      +(items.length>3 ? '<span class="rq-more">scroll for '+(items.length-3)+' more</span>' : '')
       +'<div class="ops-group-count" style="margin-left:auto">'+items.length+'</div></div>'
       +'<div class="rq-sec-body">'+body+'</div>'+(extra||'')+'</div>';
   }
