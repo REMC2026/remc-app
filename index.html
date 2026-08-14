@@ -238,7 +238,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
       <div class="nav-item" onclick="showPage('settings')">⚙️ Settings</div>
     </div>
     <div class="nav-right">
-      <div class="build-tag" id="topbuild" title="Software version. If this does not match the file you uploaded, the browser is still using an old copy - press Ctrl+Shift+R.">build 2026-08-07f</div>
+      <div class="build-tag" id="topbuild" title="Software version. If this does not match the file you uploaded, the browser is still using an old copy - press Ctrl+Shift+R.">build 2026-08-07i</div>
       <div class="nav-date" id="topdate">—</div>
       <button id="remc-logout-btn" onclick="remcLogout()" title="Sign out of this device" style="font-family:Barlow,sans-serif;font-size:12px;font-weight:700;color:var(--mid);background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:5px 12px;cursor:pointer;display:none">Log out</button>
       <div class="nav-vis-btn" id="navVisBtn" onclick="toggleNavVisPanel()" title="Customize menu tabs">
@@ -1450,6 +1450,24 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
   .ops-col-empty{padding:22px 12px;text-align:center;color:var(--muted);font-size:11.5px}
   .ops-late{color:var(--red);font-weight:800}
   .ops-p-booked{background:#e0e7ff;color:#4338ca;border-color:#c7d2fe}
+  .ops-two{display:flex;gap:6px;margin-top:9px;padding-top:8px;border-top:1px dashed var(--border)}
+  .ops-b2{flex:1;padding:8px 6px;border-radius:8px;border:1.5px solid var(--border);background:var(--surface);
+    font-family:'Barlow',sans-serif;font-size:12px;font-weight:800;cursor:pointer;color:var(--mid);
+    transition:all .12s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ops-b2:hover{border-color:var(--border2);color:var(--text)}
+  .ops-b2.go{background:var(--red);border-color:var(--red);color:#fff}
+  .ops-b2.go:hover{background:#c81a1a;border-color:#c81a1a}
+  .ops-b2.pass{background:var(--green);border-color:var(--green);color:#fff}
+  .ops-b2.pass:hover{background:#15803d;border-color:#15803d}
+  .ops-b2.no{color:var(--red);border-color:#fecaca;background:#fff}
+  .ops-b2.no:hover{background:#fee2e2;border-color:var(--red)}
+  .ops-b2.back{color:var(--muted)}
+  .ops-b2.plain{color:var(--mid)}
+  .ops-fields{display:flex;gap:6px;margin-top:8px}
+  .ops-fields .ops-inp-sm{flex:1;min-width:0}
+  .ops-fields .ops-inp-sm[type=date]{flex:0 0 130px}
+  .ops-card{padding:10px 12px}
+  .ops-card-meta{font-size:11px}
   .ops-file{display:flex;align-items:center;gap:7px;margin-top:7px;padding:5px 9px;background:var(--surface2);
     border:1px solid var(--border);border-radius:7px;font-size:11.5px}
   .ops-file-n{flex:1;min-width:0;font-weight:700;color:var(--blue);cursor:pointer;white-space:nowrap;
@@ -1872,7 +1890,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
         <div>
           <div class="ops-title">Site Coordination</div>
           <div class="ops-sub">Booking compaction tests, moving machines between sites and scheduling subcontractors
-            <span style="margin-left:8px;font-size:10px;font-weight:700;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:1px 7px">build 2026-08-07f</span>
+            <span style="margin-left:8px;font-size:10px;font-weight:700;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:1px 7px">build 2026-08-07i</span>
           </div>
         </div>
         <div style="display:flex;gap:8px;align-items:center">
@@ -1915,9 +1933,6 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
         </div>
 
         <div class="ops-legend">
-          <div class="ops-lg"><span class="ops-lg-dot" style="background:var(--blue-light);border-color:rgba(37,99,235,.4)"></span> Booked</div>
-          <div class="ops-lg"><span class="ops-lg-dot" style="background:var(--amber-light);border-color:rgba(217,119,6,.4)"></span> Awaiting result</div>
-          <div class="ops-lg"><span class="ops-lg-dot" style="background:var(--green-light);border-color:rgba(22,163,74,.4)"></span> Passed</div>
           <div class="ops-lg"><span class="ops-lg-dot" style="background:#fee2e2;border-color:#fecaca"></span> Failed</div>
         </div>
 
@@ -2944,7 +2959,7 @@ function tick() {
 // One-time build check
 if (!window._buildChecked) {
   window._buildChecked = true;
-  window.REMC_BUILD = "2026-08-07f";
+  window.REMC_BUILD = "2026-08-07i";
   console.log("%c REMC v1.1 \u00B7 build " + window.REMC_BUILD + " loaded successfully ", "background:#16a34a;color:white;font-size:14px;padding:4px 8px;border-radius:4px");
 }
 
@@ -14323,6 +14338,16 @@ function teamEditProjectBooking(pid){
   function pJob(id){ var p=projects().find(function(x){ return String(x.id)===String(id); });
     return p?(p.jobNumber||''):''; }
 
+  // Works on its own even if the shared guard has not loaded yet.
+  function noPast(v, what){
+    if(!v) return true;
+    try{ if(typeof window.remcNoPastOk==='function') return window.remcNoPastOk(v, what); }catch(e){}
+    var d=new Date();
+    var t=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    if(String(v) >= t) return true;
+    try{ alert((what||'That date')+' cannot be in the past.\n\nPick today or a later day.'); }catch(e){}
+    return false;
+  }
   function all(){
     var st=obj(K_MAT), out=[];
     Object.keys(st).forEach(function(pid){
@@ -14915,6 +14940,7 @@ function teamEditProjectBooking(pid){
   window.rqApprove=function(){
     var d=String((document.getElementById('rq-date')||{}).value||'');
     if(!d){ alert('Please set the date this will happen.'); return; }
+    if(!noPast(d,'The date it will happen')) return;
     var note=String((document.getElementById('rq-note')||{}).value||'').trim();
     var dest=readDest();
     if(dest.type==='project' && !dest.projectId){ alert('Please choose which job it is going to.'); return; }
@@ -15098,6 +15124,16 @@ function teamEditProjectBooking(pid){
     var d=(t.office&&t.office.receivedAt)||t.createdAt||'';
     if(!d) return 0;
     try{ return Math.floor((Date.now()-new Date(d).getTime())/86400000); }catch(e){ return 0; }
+  }
+  // Works on its own even if the shared guard has not loaded yet.
+  function noPast(v, what){
+    if(!v) return true;
+    try{ if(typeof window.remcNoPastOk==='function') return window.remcNoPastOk(v, what); }catch(e){}
+    var d=new Date();
+    var t=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    if(String(v) >= t) return true;
+    try{ alert((what||'That date')+' cannot be in the past.\n\nPick today or a later day.'); }catch(e){}
+    return false;
   }
   function testState(t){
     if(t.result==='pass') return 'pass';
@@ -15410,71 +15446,103 @@ function teamEditProjectBooking(pid){
       +'</div></div>';
   }
 
-  function reqCard(x){
-    var st=reqStatus(x), age=reqAgeDays(x), tone=(st==='new'?'red':'amber');
-    var opts=REQ_PICK.map(function(k){
-      return '<option value="'+k+'"'+(k===st?' selected':'')+'>'+esc(REQ_LABEL[k])+'</option>'; }).join('');
-    return '<div class="ops-card '+tone+'">'
-      +'<div class="ops-card-top"><div class="ops-card-title">'+esc(x.type||'Test')+'</div>'
-      +'<span class="ops-pill '+REQ_PILL[st]+'">'+esc(REQ_LABEL[st])+'</span></div>'
+  // Two buttons per step, nothing else. Anything the office needs to type
+  // (company, agreed date) only shows on the step where it is actually needed.
+  function cardHead(x, pillHtml){
+    return '<div class="ops-card-top"><div class="ops-card-title">'+esc(x.type||'Test')+'</div>'
+      +pillHtml+'</div>'
       +'<div class="ops-card-proj">'+esc(projName(x._pid))
-      +(projJob(x._pid)?(' \u00B7 <span style="color:var(--red)">'+esc(projJob(x._pid))+'</span>'):'')+'</div>'
-      +'<div class="ops-card-meta">Wanted for <strong>'+esc(fmt(x.date))+'</strong>'
-      +(x.date?(' \u00B7 '+esc(relDay(x.date))):'')+'<br>'
-      +'From '+esc(x.bookedBy||'supervisor')+' \u00B7 '+esc(reqSince(x)||'\u2014')
-      +(age>2?(' \u00B7 <span class="ops-late">waiting '+age+'d</span>'):'')+'</div>'
-      +(x.notes?('<div class="ops-card-note">'+esc(x.notes)+'</div>'):'')
-      +'<div class="ops-card-ctl">'
-      +'<select class="ops-sel" onchange="opReqStatus(\''+esc(x._pid)+'\',\''+esc(x.id)+'\',this.value)">'+opts+'</select>'
-      +'<input class="ops-inp-sm" style="width:100%" placeholder="Company doing the test" value="'+esc(x.company||'')+'" '
-      +'onchange="opReqCompany(\''+esc(x._pid)+'\',\''+esc(x.id)+'\',this.value)">'
-      +(st==='new' ? ''
-        : '<input class="ops-inp-sm" style="width:132px" type="date" value="'+esc(x.date||'')+'" '
-          +'onchange="opReqDate(\''+esc(x._pid)+'\',\''+esc(x.id)+'\',this.value)" '
-          +'title="The company may not have the day the supervisor asked for. Change it here.">')
-      +(st==='new'
-        ? '<button class="ops-btn sm primary" onclick="opReqStart(\''+esc(x._pid)+'\',\''+esc(x.id)+'\')">Start booking \u2192</button>'
-        : '<button class="ops-btn sm primary" onclick="opReqBooked(\''+esc(x._pid)+'\',\''+esc(x.id)+'\')" '
-          +'title="The company confirmed. Move it to Pending result.">\u2713 Booked</button>')
-      +'<button class="ops-btn sm" onclick="opReqDecline(\''+esc(x._pid)+'\',\''+esc(x.id)+'\')">Decline</button>'
+      +(projJob(x._pid)?(' \u00B7 <span style="color:var(--red)">'+esc(projJob(x._pid))+'</span>'):'')+'</div>';
+  }
+
+  function reqCard(x){
+    var st=reqStatus(x), age=reqAgeDays(x), isNew=(st==='new');
+    var pid=esc(x._pid), id=esc(x.id);
+
+    if(isNew){
+      // Just arrived. Email the company, or turn it down.
+      return '<div class="ops-card red">'
+        +cardHead(x, '<span class="ops-pill ops-p-new">New</span>')
+        +'<div class="ops-card-meta"><strong>'+esc(fmt(x.date))+'</strong>'
+        +(x.date?(' \u00B7 '+esc(relDay(x.date))):'')
+        +' \u00B7 '+esc(x.bookedBy||'supervisor')
+        +(age>2?(' \u00B7 <span class="ops-late">'+age+'d</span>'):'')+'</div>'
+        +(x.notes?('<div class="ops-card-note">'+esc(x.notes)+'</div>'):'')
+        +'<div class="ops-two">'
+        +'<button class="ops-b2 go" onclick="opReqEmailed(\''+pid+'\',\''+id+'\')">\u2709 Emailed</button>'
+        +'<button class="ops-b2 no" onclick="opReqDecline(\''+pid+'\',\''+id+'\')">Decline</button>'
+        +'</div></div>';
+    }
+
+    // Emailed, waiting on the company. Set who and when, then Booked.
+    return '<div class="ops-card amber">'
+      +cardHead(x, '<span class="ops-pill ops-p-await">Waiting on company</span>')
+      +'<div class="ops-card-meta">'+esc(x.bookedBy||'supervisor')
+      +' asked for '+esc(fmt((x.office&&x.office.wantedDate)||x.date))
+      +(age>2?(' \u00B7 <span class="ops-late">'+age+'d</span>'):'')+'</div>'
+      +'<div class="ops-fields">'
+      +'<input class="ops-inp-sm" placeholder="Company" value="'+esc(x.company||'')+'" '
+        +'onchange="opReqCompany(\''+pid+'\',\''+id+'\',this.value)">'
+      +'<input class="ops-inp-sm" type="date" data-nopast="1" value="'+esc(x.date||'')+'" '
+        +'onchange="opReqDate(\''+pid+'\',\''+id+'\',this.value)" title="Date the company can do it">'
+      +'</div>'
+      +'<div class="ops-two">'
+      +'<button class="ops-b2 back" onclick="opReqBack(\''+pid+'\',\''+id+'\')">\u2190 Back</button>'
+      +'<button class="ops-b2 go" onclick="opReqBooked(\''+pid+'\',\''+id+'\')">Booked \u2192</button>'
       +'</div></div>';
   }
 
   function resultCard(x){
-    var t=today(), waiting = x.date && x.date < t;
-    var late = waiting ? Math.max(0, Math.round((parseK(t)-parseK(x.date))/86400000)) : 0;
-    var res = x.result||'';
-    var f = resultFile(x);
-    var pill = res==='pass' ? '<span class="ops-pill ops-p-pass">Passed</span>'
-             : res==='fail' ? '<span class="ops-pill ops-p-fail">Failed</span>'
-             : res==='redo' ? '<span class="ops-pill ops-p-followup">Redo</span>'
-             : waiting ? '<span class="ops-pill ops-p-await">Awaiting result</span>'
-                       : '<span class="ops-pill ops-p-booked">Booked</span>';
-    var when = waiting
-      ? ('Tested '+esc(fmt(x.date))+(late>0?(' \u00B7 <span class="'+(late>3?'ops-late':'')+'">'+late+' day'+(late===1?'':'s')+' ago</span>'):''))
-      : ('Booked for <strong>'+esc(fmt(x.date))+'</strong>'+(x.date?(' \u00B7 '+esc(relDay(x.date))):''));
-    return '<div class="ops-card blue">'
-      +'<div class="ops-card-top"><div class="ops-card-title">'+esc(x.type||'Test')+'</div>'+pill+'</div>'
-      +'<div class="ops-card-proj">'+esc(projName(x._pid))
-      +(projJob(x._pid)?(' \u00B7 <span style="color:var(--red)">'+esc(projJob(x._pid))+'</span>'):'')+'</div>'
-      +'<div class="ops-card-meta">'+when+'<br>'
-      +(x.company?esc(x.company):'<span style="color:var(--amber);font-weight:700">no company recorded</span>')+'</div>'
-      +(x.notes?('<div class="ops-card-note">'+esc(x.notes)+'</div>'):'')
-      +(x.resultNotes?('<div class="ops-card-note">Result: '+esc(x.resultNotes)+'</div>'):'')
+    var pid=esc(x._pid), id=esc(x.id);
+    var res=x.result||'', f=resultFile(x);
+    var waiting = x.date && x.date < today();
+
+    if(!res){
+      // Booked with the company. Waiting for the report to come back.
+      return '<div class="ops-card blue">'
+        +cardHead(x, waiting ? '<span class="ops-pill ops-p-await">Result due</span>'
+                             : '<span class="ops-pill ops-p-booked">Booked</span>')
+        +'<div class="ops-card-meta"><strong>'+esc(fmt(x.date))+'</strong>'
+        +(x.date?(' \u00B7 '+esc(relDay(x.date))):'')
+        +(x.company?(' \u00B7 '+esc(x.company)):'')+'</div>'
+        // the report sometimes lands before anyone has clicked pass or fail
+        +(f ? ('<div class="ops-file"><span>\uD83D\uDCCE</span>'
+               +'<span class="ops-file-n" onclick="opFileOpen(\''+pid+'\',\''+id+'\')">'+esc(f.name||'Report')+'</span>'
+               +'<button class="ops-file-x" onclick="opFileRemove(\''+pid+'\',\''+id+'\')">\u2715</button></div>') : '')
+        +'<div class="ops-two">'
+        +'<button class="ops-b2 pass" onclick="opResultSet(\''+pid+'\',\''+id+'\',\'pass\')">\u2713 Passed</button>'
+        +'<button class="ops-b2 no" onclick="opResultSet(\''+pid+'\',\''+id+'\',\'fail\')">\u2715 Refused</button>'
+        +'</div></div>';
+    }
+
+    if(res==='pass'){
+      // Passed. Attach the report, or close it off without one.
+      return '<div class="ops-card blue" style="border-left-color:var(--green)">'
+        +cardHead(x, '<span class="ops-pill ops-p-pass">Passed</span>')
+        +'<div class="ops-card-meta">'+esc(fmt(x.date))+(x.company?(' \u00B7 '+esc(x.company)):'')+'</div>'
+        +(f ? ('<div class="ops-file"><span>\uD83D\uDCCE</span>'
+               +'<span class="ops-file-n" onclick="opFileOpen(\''+pid+'\',\''+id+'\')">'+esc(f.name||'Report')+'</span>'
+               +'<button class="ops-file-x" onclick="opFileRemove(\''+pid+'\',\''+id+'\')">\u2715</button></div>') : '')
+        +'<div class="ops-two">'
+        +(f
+          ? '<button class="ops-b2 go" onclick="opTestDone(\''+pid+'\',\''+id+'\')">\u2713 Done</button>'
+          : '<button class="ops-b2 go" onclick="opFileAdd(\''+pid+'\',\''+id+'\')">\uD83D\uDCCE Attach report</button>')
+        +(f
+          ? '<button class="ops-b2 back" onclick="opResultSet(\''+pid+'\',\''+id+'\',\'\')">\u2190 Back</button>'
+          : '<button class="ops-b2 plain" onclick="opTestDone(\''+pid+'\',\''+id+'\')">Done, no file</button>')
+        +'</div></div>';
+    }
+
+    // Refused. Either book it again, or close it off as it is.
+    return '<div class="ops-card blue" style="border-left-color:var(--red)">'
+      +cardHead(x, '<span class="ops-pill ops-p-fail">Refused</span>')
+      +'<div class="ops-card-meta">'+esc(fmt(x.date))+(x.company?(' \u00B7 '+esc(x.company)):'')+'</div>'
       +(f ? ('<div class="ops-file"><span>\uD83D\uDCCE</span>'
-             +'<span class="ops-file-n" onclick="opFileOpen(\''+esc(x._pid)+'\',\''+esc(x.id)+'\')">'+esc(f.name||'Result file')+'</span>'
-             +'<button class="ops-file-x" title="Remove this file" onclick="opFileRemove(\''+esc(x._pid)+'\',\''+esc(x.id)+'\')">\u2715</button></div>')
-           : '')
-      +'<div class="ops-card-ctl">'
-      +'<select class="ops-sel" onchange="opResultSet(\''+esc(x._pid)+'\',\''+esc(x.id)+'\',this.value)">'
-        +'<option value=""'+(!res?' selected':'')+'>Result not in yet</option>'
-        +'<option value="pass"'+(res==='pass'?' selected':'')+'>Passed</option>'
-        +'<option value="fail"'+(res==='fail'?' selected':'')+'>Failed</option>'
-        +'<option value="redo"'+(res==='redo'?' selected':'')+'>Failed \u2014 redo the test</option>'
-      +'</select>'
-      +'<button class="ops-btn sm" onclick="opFileAdd(\''+esc(x._pid)+'\',\''+esc(x.id)+'\')">\uD83D\uDCCE '+(f?'Replace report':'Attach report')+'</button>'
-      +'<button class="ops-btn sm" onclick="opResOpen(\''+esc(x._pid)+'\',\''+esc(x.id)+'\')">Notes</button>'
-      +(res ? '<button class="ops-btn sm primary" onclick="opTestDone(\''+esc(x._pid)+'\',\''+esc(x.id)+'\')">\u2713 Done</button>' : '')
+             +'<span class="ops-file-n" onclick="opFileOpen(\''+pid+'\',\''+id+'\')">'+esc(f.name||'Report')+'</span>'
+             +'<button class="ops-file-x" onclick="opFileRemove(\''+pid+'\',\''+id+'\')">\u2715</button></div>') : '')
+      +'<div class="ops-two">'
+      +'<button class="ops-b2 go" onclick="opTestRedo(\''+pid+'\',\''+id+'\')">\u21BA Do it again</button>'
+      +'<button class="ops-b2 plain" onclick="opTestDone(\''+pid+'\',\''+id+'\')">Close it off</button>'
       +'</div></div>';
   }
 
@@ -15530,6 +15598,7 @@ function teamEditProjectBooking(pid){
     opRender();
   };
   window.opReqDate=function(pid,id,v){
+    if(!noPast(v,'A test date')){ opRender(); return; }
     reqTouch(pid,id,function(x){
       if(!x.office.wantedDate) x.office.wantedDate=x.date;
       if(v!==x.date) addEvent(x,'date','Date moved '+fmt(x.date)+' \u2192 '+fmt(v));
@@ -15551,6 +15620,31 @@ function teamEditProjectBooking(pid){
       delete x.office.confirmedAt; delete x.office.confirmedBy;
       addEvent(x,'reopened','Taken back off the calendar'); },'request_reopened',
       function(t){ return (t.type||'Test')+' \u00B7 taken back off the calendar'; });
+    opRender();
+  };
+  // Step 1 -> 2. We emailed the company; now we wait on them.
+  window.opReqEmailed=function(pid,id){
+    reqTouch(pid,id,function(x){ x.office.status='emailed';
+      addEvent(x,'status','Emailed the company'); },'request_status',
+      function(t){ return (t.type||'Test')+' \u00B7 emailed the company'; });
+    opRender();
+  };
+  // Step 2 -> 1. Sent too early, or the wrong company. Put it back.
+  window.opReqBack=function(pid,id){
+    reqTouch(pid,id,function(x){ x.office.status='new';
+      addEvent(x,'status','Put back to To book'); },'request_status',
+      function(t){ return (t.type||'Test')+' \u00B7 put back to To book'; });
+    opRender();
+  };
+  // Refused. Start the whole thing over: back to To book as a fresh request.
+  window.opTestRedo=function(pid,id){
+    if(!confirm('Book this test again?\n\nIt goes back to To book as a new request.')) return;
+    reqTouch(pid,id,function(x){
+      x.office.confirmed=false; x.office.status='new'; x.office.done=false;
+      delete x.office.confirmedAt; delete x.office.confirmedBy;
+      x.result=''; x.resultAt=''; x.resultNotes='';
+      addEvent(x,'redo','Refused \u2014 booking it again');
+    },'redo', function(t){ return (t.type||'Test')+' \u00B7 refused, booking again'; });
     opRender();
   };
   // The company confirmed. Straight into Pending result: the day is set and now
@@ -15691,6 +15785,7 @@ function teamEditProjectBooking(pid){
         company=getVal('op-test-company').trim(), notes=getVal('op-test-notes').trim();
     if(!pid){ alert('Please choose a project.'); return; }
     if(!type){ alert('Please enter the test type.'); return; }
+    if(!noPast(date,'A test date')) return;
     var store=obj(K_TESTS);
     if(EDIT_TEST){
       var old=(store[EDIT_TEST.pid]||[]).find(function(x){ return String(x.id)===EDIT_TEST.id; });
@@ -15854,6 +15949,7 @@ function teamEditProjectBooking(pid){
     if(!fromId){ alert('Please choose the site the machine is on.'); return; }
     if(!machine){ alert('Please enter which machine.'); return; }
     if(action==='transfer' && !toId){ alert('Please choose the destination site.'); return; }
+    if(!noPast(date,'A transfer date')) return;
     var fp=projById(fromId), tp=toId?projById(toId):null;
     var store=obj(K_TR);
     if(EDIT_TR){
@@ -16009,6 +16105,7 @@ function teamEditProjectBooking(pid){
         date=getVal('op-sub-date'), status=getVal('op-sub-status'), notes=getVal('op-sub-notes').trim();
     if(!pid){ alert('Please choose a project.'); return; }
     if(!product){ alert('Please enter the trade or work.'); return; }
+    if(!noPast(date,'A subcontractor date')) return;
     var store=obj(K_SUBS);
     if(EDIT_SUB){
       var old=(store[EDIT_SUB.pid]||[]).find(function(x){ return String(x.id)===EDIT_SUB.id; });
@@ -16352,6 +16449,60 @@ function teamEditProjectBooking(pid){
     }catch(e){}
   }, 4000);
 
+})();
+</script>
+
+
+<script>
+/* ── No booking in the past ──────────────────────────────────────────────
+   Anything that schedules work is blocked from taking a date before today.
+   Two layers: the date picker itself refuses earlier days, and the value is
+   checked again on change in case it was typed or pasted.
+   Records of things that already happened - dates of birth, start dates,
+   leave already taken - are deliberately left alone.
+──────────────────────────────────────────────────────────────────────── */
+(function(){
+  var NOPAST = ['op-test-date','op-tr-date','op-sub-date','rq-date','pd-sub-date','pm-date','pm-enddate','sch-e-start','sch-e-end','sch-f-start','sch-f-end'];
+  function todayKey(){
+    var d=new Date();
+    return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  }
+  function guarded(el){
+    if(!el || el.type!=='date') return false;
+    if(el.getAttribute('data-nopast')==='1') return true;
+    return NOPAST.indexOf(el.id) >= 0;
+  }
+  function stamp(el){ try{ el.min = todayKey(); }catch(e){} }
+  window.remcNoPastApply = function(root){
+    try{
+      (root||document).querySelectorAll('input[type=date]').forEach(function(el){
+        if(guarded(el)) stamp(el);
+      });
+    }catch(e){}
+  };
+  // a date already in the past is fine to leave alone; only a NEW past date is refused
+  window.remcNoPastOk = function(v, what){
+    if(!v) return true;
+    if(String(v) >= todayKey()) return true;
+    try{ alert((what||'That date')+' cannot be in the past.\n\nPick today or a later day.'); }catch(e){}
+    return false;
+  };
+  document.addEventListener('focusin', function(ev){ if(guarded(ev.target)) stamp(ev.target); }, true);
+  document.addEventListener('change', function(ev){
+    var el=ev.target;
+    if(!guarded(el) || !el.value) return;
+    if(String(el.value) < todayKey()){
+      var was = el.getAttribute('data-was') || '';
+      el.value = was;
+      try{ alert('That date has already passed.\n\nPick today or a later day.'); }catch(e){}
+      ev.stopImmediatePropagation();
+      ev.preventDefault();
+    } else {
+      el.setAttribute('data-was', el.value);
+    }
+  }, true);
+  function boot(){ remcNoPastApply(document); setInterval(function(){ remcNoPastApply(document); }, 3000); }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 })();
 </script>
 

@@ -390,7 +390,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     <div class="obx-badge" id="obx-badge" style="display:none" onclick="obxFlush()"></div>
     <div class="who">
       <div class="who-name" id="who-name"></div>
-      <div class="who-sub">Supervisor <span class="build-tag">build 2026-08-07f</span></div>
+      <div class="who-sub">Supervisor <span class="build-tag">build 2026-08-07i</span></div>
     </div>
     <button class="notif-btn" id="notif-btn" onclick="openNotif()" title="Notifications">🔔<span class="notif-badge" id="notif-badge" style="display:none">0</span></button>
     <button class="notif-btn" id="cloud-check-btn" onclick="supCloudCheck()" title="Check the cloud connection">🩺</button>
@@ -815,9 +815,19 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     try{ localStorage.setItem('remc_sup_backend', m); localStorage.setItem('remc_sup_server_url', u); }catch(e){}
     location.reload();
   };
+  // Works on its own even if the shared guard has not loaded yet.
+  function noPast(v, what){
+    if(!v) return true;
+    try{ if(typeof window.remcNoPastOk==='function') return window.remcNoPastOk(v, what); }catch(e){}
+    var d=new Date();
+    var t=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    if(String(v) >= t) return true;
+    try{ alert((what||'That date')+' cannot be in the past.\n\nPick today or a later day.'); }catch(e){}
+    return false;
+  }
   var MATREQS={};
   var MATERIAL_TYPES=['Clean Sand','Dirty Sand','Clay','Rocks','Concrete','Tree','Grass','Rubbish','Mix Material'];
-  window.REMC_BUILD='2026-08-07f';
+  window.REMC_BUILD='2026-08-07i';
   try{ console.log('%c REMC Supervisor \u00B7 build '+window.REMC_BUILD+' ','background:#16a34a;color:#fff;padding:3px 7px;border-radius:4px'); }catch(e){}
   function parseData(){
     function j(k,def){ try{ return JSON.parse(DATA[k]||def); }catch(e){ return JSON.parse(def); } }
@@ -1467,12 +1477,15 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
   };
   function bkReadRanges(){
     var out=[];
+    // a job cannot be booked to start on a day that has already gone
     var s0=($('f-start')||{}).value||'', e0=($('f-end')||{}).value||'';
     if(s0 && e0) out.push({start:s0, end:e0});
     var rows=document.querySelectorAll('#f-extra-ranges .f-range-row');
     for(var i=0;i<rows.length;i++){
       var s=(rows[i].querySelector('.rr-start')||{}).value||'', e=(rows[i].querySelector('.rr-end')||{}).value||'';
       if(s && e) out.push({start:s, end:e});
+      if(rows[i].querySelector('.rr-start')) rows[i].querySelector('.rr-start').setAttribute('data-nopast','1');
+      if(rows[i].querySelector('.rr-end')) rows[i].querySelector('.rr-end').setAttribute('data-nopast','1');
     }
     out.forEach(function(r){ if(r.end<r.start){ var t=r.start; r.start=r.end; r.end=t; } });
     return out;
@@ -1588,6 +1601,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     var date=($('t-date')||{}).value||'', type=(($('t-type')||{}).value||'').trim(), notes=(($('t-notes')||{}).value||'').trim();
     if(!date){ alert('Please choose a date for the test.'); return; }
     if(!type){ alert('Please choose the type of test.'); return; }
+    if(!noPast(date,'A test date')) return;
     if(!TESTS[String(pid)]) TESTS[String(pid)]=[];
     TESTS[String(pid)].push({
       id:'ct_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
@@ -1687,6 +1701,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     var machine=(($('tr-machine')||{}).value||'').trim();
     if(!machine){ alert('Please enter which machine.'); return; }
     if(!TR_ACTION){ alert('Please choose: remove or transfer.'); return; }
+    if(!noPast((($('tr-date')||{}).value||''),'A transfer date')) return;
     var p=PROJECTS.find(function(x){return String(x.id)===String(pid);});
     var rec={
       id:'mt_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
@@ -2513,6 +2528,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     if(!MAT_DIR){ alert('Please choose first: is the material coming IN or going OUT?'); return; }
     var v=matFormValue();
     if(!v){ alert('Please fill in the material, quantity and date.'); return; }
+    if(!noPast(v.date,'A material date')) return;
     var item={
       id:'mrq_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
       dir:MAT_DIR, material:v.material, qty:v.qty, unit:v.unit, date:v.date, comments:v.comments,
@@ -2933,5 +2949,59 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
 })();
 </script>
 <div id="sup-toast"></div>
+
+<script>
+/* ── No booking in the past ──────────────────────────────────────────────
+   Anything that schedules work is blocked from taking a date before today.
+   Two layers: the date picker itself refuses earlier days, and the value is
+   checked again on change in case it was typed or pasted.
+   Records of things that already happened - dates of birth, start dates,
+   leave already taken - are deliberately left alone.
+──────────────────────────────────────────────────────────────────────── */
+(function(){
+  var NOPAST = ['m-date','t-date','tr-date','f-start','f-end','sub-act-date'];
+  function todayKey(){
+    var d=new Date();
+    return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  }
+  function guarded(el){
+    if(!el || el.type!=='date') return false;
+    if(el.getAttribute('data-nopast')==='1') return true;
+    return NOPAST.indexOf(el.id) >= 0;
+  }
+  function stamp(el){ try{ el.min = todayKey(); }catch(e){} }
+  window.remcNoPastApply = function(root){
+    try{
+      (root||document).querySelectorAll('input[type=date]').forEach(function(el){
+        if(guarded(el)) stamp(el);
+      });
+    }catch(e){}
+  };
+  // a date already in the past is fine to leave alone; only a NEW past date is refused
+  window.remcNoPastOk = function(v, what){
+    if(!v) return true;
+    if(String(v) >= todayKey()) return true;
+    try{ alert((what||'That date')+' cannot be in the past.\n\nPick today or a later day.'); }catch(e){}
+    return false;
+  };
+  document.addEventListener('focusin', function(ev){ if(guarded(ev.target)) stamp(ev.target); }, true);
+  document.addEventListener('change', function(ev){
+    var el=ev.target;
+    if(!guarded(el) || !el.value) return;
+    if(String(el.value) < todayKey()){
+      var was = el.getAttribute('data-was') || '';
+      el.value = was;
+      try{ alert('That date has already passed.\n\nPick today or a later day.'); }catch(e){}
+      ev.stopImmediatePropagation();
+      ev.preventDefault();
+    } else {
+      el.setAttribute('data-was', el.value);
+    }
+  }, true);
+  function boot(){ remcNoPastApply(document); setInterval(function(){ remcNoPastApply(document); }, 3000); }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+})();
+</script>
+
 </body>
 </html>
