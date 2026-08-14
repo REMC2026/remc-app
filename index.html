@@ -238,7 +238,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
       <div class="nav-item" onclick="showPage('settings')">⚙️ Settings</div>
     </div>
     <div class="nav-right">
-      <div class="build-tag" id="topbuild" title="Software version. If this does not match the file you uploaded, the browser is still using an old copy - press Ctrl+Shift+R.">build 2026-08-07k</div>
+      <div class="build-tag" id="topbuild" title="Software version. If this does not match the file you uploaded, the browser is still using an old copy - press Ctrl+Shift+R.">build 2026-08-07l</div>
       <div class="nav-date" id="topdate">—</div>
       <button id="remc-logout-btn" onclick="remcLogout()" title="Sign out of this device" style="font-family:Barlow,sans-serif;font-size:12px;font-weight:700;color:var(--mid);background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:5px 12px;cursor:pointer;display:none">Log out</button>
       <div class="nav-vis-btn" id="navVisBtn" onclick="toggleNavVisPanel()" title="Customize menu tabs">
@@ -1893,7 +1893,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
         <div>
           <div class="ops-title">Site Coordination</div>
           <div class="ops-sub">Booking compaction tests, moving machines between sites and scheduling subcontractors
-            <span style="margin-left:8px;font-size:10px;font-weight:700;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:1px 7px">build 2026-08-07k</span>
+            <span style="margin-left:8px;font-size:10px;font-weight:700;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:1px 7px">build 2026-08-07l</span>
           </div>
         </div>
         <div style="display:flex;gap:8px;align-items:center">
@@ -1950,14 +1950,25 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
       <div class="ops-panel" id="op-panel-transfers">
         <div class="ops-toolbar">
           <button class="ops-btn primary" onclick="opTrOpen()">+ New transfer / removal</button>
-          <div class="ops-filters">
-            <button class="ops-fbtn active" data-rf="open" onclick="opTrFilter('open')">Open</button>
-            <button class="ops-fbtn" data-rf="today" onclick="opTrFilter('today')">Today</button>
-            <button class="ops-fbtn" data-rf="done" onclick="opTrFilter('done')">Done</button>
-            <button class="ops-fbtn" data-rf="all" onclick="opTrFilter('all')">All</button>
+          <div class="ops-cal-bar" style="margin-bottom:0">
+            <button class="ops-nav-btn" onclick="opTrCalMove(-1)">&lsaquo;</button>
+            <div class="ops-cal-month" id="op-tr-month">&mdash;</div>
+            <button class="ops-nav-btn" onclick="opTrCalMove(1)">&rsaquo;</button>
+            <button class="ops-btn sm" onclick="opTrCalToday()">Today</button>
+            <div class="ops-months">
+              <span class="ops-months-lbl">Months</span>
+              <button class="ops-mbtn" data-trmn="1" onclick="opTrCalMonths(1)">1</button>
+              <button class="ops-mbtn" data-trmn="2" onclick="opTrCalMonths(2)">2</button>
+              <button class="ops-mbtn active" data-trmn="3" onclick="opTrCalMonths(3)">3</button>
+              <button class="ops-mbtn" data-trmn="4" onclick="opTrCalMonths(4)">4</button>
+            </div>
           </div>
-          <input class="ops-search" id="op-tr-search" placeholder="Search machine or site…" oninput="opRenderTransfers()" style="margin-left:auto">
+          <input class="ops-search" id="op-tr-search" placeholder="Search machine or site&hellip;"
+            oninput="opRenderTransfers()" style="margin-left:auto">
         </div>
+
+        <div id="op-tr-board"></div>
+        <div class="ops-cals" id="op-tr-cals"></div>
         <div id="op-tr-list"></div>
       </div>
 
@@ -2149,6 +2160,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
         </div>
       </div>
       <div class="proj-modal-footer">
+        <button class="proj-modal-cancel" id="op-tr-undo" onclick="opTrUndoFromBox()" style="margin-right:auto">Undo booking</button>
         <button class="proj-modal-cancel" onclick="opTrClose()">Cancel</button>
         <button class="proj-modal-save" onclick="opTrSave()">Save</button>
       </div>
@@ -2962,7 +2974,7 @@ function tick() {
 // One-time build check
 if (!window._buildChecked) {
   window._buildChecked = true;
-  window.REMC_BUILD = "2026-08-07k";
+  window.REMC_BUILD = "2026-08-07l";
   console.log("%c REMC v1.1 \u00B7 build " + window.REMC_BUILD + " loaded successfully ", "background:#16a34a;color:white;font-size:14px;padding:4px 8px;border-radius:4px");
 }
 
@@ -15006,6 +15018,11 @@ function teamEditProjectBooking(pid){
     'Compaction Test','Kerbing','Road Base','Asphalt / Sealing','Concrete / Footpath','Landscaping','As-Built Survey'];
 
   var TAB='overview', CAL=new Date(), TFILTER='upcoming', RFILTER='open', SFILTER='open';
+  var TRCAL=new Date();
+  var TR_MONTHS=(function(){
+    try{ var n=parseInt(localStorage.getItem('remc_tr_cal_months'),10);
+      return (n>=1 && n<=4) ? n : 3; }catch(e){ return 3; }
+  })();
   // How many months to show side by side, 1 to 4. Remembered between visits.
   var CAL_MONTHS=(function(){
     try{ var n=parseInt(localStorage.getItem('remc_cal_months'),10);
@@ -15906,51 +15923,182 @@ function teamEditProjectBooking(pid){
     if(w) w.style.display = (a==='transfer') ? '' : 'none';
   };
 
-  function renderTransfers(){
-    var list=flat(obj(K_TR));
-    var q=String((document.getElementById('op-tr-search')||{}).value||'').trim().toLowerCase();
-    if(q) list=list.filter(function(x){
-      return ((x.machine||'')+' '+(x.fromName||'')+' '+(x.toName||'')+' '+projName(x._pid)+' '+(x.notes||'')).toLowerCase().indexOf(q)>=0; });
+  // Machine transfers follow the same path as a compaction test:
+  // a request comes in, we email the yard or the float company, they confirm,
+  // and only then does it land on the calendar.
+  function trFromSup(r){
+    if(String(r.au_app||'')==='Mobile') return true;
+    var by=String(r.bookedBy||'');
+    return !!by && by.indexOf('Office')<0;
+  }
+  function trStage(r){
+    var o=(r && r.office) || {};
+    if(o.done || r.status==='done') return 'done';
+    var st=o.status||'';
+    if(st==='booked') return o.confirmed===false ? 'work' : 'booked';
+    if(st==='emailed' || st==='awaiting' || st==='followup') return 'work';
+    if(st==='new') return 'new';
+    // nothing recorded: older office bookings are already arranged
+    if(r.status==='scheduled') return 'booked';
+    return trFromSup(r) ? 'new' : 'booked';
+  }
+  function trAgeDays(r){
+    var d=(r.office&&r.office.receivedAt)||r.createdAt||'';
+    if(!d) return 0;
+    try{ return Math.floor((Date.now()-new Date(d).getTime())/86400000); }catch(e){ return 0; }
+  }
+  function trWhat(r){
+    return (r.machine||'Machine')+(r.action==='transfer' ? (' \u2192 '+(r.toName||'?')) : ' (off site)');
+  }
 
-    var f=list.filter(function(x){
-      var s=trState(x);
-      if(RFILTER==='open') return s!=='done';
-      if(RFILTER==='today') return s==='today';
-      if(RFILTER==='done') return s==='done';
-      return true;
-    }).sort(function(a,b){
-      var ad=trDate(a)||'9999', bd=trDate(b)||'9999';
-      return ad<bd?-1:(ad>bd?1:0);
+  window.opTrCalMove=function(n){ TRCAL=new Date(TRCAL.getFullYear(), TRCAL.getMonth()+n, 1); renderTransfers(); };
+  window.opTrCalToday=function(){ TRCAL=new Date(); renderTransfers(); };
+  window.opTrCalMonths=function(n){
+    n=parseInt(n,10); if(!isFinite(n)) n=3;
+    TR_MONTHS=Math.max(1, Math.min(4, n));
+    try{ localStorage.setItem('remc_tr_cal_months', String(TR_MONTHS)); }catch(e){}
+    renderTransfers();
+  };
+
+  function renderTransfers(){
+    var all=flat(obj(K_TR));
+    var q=String((document.getElementById('op-tr-search')||{}).value||'').trim().toLowerCase();
+    if(q) all=all.filter(function(x){
+      return ((x.machine||'')+' '+(x.fromName||'')+' '+(x.toName||'')+' '+projName(x._pid)+' '+(x.notes||''))
+        .toLowerCase().indexOf(q)>=0; });
+
+    // ---- board: what still needs the office ----
+    var colNew =all.filter(function(x){ return trStage(x)==='new'; })
+      .sort(function(a,b){ return String(b.createdAt||'')<String(a.createdAt||'')?-1:1; });
+    var colWork=all.filter(function(x){ return trStage(x)==='work'; })
+      .sort(function(a,b){ return String(b.createdAt||'')<String(a.createdAt||'')?-1:1; });
+
+    var board=document.getElementById('op-tr-board');
+    if(board){
+      board.innerHTML='<div class="ops-board" style="grid-template-columns:repeat(2,1fr)">'
+        + col('red','\uD83D\uDCE5 To book','Asked for by the supervisors. Nobody has acted on these yet.',
+              colNew, trCardNew, 'Nothing new from the supervisors.', true)
+        + col('amber','\u23F3 Pending confirmation','We contacted the float \u2014 waiting for them to confirm.',
+              colWork, trCardWork, 'Nothing waiting on a float.', false)
+        + '</div>';
+    }
+
+    // ---- calendar: only what is actually booked ----
+    var onCal=all.filter(function(x){ var g=trStage(x); return g==='booked' || g==='done'; });
+    var byDay={};
+    onCal.forEach(function(x){ var k=trDate(x); if(k) (byDay[k]=byDay[k]||[]).push(x); });
+
+    var mLbl=document.getElementById('op-tr-month');
+    if(mLbl){
+      var last=new Date(TRCAL.getFullYear(), TRCAL.getMonth()+TR_MONTHS-1, 1);
+      mLbl.textContent=(TR_MONTHS===1)
+        ? (MONFULL[TRCAL.getMonth()]+' '+TRCAL.getFullYear())
+        : (MONFULL[TRCAL.getMonth()]+' \u2013 '+MONFULL[last.getMonth()]+' '+last.getFullYear());
+    }
+    var cals=document.getElementById('op-tr-cals');
+    if(cals){
+      cals.className='ops-cals m'+TR_MONTHS;
+      var html='';
+      for(var mi=0; mi<TR_MONTHS; mi++){
+        html+=trMonthBlock(new Date(TRCAL.getFullYear(), TRCAL.getMonth()+mi, 1), byDay);
+      }
+      cals.innerHTML=html;
+    }
+    document.querySelectorAll('#op-panel-transfers .ops-mbtn').forEach(function(bt){
+      bt.classList.toggle('active', Number(bt.getAttribute('data-trmn'))===TR_MONTHS);
     });
 
-    var box=document.getElementById('op-tr-list'); if(!box) return;
-    if(!f.length){ box.innerHTML='<div class="ops-empty-big">No machine transfers in this view.</div>'; return; }
-    box.innerHTML='<div class="ops-group"><div class="ops-group-body">'+f.map(function(x){
-      var s=trState(x);
-      var tone = (s==='today'||s==='overdue')?'red' : (s==='nodate'||s==='requested')?'amber' : s==='done'?'grey':'blue';
-      var pill = s==='today'?'<span class="ops-pill ops-p-today">Today</span>'
-        : s==='overdue'?'<span class="ops-pill ops-p-fail">Overdue</span>'
-        : s==='nodate'?'<span class="ops-pill ops-p-grey">No date</span>'
-        : s==='requested'?'<span class="ops-pill ops-p-pending">Requested</span>'
-        : s==='done'?'<span class="ops-pill ops-p-done">Done</span>'
-        : '<span class="ops-pill ops-p-booked">Scheduled</span>';
-      var route = x.action==='transfer'
-        ? esc(x.fromName||projName(x._pid))+' \u2192 <strong>'+esc(x.toName||'?')+'</strong>'
-        : 'Remove from '+esc(x.fromName||projName(x._pid));
-      return '<div class="ops-item '+tone+'"><div class="ops-item-icon">'+(x.action==='transfer'?'\uD83D\uDE9A':'\u21A9\uFE0F')+'</div>'
-        +'<div class="ops-item-main"><div class="ops-item-title">'+esc(x.machine||'Machine')+'</div>'
-        +'<div class="ops-item-meta">'+route+'</div>'
-        +'<div class="ops-item-meta">'+esc(fmt(trDate(x)))+(trDate(x)?(' \u00B7 '+esc(relDay(trDate(x)))):'')
-        +(x.officeDate && x.date && x.officeDate!==x.date ? (' \u00B7 <span style="color:var(--amber);font-weight:700">rescheduled from '+esc(fmt(x.date))+'</span>') : '')
-        +(x.bookedBy?(' \u00B7 requested by '+esc(x.bookedBy)):'')+'</div>'
-        +(x.notes?('<div class="ops-item-note">Site: '+esc(x.notes)+'</div>'):'')
-        +(x.officeNotes?('<div class="ops-item-note">Office: '+esc(x.officeNotes)+'</div>'):'')
-        +'</div><div class="ops-item-actions">'+pill
-        +(s!=='done'?'<button class="ops-btn sm" onclick="opTrDone(\''+esc(x._pid)+'\',\''+esc(x.id)+'\')">Mark done</button>':'')
-        +'<button class="ops-btn sm" onclick="opTrOpen(\''+esc(x._pid)+'\',\''+esc(x.id)+'\')">Edit</button>'
-        +'<button class="ops-btn sm" onclick="opTrDelete(\''+esc(x._pid)+'\',\''+esc(x.id)+'\')">\u2715</button>'
-        +'</div></div>';
-    }).join('')+'</div></div>';
+    // ---- anything booked but overdue still needs chasing ----
+    var late=onCal.filter(function(x){
+      return trStage(x)==='booked' && trDate(x) && trDate(x) < today(); });
+    var box=document.getElementById('op-tr-list');
+    if(box){
+      box.innerHTML = late.length
+        ? ('<div class="ops-group"><div class="ops-group-head">'
+           +'<div class="ops-group-title red">\u26A0 Booked but the day has passed</div>'
+           +'<div class="ops-group-count">'+late.length+'</div></div><div class="ops-group-body">'
+           + late.map(function(x){
+               return '<div class="ops-item red"><div class="ops-item-icon">\uD83D\uDE9A</div>'
+                 +'<div class="ops-item-main"><div class="ops-item-title">'+esc(trWhat(x))+'</div>'
+                 +'<div class="ops-item-meta">'+esc(projName(x._pid))+' \u00B7 was due '+esc(fmt(trDate(x)))
+                 +' ('+esc(relDay(trDate(x)))+')</div></div>'
+                 +'<div class="ops-item-actions">'
+                 +'<button class="ops-btn sm primary" onclick="opTrDone(\''+esc(x._pid)+'\',\''+esc(x.id)+'\')">Mark done</button>'
+                 +'<button class="ops-btn sm" onclick="opTrOpen(\''+esc(x._pid)+'\',\''+esc(x.id)+'\')">Reschedule</button>'
+                 +'</div></div>';
+             }).join('')
+           +'</div></div>')
+        : '';
+    }
+  }
+
+  function trMonthBlock(d, byDay){
+    var first=new Date(d.getFullYear(), d.getMonth(), 1);
+    var offset=(first.getDay()+6)%7;
+    var start=new Date(first); start.setDate(first.getDate()-offset);
+    var isNow=(d.getFullYear()===new Date().getFullYear() && d.getMonth()===new Date().getMonth());
+    var cells='';
+    for(var i=0;i<42;i++){
+      var c=new Date(start); c.setDate(start.getDate()+i);
+      var k=dkey(c), other=(c.getMonth()!==d.getMonth()), wk=(c.getDay()===0||c.getDay()===6);
+      var cls='ops-cal-day'+(other?' other':'')+(wk?' wkend':'')+(k===today()?' today':'');
+      var chips=(byDay[k]||[]).map(function(x){
+        var done=(trStage(x)==='done');
+        return '<div class="ops-chip '+(done?'pass':'booked')+'" '
+          +'onclick="opTrOpen(\''+esc(x._pid)+'\',\''+esc(x.id)+'\')" '
+          +'title="'+esc(trWhat(x)+' \u2014 '+projName(x._pid))+'">'
+          +'<div class="ops-chip-proj">'+esc(x.machine||'Machine')+'</div>'
+          +'<div class="ops-chip-line">'+(x.action==='transfer'?'\u2192 ':'')+esc(x.action==='transfer'?(x.toName||'?'):'Off site')+'</div>'
+          +'<div class="ops-chip-line">'+esc(projName(x._pid))+'</div></div>';
+      }).join('');
+      cells+='<div class="'+cls+'"><div class="ops-cal-num"><span>'+c.getDate()+'</span></div>'+chips+'</div>';
+    }
+    return '<div class="ops-cal">'
+      +'<div class="ops-cal-title'+(isNow?' now':'')+'">'+MONFULL[d.getMonth()]+' '+d.getFullYear()+'</div>'
+      +'<div class="ops-cal-head">'
+      +'<div class="ops-cal-hd">Mon</div><div class="ops-cal-hd">Tue</div><div class="ops-cal-hd">Wed</div>'
+      +'<div class="ops-cal-hd">Thu</div><div class="ops-cal-hd">Fri</div><div class="ops-cal-hd">Sat</div>'
+      +'<div class="ops-cal-hd">Sun</div></div>'
+      +'<div class="ops-cal-grid">'+cells+'</div></div>';
+  }
+
+  function trCardNew(x){
+    var pid=esc(x._pid), id=esc(x.id), age=trAgeDays(x);
+    return '<div class="ops-card red">'
+      +'<div class="ops-card-top"><div class="ops-card-title">'+esc(x.machine||'Machine')+'</div>'
+      +'<span class="ops-pill ops-p-new">New</span></div>'
+      +'<div class="ops-card-proj">'+esc(x.action==='transfer'
+          ? (esc(x.fromName||projName(x._pid))+' \u2192 '+(x.toName||'?'))
+          : ('Off site \u00B7 '+(x.fromName||projName(x._pid))))+'</div>'
+      +'<div class="ops-card-meta">'+esc(fmt(trDate(x)))
+      +(trDate(x)?(' \u00B7 '+esc(relDay(trDate(x)))):'')
+      +' \u00B7 '+esc(x.bookedBy||'supervisor')
+      +(age>2?(' \u00B7 <span class="ops-late">'+age+'d</span>'):'')+'</div>'
+      +(x.notes?('<div class="ops-card-note">'+esc(x.notes)+'</div>'):'')
+      +'<div class="ops-two">'
+      +'<button class="ops-b2 go" onclick="opTrEmailed(\''+pid+'\',\''+id+'\')">\u2709 Emailed</button>'
+      +'<button class="ops-b2 no" onclick="opTrDelete(\''+pid+'\',\''+id+'\')">Decline</button>'
+      +'</div></div>';
+  }
+
+  function trCardWork(x){
+    var pid=esc(x._pid), id=esc(x.id), age=trAgeDays(x);
+    return '<div class="ops-card amber">'
+      +'<div class="ops-card-top"><div class="ops-card-title">'+esc(x.machine||'Machine')+'</div>'
+      +'<span class="ops-pill ops-p-await">Waiting on float</span></div>'
+      +'<div class="ops-card-proj">'+esc(x.action==='transfer'
+          ? (esc(x.fromName||projName(x._pid))+' \u2192 '+(x.toName||'?'))
+          : ('Off site \u00B7 '+(x.fromName||projName(x._pid))))+'</div>'
+      +'<div class="ops-card-meta">'+esc(x.bookedBy||'supervisor')+' asked for '+esc(fmt(x.date))
+      +(age>2?(' \u00B7 <span class="ops-late">'+age+'d</span>'):'')+'</div>'
+      +'<div class="ops-fields">'
+      +'<input class="ops-inp-sm" type="date" data-nopast="1" style="width:100%" value="'+esc(trDate(x))+'" '
+        +'onchange="opTrSetDate(\''+pid+'\',\''+id+'\',this.value)" title="Day the float can do it">'
+      +'</div>'
+      +'<div class="ops-two">'
+      +'<button class="ops-b2 back" onclick="opTrBack(\''+pid+'\',\''+id+'\')">\u2190 Back</button>'
+      +'<button class="ops-b2 go" onclick="opTrBooked(\''+pid+'\',\''+id+'\')">Booked \u2192</button>'
+      +'</div></div>';
   }
 
   window.opTrOpen=function(pid,id){
@@ -15970,7 +16118,15 @@ function teamEditProjectBooking(pid){
     setVal('op-tr-status', r?(r.status||'requested'):'scheduled');
     setVal('op-tr-notes', r?(r.officeNotes||''):'');
     opTrActionChange();
+    var u=document.getElementById('op-tr-undo');
+    if(u) u.style.display = (r && trStage(r)==='booked') ? '' : 'none';
     document.getElementById('op-tr-modal').classList.add('open');
+  };
+  window.opTrUndoFromBox=function(){
+    if(!EDIT_TR) return;
+    var ref={pid:EDIT_TR.pid, id:EDIT_TR.id};
+    opTrClose();
+    opTrUndo(ref.pid, ref.id);
   };
   window.opTrClose=function(){ document.getElementById('op-tr-modal').classList.remove('open'); EDIT_TR=null; };
   window.opTrSave=function(){
@@ -16002,6 +16158,8 @@ function teamEditProjectBooking(pid){
       var rec={ id:nid('mt'), machine:machine, action:action,
         fromId:String(fromId), fromName:fp?(fp.name||('Project '+fromId)):'', fromAddr:(fp&&fp.address)||'',
         date:date, officeDate:date, status:status, officeNotes:notes,
+        office:{ status:(status==='done'?'done':'booked'), confirmed:true, done:(status==='done'),
+                 receivedAt:new Date().toISOString(), confirmedBy:String(window.REMC_ME||'Office') },
         createdAt:new Date().toISOString(), bookedBy:'Office', au_user:String(window.REMC_ME||''), au_app:'PC' };
       if(action==='transfer'){ rec.toId=String(toId); rec.toName=tp?(tp.name||('Project '+toId)):''; rec.toAddr=(tp&&tp.address)||''; }
       store[String(fromId)].push(rec);
@@ -16009,9 +16167,67 @@ function teamEditProjectBooking(pid){
     }
     opTrClose(); opRender();
   };
+  // ---- the same three steps as a compaction test ----
+  window.opTrEmailed=function(pid,id){
+    var store=obj(K_TR), m='';
+    putBack(store,pid,id,function(x){
+      if(!x.office) x.office={ receivedAt:x.createdAt||new Date().toISOString() };
+      x.office.status='emailed'; m=x.machine||'Machine';
+      x.au_eby='Office'; x.au_eat=new Date().toISOString(); x.au_eapp='PC';
+    });
+    if(save(K_TR,store)) logIt('transfer','emailed',pid, m+' \u00B7 emailed the float');
+    opRender();
+  };
+  window.opTrBack=function(pid,id){
+    var store=obj(K_TR), m='';
+    putBack(store,pid,id,function(x){
+      if(!x.office) x.office={};
+      x.office.status='new'; x.office.confirmed=false; m=x.machine||'Machine';
+    });
+    if(save(K_TR,store)) logIt('transfer','reopened',pid, m+' \u00B7 put back to To book');
+    opRender();
+  };
+  window.opTrSetDate=function(pid,id,v){
+    if(!noPast(v,'A transfer date')){ opRender(); return; }
+    var store=obj(K_TR);
+    putBack(store,pid,id,function(x){ x.officeDate=v; });
+    save(K_TR,store);
+    opRender();
+  };
+  window.opTrBooked=function(pid,id){
+    var cur=(obj(K_TR)[String(pid)]||[]).find(function(x){ return String(x.id)===String(id); });
+    if(!cur) return;
+    if(!trDate(cur)){ alert('Please set the day the float can do it before marking it Booked.'); return; }
+    var store=obj(K_TR), m='', d='';
+    putBack(store,pid,id,function(x){
+      if(!x.office) x.office={};
+      x.office.status='booked'; x.office.confirmed=true;
+      x.office.confirmedAt=new Date().toISOString();
+      x.office.confirmedBy=String(window.REMC_ME||'Office');
+      x.status='scheduled';
+      m=x.machine||'Machine'; d=trDate(x);
+      x.au_eby='Office'; x.au_eat=new Date().toISOString(); x.au_eapp='PC';
+    });
+    if(save(K_TR,store)) logIt('transfer','booked',pid, m+' \u00B7 booked for '+fmt(d)
+      +(cur.date && cur.date!==d ? (' \u00B7 moved from '+fmt(cur.date)) : ''));
+    opRender();
+  };
+  window.opTrUndo=function(pid,id){
+    if(!confirm('Take this transfer off the calendar and put it back to Pending confirmation?')) return;
+    var store=obj(K_TR), m='';
+    putBack(store,pid,id,function(x){
+      if(!x.office) x.office={};
+      x.office.status='emailed'; x.office.confirmed=false; x.office.done=false;
+      x.status='requested'; m=x.machine||'Machine';
+    });
+    if(save(K_TR,store)) logIt('transfer','reopened',pid, m+' \u00B7 booking undone');
+    opRender();
+  };
   window.opTrDone=function(pid,id){
     var store=obj(K_TR), m='';
-    putBack(store,pid,id,function(x){ m=x.machine||'Machine'; x.status='done'; x.doneAt=new Date().toISOString(); x.au_eby='Office'; x.au_eapp='PC'; });
+    putBack(store,pid,id,function(x){ m=x.machine||'Machine'; x.status='done';
+      if(!x.office) x.office={}; x.office.status='done'; x.office.done=true;
+      x.doneAt=new Date().toISOString(); x.au_eby='Office'; x.au_eapp='PC'; });
     if(save(K_TR,store)) logIt('transfer','completed',pid,m);
     opRender();
   };
