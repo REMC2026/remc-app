@@ -328,6 +328,10 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
   .pmat{background:#f7fee7;color:#4d7c0f;border:1px solid #d9f99d;border-radius:8px;padding:8px 12px;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer}
   .mdot{color:#dc2626;font-size:15px;line-height:1}
   .mat-carrier{display:inline-block;font-size:11.5px;font-weight:700;background:#eff6ff;color:#1d4ed8;border:1px solid rgba(37,99,235,.22);border-radius:5px;padding:1px 7px;margin-top:3px}
+  .obx-badge{font-size:10px;font-weight:800;background:#fef3c7;color:#92400e;border:1px solid #fde68a;
+    border-radius:6px;padding:3px 8px;margin-left:6px;cursor:pointer;white-space:nowrap}
+  .mat-card.unsent{border-left-color:#92400e;background:#fffdf5}
+  .mat-b-unsent{background:#fef3c7;color:#92400e}
   .mat-carrier.dest{background:#f5f3ff;color:#6d28d9;border-color:#ddd6fe}
   .build-tag{font-size:9px;font-weight:700;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:0 5px;margin-left:4px;white-space:nowrap}
   .mat-fresh{font-size:11px;color:var(--muted);text-align:center;padding:4px 0 10px}
@@ -383,9 +387,10 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
   <div class="topbar">
     <div class="brand"><span class="r">R</span>EMC</div>
     <div class="cloud" id="cloud">•</div>
+    <div class="obx-badge" id="obx-badge" style="display:none" onclick="obxFlush()"></div>
     <div class="who">
       <div class="who-name" id="who-name"></div>
-      <div class="who-sub">Supervisor <span class="build-tag">build 2026-08-07e</span></div>
+      <div class="who-sub">Supervisor <span class="build-tag">build 2026-08-07f</span></div>
     </div>
     <button class="notif-btn" id="notif-btn" onclick="openNotif()" title="Notifications">🔔<span class="notif-badge" id="notif-badge" style="display:none">0</span></button>
     <button class="notif-btn" id="cloud-check-btn" onclick="supCloudCheck()" title="Check the cloud connection">🩺</button>
@@ -812,7 +817,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
   };
   var MATREQS={};
   var MATERIAL_TYPES=['Clean Sand','Dirty Sand','Clay','Rocks','Concrete','Tree','Grass','Rubbish','Mix Material'];
-  window.REMC_BUILD='2026-08-07e';
+  window.REMC_BUILD='2026-08-07f';
   try{ console.log('%c REMC Supervisor \u00B7 build '+window.REMC_BUILD+' ','background:#16a34a;color:#fff;padding:3px 7px;border-radius:4px'); }catch(e){}
   function parseData(){
     function j(k,def){ try{ return JSON.parse(DATA[k]||def); }catch(e){ return JSON.parse(def); } }
@@ -828,6 +833,8 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     PROJDOCS = j('remc_proj_docs','{}'); if(!PROJDOCS || typeof PROJDOCS!=='object' || Array.isArray(PROJDOCS)) PROJDOCS={};
     ACTIVITY = j('remc_activity_log','[]'); if(!Array.isArray(ACTIVITY)) ACTIVITY=[];
     MATREQS  = j('remc_material_requests','{}'); if(!MATREQS || typeof MATREQS!=='object' || Array.isArray(MATREQS)) MATREQS={};
+    // anything still queued on this phone goes back on top of the cloud copy
+    try{ obxApply(); }catch(e){}
     fillMachineList();
   }
   // Fill the Machine dropdown with the machines uploaded in App 1 (falls back to a default list)
@@ -997,15 +1004,18 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
           if(up.office) c.office = up.office;      // the office answer always wins
           return c;
         });
-        // Anything the office (or another phone) added that this one has not seen.
-        // A request the office has already answered is never dropped. One that is
-        // still waiting and is missing here means this phone cancelled it, so it
-        // stays gone.
+        // Anything the office (or another phone) added that this one has not seen
+        // is KEPT. The only things dropped are requests this phone explicitly
+        // cancelled - we know which, because a cancel is queued in the outbox.
+        // Assuming "missing here means cancelled" used to wipe other people's
+        // work whenever this phone had not loaded the list yet.
+        var _del = {};
+        try{ _del = obxDeletedIds(); }catch(e){}
         theirs.forEach(function(x){
           if(!x || !x.id) return;
           if(mine.some(function(m){ return String(m.id) === String(x.id); })) return;
-          var answered = x.office && (x.office.status === 'approved' || x.office.status === 'declined');
-          if(answered) merged[pid].push(x);
+          if(_del[String(x.id)]) return;              // this phone cancelled it
+          merged[pid].push(x);
         });
       });
       // whole projects this phone knows nothing about must survive too
@@ -2345,6 +2355,87 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     try{ updateNotifBadge(); }catch(e){}
   }
 
+  // ─────────── Outbox: nothing is lost ───────────
+  // Saving to this phone is instant and cannot fail. Sending can fail, so it is
+  // retried. The queue lives in the phone's own storage, so it survives the app
+  // being closed, the phone being locked, and the battery going flat.
+  var OBX_KEY='remc_outbox';
+  function obxLoad(){
+    try{ var a=JSON.parse(localStorage.getItem(OBX_KEY)||'[]'); return Array.isArray(a)?a:[]; }
+    catch(e){ return []; }
+  }
+  function obxSave(list){
+    try{ localStorage.setItem(OBX_KEY, JSON.stringify(list.slice(-200))); }catch(e){}
+    obxBadge();
+  }
+  function obxAdd(op){
+    var l=obxLoad();
+    l.push(op);
+    obxSave(l);
+  }
+  function obxRemove(ids){
+    var gone={}; ids.forEach(function(i){ gone[i]=1; });
+    obxSave(obxLoad().filter(function(o){ return !gone[o.id]; }));
+  }
+  function obxCount(){ return obxLoad().length; }
+
+  // Put anything still queued back on top of whatever came from the cloud, so
+  // the supervisor always sees their own work even before it has been sent.
+  function obxApply(){
+    obxLoad().forEach(function(o){
+      if(o.kind!=='material') return;
+      var k=String(o.pid);
+      if(!Array.isArray(MATREQS[k])) MATREQS[k]=[];
+      if(o.act==='add'){
+        if(!MATREQS[k].some(function(x){ return String(x.id)===String(o.item.id); })) MATREQS[k].push(o.item);
+      } else if(o.act==='del'){
+        MATREQS[k]=MATREQS[k].filter(function(x){ return String(x.id)!==String(o.itemId); });
+      }
+    });
+  }
+  function obxDeletedIds(){
+    var ids={};
+    obxLoad().forEach(function(o){ if(o.kind==='material' && o.act==='del') ids[String(o.itemId)]=1; });
+    return ids;
+  }
+  window.obxDeletedIds=obxDeletedIds;
+  function obxPendingIds(){
+    var ids={};
+    obxLoad().forEach(function(o){ if(o.kind==='material' && o.act==='add') ids[String(o.item.id)]=1; });
+    return ids;
+  }
+  function obxBadge(){
+    var el=$('obx-badge'); if(!el) return;
+    var n=obxCount();
+    if(n>0){
+      el.style.display='';
+      el.textContent=n+' waiting to send';
+      el.title='Saved on this phone. It will go up on its own as soon as there is signal.';
+    } else { el.style.display='none'; el.textContent=''; el.title=''; }
+  }
+  var _obxBusy=false;
+  function obxFlush(cb){
+    if(_obxBusy){ if(cb) cb(); return; }
+    var l=obxLoad();
+    if(!l.length){ if(cb) cb(); return; }
+    if(!navigator.onLine || !sb || !ME){ if(cb) cb(); return; }
+    _obxBusy=true;
+    var ids=l.map(function(o){ return o.id; });
+    obxApply();                       // make sure local state holds everything queued
+    pushMaterials(function(err){
+      _obxBusy=false;
+      if(!err){ obxRemove(ids); }     // only clear the queue once the cloud has it
+      try{ renderMatList(); render(); }catch(e){}
+      obxBadge();
+      if(cb) cb(err);
+    });
+  }
+  window.obxFlush=obxFlush;
+  // Try again whenever there is a reason to think it might work now
+  window.addEventListener('online', function(){ obxFlush(); });
+  document.addEventListener('visibilitychange', function(){ if(!document.hidden) obxFlush(); });
+  setInterval(function(){ if(!document.hidden) obxFlush(); }, 15000);
+
   // ─────────── Material requests ───────────
   var MAT_PID=null, MAT_DIR=null;   // nothing is chosen until the supervisor picks
   function matList(pid){ var a=MATREQS[String(pid)]; return Array.isArray(a)?a:[]; }
@@ -2422,22 +2513,32 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     if(!MAT_DIR){ alert('Please choose first: is the material coming IN or going OUT?'); return; }
     var v=matFormValue();
     if(!v){ alert('Please fill in the material, quantity and date.'); return; }
-    if(!MATREQS[MAT_PID]) MATREQS[MAT_PID]=[];
-    MATREQS[MAT_PID].push({
+    var item={
       id:'mrq_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
       dir:MAT_DIR, material:v.material, qty:v.qty, unit:v.unit, date:v.date, comments:v.comments,
       createdAt:new Date().toISOString(), bookedBy:((ME&&ME.name)||(ME&&ME.username)||'Supervisor'),
       au_user:((ME&&ME.username)||''), au_app:'Mobile',
       office:{ status:'pending' }
-    });
+    };
+    // 1. Save on this phone. Instant, cannot fail, survives the app closing.
+    obxAdd({ id:'ob_'+Date.now()+'_'+Math.random().toString(36).slice(2,5),
+             at:new Date().toISOString(), kind:'material', act:'add', pid:MAT_PID, item:item });
+    if(!MATREQS[MAT_PID]) MATREQS[MAT_PID]=[];
+    MATREQS[MAT_PID].push(item);
+
+    // 2. Clear the form and show it straight away - the request is already safe.
+    if($('m-qty')) $('m-qty').value='';
+    if($('m-date')) $('m-date').value='';
+    if($('m-comments')) $('m-comments').value='';
+    updateMatSave(); renderMatList(); render();
+
+    // 3. Now try to send. If it fails, the queue keeps it and retries later.
     var btn=$('m-save'); if(btn){ btn.disabled=true; btn.textContent='Sending…'; }
-    pushMaterials(function(err){
-      if(btn){ btn.textContent='+ Send request'; btn.disabled=false; }
-      if(err){ alert('Could not send the request: '+err+'\n\nIt is saved on this phone and will go up when the connection is back.'); }
-      if($('m-qty')) $('m-qty').value='';
-      if($('m-date')) $('m-date').value='';
-      if($('m-comments')) $('m-comments').value='';
-      updateMatSave(); renderMatList(); render();
+    obxFlush(function(err){
+      if(btn){ btn.textContent = MAT_DIR==='remove' ? '+ Send removal request'
+                               : MAT_DIR==='import' ? '+ Send delivery request' : '+ Send request';
+               btn.disabled=false; }
+      if(err) setCloud('waiting to send','#fef3c7','#92400e');
     });
   };
   window.deleteMaterial=function(id){
@@ -2445,8 +2546,11 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     var m=matList(MAT_PID).find(function(x){ return String(x.id)===String(id); });
     if(m && matStatus(m)!=='pending'){ alert('The office has already answered this one, so it cannot be removed.'); return; }
     if(!confirm('Cancel this material request?')) return;
+    obxAdd({ id:'ob_'+Date.now()+'_'+Math.random().toString(36).slice(2,5),
+             at:new Date().toISOString(), kind:'material', act:'del', pid:MAT_PID, itemId:String(id) });
     MATREQS[MAT_PID]=matList(MAT_PID).filter(function(x){ return String(x.id)!==String(id); });
-    pushMaterials(function(){ renderMatList(); render(); });
+    renderMatList(); render();
+    obxFlush();
   };
   // Redraw only when something actually changed, so this costs nothing when
   // it is idle and cannot flicker or fight with typing.
@@ -2475,6 +2579,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
       return;
     }
     var stampNow=new Date();
+    var _pend=obxPendingIds();
     host.innerHTML='<div class="mat-fresh">Updated '
       +String(stampNow.getHours()).padStart(2,'0')+':'+String(stampNow.getMinutes()).padStart(2,'0')
       +':'+String(stampNow.getSeconds()).padStart(2,'0')
@@ -2484,9 +2589,13 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
       var when = (st==='approved' && o.date && o.date!==m.date)
         ? ('<span class="mat-moved">Moved to '+esc(_dLabel(o.date))+'</span>')
         : esc(_dLabel(m.date));
-      return '<div class="mat-card '+st+'">'
+      var notSent=!!_pend[String(m.id)];
+      return '<div class="mat-card '+st+(notSent?' unsent':'')+'">'
         +'<div class="mat-top"><div class="mat-name">'+(m.dir==='import'?'\u2B07 IN':'\u2B06 OUT')+' \u00B7 '+esc(m.material)+'</div>'
-        +'<span class="mat-badge mat-b-'+st+'">'+(st==='pending'?'Waiting':st==='approved'?'Approved':'Declined')+'</span></div>'
+        +(notSent
+          ? '<span class="mat-badge mat-b-unsent">\u23F1 Saved, not sent</span>'
+          : '<span class="mat-badge mat-b-'+st+'">'+(st==='pending'?'Waiting':st==='approved'?'Approved':'Declined')+'</span>')
+        +'</div>'
         +'<div class="mat-meta"><strong>'+esc(matQtyText(m))+'</strong><br>'+when
         +(st==='approved'&&matDest(m)?('<br><span class="mat-carrier dest">'+esc(matDest(m))+'</span>'):'')
         +(st==='approved'&&matCarrier(m)?('<br><span class="mat-carrier">'+esc(matCarrier(m))+'</span>'):'')
@@ -2750,6 +2859,8 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     try{ sessionStorage.setItem('remc_sup_me', JSON.stringify(ME)); }catch(e){}
     try{ if(!_lsGet(_notifSeenKey())) _lsSet(_notifSeenKey(), new Date().toISOString()); }catch(e){}
     updateWarn();
+    try{ obxApply(); obxBadge(); }catch(e){}
+    try{ obxFlush(); }catch(e){}      // send anything left over from last time
     subscribe();
     goHome();
     try{ _detectChanges(); }catch(e){}
