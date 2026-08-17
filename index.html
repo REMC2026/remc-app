@@ -13970,6 +13970,7 @@ function teamEditProjectBooking(pid){
         if(!r2 || r2.error || !r2.data || !r2.data.data) return;
         _lastSeen = stamp;
         var d = r2.data.data;
+        try{ window.remcNoteDoc(stamp, d); }catch(e){}
         if(d.__client === CLIENT_ID) return;           // our own write
         applyRemoteAndRender(d);
         try{ scheduleBackup(); }catch(e){}
@@ -14189,7 +14190,61 @@ function teamEditProjectBooking(pid){
       });
     });
   };
+  // The last full document we read, and the timestamp it carried.
+  var _docCache = { stamp:'', data:null };
+  window.remcNoteDoc = function(stamp, data){
+    if(stamp && data && typeof data==='object' && !Array.isArray(data)){
+      _docCache.stamp = String(stamp);
+      _docCache.data = data;
+    }
+  };
+
   function _remcUpsertNow(k, valueStr, cb){
+    // Check the timestamp first. If nothing has moved since we last looked,
+    // there is no reason to download the whole thing again.
+    if(_docCache.stamp && _docCache.data){
+      sb.from('remc_state').select('updated_at').eq('id', WS).maybeSingle().then(function(t){
+        var stamp = (t && !t.error && t.data) ? String(t.data.updated_at||'') : '';
+        if(stamp && stamp === _docCache.stamp){
+          _remcUpsertWith(k, valueStr, _docCache.data, cb);   // our copy is current
+        } else {
+          _remcUpsertFull(k, valueStr, cb);                   // someone else changed it
+        }
+      }).catch(function(){ _remcUpsertFull(k, valueStr, cb); });
+      return;
+    }
+    _remcUpsertFull(k, valueStr, cb);
+  }
+
+  // Put the key into a document we already hold, and send it.
+  function _remcUpsertWith(k, valueStr, data, cb){
+    try{
+      var copy = {};
+      for(var key in data){ copy[key] = data[key]; }
+      copy[k] = valueStr;
+      copy['__client'] = CLIENT_ID;
+      var mine = new Date().toISOString();
+      sb.from('remc_state')
+        .upsert({ id: WS, data: copy, updated_at: mine })
+        .then(function(r){
+          if(r && r.error){
+            // fall back to the careful path rather than lose the change
+            _remcUpsertFull(k, valueStr, cb);
+            return;
+          }
+          _cloudOk();
+          // We know exactly what is up there now, and when. If another device
+          // writes after this, the server timestamp will no longer match and a
+          // proper read happens automatically.
+          _docCache.data = copy;
+          _docCache.stamp = mine;
+          if(cb) cb(null);
+        })
+        .catch(function(){ _remcUpsertFull(k, valueStr, cb); });
+    }catch(e){ _remcUpsertFull(k, valueStr, cb); }
+  }
+
+  function _remcUpsertFull(k, valueStr, cb){
     try{
       sb.from('remc_state').select('data').eq('id', WS).maybeSingle().then(function(res){
         // A read that failed must NEVER turn into a write. Writing here would
@@ -18124,10 +18179,17 @@ function teamEditProjectBooking(pid){
     return el;
   }
 
-  var hideTimer=null;
+  var hideTimer=null, slowTimer=null, showing=false;
+  var SLOW_AFTER=2000;   // only speak up if it is taking longer than this
   function paint(){
     try{
       var n=pending().length, p=percent();
+
+      // start counting the moment something is pending; stop as soon as it clears
+      if(n>0 && !showing && slowTimer===null){
+        slowTimer=setTimeout(function(){ slowTimer=null; showing=true; paint(); }, SLOW_AFTER);
+      }
+      if(n===0){ clearTimeout(slowTimer); slowTimer=null; }
 
       var tag=document.getElementById('remc-saving');
       if(tag){
@@ -18145,6 +18207,7 @@ function teamEditProjectBooking(pid){
       var ico=document.getElementById('remc-save-ico');
 
       clearTimeout(hideTimer);
+      if(n>0 && !showing){ el.style.display='none'; return; }   // quick save: stay quiet
       if(n>0){
         el.style.display='';
         el.style.borderLeftColor='#d97706';
@@ -18155,15 +18218,19 @@ function teamEditProjectBooking(pid){
         if(sub) sub.textContent = navigator.onLine
           ? 'Please wait before closing the page.'
           : 'No connection. It is safe on this computer and will go up when you are back online.';
-      } else if(el.style.display!=='none'){
-        // brief green tick, so it is obvious it finished
+      } else if(showing && el.style.display!=='none'){
+        // brief green tick, but only if we bothered the person in the first place
+        showing=false;
         el.style.borderLeftColor='#16a34a';
         if(bar){ bar.style.width='100%'; bar.style.background='#16a34a'; }
         if(pct){ pct.textContent='100%'; pct.style.color='#16a34a'; }
         if(ico) ico.textContent='\u2713';
         if(txt) txt.textContent='All changes saved';
         if(sub) sub.textContent='Safe to close the page.';
-        hideTimer=setTimeout(function(){ el.style.display='none'; }, 1800);
+        hideTimer=setTimeout(function(){ el.style.display='none'; }, 1500);
+      } else {
+        showing=false;
+        el.style.display='none';
       }
     }catch(e){}
   }
