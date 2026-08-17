@@ -13719,6 +13719,10 @@ function teamEditProjectBooking(pid){
     finally { _applying = false; try{ markSnapshotClean(); }catch(e){} }
   }
   function setStatus(state){
+    // Whatever path got us here, "saved" means the cloud has it.
+    if(state==='saved'){
+      try{ if(typeof window.remcSaveConfirmed==='function') window.remcSaveConfirmed(); }catch(e){}
+    }
     var el = document.getElementById('remc-cloud-badge'); if(!el) return;
     el.style.display='';
     var map = { saving:['Saving…','#fef3c7','#92400e'], saved:['Synced ☁️','#dcfce7','#15803d'], error:['Offline','#fee2e2','#dc2626'], loading:['Loading…','#eff6ff','#1d4ed8'], reconnecting:['Reconnecting…','#fef3c7','#92400e'] };
@@ -18199,17 +18203,15 @@ function teamEditProjectBooking(pid){
     return el;
   }
 
-  var hideTimer=null, slowTimer=null, showing=false;
-  var SLOW_AFTER=2000;   // only speak up if it is taking longer than this
+  var hideTimer=null, showing=false;
+  // The card is not something to watch while working. It only appears if the
+  // page is being closed with a change still on its way.
+  window.remcShowSaveCard=function(){ showing=true; paint(); };
   function paint(){
     try{
       var n=pending().length, p=percent();
 
-      // start counting the moment something is pending; stop as soon as it clears
-      if(n>0 && !showing && slowTimer===null){
-        slowTimer=setTimeout(function(){ slowTimer=null; showing=true; paint(); }, SLOW_AFTER);
-      }
-      if(n===0){ clearTimeout(slowTimer); slowTimer=null; }
+
 
       var tag=document.getElementById('remc-saving');
       if(tag){
@@ -18236,7 +18238,7 @@ function teamEditProjectBooking(pid){
         if(ico) ico.textContent='\u21BB';
         if(txt) txt.textContent='Saving your changes\u2026';
         if(sub) sub.textContent = navigator.onLine
-          ? 'Please wait before closing the page.'
+          ? 'Nearly there \u2014 please wait a moment before closing.'
           : 'No connection. It is safe on this computer and will go up when you are back online.';
       } else if(showing && el.style.display!=='none'){
         // brief green tick, but only if we bothered the person in the first place
@@ -18311,7 +18313,7 @@ function teamEditProjectBooking(pid){
   window.addEventListener('beforeunload', function(ev){
     if(!pending().length) return;
     flushNow();
-    paint();
+    window.remcShowSaveCard();          // now it is worth showing
     // Browsers only allow their own wording here, so the card on screen carries
     // the detail: how far along it is and to wait a moment.
     ev.preventDefault();
