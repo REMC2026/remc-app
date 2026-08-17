@@ -828,7 +828,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
   var MATREQS={};
   var MATERIAL_TYPES=['Clean Sand','Dirty Sand','Clay','Rocks','Concrete','Tree','Grass','Rubbish','Mix Material'];
   window.REMC_BUILD='2026-08-08h';
-  window.REMC_UPDATED='2026-08-17T05:37';
+  window.REMC_UPDATED='2026-08-17T06:20';
   // The company logo and name are set once in the office app and travel here
   // through the shared data, so both apps always look the same.
   window.supApplyBrand=function(){
@@ -996,12 +996,52 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
       });
   };
 
+  // Every save used to download the whole shared document first. On a big
+  // database that is seconds, every time. Ask for the timestamp instead: if
+  // nothing has moved since we last looked, use the copy already in memory.
+  var _docStamp='';
+  window.remcNoteStamp=function(st){ _docStamp=String(st||''); };
+  function fullRead(cb){
+    sb.from('remc_state').select('data,updated_at').eq('id',WS).maybeSingle().then(function(res){
+      if(res && res.error){ cb(null); return; }
+      var d=(res && res.data && res.data.data) ? res.data.data : {};
+      if(res && res.data && res.data.updated_at) _docStamp=String(res.data.updated_at);
+      cb(d);
+    }).catch(function(){ cb(null); });
+  }
+  function withDoc(cb){
+    if(_docStamp && DATA && typeof DATA==='object' && !Array.isArray(DATA)){
+      sb.from('remc_state').select('updated_at').eq('id',WS).maybeSingle().then(function(t){
+        var st=(t && !t.error && t.data) ? String(t.data.updated_at||'') : '';
+        if(st && st===_docStamp){ cb(DATA); return; }      // our copy is current
+        fullRead(cb);                                       // someone else changed it
+      }).catch(function(){ fullRead(cb); });
+      return;
+    }
+    fullRead(cb);
+  }
+  // One place that writes, so every save behaves the same way.
+  function writeDoc(d, cb, after){
+    var mine=new Date().toISOString();
+    d['__client']=CLIENT;
+    sb.from('remc_state').upsert({ id:WS, data:d, updated_at:mine }).then(function(r){
+      if(r && r.error){ _cloudFail(); if(cb) cb(r.error.message||'error'); return; }
+      DATA=d; _docStamp=mine; _cloudOk();
+      // our own write moved the timestamp; tell the background check so it does
+      // not download the whole document again for a change we just made
+      try{ _lastSeen=mine; }catch(e){}
+      if(after){ try{ after(); }catch(e){} }
+      if(cb) cb(null);
+    }).catch(function(e){ _cloudFail(); if(cb) cb((e&&e.message)||'network'); });
+  }
+
   function pull(cb){
     if(!ensureClient()){ if(cb) cb('noconfig'); return; }
     setCloud('…','#eff6ff','#1d4ed8');
-    sb.from('remc_state').select('data').eq('id',WS).maybeSingle().then(function(res){
+    sb.from('remc_state').select('data,updated_at').eq('id',WS).maybeSingle().then(function(res){
       if(res && res.error){ _cloudFail(); if(cb) cb(res.error.message||'error'); return; }
       DATA = (res && res.data && res.data.data) ? res.data.data : {};
+      if(res && res.data && res.data.updated_at) remcNoteStamp(res.data.updated_at);
       parseData(); connected=true; _cloudOk(); if(cb) cb(null);
     }).catch(function(e){
       _cloudFail();
@@ -1011,42 +1051,28 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
   function pushBookings(cb){
     if(!ensureClient()){ if(cb) cb('noconfig'); return; }
     setCloud('saving…','#fef3c7','#92400e');
-    // read-modify-write: pull latest, change only remc_scheduler, push back
-    sb.from('remc_state').select('data').eq('id',WS).maybeSingle().then(function(res){
-      // If the read failed we must STOP here. Carrying on would write a
-      // document containing only this one key and wipe everything else.
-      if(res && res.error){ _cloudFail(); if(cb) cb(res.error.message||'error'); return; }
-      var d = (res && res.data && res.data.data) ? res.data.data : {};
+    withDoc(function(d){
+      if(!d){ _cloudFail(); if(cb) cb('read failed'); return; }
       d['remc_scheduler'] = JSON.stringify(BOOKINGS);
-      d['__client'] = CLIENT;
-      sb.from('remc_state').upsert({ id:WS, data:d, updated_at:new Date().toISOString() }).then(function(r2){
-        if(r2 && r2.error){ _cloudFail(); if(cb) cb(r2.error.message); }
-        else { DATA=d; _cloudOk(); if(cb) cb(null); }
-      }).catch(function(e){ _cloudFail(); if(cb) cb((e&&e.message)||'network'); });
-    }).catch(function(e){ _cloudFail(); if(cb) cb((e&&e.message)||'network'); });
+      writeDoc(d, cb);
+    });
   }
+
   function pushNotes(cb){
     if(!ensureClient()){ if(cb) cb('noconfig'); return; }
     setCloud('saving…','#fef3c7','#92400e');
-    sb.from('remc_state').select('data').eq('id',WS).maybeSingle().then(function(res){
-      // If the read failed we must STOP here. Carrying on would write a
-      // document containing only this one key and wipe everything else.
-      if(res && res.error){ _cloudFail(); if(cb) cb(res.error.message||'error'); return; }
-      var d = (res && res.data && res.data.data) ? res.data.data : {};
+    withDoc(function(d){
+      if(!d){ _cloudFail(); if(cb) cb('read failed'); return; }
       d['remc_project_notes'] = JSON.stringify(NOTES);
-      d['__client'] = CLIENT;
-      sb.from('remc_state').upsert({ id:WS, data:d, updated_at:new Date().toISOString() }).then(function(r2){
-        if(r2 && r2.error){ _cloudFail(); if(cb) cb(r2.error.message); }
-        else { DATA=d; _cloudOk(); if(cb) cb(null); }
-      }).catch(function(e){ _cloudFail(); if(cb) cb((e&&e.message)||'network'); });
-    }).catch(function(e){ _cloudFail(); if(cb) cb((e&&e.message)||'network'); });
+      writeDoc(d, cb);
+    });
   }
+
   function pushMaterials(cb){
     if(!ensureClient()){ if(cb) cb('noconfig'); return; }
     setCloud('saving…','#fef3c7','#92400e');
-    sb.from('remc_state').select('data').eq('id',WS).maybeSingle().then(function(res){
-      if(res && res.error){ _cloudFail(); if(cb) cb(res.error.message||'error'); return; }
-      var d = (res && res.data && res.data.data) ? res.data.data : {};
+    withDoc(function(d){
+      if(!d){ _cloudFail(); if(cb) cb('read failed'); return; }
       // The office decides approved / declined. Never write over that with a
       // copy this phone may have been holding since before the office answered.
       var cloudMat = {};
@@ -1084,92 +1110,61 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
       });
       MATREQS = merged;
       d['remc_material_requests'] = JSON.stringify(merged);
-      d['__client'] = CLIENT;
-      sb.from('remc_state').upsert({ id:WS, data:d, updated_at:new Date().toISOString() }).then(function(r2){
-        if(r2 && r2.error){ _cloudFail(); if(cb) cb(r2.error.message||'error'); }
-        else { DATA=d; _cloudOk(); _forgetLastSeen(); _recheckSoon();
-               try{ refreshOpenScreens(); }catch(e){} if(cb) cb(null); }
-      }).catch(function(e){ _cloudFail(); if(cb) cb((e&&e.message)||'network'); });
-    }).catch(function(e){ _cloudFail(); if(cb) cb((e&&e.message)||'network'); });
+      writeDoc(d, cb, function(){
+        _recheckSoon();
+        try{ refreshOpenScreens(); }catch(e){}
+      });
+    });
   }
   function pushTests(cb){
     if(!ensureClient()){ if(cb) cb('noconfig'); return; }
     setCloud('saving…','#fef3c7','#92400e');
-    sb.from('remc_state').select('data').eq('id',WS).maybeSingle().then(function(res){
-      // If the read failed we must STOP here. Carrying on would write a
-      // document containing only this one key and wipe everything else.
-      if(res && res.error){ _cloudFail(); if(cb) cb(res.error.message||'error'); return; }
-      var d = (res && res.data && res.data.data) ? res.data.data : {};
+    withDoc(function(d){
+      if(!d){ _cloudFail(); if(cb) cb('read failed'); return; }
       d['remc_compaction_tests'] = JSON.stringify(TESTS);
-      d['__client'] = CLIENT;
-      sb.from('remc_state').upsert({ id:WS, data:d, updated_at:new Date().toISOString() }).then(function(r2){
-        if(r2 && r2.error){ _cloudFail(); if(cb) cb(r2.error.message); }
-        else { DATA=d; _cloudOk(); if(cb) cb(null); }
-      }).catch(function(e){ _cloudFail(); if(cb) cb((e&&e.message)||'network'); });
-    }).catch(function(e){ _cloudFail(); if(cb) cb((e&&e.message)||'network'); });
+      writeDoc(d, cb);
+    });
   }
+
   function pushTransfers(cb){
     if(!ensureClient()){ if(cb) cb('noconfig'); return; }
     setCloud('saving…','#fef3c7','#92400e');
-    sb.from('remc_state').select('data').eq('id',WS).maybeSingle().then(function(res){
-      // If the read failed we must STOP here. Carrying on would write a
-      // document containing only this one key and wipe everything else.
-      if(res && res.error){ _cloudFail(); if(cb) cb(res.error.message||'error'); return; }
-      var d = (res && res.data && res.data.data) ? res.data.data : {};
+    withDoc(function(d){
+      if(!d){ _cloudFail(); if(cb) cb('read failed'); return; }
       d['remc_machine_transfers'] = JSON.stringify(TRANSFERS);
-      d['__client'] = CLIENT;
-      sb.from('remc_state').upsert({ id:WS, data:d, updated_at:new Date().toISOString() }).then(function(r2){
-        if(r2 && r2.error){ _cloudFail(); if(cb) cb(r2.error.message); }
-        else { DATA=d; _cloudOk(); if(cb) cb(null); }
-      }).catch(function(e){ _cloudFail(); if(cb) cb((e&&e.message)||'network'); });
-    }).catch(function(e){ _cloudFail(); if(cb) cb((e&&e.message)||'network'); });
+      writeDoc(d, cb);
+    });
   }
+
   function pushVariations(cb){
     if(!ensureClient()){ if(cb) cb('noconfig'); return; }
     setCloud('saving…','#fef3c7','#92400e');
-    sb.from('remc_state').select('data').eq('id',WS).maybeSingle().then(function(res){
-      // If the read failed we must STOP here. Carrying on would write a
-      // document containing only this one key and wipe everything else.
-      if(res && res.error){ _cloudFail(); if(cb) cb(res.error.message||'error'); return; }
-      var d = (res && res.data && res.data.data) ? res.data.data : {};
+    withDoc(function(d){
+      if(!d){ _cloudFail(); if(cb) cb('read failed'); return; }
       d['remc_variations'] = JSON.stringify(VARIATIONS);
-      d['__client'] = CLIENT;
-      sb.from('remc_state').upsert({ id:WS, data:d, updated_at:new Date().toISOString() }).then(function(r2){
-        if(r2 && r2.error){ _cloudFail(); if(cb) cb(r2.error.message); }
-        else { DATA=d; _cloudOk(); if(cb) cb(null); }
-      }).catch(function(e){ _cloudFail(); if(cb) cb((e&&e.message)||'network'); });
-    }).catch(function(e){ _cloudFail(); if(cb) cb((e&&e.message)||'network'); });
+      writeDoc(d, cb);
+    });
   }
+
   function pushSubs(cb){
     if(!ensureClient()){ if(cb) cb('noconfig'); return; }
     setCloud('saving…','#fef3c7','#92400e');
-    sb.from('remc_state').select('data').eq('id',WS).maybeSingle().then(function(res){
-      // If the read failed we must STOP here. Carrying on would write a
-      // document containing only this one key and wipe everything else.
-      if(res && res.error){ _cloudFail(); if(cb) cb(res.error.message||'error'); return; }
-      var d = (res && res.data && res.data.data) ? res.data.data : {};
-      d['remc_sub_bookings'] = JSON.stringify(SUBCONS);
-      d['__client'] = CLIENT;
-      sb.from('remc_state').upsert({ id:WS, data:d, updated_at:new Date().toISOString() }).then(function(r2){
-        if(r2 && r2.error){ _cloudFail(); if(cb) cb(r2.error.message); }
-        else { DATA=d; _cloudOk(); if(cb) cb(null); }
-      }).catch(function(e){ _cloudFail(); if(cb) cb((e&&e.message)||'network'); });
-    }).catch(function(e){ _cloudFail(); if(cb) cb((e&&e.message)||'network'); });
+    withDoc(function(d){
+      if(!d){ _cloudFail(); if(cb) cb('read failed'); return; }
+      d['remc_sub_bookings'] = JSON.stringify(SUBS);
+      writeDoc(d, cb);
+    });
   }
+
   function pushActivity(cb){
     if(!ensureClient()){ if(cb) cb('noconfig'); return; }
-    sb.from('remc_state').select('data').eq('id',WS).maybeSingle().then(function(res){
-      // If the read failed we must STOP here. Carrying on would write a
-      // document containing only this one key and wipe everything else.
-      if(res && res.error){ _cloudFail(); if(cb) cb(res.error.message||'error'); return; }
-      var d = (res && res.data && res.data.data) ? res.data.data : {};
+    withDoc(function(d){
+      if(!d){ _cloudFail(); if(cb) cb('read failed'); return; }
       d['remc_activity_log'] = JSON.stringify(ACTIVITY);
-      d['__client'] = CLIENT;
-      sb.from('remc_state').upsert({ id:WS, data:d, updated_at:new Date().toISOString() }).then(function(r2){
-        if(r2 && r2.error){ if(cb) cb(r2.error.message); } else { DATA=d; if(cb) cb(null); }
-      });
-    }).catch(function(e){ if(cb) cb((e&&e.message)||'network'); });
+      writeDoc(d, cb);
+    });
   }
+
   // Record a destructive / request action so it shows in History (creations & edits are derived from the data itself)
   function logActivity(kind, action, pid, detail){
     try{
@@ -1231,6 +1226,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
         _refreshing=false;
         if(!r2 || r2.error || !r2.data || !r2.data.data) return;
         _lastSeen=stamp;
+        try{ remcNoteStamp(stamp); }catch(e){}
         var d=r2.data.data;
         if(d.__client===CLIENT) return;
         DATA=d;

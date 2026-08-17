@@ -3249,7 +3249,7 @@ if (!window._buildChecked) {
   // When this version of the software was released. Shown in plain words so
   // anyone can tell at a glance whether they are on the latest copy.
   window.REMC_VERSION = "1.1";
-  window.REMC_UPDATED = "2026-08-17T05:37";
+  window.REMC_UPDATED = "2026-08-17T06:20";
   window.remcUpdatedText = function(){
     try{
       var d=new Date(window.REMC_UPDATED);
@@ -13778,11 +13778,19 @@ function teamEditProjectBooking(pid){
         _dirty = {};
         try{ markSnapshotClean(); }catch(e){}
         _cloudOk();
+        try{ if(typeof window.remcSaveConfirmed==='function') window.remcSaveConfirmed(); }catch(e){}
         scheduleBackup();
       });
     }).catch(function(e){ _cloudFail((e&&(e.message||e))||'network'); });
   }
-  function schedulePush(){ if(_applying) return; setStatus('saving'); clearTimeout(_pushTimer); _pushTimer=setTimeout(push, 1200); }
+  function schedulePush(){ if(_applying) return; setStatus('saving'); clearTimeout(_pushTimer); _pushTimer=setTimeout(push, 700); }
+  // Send now, without waiting out the pause. Used when a page is closing or the
+  // person has clicked away.
+  window.remcSyncNow = function(){
+    if(_applying) return;
+    clearTimeout(_pushTimer);
+    try{ push(); }catch(e){}
+  };
 
   // ---- Auto Excel backup to Supabase Storage (bucket: remc-backups / remc-latest.xlsx) ----
   function _bkJSON(k, def){ try{ return JSON.parse(localStorage.getItem(k)||def); }catch(e){ return JSON.parse(def); } }
@@ -13878,7 +13886,19 @@ function teamEditProjectBooking(pid){
       });
     }catch(e){ /* backup is best-effort; never disturb the app */ }
   }
-  function scheduleBackup(){ clearTimeout(_bkTimer); _bkTimer=setTimeout(uploadExcelBackup, 2500); }
+  // Building and uploading a spreadsheet of the whole database is heavy, so it
+  // is not something to do on every save. At most once every few minutes, and
+  // well after the save itself has finished.
+  var _bkLast = 0, BK_GAP = 5*60*1000;
+  function scheduleBackup(){
+    clearTimeout(_bkTimer);
+    var since = Date.now() - _bkLast;
+    var wait = since >= BK_GAP ? 20000 : (BK_GAP - since);
+    _bkTimer = setTimeout(function(){
+      _bkLast = Date.now();
+      try{ uploadExcelBackup(); }catch(e){}
+    }, wait);
+  }
   window.remcUploadExcelBackup = uploadExcelBackup;
   window.remcBackupUrl = String(CFG.url).replace(/\/$/,'') + '/storage/v1/object/public/remc-backups/remc-latest.xlsx';
 
@@ -18239,38 +18259,40 @@ function teamEditProjectBooking(pid){
 
   // Rapid edits - typing across a row - collapse into one send.
   var timers={};
-  window.remcSaveKey = function(key, valueStr, wait){
+  window.remcSaveKey = function(key, valueStr){
+    // Writing here is what starts the app's own sync; it picks the key up and
+    // sends it. All we do is remember it is outstanding, so the indicator is
+    // honest, and clear it when the sync reports success.
     try{ localStorage.setItem(key, valueStr); }catch(e){ alert('Browser storage is full.'); return; }
     mark(key);
-    clearTimeout(timers[key]);
-    timers[key]=setTimeout(function(){ push(key); }, (wait==null?400:wait));
+    phase[key]='sending';
+    paint();
+  };
+  // Called by the sync once the cloud has confirmed the write.
+  window.remcSaveConfirmed = function(){
+    pending().forEach(clear);
+    paint();
   };
 
-  var busy={};
+  // Nothing needs re-routing: anything written to this computer is picked up by
+  // the app's own sync automatically. Wrapping the upsert as well meant a save
+  // was queued twice and the document sent twice.
+
+  // Nudging the app's own sync is enough; it already holds the list of changed
+  // keys and does the read-modify-write once, not twice.
   function push(key){
-    if(busy[key]) return;
     if(!navigator.onLine){ phase[key]='failed'; paint(); return; }
-    if(typeof window.remcCloudUpsertKey!=='function') return;
-    var val=null;
-    try{ val=localStorage.getItem(key); }catch(e){}
-    if(val==null){ clear(key); return; }
-    busy[key]=true;
     phase[key]='sending'; paint();
-    try{
-      window.remcCloudUpsertKey(key, val, function(err){
-        busy[key]=false;
-        if(!err) clear(key);          // only forget it once the cloud has it
-        else { phase[key]='failed'; paint(); }
-      });
-    }catch(e){ busy[key]=false; phase[key]='failed'; paint(); }
+    try{ if(typeof window.remcSyncNow==='function') window.remcSyncNow(); }catch(e){}
   }
+
   function pushAll(){ pending().forEach(push); }
   window.remcFlushPending = pushAll;
 
   // Sending waits a moment for more typing. The moment attention moves away,
   // stop waiting and send now - that is exactly when a page tends to be closed.
   function flushNow(){
-    Object.keys(timers).forEach(function(k){ clearTimeout(timers[k]); delete timers[k]; });
+    try{ if(typeof window.remcSyncNow==='function') window.remcSyncNow(); }catch(e){}
     pushAll();
   }
   window.remcFlushNow = flushNow;
