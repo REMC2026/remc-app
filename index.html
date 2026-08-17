@@ -238,7 +238,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
       <div class="nav-item" onclick="showPage('settings')">⚙️ Settings</div>
     </div>
     <div class="nav-right">
-      <div class="build-tag" id="topbuild" title="Software version. If this does not match the file you uploaded, the browser is still using an old copy - press Ctrl+Shift+R.">build 2026-08-08d</div>
+      <div class="build-tag" id="topbuild" title="Software version. If this does not match the file you uploaded, the browser is still using an old copy - press Ctrl+Shift+R.">build 2026-08-08e</div>
       <div class="nav-date" id="topdate">—</div>
       <button id="remc-logout-btn" onclick="remcLogout()" title="Sign out of this device" style="font-family:Barlow,sans-serif;font-size:12px;font-weight:700;color:var(--mid);background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:5px 12px;cursor:pointer;display:none">Log out</button>
       <div class="nav-vis-btn" id="navVisBtn" onclick="toggleNavVisPanel()" title="Customize menu tabs">
@@ -2010,7 +2010,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
         <div>
           <div class="ops-title">Site Coordination</div>
           <div class="ops-sub">Booking compaction tests, moving machines between sites and scheduling subcontractors
-            <span style="margin-left:8px;font-size:10px;font-weight:700;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:1px 7px">build 2026-08-08d</span>
+            <span style="margin-left:8px;font-size:10px;font-weight:700;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:1px 7px">build 2026-08-08e</span>
           </div>
         </div>
         <div style="display:flex;gap:8px;align-items:center">
@@ -3149,7 +3149,7 @@ function tick() {
 // One-time build check
 if (!window._buildChecked) {
   window._buildChecked = true;
-  window.REMC_BUILD = "2026-08-08d";
+  window.REMC_BUILD = "2026-08-08e";
   // the top-bar mark follows the company details too
   try{
     if(document.readyState==='loading')
@@ -10632,7 +10632,12 @@ window.paPrint = function(){
     +'.tot b{font-size:15px}'
     +'.foot{margin-top:14px;padding-top:6px;border-top:1px solid #ddd;font-size:9px;color:#888;'
       +'display:flex;justify-content:space-between}'
+    +'.noprint{position:fixed;top:12px;right:12px;background:#e11d1d;color:#fff;border:none;'
+      +'border-radius:8px;padding:9px 16px;font-family:Arial,sans-serif;font-size:13px;font-weight:700;'
+      +'cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.2)}'
+    +'.noprint:hover{background:#c81a1a}'
     +'@media print{body{padding:10mm 8mm}@page{size:A4 portrait;margin:10mm}'
+      +'.noprint{display:none !important}'
       +'tr{page-break-inside:avoid}tr.sec{page-break-after:avoid}thead{display:table-header-group}}'
     +'</style></head><body>'
     +'<div class="top">'
@@ -10673,13 +10678,30 @@ window.paPrint = function(){
     +'</div>'
     +'<div class="foot"><span>'+e(coName)+'</span>'
       +'<span>Printed '+new Date().toLocaleString('en-AU')+'</span></div>'
+    // A button in case the print box does not open on its own, and a script
+    // that waits for the logo to load before printing - printing too early
+    // leaves an empty box where the logo should be.
+    +'<button class="noprint" id="pbtn" onclick="window.print()">\uD83D\uDDA8 Print / Save as PDF</button>'
+    +'<scr'+'ipt>(function(){'
+      +'var done=false;'
+      +'function go(){ if(done) return; done=true; try{ window.focus(); window.print(); }catch(e){} }'
+      +'var imgs=document.images, left=imgs.length;'
+      +'if(!left){ setTimeout(go,150); return; }'
+      +'function tick(){ if(--left<=0) setTimeout(go,80); }'
+      +'for(var i=0;i<imgs.length;i++){'
+        +'if(imgs[i].complete) tick();'
+        +'else { imgs[i].addEventListener("load",tick); imgs[i].addEventListener("error",tick); }'
+      +'}'
+      +'setTimeout(go,2500);'   // never wait forever on a slow image
+    +'})();</scr'+'ipt>'
     +'</body></html>';
 
   var w=window.open('', '_blank');
   if(!w){ alert('The print window was blocked.\n\nAllow pop-ups for this site and try again.'); return; }
   w.document.open(); w.document.write(html); w.document.close();
-  // give the logo a moment to load, or it prints as a blank box
-  setTimeout(function(){ try{ w.focus(); w.print(); }catch(e){} }, 400);
+  // the new page prints itself once the logo has loaded; if anything stops that,
+  // the red button in its corner does the same job.
+  try{ w.focus(); }catch(e){}
 };
 
 window.paClose = function(){
