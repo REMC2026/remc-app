@@ -223,7 +223,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
 
   <!-- TOP NAV -->
   <div class="topnav">
-    <div class="brand"><span class="brand-r">R</span><span class="brand-rest">EMC</span><span id="remc-version" style="font-size:9px;color:#16a34a;font-weight:700;margin-left:6px;background:#dcfce7;padding:2px 6px;border-radius:4px" title="App version">v1.1</span></div>
+    <div class="brand"><span class="brand-r">R</span><span class="brand-rest">EMC</span></div>
     <div class="nav-menu">
       <div class="nav-item active" onclick="showPage('overview')">🏗️ Overview</div>
       <div class="nav-item" onclick="showPage('material')">⚖️ Material Balance</div>
@@ -238,9 +238,12 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
       <div class="nav-item" onclick="showPage('settings')">⚙️ Settings</div>
     </div>
     <div class="nav-right">
-      <div id="remc-saving" style="display:none;font-size:10px;font-weight:800;color:#92400e;background:#fef3c7;border:1px solid #fde68a;border-radius:5px;padding:2px 8px;white-space:nowrap"></div>
-      <div class="build-tag" id="topbuild" title="Software version. If this does not match the file you uploaded, the browser is still using an old copy - press Ctrl+Shift+R.">build 2026-08-08f</div>
-      <div class="nav-date" id="topdate">—</div>
+      <div class="nav-info">
+        <div id="remc-updated" class="nav-info-l"></div>
+        <div class="nav-date nav-info-l" id="topdate">—</div>
+        <div id="remc-whoami" class="nav-info-l" style="display:none"></div>
+        <div id="remc-saving" class="nav-info-l" style="display:none;color:#92400e;font-weight:800"></div>
+      </div>
       <button id="remc-logout-btn" onclick="remcLogout()" title="Sign out of this device" style="font-family:Barlow,sans-serif;font-size:12px;font-weight:700;color:var(--mid);background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:5px 12px;cursor:pointer;display:none">Log out</button>
       <div class="nav-vis-btn" id="navVisBtn" onclick="toggleNavVisPanel()" title="Customize menu tabs">
         <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
@@ -597,57 +600,38 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
 
   <!-- ══ PAGE: MATERIALS ══ -->
   <div class="page" id="page-materials">
-    <div style="padding:24px 32px;max-width:1200px;margin:0 auto">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
+    <div class="sup-page">
+      <div class="ops-header">
         <div>
-          <div
-            style="font-family:'Barlow Condensed',sans-serif;font-size:32px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px">
-            🚚 Materials & Disposal</div>
-          <div style="font-size:14px;color:var(--muted);margin-top:2px">Locations for disposal and purchase of materials
-            as configured in the spreadsheet</div>
+          <div class="ops-title">&#128666; Material / Supplies</div>
+          <div class="ops-sub">Everyone we buy from, hire from or tip at &mdash; in one place.</div>
         </div>
-        <div style="display:flex;gap:12px;align-items:center">
-          <button id="mat-toggle-btn" onclick="toggleMaterialsModule()"
-            style="padding:9px 16px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--text);transition:all 0.2s;display:flex;align-items:center;gap:8px">
-            <span id="mat-toggle-status">Module: Enabled</span>
-            <div id="mat-toggle-dot" style="width:10px;height:10px;border-radius:50%;background:var(--green)"></div>
-          </button>
-          <input name="remcflt_matsearch" type="search" id="mat-search" placeholder="🔍 Filter locations or materials..."
-            oninput="renderMaterials()"
-            style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:9px 16px;font-size:14px;font-family:'Barlow',sans-serif;color:var(--text);outline:none;width:250px;box-shadow:var(--shadow)" autocomplete="off" autocorrect="off" spellcheck="false" data-lpignore="true" data-1p-ignore data-form-type="other" aria-autocomplete="none">
-          <div
-            style="display:flex;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:4px;gap:2px;box-shadow:var(--shadow)">
-            <button id="mt-all" onclick="matFilter('all')"
-              style="padding:7px 18px;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;border:none;background:var(--red);color:#fff;transition:all 0.2s">All</button>
-            <button id="mt-descarte" onclick="matFilter('descarte')"
-              style="padding:7px 18px;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;border:none;background:none;color:var(--muted);transition:all 0.2s">Disposal</button>
-            <button id="mt-compra" onclick="matFilter('compra')"
-              style="padding:7px 18px;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;border:none;background:none;color:var(--muted);transition:all 0.2s">Purchase</button>
-          </div>
+        <div class="ops-tools">
+          <select class="ops-sel" id="sup-cat" onchange="supRender()" style="min-width:190px"></select>
+          <input class="ops-search" id="sup-search" placeholder="Search name, trade or suburb&hellip;"
+            oninput="supRender()" autocomplete="off">
+          <button class="ops-btn gear" onclick="supCatOpen()" title="Manage categories">&#9881;</button>
+          <button class="ops-btn green" onclick="supOpen()">+ Add supplier</button>
         </div>
       </div>
 
-      <div id="materials-list"
-        style="display:grid;grid-template-columns:repeat(auto-fill, minmax(360px, 1fr));gap:20px">
-        <!-- List rendered by JS -->
+      <div class="sup-tbl-wrap">
+        <table class="sup-tbl">
+          <colgroup><col><col style="width:190px"><col style="width:210px"><col style="width:160px"></colgroup>
+          <thead><tr>
+            <th onclick="supSort('name')">Company <span class="sup-ar" id="sup-ar-name"></span></th>
+            <th onclick="supSort('cat')">Category <span class="sup-ar" id="sup-ar-cat"></span></th>
+            <th onclick="supSort('area')">Location <span class="sup-ar" id="sup-ar-area"></span></th>
+            <th onclick="supSort('phone')">Phone <span class="sup-ar" id="sup-ar-phone"></span></th>
+          </tr></thead>
+          <tbody id="sup-rows"></tbody>
+        </table>
+        <div id="sup-empty" class="sup-empty" style="display:none"></div>
       </div>
-      <div id="materials-empty"
-        style="display:none;padding:100px 20px;text-align:center;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow)">
-        <div style="font-size:54px;margin-bottom:16px">🚛</div>
-        <div id="mat-empty-title" style="font-size:18px;font-weight:800;color:var(--text)">No locations found</div>
-        <div id="mat-empty-sub" style="font-size:14px;margin-top:4px">Check the spreadsheet settings or adjust the
-          filter.</div>
-      </div>
+      <div class="sup-hint">Double-click a row to see the full details.</div>
     </div>
   </div>
 
-  
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-  
-
-
-  <!-- ══ PAGE: TEAM PLANNING ══ -->
   <div class="page" id="page-team">
     <div class="team-page">
 
@@ -1627,6 +1611,10 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
   .rq-sec-body::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
   .rq-sec-body::-webkit-scrollbar-thumb:hover{background:var(--muted)}
   .rq-more{font-size:11px;font-weight:700;color:var(--muted);margin-left:8px}
+  .nav-info{display:flex;flex-direction:column;align-items:flex-end;gap:1px;line-height:1.35;margin-right:4px}
+  .nav-info-l{font-size:10.5px;font-weight:700;color:var(--muted);white-space:nowrap}
+  .nav-info .nav-date{font-size:10.5px;font-weight:700;color:var(--mid);background:none;border:none;padding:0}
+  @media (max-width:900px){ .nav-info{display:none} }
   .build-tag{font-size:10px;font-weight:700;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:2px 7px;white-space:nowrap}
   .rq-who{display:flex;gap:7px;flex-wrap:wrap}
   .pt-row{display:flex;align-items:flex-start;gap:9px;padding:8px 10px;border:1px solid var(--border);
@@ -1664,6 +1652,39 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
   .pa-tot-v.out{color:var(--red)} .pa-tot-v.in{color:var(--green)} .pa-tot-v.n{color:var(--text)}
   .pa-tot-u{font-size:12px;font-weight:700;color:var(--muted);margin-left:3px}
   .pa-subtot{background:#fdf5f5}
+  .sup-page{padding:22px 26px;max-width:1300px;margin:0 auto}
+  .sup-tbl-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;
+    box-shadow:var(--shadow);overflow:hidden}
+  table.sup-tbl{border-collapse:collapse;width:100%;table-layout:fixed}
+  table.sup-tbl th{background:var(--surface2);border-bottom:2px solid var(--border2);
+    padding:9px 14px;text-align:left;font-size:9px;font-weight:800;text-transform:uppercase;
+    letter-spacing:1.2px;color:var(--muted);cursor:pointer;user-select:none;white-space:nowrap}
+  table.sup-tbl th:hover{color:var(--text)}
+  .sup-ar{font-size:8px;color:var(--red)}
+  table.sup-tbl td{border-bottom:1px solid var(--border);padding:9px 14px;font-size:13px;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  table.sup-tbl tbody tr{cursor:pointer}
+  table.sup-tbl tbody tr:hover td{background:var(--surface2)}
+  table.sup-tbl tbody tr:last-child td{border-bottom:none}
+  .sup-name{font-weight:800;color:var(--text)}
+  .sup-sub{font-size:11px;color:var(--muted);font-weight:600}
+  .sup-pill{display:inline-block;font-size:10px;font-weight:800;background:var(--blue-light);
+    color:#1d4ed8;border:1px solid rgba(37,99,235,.2);border-radius:5px;padding:1px 8px}
+  .sup-empty{padding:60px 20px;text-align:center;color:var(--muted);font-size:13.5px}
+  .sup-hint{font-size:11.5px;color:var(--muted);margin-top:9px;text-align:right}
+  .sup-sep{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1.3px;
+    color:var(--muted);border-top:1px solid var(--border);padding-top:12px;margin-top:2px}
+  .sys-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;
+    box-shadow:var(--shadow);overflow:hidden;max-width:620px}
+  .sys-row{display:grid;grid-template-columns:150px 1fr;gap:4px 16px;padding:13px 18px;
+    border-bottom:1px solid var(--border);align-items:baseline}
+  .sys-row:last-child{border-bottom:none}
+  .sys-l{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1.3px;color:var(--muted)}
+  .sys-v{font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:800;color:var(--text)}
+  .sys-n{grid-column:2;font-size:11.5px;color:var(--muted)}
+  .sys-foot{max-width:620px;margin-top:10px;font-size:11px;color:var(--muted);text-align:right}
+  .sys-foot code{background:var(--surface2);border:1px solid var(--border);border-radius:4px;
+    padding:1px 6px;font-size:10.5px}
   .co-head{margin-bottom:16px}
   .co-title{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;
     text-transform:uppercase;letter-spacing:.5px}
@@ -2011,7 +2032,6 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
         <div>
           <div class="ops-title">Site Coordination</div>
           <div class="ops-sub">Booking compaction tests, moving machines between sites and scheduling subcontractors
-            <span style="margin-left:8px;font-size:10px;font-weight:700;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:1px 7px">build 2026-08-08f</span>
           </div>
         </div>
         <div style="display:flex;gap:8px;align-items:center">
@@ -2284,6 +2304,72 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
     </div>
   </div>
 
+  <!-- ─────────── SUPPLIER ─────────── -->
+  <div class="proj-modal-overlay" id="sup-modal">
+    <div class="proj-modal" style="width:720px;max-width:96vw">
+      <div class="proj-modal-header"><span id="sup-modal-title">Supplier</span>
+        <button class="proj-modal-close" onclick="supClose()">&#10005;</button></div>
+      <div class="proj-modal-body">
+        <div class="proj-form-grid">
+          <div class="proj-form-group"><label>Company name *</label>
+            <input id="sup-f-name" placeholder="Company name"></div>
+          <div class="proj-form-group"><label>Category</label>
+            <input id="sup-f-cat" list="sup-cats" placeholder="Trade or sector">
+            <datalist id="sup-cats"></datalist></div>
+          <div class="proj-form-group"><label>Location</label>
+            <input id="sup-f-area" placeholder="Suburb"></div>
+          <div class="proj-form-group"><label>Phone</label>
+            <input id="sup-f-phone" placeholder="Main phone"></div>
+
+          <div class="proj-form-group" style="grid-column:1/-1">
+            <div class="sup-sep">Contact details</div></div>
+          <div class="proj-form-group"><label>Contact person</label>
+            <input id="sup-f-contact" placeholder="Who to ask for"></div>
+          <div class="proj-form-group"><label>Their role</label>
+            <input id="sup-f-role" placeholder="Sales, dispatch&hellip;"></div>
+          <div class="proj-form-group"><label>Email</label>
+            <input id="sup-f-email" placeholder="name@company.com"></div>
+          <div class="proj-form-group"><label>Second phone</label>
+            <input id="sup-f-phone2" placeholder="Mobile or after hours"></div>
+          <div class="proj-form-group" style="grid-column:1/-1"><label>Full address</label>
+            <input id="sup-f-address" placeholder="Street, suburb, state, postcode"></div>
+          <div class="proj-form-group"><label>ABN</label>
+            <input id="sup-f-abn" placeholder="ABN"></div>
+          <div class="proj-form-group"><label>Website</label>
+            <input id="sup-f-web" placeholder="Website"></div>
+          <div class="proj-form-group" style="grid-column:1/-1"><label>Notes</label>
+            <input id="sup-f-notes" placeholder="Rates, opening hours, what they are good for&hellip;"></div>
+        </div>
+      </div>
+      <div class="proj-modal-footer">
+        <button class="proj-modal-cancel" id="sup-del" onclick="supDelete()" style="margin-right:auto">Delete</button>
+        <button class="proj-modal-cancel" onclick="supClose()">Cancel</button>
+        <button class="proj-modal-save" onclick="supSave()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────── SUPPLIER CATEGORIES ─────────── -->
+  <div class="proj-modal-overlay" id="supcat-modal">
+    <div class="proj-modal" style="width:520px">
+      <div class="proj-modal-header"><span>&#9881; Supplier categories</span>
+        <button class="proj-modal-close" onclick="supCatClose()">&#10005;</button></div>
+      <div class="proj-modal-body">
+        <div class="sq-hint">Group suppliers however suits you &mdash; Sand &amp; Fill, Plant Hire,
+          Traffic Control, Waste. A category in use cannot be removed.</div>
+        <div class="sq-add">
+          <input class="sq-input" id="supcat-new" placeholder="Add a category"
+            onkeydown="if(event.key==='Enter')supCatAdd()">
+          <button class="ops-btn sm primary" onclick="supCatAdd()">+ Add</button>
+        </div>
+        <div class="sq-list" id="supcat-list"></div>
+      </div>
+      <div class="proj-modal-footer">
+        <button class="proj-modal-save" onclick="supCatClose()">Done</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ─────────── PROJECT ALLOWANCES ─────────── -->
   <!-- opened from inside the project panel, so it has to sit above it -->
   <div class="proj-modal-overlay" id="pa-modal" style="z-index:1100">
@@ -2415,6 +2501,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
         <div class="stab" onclick="showSettingsTab('outlook')"           data-tab="outlook"        data-cat="system">📧 Email (Outlook)</div>
         <div class="stab" onclick="showSettingsTab('display')"           data-tab="display"        data-cat="display">🖥️ Display</div>
         <div class="stab" onclick="showSettingsTab('company')"           data-tab="company"        data-cat="display">🏢 Company Details</div>
+        <div class="stab" onclick="showSettingsTab('system')"            data-tab="system"         data-cat="display">ℹ️ System</div>
       </div>
 
       <!-- TAB: COMMERCIAL PROJECTS -->
@@ -2914,6 +3001,14 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
         </div>
       </div>
 
+      <div class="stab-panel" id="stpanel-system">
+        <div class="co-head">
+          <div class="co-title">&#8505;&#65039; System</div>
+          <div class="co-sub">Which version of the software this device is running.</div>
+        </div>
+        <div id="sys-body"></div>
+      </div>
+
       <div class="stab-panel" id="stpanel-company">
         <div class="co-head">
           <div class="co-title">&#127970; Company Details</div>
@@ -3150,7 +3245,37 @@ function tick() {
 // One-time build check
 if (!window._buildChecked) {
   window._buildChecked = true;
-  window.REMC_BUILD = "2026-08-08f";
+  window.REMC_BUILD = "2026-08-08h";
+  // When this version of the software was released. Shown in plain words so
+  // anyone can tell at a glance whether they are on the latest copy.
+  window.REMC_VERSION = "1.1";
+  window.REMC_UPDATED = "2026-08-17T05:37";
+  window.remcUpdatedText = function(){
+    try{
+      var d=new Date(window.REMC_UPDATED);
+      if(isNaN(d.getTime())) return '';
+      var days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+      var mons=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      function p(n){ return String(n).padStart(2,'0'); }
+      return days[d.getDay()]+' '+d.getDate()+' '+mons[d.getMonth()]+' '+d.getFullYear()
+        +', '+p(d.getHours())+':'+p(d.getMinutes());
+    }catch(e){ return ''; }
+  };
+  window.remcShowUpdated = function(){
+    try{
+      var el=document.getElementById('remc-updated');
+      if(!el) return;
+      var t=window.remcUpdatedText();
+      if(!t){ el.style.display='none'; return; }
+      el.textContent='Updated '+t;
+      el.title='The last time this software was updated.';
+    }catch(e){}
+  };
+  try{
+    if(document.readyState==='loading')
+      document.addEventListener('DOMContentLoaded', function(){ window.remcShowUpdated(); });
+    else setTimeout(function(){ window.remcShowUpdated(); }, 0);
+  }catch(e){}
   // the top-bar mark follows the company details too
   try{
     if(document.readyState==='loading')
@@ -3641,15 +3766,11 @@ window.remcApplyBrand = function(){
     var name=String(c.name||'').trim();
     if(logo){
       el.innerHTML='<img src="'+logo.replace(/"/g,'&quot;')+'" alt="" '
-        +'style="max-height:26px;max-width:120px;object-fit:contain;vertical-align:middle">'
-        +'<span id="remc-version" style="font-size:9px;color:#16a34a;font-weight:700;margin-left:6px;'
-        +'background:#dcfce7;padding:2px 6px;border-radius:4px">v1.1</span>';
+        +'style="max-height:26px;max-width:120px;object-fit:contain;vertical-align:middle">';
     } else if(name){
       var first=name.charAt(0).toUpperCase(), rest=name.slice(1);
       el.innerHTML='<span class="brand-r">'+first+'</span><span class="brand-rest">'
-        +rest.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</span>'
-        +'<span id="remc-version" style="font-size:9px;color:#16a34a;font-weight:700;margin-left:6px;'
-        +'background:#dcfce7;padding:2px 6px;border-radius:4px">v1.1</span>';
+        +rest.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</span>';
     }
   }catch(e){}
 };
@@ -3663,7 +3784,7 @@ window.coPickLogo = function(){
   inp.type='file'; inp.accept='image/png,image/jpeg,image/svg+xml,image/webp';
   inp.onchange=function(){
     var f=inp.files && inp.files[0]; if(!f) return;
-    if(f.size > 4*1024*1024){ alert('That image is bigger than 4 MB. Please use a smaller one.'); return; }
+    if(f.size > 4*1024*1024){ alert('That image is bigger than 4 MB.\n\nA logo only needs to be a few hundred KB. Please save it smaller and try again.'); return; }
     coUploadLogo(f);
   };
   inp.click();
@@ -3688,17 +3809,19 @@ function coUploadLogo(file){
   coLogoFallback(file, 'cloud storage not available');
 }
 function coLogoFallback(file, why){
-  if(file.size > 200*1024){
-    alert('Could not upload the logo ('+why+').\n\n'
-      +'The image is too big to keep on this device instead. Please use one under 200 KB, '
-      +'or try again when the connection is back.');
+  // A logo is small, so keeping it with the settings is fine when cloud storage
+  // is not available. Above this size the shared document would get heavy.
+  if(file.size > 900*1024){
+    alert('Could not use cloud storage ('+why+').\n\n'
+      +'This image is '+Math.round(file.size/1024)+' KB, which is too big to store directly.\n\n'
+      +'Please save it smaller (under about 500 KB) and try again \u2014 a logo does not need to be large.');
     return;
   }
   var r=new FileReader();
+  r.onerror=function(){ alert('That file could not be read. Please try another image.'); };
   r.onload=function(){
     var o=coLoad(); o.logo=String(r.result||''); o.logoName=file.name; coSave(o); coRender();
     try{ window.remcApplyBrand(); }catch(e){}
-    alert('Saved on this device. It will not reach the other devices until cloud storage is working.');
   };
   r.readAsDataURL(file);
 }
@@ -3741,6 +3864,39 @@ function coRender(){
 }
 window.coRender = coRender;
 
+// ── System: version and when it was last updated ───────────────────────────
+function sysRender(){
+  var host=document.getElementById('sys-body'); if(!host) return;
+  var ver=String(window.REMC_VERSION||'1.1');
+  var when='';
+  try{ when=window.remcUpdatedText(); }catch(e){}
+  var build=String(window.REMC_BUILD||'');
+
+  var cloud='Not connected';
+  try{ cloud = window.REMC_CLOUD_ACTIVE ? 'Connected' : 'Not connected'; }catch(e){}
+
+  var pending=0;
+  try{ pending=(window.remcPendingKeys()||[]).length; }catch(e){}
+
+  function row(label, value, note){
+    return '<div class="sys-row"><div class="sys-l">'+label+'</div>'
+      +'<div class="sys-v">'+value+'</div>'
+      +(note?('<div class="sys-n">'+note+'</div>'):'')+'</div>';
+  }
+  host.innerHTML='<div class="sys-card">'
+    + row('Version', 'v'+ver.replace(/</g,'&lt;'), 'The release running on this device.')
+    + row('Last updated', when || 'Unknown',
+          'When this version of the software was released.')
+    + row('Cloud', cloud, cloud==='Connected'
+          ? 'Changes are shared with the other devices.'
+          : 'Working from this device only.')
+    + row('Unsaved changes', pending===0 ? 'None' : (pending+' waiting to go up'),
+          pending===0 ? 'Everything is saved.' : 'They will go up on their own.')
+    + '</div>'
+    + '<div class="sys-foot">Reference for support: <code>'+build.replace(/</g,'&lt;')+'</code></div>';
+}
+window.sysRender = sysRender;
+
 function showSettingsTab(tab) {
 document.querySelectorAll('.stab').forEach(function(t) {
 t.classList.toggle('active', t.getAttribute('data-tab') === tab);
@@ -3748,6 +3904,7 @@ t.classList.toggle('active', t.getAttribute('data-tab') === tab);
 document.querySelectorAll('.stab-panel').forEach(function(p) {
 p.classList.toggle('active', p.id === 'stpanel-' + tab);
 });
+if(tab==='system'){ try{ sysRender(); }catch(e){ console.warn('system:', e); } }
 if(tab==='company'){ try{ coRender(); }catch(e){ console.warn('company details:', e); } }
 if(tab==='projects'){ try{ if(typeof window.remcReloadProjData==='function') window.remcReloadProjData(); if(typeof remcRenderCommercialModeUI==='function') remcRenderCommercialModeUI(); }catch(e){} }
 if(tab==='quotations'){ try{ if(typeof remcRenderQuotModeUI==='function') remcRenderQuotModeUI(); }catch(e){} }
@@ -3957,95 +4114,218 @@ function renderMaterialBalance(){
 }
 window.renderMaterialBalance = renderMaterialBalance;
 
-var MAT_DATA = [];
-var MAT_FILTER = 'all';
-var MAT_ACTIVE = true;
+// ── Material / Supplies: who we buy from, hire from and tip at ─────────────
+var SUP_KEY='remc_suppliers', SUPCAT_KEY='remc_supplier_cats';
+var SUP_SORT={ by:'name', dir:1 }, SUP_EDIT=null;
+var SUP_DEFAULT_CATS=['Sand & Fill','Road Base & Limestone','Concrete','Asphalt',
+  'Plant Hire','Trucking & Haulage','Waste & Disposal','Traffic Control','Testing','Other'];
 
-function toggleMaterialsModule() {
-MAT_ACTIVE = !MAT_ACTIVE;
-updateMaterialsToggleUI();
-renderMaterials();
+function supList(){
+  try{ var a=JSON.parse(localStorage.getItem(SUP_KEY)||'[]'); return Array.isArray(a)?a:[]; }
+  catch(e){ return []; }
+}
+function supWrite(a){
+  var txt=JSON.stringify(a||[]);
+  if(typeof window.remcSaveKey==='function'){ window.remcSaveKey(SUP_KEY, txt); return; }
+  try{ localStorage.setItem(SUP_KEY, txt); }catch(e){ alert('Browser storage is full.'); }
+  try{ if(typeof window.remcCloudUpsertKey==='function') window.remcCloudUpsertKey(SUP_KEY, txt); }catch(e){}
+}
+function supCats(){
+  var raw=null;
+  try{ raw=localStorage.getItem(SUPCAT_KEY); }catch(e){}
+  if(raw==null || raw==='') return SUP_DEFAULT_CATS.slice();
+  try{ var a=JSON.parse(raw); return Array.isArray(a)?a:SUP_DEFAULT_CATS.slice(); }
+  catch(e){ return SUP_DEFAULT_CATS.slice(); }
+}
+function supCatsWrite(a){
+  var txt=JSON.stringify(a||[]);
+  if(typeof window.remcSaveKey==='function'){ window.remcSaveKey(SUPCAT_KEY, txt); return; }
+  try{ localStorage.setItem(SUPCAT_KEY, txt); }catch(e){}
+  try{ if(typeof window.remcCloudUpsertKey==='function') window.remcCloudUpsertKey(SUPCAT_KEY, txt); }catch(e){}
+}
+function supEsc(x){ return String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+  .replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function supNid(){ return 'sup_'+Date.now()+'_'+Math.random().toString(36).slice(2,6); }
+
+window.supSort=function(by){
+  if(SUP_SORT.by===by) SUP_SORT.dir=-SUP_SORT.dir;
+  else { SUP_SORT.by=by; SUP_SORT.dir=1; }
+  supRender();
+};
+
+function supFillCatPicker(){
+  var sel=document.getElementById('sup-cat'); if(!sel) return;
+  var used={};
+  supList().forEach(function(x){ if(x.cat) used[x.cat]=(used[x.cat]||0)+1; });
+  var cats=supCats().slice();
+  Object.keys(used).forEach(function(c){ if(cats.indexOf(c)<0) cats.push(c); });
+  cats.sort();
+  var keep=sel.value;
+  sel.innerHTML='<option value="">All categories ('+supList().length+')</option>'
+    + cats.map(function(c){
+        return '<option value="'+supEsc(c)+'"'+(c===keep?' selected':'')+'>'
+          +supEsc(c)+' ('+(used[c]||0)+')</option>'; }).join('');
+  var dl=document.getElementById('sup-cats');
+  if(dl) dl.innerHTML=cats.map(function(c){ return '<option value="'+supEsc(c)+'">'; }).join('');
 }
 
-function updateMaterialsToggleUI() {
-const btn = document.getElementById('mat-toggle-status');
-const dot = document.getElementById('mat-toggle-dot');
-if (!btn || !dot) return;
-btn.textContent = MAT_ACTIVE ? 'Module: Enabled' : 'Module: Disabled';
-dot.style.background = MAT_ACTIVE ? 'var(--green)' : 'var(--red)';
-}
+function renderMaterials(){ supRender(); }
+window.renderMaterials = renderMaterials;
 
-async function renderMaterials() {
-const listEl = document.getElementById('materials-list');
-const emptyEl = document.getElementById('materials-empty');
-if (!listEl) return;
+window.supRender=function(){
+  var body=document.getElementById('sup-rows'); if(!body) return;
+  supFillCatPicker();
 
-const titleEl = document.getElementById('mat-empty-title');
-const subEl = document.getElementById('mat-empty-sub');
+  var q=String((document.getElementById('sup-search')||{}).value||'').trim().toLowerCase();
+  var cat=String((document.getElementById('sup-cat')||{}).value||'');
+  var rows=supList().filter(function(x){
+    if(cat && String(x.cat||'')!==cat) return false;
+    if(!q) return true;
+    return ((x.name||'')+' '+(x.cat||'')+' '+(x.area||'')+' '+(x.contact||'')+' '
+      +(x.phone||'')+' '+(x.notes||'')).toLowerCase().indexOf(q)>=0;
+  });
 
-if (!MAT_ACTIVE) {
-listEl.innerHTML = '';
-emptyEl.style.display = 'block';
-if (titleEl) titleEl.textContent = 'Module Disabled';
-if (subEl) subEl.textContent = 'Enable the module using the button above to view locations.';
-return;
-}
+  var by=SUP_SORT.by, dir=SUP_SORT.dir;
+  rows.sort(function(a,b){
+    var x=String(a[by]||'').toLowerCase(), y=String(b[by]||'').toLowerCase();
+    if(x===y) return String(a.name||'').localeCompare(String(b.name||''));
+    return x<y ? -dir : dir;
+  });
+  ['name','cat','area','phone'].forEach(function(k){
+    var el=document.getElementById('sup-ar-'+k);
+    if(el) el.textContent = (k===by) ? (dir>0?'\u25B2':'\u25BC') : '';
+  });
 
-if (!MAT_DATA || MAT_DATA.length === 0) {
-MAT_DATA = [
-{ name: 'Muchea Sand Pit', type: 'compra', address: 'Muchea, WA', notes: 'Sand fill — call ahead' },
-{ name: 'Gnangara Quarry', type: 'compra', address: 'Gnangara, WA', notes: 'Crushed limestone' },
-{ name: 'Kalamunda Tip', type: 'descarte', address: 'Kalamunda, WA', notes: 'Clean fill accepted' },
-{ name: 'Boral Landfill Baldivis', type: 'descarte', address: 'Baldivis, WA', notes: 'Mon–Fri 7am–5pm' }
-];
-}
+  var empty=document.getElementById('sup-empty');
+  if(!rows.length){
+    body.innerHTML='';
+    if(empty){
+      empty.style.display='';
+      empty.innerHTML = supList().length
+        ? 'No suppliers match that.'
+        : 'No suppliers yet.<br><span style="font-size:12px">Use <strong>+ Add supplier</strong> to record the first one.</span>';
+    }
+    return;
+  }
+  if(empty) empty.style.display='none';
 
-const query = (document.getElementById('mat-search')?.value || '').toLowerCase();
+  body.innerHTML=rows.map(function(x){
+    return '<tr ondblclick="supOpen(\'' + supEsc(x.id) + '\')" title="Double-click for the full details">'
+      +'<td><div class="sup-name">'+supEsc(x.name||'\u2014')+'</div>'
+        +(x.contact?('<div class="sup-sub">'+supEsc(x.contact)+'</div>'):'')+'</td>'
+      +'<td>'+(x.cat?('<span class="sup-pill">'+supEsc(x.cat)+'</span>'):'')+'</td>'
+      +'<td>'+supEsc(x.area||'')+'</td>'
+      +'<td>'+supEsc(x.phone||'')+'</td>'
+      +'</tr>';
+  }).join('');
+};
 
-const filtered = MAT_DATA.filter(m => {
-const matchesType = (MAT_FILTER === 'all') || (m.type === MAT_FILTER);
-const matchesSearch = !query ||
-m.name.toLowerCase().includes(query) ||
-m.address.toLowerCase().includes(query) ||
-(m.notes && m.notes.toLowerCase().includes(query));
-return matchesType && matchesSearch;
-});
+// ---- the supplier card ----
+function supSet(id, v){ var e=document.getElementById(id); if(e) e.value=(v==null?'':v); }
+function supGet(id){ var e=document.getElementById(id); return e ? String(e.value||'').trim() : ''; }
 
-if (filtered.length === 0) {
-listEl.innerHTML = '';
-emptyEl.style.display = 'block';
-} else {
-emptyEl.style.display = 'none';
-listEl.innerHTML = filtered.map(m => {
-const isPurchase = m.type === 'compra' || m.type === 'purchase';
-const icon = isPurchase ? '💰' : '♻️';
-const typeLabel = isPurchase ? 'Purchase' : 'Disposal';
-const badgeClass = isPurchase ? 'pt-type-res' : 'pt-type-com';
+window.supOpen=function(id){
+  SUP_EDIT = id ? (supList().find(function(x){ return String(x.id)===String(id); }) || null) : null;
+  var x=SUP_EDIT||{};
+  supFillCatPicker();
+  document.getElementById('sup-modal-title').textContent = SUP_EDIT ? (x.name||'Supplier') : 'New supplier';
+  supSet('sup-f-name',x.name); supSet('sup-f-cat',x.cat); supSet('sup-f-area',x.area);
+  supSet('sup-f-phone',x.phone); supSet('sup-f-contact',x.contact); supSet('sup-f-role',x.role);
+  supSet('sup-f-email',x.email); supSet('sup-f-phone2',x.phone2); supSet('sup-f-address',x.address);
+  supSet('sup-f-abn',x.abn); supSet('sup-f-web',x.web); supSet('sup-f-notes',x.notes);
+  var d=document.getElementById('sup-del');
+  if(d) d.style.display = SUP_EDIT ? '' : 'none';
+  document.getElementById('sup-modal').classList.add('open');
+  setTimeout(function(){ var n=document.getElementById('sup-f-name'); if(n && !SUP_EDIT) n.focus(); }, 60);
+};
+window.supClose=function(){ document.getElementById('sup-modal').classList.remove('open'); SUP_EDIT=null; };
+window.supSave=function(){
+  var name=supGet('sup-f-name');
+  if(!name){ alert('Please enter the company name.'); return; }
+  var list=supList();
+  var rec = SUP_EDIT ? list.find(function(x){ return String(x.id)===String(SUP_EDIT.id); }) : null;
+  if(!rec){
+    rec={ id:supNid(), createdAt:new Date().toISOString() };
+    list.push(rec);
+  }
+  rec.name=name;
+  rec.cat=supGet('sup-f-cat');       rec.area=supGet('sup-f-area');
+  rec.phone=supGet('sup-f-phone');   rec.contact=supGet('sup-f-contact');
+  rec.role=supGet('sup-f-role');     rec.email=supGet('sup-f-email');
+  rec.phone2=supGet('sup-f-phone2'); rec.address=supGet('sup-f-address');
+  rec.abn=supGet('sup-f-abn');       rec.web=supGet('sup-f-web');
+  rec.notes=supGet('sup-f-notes');
+  rec.updatedAt=new Date().toISOString();
+  supWrite(list);
+  supClose(); supRender();
+};
+window.supDelete=function(){
+  if(!SUP_EDIT) return;
+  if(!confirm('Remove "'+(SUP_EDIT.name||'this supplier')+'" from the list?')) return;
+  supWrite(supList().filter(function(x){ return String(x.id)!==String(SUP_EDIT.id); }));
+  supClose(); supRender();
+};
 
-return `
-<div class="pcard" style="border-left-color: ${isPurchase ? 'var(--green)' : 'var(--blue)'}; padding: 14px 18px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow)">
-<div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px">
-<div style="font-weight:800; font-size:16px; color:var(--text); font-family: 'Barlow', sans-serif">${icon} ${m.name}</div>
-<span class="pt-type-badge ${badgeClass}" style="font-size:10px; font-weight:800; padding:2px 10px; border-radius:6px">${typeLabel}</span>
-</div>
-<div style="font-size:13px; color:var(--mid); margin-bottom:8px">📍 ${m.address || 'Address not provided'}</div>
-${m.notes ? `<div style="font-size:12px; background:var(--surface2); padding:8px 12px; border-radius:8px; color:var(--mid); border:1px solid var(--border); line-height:1.4">📝 ${m.notes}</div>` : ''}
-</div>
-`;
-}).join('');
-}
-}
-
-function matFilter(f) {
-MAT_FILTER = f;
-['all', 'descarte', 'compra'].forEach(id => {
-const el = document.getElementById('mt-' + id);
-if (!el) return;
-const active = (id === f);
-el.style.background = active ? 'var(--red)' : 'none';
-el.style.color = active ? '#fff' : 'var(--muted)';
-});
-renderMaterials();
+// ---- categories ----
+window.supCatOpen=function(){
+  document.getElementById('supcat-modal').classList.add('open');
+  supCatRender();
+  var i=document.getElementById('supcat-new'); if(i){ i.value=''; setTimeout(function(){ i.focus(); },50); }
+};
+window.supCatClose=function(){
+  document.getElementById('supcat-modal').classList.remove('open');
+  supRender();
+};
+window.supCatAdd=function(){
+  var el=document.getElementById('supcat-new'); if(!el) return;
+  var v=String(el.value||'').trim(); if(!v) return;
+  var a=supCats();
+  if(a.some(function(x){ return String(x).toLowerCase()===v.toLowerCase(); })){
+    alert('"'+v+'" is already there.'); return;
+  }
+  a.push(v); supCatsWrite(a); el.value=''; el.focus(); supCatRender();
+};
+window.supCatRename=function(i, v){
+  v=String(v||'').trim(); if(!v){ supCatRender(); return; }
+  var a=supCats(), old=a[i];
+  a[i]=v; supCatsWrite(a);
+  // suppliers keep pointing at the right group
+  var list=supList(), touched=false;
+  list.forEach(function(x){ if(x.cat===old){ x.cat=v; touched=true; } });
+  if(touched) supWrite(list);
+  supCatRender();
+};
+window.supCatMove=function(i, dir){
+  var a=supCats(), j=i+dir;
+  if(j<0 || j>=a.length) return;
+  var t=a[i]; a[i]=a[j]; a[j]=t; supCatsWrite(a); supCatRender();
+};
+window.supCatRemove=function(i){
+  var a=supCats(), name=a[i];
+  var used=supList().filter(function(x){ return x.cat===name; }).length;
+  if(used){ alert('"'+name+'" is used by '+used+' supplier'+(used===1?'':'s')+'.\n\n'
+    +'Move them to another category first.'); return; }
+  if(!confirm('Remove "'+name+'"?')) return;
+  a.splice(i,1); supCatsWrite(a); supCatRender();
+};
+function supCatRender(){
+  var box=document.getElementById('supcat-list'); if(!box) return;
+  var a=supCats(), used={};
+  supList().forEach(function(x){ if(x.cat) used[x.cat]=(used[x.cat]||0)+1; });
+  if(!a.length){ box.innerHTML='<div class="sq-empty">No categories yet.</div>'; return; }
+  box.innerHTML=a.map(function(c,i){
+    return '<div class="sq-row"><span class="sq-n">'+(i+1)+'</span>'
+      +'<input class="sq-name" value="'+supEsc(c)+'" onchange="supCatRename('+i+',this.value)" '
+        +'onkeydown="if(event.key===\'Enter\')this.blur()">'
+      +'<span style="font-size:11px;color:var(--muted);font-weight:700;min-width:52px;text-align:right">'
+        +(used[c]||0)+' in use</span>'
+      +'<button class="sq-move" title="Move up"'+(i===0?' disabled':'')
+        +' onclick="supCatMove('+i+',-1)">\u25B2</button>'
+      +'<button class="sq-move" title="Move down"'+(i===a.length-1?' disabled':'')
+        +' onclick="supCatMove('+i+',1)">\u25BC</button>'
+      +'<button class="sq-del" title="Remove" onclick="supCatRemove('+i+')">\u2715</button>'
+      +'</div>';
+  }).join('');
 }
 
 var QUOT_DATA = [];
@@ -7712,7 +7992,7 @@ var NAV_TABS = [
 { key: 'overview',    label: 'Overview',         icon: '🏗️',  onclick: "showPage('overview')" },
 { key: 'material',    label: 'Material Balance',  icon: '⚖️',  onclick: "showPage('material')" },
 { key: 'requests',    label: 'Requests',          icon: '📋', onclick: "showPage('requests')" },
-{ key: 'materials',   label: 'Materials',         icon: '🚚', onclick: "showPage('materials')" },
+{ key: 'materials',   label: 'Material / Supplies', icon: '🚚', onclick: "showPage('materials')" },
 { key: 'quotations',  label: 'Quotations',        icon: '📊', onclick: "showPage('quotations')" },
 { key: 'team',        label: 'Team Planning',     icon: '👥', onclick: "showPage('team')" },
 { key: 'employees',   label: 'Employees',         icon: '👷', onclick: "showPage('employees')" },
@@ -13241,7 +13521,56 @@ function teamEditProjectBooking(pid){
   window.remcShowLogout = function(on){
     var b = document.getElementById('remc-logout-btn');
     if(b) b.style.display = on ? '' : 'none';
+    try{ window.remcShowWho(on); }catch(e){}
   };
+
+  // Who is signed in, next to Log out. Administrators are labelled, so it is
+  // never a guess whether you are on an account that can change everything.
+  window.remcWhoAmI = function(){
+    var who=String(window.REMC_ME||'').trim();
+    if(!who) return null;
+    var name=who, role='';
+    try{
+      var list=JSON.parse(localStorage.getItem('remc_users')||'[]');
+      if(Array.isArray(list)){
+        var low=who.toLowerCase();
+        var u=list.find(function(x){
+          return x && (String(x.username||'').toLowerCase()===low
+                    || String(x.email||'').toLowerCase()===low);
+        });
+        if(u){
+          role=String(u.role||'');
+          var full=[u.firstName, u.lastName].filter(Boolean).join(' ').trim();
+          if(full) name=full;
+          else if(u.username) name=u.username;
+        }
+      }
+    }catch(e){}
+    if(name.indexOf('@')>0) name=name.split('@')[0];
+    return { name:name, role:role, isAdmin:(role.toLowerCase()==='admin') };
+  };
+  window.remcShowWho = function(on){
+    try{
+      var el=document.getElementById('remc-whoami'); if(!el) return;
+      var me=(on===false) ? null : window.remcWhoAmI();
+      if(!me){ el.style.display='none'; el.textContent=''; return; }
+      el.style.display='';
+      el.innerHTML='Signed in: <b style="color:var(--text)">'
+        +String(me.name).replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</b>'
+        +(me.isAdmin
+          ? ' <span style="background:var(--red);color:#fff;border-radius:3px;padding:0 5px;'
+            +'font-size:9px;font-weight:800;letter-spacing:.5px;vertical-align:1px">ADM</span>'
+          : (me.role ? ' <span style="color:var(--muted);font-size:10px">'
+              +String(me.role).replace(/</g,'&lt;')+'</span>' : ''));
+      el.title='Signed in as '+me.name+(me.isAdmin?' (Administrator)':(me.role?(' ('+me.role+')'):''));
+    }catch(e){}
+  };
+  try{
+    if(document.readyState==='loading')
+      document.addEventListener('DOMContentLoaded', function(){ window.remcShowWho(); });
+    else setTimeout(function(){ window.remcShowWho(); }, 0);
+    setInterval(function(){ try{ window.remcShowWho(); }catch(e){} }, 4000);
+  }catch(e){}
 
   // Add the Cloud status badge to the top nav
   function inject(){
@@ -13975,7 +14304,7 @@ function teamEditProjectBooking(pid){
   var PAGES = [
     { key:'overview',     label:'🏗️ Overview' },
     { key:'material',     label:'⚖️ Material Balance' },
-    { key:'materials',    label:'🚚 Materials' },
+    { key:'materials',    label:'🚚 Material / Supplies' },
     { key:'quotations',   label:'📊 Quotations' },
     { key:'team',         label:'👥 Team Planning' },
     { key:'employees',    label:'👷 Employees' },
@@ -17751,20 +18080,95 @@ function teamEditProjectBooking(pid){
       return (o && typeof o==='object' && !Array.isArray(o)) ? o : {}; }catch(e){ return {}; }
   }
   function save(o){ try{ localStorage.setItem(DIRTY, JSON.stringify(o)); }catch(e){} }
-  function mark(k){ var o=load(); o[k]=Date.now(); save(o); paint(); }
-  function clear(k){ var o=load(); delete o[k]; save(o); paint(); }
+  function mark(k){ var o=load(); o[k]=Date.now(); save(o); phase[k]='waiting'; paint(); }
+  function clear(k){ var o=load(); delete o[k]; save(o); delete phase[k]; paint(); }
   function pending(){ return Object.keys(load()); }
   window.remcPendingKeys = pending;
 
+  // Where each change is up to. The percentage is worked out from this, so it
+  // reflects what is actually happening rather than a guess.
+  //   waiting  - held for a moment in case more typing follows
+  //   sending  - on its way to the cloud
+  //   failed   - will be tried again
+  var phase={};
+  var WEIGHT={ waiting:25, sending:65, failed:10 };
+  function percent(){
+    var keys=pending();
+    if(!keys.length) return 100;
+    var total=0;
+    keys.forEach(function(k){ total += (WEIGHT[phase[k]||'waiting']||25); });
+    return Math.max(5, Math.min(95, Math.round(total/keys.length)));
+  }
+  window.remcSavePercent = percent;
+
+  function card(){
+    var el=document.getElementById('remc-save-card');
+    if(el) return el;
+    el=document.createElement('div');
+    el.id='remc-save-card';
+    el.style.cssText='position:fixed;right:18px;bottom:18px;z-index:99999;display:none;'
+      +'background:#fff;border:1px solid #e4e8ef;border-left:4px solid #d97706;border-radius:12px;'
+      +'box-shadow:0 8px 28px rgba(15,22,33,.18);padding:13px 16px;min-width:250px;'
+      +"font-family:'Barlow',sans-serif";
+    el.innerHTML='<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">'
+      +'<span id="remc-save-ico" style="font-size:15px">\u21BB</span>'
+      +'<span id="remc-save-txt" style="font-size:13px;font-weight:800;color:#0f1621">Saving your changes\u2026</span>'
+      +'<span id="remc-save-pct" style="margin-left:auto;font-family:\'Barlow Condensed\',sans-serif;'
+        +'font-size:17px;font-weight:800;color:#d97706">0%</span></div>'
+      +'<div style="height:6px;background:#eef1f6;border-radius:4px;overflow:hidden">'
+      +'<div id="remc-save-bar" style="height:100%;width:0;background:#d97706;'
+        +'border-radius:4px;transition:width .25s"></div></div>'
+      +'<div id="remc-save-sub" style="font-size:11px;color:#94a3b8;margin-top:7px">'
+        +'Please wait before closing the page.</div>';
+    document.body.appendChild(el);
+    return el;
+  }
+
+  var hideTimer=null;
   function paint(){
     try{
-      var el=document.getElementById('remc-saving');
-      if(!el) return;
-      var n=pending().length;
-      if(n>0){ el.style.display=''; el.textContent='Saving\u2026'; el.title=n+' change(s) still going up'; }
-      else { el.style.display='none'; el.textContent=''; el.title=''; }
+      var n=pending().length, p=percent();
+
+      var tag=document.getElementById('remc-saving');
+      if(tag){
+        if(n>0){ tag.style.display=''; tag.textContent='Saving '+p+'%';
+                 tag.title=n+' change(s) still going up'; }
+        else { tag.style.display='none'; tag.textContent=''; tag.title=''; }
+      }
+
+      if(!document.body) return;
+      var el=card();
+      var bar=document.getElementById('remc-save-bar');
+      var pct=document.getElementById('remc-save-pct');
+      var txt=document.getElementById('remc-save-txt');
+      var sub=document.getElementById('remc-save-sub');
+      var ico=document.getElementById('remc-save-ico');
+
+      clearTimeout(hideTimer);
+      if(n>0){
+        el.style.display='';
+        el.style.borderLeftColor='#d97706';
+        if(bar){ bar.style.width=p+'%'; bar.style.background='#d97706'; }
+        if(pct){ pct.textContent=p+'%'; pct.style.color='#d97706'; }
+        if(ico) ico.textContent='\u21BB';
+        if(txt) txt.textContent='Saving your changes\u2026';
+        if(sub) sub.textContent = navigator.onLine
+          ? 'Please wait before closing the page.'
+          : 'No connection. It is safe on this computer and will go up when you are back online.';
+      } else if(el.style.display!=='none'){
+        // brief green tick, so it is obvious it finished
+        el.style.borderLeftColor='#16a34a';
+        if(bar){ bar.style.width='100%'; bar.style.background='#16a34a'; }
+        if(pct){ pct.textContent='100%'; pct.style.color='#16a34a'; }
+        if(ico) ico.textContent='\u2713';
+        if(txt) txt.textContent='All changes saved';
+        if(sub) sub.textContent='Safe to close the page.';
+        hideTimer=setTimeout(function(){ el.style.display='none'; }, 1800);
+      }
     }catch(e){}
   }
+  // keep the bar moving while a send is in flight
+  setInterval(function(){ if(pending().length) paint(); }, 500);
 
   // Rapid edits - typing across a row - collapse into one send.
   var timers={};
@@ -17772,27 +18176,39 @@ function teamEditProjectBooking(pid){
     try{ localStorage.setItem(key, valueStr); }catch(e){ alert('Browser storage is full.'); return; }
     mark(key);
     clearTimeout(timers[key]);
-    timers[key]=setTimeout(function(){ push(key); }, (wait==null?700:wait));
+    timers[key]=setTimeout(function(){ push(key); }, (wait==null?400:wait));
   };
 
   var busy={};
   function push(key){
     if(busy[key]) return;
-    if(!navigator.onLine) return;
+    if(!navigator.onLine){ phase[key]='failed'; paint(); return; }
     if(typeof window.remcCloudUpsertKey!=='function') return;
     var val=null;
     try{ val=localStorage.getItem(key); }catch(e){}
     if(val==null){ clear(key); return; }
     busy[key]=true;
+    phase[key]='sending'; paint();
     try{
       window.remcCloudUpsertKey(key, val, function(err){
         busy[key]=false;
         if(!err) clear(key);          // only forget it once the cloud has it
+        else { phase[key]='failed'; paint(); }
       });
-    }catch(e){ busy[key]=false; }
+    }catch(e){ busy[key]=false; phase[key]='failed'; paint(); }
   }
   function pushAll(){ pending().forEach(push); }
   window.remcFlushPending = pushAll;
+
+  // Sending waits a moment for more typing. The moment attention moves away,
+  // stop waiting and send now - that is exactly when a page tends to be closed.
+  function flushNow(){
+    Object.keys(timers).forEach(function(k){ clearTimeout(timers[k]); delete timers[k]; });
+    pushAll();
+  }
+  window.remcFlushNow = flushNow;
+  window.addEventListener('blur', flushNow);
+  document.addEventListener('visibilitychange', function(){ if(document.hidden) flushNow(); });
 
   // Every reason to think it might work now
   window.addEventListener('online', pushAll);
@@ -17802,10 +18218,13 @@ function teamEditProjectBooking(pid){
 
   // Closing with work still in flight: try one last time, and let the browser
   // ask before leaving so nothing is lost by accident.
-  window.addEventListener('pagehide', pushAll);
+  window.addEventListener('pagehide', flushNow);
   window.addEventListener('beforeunload', function(ev){
     if(!pending().length) return;
-    pushAll();
+    flushNow();
+    paint();
+    // Browsers only allow their own wording here, so the card on screen carries
+    // the detail: how far along it is and to wait a moment.
     ev.preventDefault();
     ev.returnValue='';
     return '';
