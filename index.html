@@ -1627,6 +1627,26 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
   .pt-main{flex:1;min-width:0}
   .pt-t{font-size:12.5px;font-weight:800;margin-bottom:2px}
   .pt-m{font-size:11px;color:var(--muted);line-height:1.5}
+  .pd-docs-head{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+  .pd-add-btn{margin-left:auto;width:26px;height:26px;border-radius:7px;border:1.5px solid var(--border);
+    background:var(--surface);color:var(--blue);font-size:16px;font-weight:800;line-height:1;cursor:pointer;
+    font-family:'Barlow',sans-serif;display:flex;align-items:center;justify-content:center;padding:0}
+  .pd-add-btn:hover{background:var(--blue);border-color:var(--blue);color:#fff}
+  .pd-grp{margin-bottom:12px}
+  .pd-grp-h{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted);
+    padding:0 2px 5px;display:flex;align-items:center;gap:6px}
+  .pd-none{font-size:12px;color:var(--muted);font-style:italic;padding:14px 2px}
+  .pd-kind{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+  .pd-kind-b{display:flex;align-items:center;gap:9px;padding:13px 14px;border:1.5px solid var(--border);
+    border-radius:10px;background:var(--surface);cursor:pointer;text-align:left;
+    font-family:'Barlow',sans-serif;transition:all .12s}
+  .pd-kind-b:hover{border-color:var(--blue);background:var(--blue-light)}
+  .pd-kind-i{font-size:19px}
+  .pd-kind-t{font-size:13px;font-weight:800;color:var(--text)}
+  .pd-kind-s{font-size:10.5px;color:var(--muted)}
+  .pt-res{font-size:11.5px;font-weight:800;margin-top:3px}
+  .pt-res.ok{color:#15803d} .pt-res.no{color:#b91c1c} .pt-res.wait{color:var(--muted)}
+  .pt-note{font-size:11.5px;color:var(--mid);font-style:italic;margin-top:2px;line-height:1.45}
   .pt-badge{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;padding:2px 7px;
     border-radius:5px;white-space:nowrap;border:1px solid}
   .pt-b-pass{background:var(--green-light);color:#15803d;border-color:rgba(22,163,74,.25)}
@@ -10746,15 +10766,22 @@ function ptRender(pid){
       +'<div class="pt-m">'+ptEsc(ptFmt(t.date))
       +(t.company?(' \u00B7 '+ptEsc(t.company)):' \u00B7 no company yet')
       +(done?' \u00B7 completed':'')+'</div>'
-      +(t.resultNotes?('<div class="pt-m" style="font-style:italic">'+ptEsc(t.resultNotes)+'</div>'):'')
+      // the result in plain words, so it can be read without opening anything
+      +'<div class="pt-res '+(res==='pass'?'ok':(res?'no':'wait'))+'">'
+        +(res==='pass' ? '\u2713 Result: Passed'
+          : res==='fail' ? '\u2715 Result: Failed'
+          : res==='redo' ? '\u21BA Result: Failed \u2014 test to be done again'
+          : o.confirmed ? '\u23F3 Booked \u2014 result not back yet'
+          : '\u2709 Still being booked with the company')
+        +(t.resultAt ? (' \u00B7 ' + ptEsc(ptFmt(String(t.resultAt).slice(0,10)))) : '')
+      +'</div>'
+      +(t.resultNotes?('<div class="pt-note">\u201C'+ptEsc(t.resultNotes)+'\u201D</div>'):'')
       +(f ? ('<div class="pt-file" onclick="ptOpenFile(\''+ptEsc(pid)+'\',\''+ptEsc(t.id)+'\')">'
              +'\uD83D\uDCCE '+ptEsc(f.name||'Report')+'</div>') : '')
       +'</div>'+badge+'</div>';
   }).join('');
 
-  host.innerHTML='<div class="pa-head"><div class="pa-title">\uD83E\uDDEA Compaction tests</div>'
-    +'<button class="pa-add" style="background:var(--surface2);color:var(--mid);border:1px solid var(--border)" '
-    +'onclick="showPage(\'operations\')">Manage in Site Coordination</button></div>'
+  host.innerHTML='<div class="pa-head"><div class="pa-title">\uD83E\uDDEA Compaction tests</div></div>'
     +(list.length
       ? (rows + '<div class="pt-sum">'
          +'<span>Passed: <b style="color:var(--green)">'+nPass+'</b></span>'
@@ -11235,50 +11262,103 @@ var _pdDocPendingSlot = null;
 var _pdDocReplaceIdx = null;
 var _pdDocCustomLabel = null;
 
+// Every plan and document in one list, grouped by what it is. The kind is
+// chosen when the file is attached, not by which section it was dropped into.
+var PD_KINDS = [
+  { key:'civil',      icon:'\uD83C\uDFD7', label:'Civil Plans',     hint:'Levels, drainage, pavement' },
+  { key:'architect',  icon:'\uD83D\uDCD0', label:'Architect Plans', hint:'Building and layout drawings' },
+  { key:'landscape',  icon:'\uD83C\uDF3F', label:'Landscape Plans', hint:'Soft and hard landscaping' },
+  { key:'other',      icon:'\uD83D\uDCCE', label:'Other Files',     hint:'Permits, reports, anything else' }
+];
+function pdKind(key){
+  return PD_KINDS.find(function(k){ return k.key===key; })
+    || { key:key, icon:'\uD83D\uDCCE', label:key, hint:'' };
+}
+
 function pdRenderDocs(id) {
   var store = pdLoadDocs();
   var proj  = store[id] || {};
+  var host  = document.getElementById('pd-docs-all');
+  if (!host) return;
 
-  // Render each category
-  ['civil','architect','landscape'].forEach(function(cat) {
-    var el = document.getElementById('pd-docs-' + cat);
-    if (!el) return;
-    var slots = PD_DOC_SLOTS[cat] || [];
-    var slotKeys = slots.map(function(s){ return s.key; });
-    var catObj = proj[cat] || {};
-    var html = slots.map(function(slot) {
-      var doc = catObj[slot.key];
-      if (doc && doc.name) {
-        return pdDocRow(id, cat, slot.key, slot.icon, slot.label, doc);
-      } else {
-        return pdDocEmptyRow(id, cat, slot.key, slot.icon, slot.label);
-      }
-    }).join('');
-    // Manually-added (custom) items for this sector
-    Object.keys(catObj).forEach(function(k){
-      if (slotKeys.indexOf(k) >= 0) return;
-      var doc = catObj[k];
-      if (doc && (doc.name || doc.label)) html += pdDocRow(id, cat, k, '\ud83d\udcc4', doc.label || doc.name || 'File', doc);
-    });
-    // "+ Add plan" button lets you create a named item + attach a file (not for the single Allowances slot)
-    if (cat !== 'allowances') {
-      html += '<div style="margin-top:6px"><button onclick="pdDocAddCustom(\'' + id + '\',\'' + cat + '\')" style="padding:4px 12px;background:var(--surface2);border:1px dashed var(--border2);border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;color:var(--blue);font-family:\'Barlow\',sans-serif">+ Add plan</button></div>';
+  var html = '', total = 0;
+
+  PD_KINDS.forEach(function(kind){
+    var rows = '';
+    if (kind.key === 'other') {
+      (proj.other || []).forEach(function(doc, i){
+        if (!doc) return;
+        rows += pdDocRow(id, 'other', i, kind.icon, doc.name || 'File', doc);
+        total++;
+      });
+    } else {
+      var catObj = proj[kind.key] || {};
+      Object.keys(catObj).forEach(function(k){
+        var doc = catObj[k];
+        if (!doc || !(doc.name || doc.label)) return;
+        rows += pdDocRow(id, kind.key, k, kind.icon, doc.label || doc.name || 'File', doc);
+        total++;
+      });
     }
-    el.innerHTML = html;
+    if (rows) {
+      html += '<div class="pd-grp"><div class="pd-grp-h"><span>' + kind.icon + '</span> '
+        + kind.label + '</div>' + rows + '</div>';
+    }
   });
 
-  // Other files (dynamic list)
-  var otherEl = document.getElementById('pd-docs-other');
-  if (otherEl) {
-    var others = proj.other || [];
-    if (!others.length) {
-      otherEl.innerHTML = '<div style="font-size:11px;color:var(--muted);font-style:italic;padding:4px 0">No other files</div>';
-    } else {
-      otherEl.innerHTML = others.map(function(doc, i) {
-        return pdDocRow(id, 'other', i, '\ud83d\udcce', doc.name || 'File', doc);
-      }).join('');
-    }
-  }
+  host.innerHTML = total
+    ? html
+    : '<div class="pd-none">Nothing attached yet. Use <strong>+</strong> to add a plan or document.</div>';
+}
+
+// The + button: pick what kind of drawing this is, then how to attach it.
+function pdDocNew(){
+  var id = window._pdCurrentId;
+  if (id == null) return;
+  var existing = document.getElementById('pd-doc-kind-modal');
+  if (existing) existing.remove();
+
+  var ov = document.createElement('div');
+  ov.id = 'pd-doc-kind-modal';
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:2000;'
+    + 'display:flex;align-items:center;justify-content:center';
+  ov.innerHTML =
+    '<div style="background:var(--surface);border-radius:14px;padding:22px;width:470px;max-width:93vw;'
+      + 'box-shadow:0 20px 60px rgba(0,0,0,0.3)">'
+    + '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:18px;font-weight:800;'
+      + 'text-transform:uppercase;margin-bottom:4px">Add a plan or document</div>'
+    + '<div style="font-size:12px;color:var(--muted);margin-bottom:16px">What kind of drawing is it?</div>'
+    + '<div class="pd-kind">'
+    + PD_KINDS.map(function(k){
+        return '<button class="pd-kind-b" onclick="pdDocPickKind(\'' + k.key + '\')">'
+          + '<span class="pd-kind-i">' + k.icon + '</span>'
+          + '<span><span class="pd-kind-t">' + k.label + '</span><br>'
+          + '<span class="pd-kind-s">' + k.hint + '</span></span></button>';
+      }).join('')
+    + '</div>'
+    + '<div style="margin-top:16px;text-align:right">'
+      + '<button onclick="document.getElementById(\'pd-doc-kind-modal\').remove()" '
+      + 'style="padding:7px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;'
+      + 'font-family:\'Barlow\',sans-serif;font-size:12px;font-weight:700;cursor:pointer;color:var(--text)">'
+      + 'Cancel</button></div>'
+    + '</div>';
+  document.body.appendChild(ov);
+  ov.onclick = function(e){ if (e.target === ov) ov.remove(); };
+}
+
+function pdDocPickKind(cat){
+  var m = document.getElementById('pd-doc-kind-modal');
+  if (m) m.remove();
+  var id = window._pdCurrentId;
+  if (cat === 'other'){ pdDocAdd('other'); return; }
+  var name = prompt('Name for this ' + pdKind(cat).label.replace(/ Plans$/,'').toLowerCase()
+    + ' drawing:', '');
+  if (name === null) return;
+  name = String(name).trim();
+  if (!name) return;
+  _pdDocReplaceIdx = null;
+  _pdDocCustomLabel = name;
+  pdDocAttach(id, cat, 'c_' + Date.now());
 }
 
 function pdDocEmptyRow(id, cat, slotKey, icon, label) {
@@ -12469,33 +12549,6 @@ function projDetailOpen(id) {
     badgeEl.innerHTML = '<span style="padding:4px 14px;border-radius:20px;font-size:11px;font-weight:800;text-transform:uppercase;background:' + col + '20;color:' + col + '">' + lbl + '</span>';
   }
 
-  // Today's staff
-  var staffEl = document.getElementById('pd-staff');
-  if (staffEl) {
-    try {
-      var dayKey = planGetDayKey();
-      var assigns = planLoadAssignments();
-      var staff = planGetStaff();
-      var assigned = assigns[dayKey + '|' + id] || [];
-      if (!assigned.length) {
-        staffEl.innerHTML = '<div style="font-size:13px;color:var(--muted);font-style:italic">No staff assigned today</div>';
-      } else {
-        staffEl.innerHTML = assigned.map(function(sid) {
-          var s = staff.find(function(x) { return x.id === sid; });
-          var name = s ? s.name : String(sid);
-          var role = s ? (s.role || '') : '';
-          var ini = name.split(' ').map(function(w) { return (w[0] || '').toUpperCase(); }).join('').slice(0, 2);
-          return '<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:#eff6ff;border-radius:8px;margin-bottom:4px">'
-            + '<div style="width:28px;height:28px;border-radius:6px;background:#2563eb;color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center">' + ini + '</div>'
-            + '<div><div style="font-size:12px;font-weight:700">' + name + '</div>'
-            + (role ? '<div style="font-size:10px;color:var(--muted)">' + role + '</div>' : '') + '</div></div>';
-        }).join('');
-      }
-    } catch (e) {
-      staffEl.innerHTML = '<div style="font-size:13px;color:var(--muted);font-style:italic">Staff data not available</div>';
-    }
-  }
-
   // Load drawing, docs, timeline
   try { pdLoadDrawing(id); } catch(e) { console.warn('pdLoadDrawing error:', e); }
   try { pdRenderDocs(id); } catch(e) { console.warn('pdRenderDocs error:', e); }
@@ -13420,37 +13473,16 @@ function teamEditProjectBooking(pid){
       <input type="file" id="pd-drawing-input" accept="application/pdf,image/*" style="display:none" onchange="pdDrawingUpload(event)">
     </div>
 
-    <!-- Q3 BOTTOM-LEFT: Today's staff -->
-    <div style="background:var(--surface);overflow-y:auto;padding:20px">
-      <div style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;color:var(--blue);margin-bottom:16px">&#128101; Today's Staff</div>
-      <div id="pd-staff" style="font-size:12px;color:var(--muted)">No staff assigned today</div>
-    </div>
-
     <!-- Q4 BOTTOM-RIGHT: Project Plans & Documents -->
     <div style="background:var(--surface);overflow-y:auto;padding:16px 18px">
       <div style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;color:var(--blue);margin-bottom:10px">&#128203; Project Allowances</div>
       <div id="pd-allow-items" style="margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border)"></div>
       <div id="pd-tests" style="margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border)"></div>
-      <div style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;color:var(--blue);margin-bottom:14px">&#128194; Project Plans & Documents</div>
-      <div style="margin-bottom:14px">
-        <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--text);padding:6px 10px;background:var(--surface2);border-radius:6px;margin-bottom:8px;display:flex;align-items:center;gap:6px"><span style="font-size:14px">&#127959;</span> Civil Plans</div>
-        <div id="pd-docs-civil"></div>
+      <div class="pd-docs-head">
+        <div style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;color:var(--blue)">&#128194; Project Plans & Documents</div>
+        <button class="pd-add-btn" onclick="pdDocNew()" title="Attach a plan or document">+</button>
       </div>
-      <div style="margin-bottom:14px">
-        <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--text);padding:6px 10px;background:var(--surface2);border-radius:6px;margin-bottom:8px;display:flex;align-items:center;gap:6px"><span style="font-size:14px">&#128208;</span> Architect Plans</div>
-        <div id="pd-docs-architect"></div>
-      </div>
-      <div style="margin-bottom:14px">
-        <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--text);padding:6px 10px;background:var(--surface2);border-radius:6px;margin-bottom:8px;display:flex;align-items:center;gap:6px"><span style="font-size:14px">&#127807;</span> Landscape Plans</div>
-        <div id="pd-docs-landscape"></div>
-      </div>
-      <div>
-        <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--text);padding:6px 10px;background:var(--surface2);border-radius:6px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between">
-          <div style="display:flex;align-items:center;gap:6px"><span style="font-size:14px">&#128206;</span> Other Files</div>
-          <button onclick="pdDocAdd('other')" style="padding:3px 12px;background:var(--blue);color:#fff;border:none;border-radius:5px;font-size:10px;font-weight:700;cursor:pointer">+ Add</button>
-        </div>
-        <div id="pd-docs-other"></div>
-      </div>
+      <div id="pd-docs-all"></div>
       <input type="file" id="pd-doc-file-input" accept="application/pdf,image/*,.xlsx,.xls,.doc,.docx,.dwg,.dxf" style="display:none" onchange="pdDocFileChosen(event)">
     </div>
   </div><!-- end grid -->
