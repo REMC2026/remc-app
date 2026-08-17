@@ -238,7 +238,8 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
       <div class="nav-item" onclick="showPage('settings')">⚙️ Settings</div>
     </div>
     <div class="nav-right">
-      <div class="build-tag" id="topbuild" title="Software version. If this does not match the file you uploaded, the browser is still using an old copy - press Ctrl+Shift+R.">build 2026-08-08e</div>
+      <div id="remc-saving" style="display:none;font-size:10px;font-weight:800;color:#92400e;background:#fef3c7;border:1px solid #fde68a;border-radius:5px;padding:2px 8px;white-space:nowrap"></div>
+      <div class="build-tag" id="topbuild" title="Software version. If this does not match the file you uploaded, the browser is still using an old copy - press Ctrl+Shift+R.">build 2026-08-08f</div>
       <div class="nav-date" id="topdate">—</div>
       <button id="remc-logout-btn" onclick="remcLogout()" title="Sign out of this device" style="font-family:Barlow,sans-serif;font-size:12px;font-weight:700;color:var(--mid);background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:5px 12px;cursor:pointer;display:none">Log out</button>
       <div class="nav-vis-btn" id="navVisBtn" onclick="toggleNavVisPanel()" title="Customize menu tabs">
@@ -2010,7 +2011,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
         <div>
           <div class="ops-title">Site Coordination</div>
           <div class="ops-sub">Booking compaction tests, moving machines between sites and scheduling subcontractors
-            <span style="margin-left:8px;font-size:10px;font-weight:700;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:1px 7px">build 2026-08-08e</span>
+            <span style="margin-left:8px;font-size:10px;font-weight:700;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:1px 7px">build 2026-08-08f</span>
           </div>
         </div>
         <div style="display:flex;gap:8px;align-items:center">
@@ -3149,7 +3150,7 @@ function tick() {
 // One-time build check
 if (!window._buildChecked) {
   window._buildChecked = true;
-  window.REMC_BUILD = "2026-08-08e";
+  window.REMC_BUILD = "2026-08-08f";
   // the top-bar mark follows the company details too
   try{
     if(document.readyState==='loading')
@@ -3565,8 +3566,10 @@ function coLoad(){
     return (o && typeof o==='object' && !Array.isArray(o)) ? o : {}; }catch(e){ return {}; }
 }
 function coSave(o){
-  try{ localStorage.setItem(CO_KEY, JSON.stringify(o)); }catch(e){ alert('Browser storage is full.'); return; }
-  try{ if(typeof window.remcCloudUpsertKey==='function') window.remcCloudUpsertKey(CO_KEY, JSON.stringify(o)); }catch(e){}
+  var txt=JSON.stringify(o);
+  if(typeof window.remcSaveKey==='function'){ window.remcSaveKey(CO_KEY, txt); return; }
+  try{ localStorage.setItem(CO_KEY, txt); }catch(e){ alert('Browser storage is full.'); return; }
+  try{ if(typeof window.remcCloudUpsertKey==='function') window.remcCloudUpsertKey(CO_KEY, txt); }catch(e){}
 }
 window.remcCompany = coLoad;
 // Everything that shows the company reads through these, so changing the
@@ -10495,8 +10498,12 @@ function paLoad(){
     return (o && typeof o==='object' && !Array.isArray(o)) ? o : {}; }catch(e){ return {}; }
 }
 function paSave(o){
-  try{ localStorage.setItem(PA_KEY, JSON.stringify(o)); }catch(e){ alert('Browser storage is full.'); return; }
-  try{ if(typeof window.remcCloudUpsertKey==='function') window.remcCloudUpsertKey(PA_KEY, JSON.stringify(o)); }catch(e){}
+  var txt=JSON.stringify(o);
+  // Saved on this computer straight away; the cloud copy follows and is
+  // retried until it lands, even if the page is closed in between.
+  if(typeof window.remcSaveKey==='function'){ window.remcSaveKey(PA_KEY, txt); return; }
+  try{ localStorage.setItem(PA_KEY, txt); }catch(e){ alert('Browser storage is full.'); return; }
+  try{ if(typeof window.remcCloudUpsertKey==='function') window.remcCloudUpsertKey(PA_KEY, txt); }catch(e){}
 }
 function paNid(p){ return p+'_'+Date.now()+'_'+Math.random().toString(36).slice(2,6); }
 function paEsc(x){ return String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;')
@@ -17732,6 +17739,80 @@ function teamEditProjectBooking(pid){
   }, true);
   function boot(){ remcNoPastApply(document); setInterval(function(){ remcNoPastApply(document); }, 3000); }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+})();
+</script>
+
+
+<script>
+(function(){
+  var DIRTY='remc_pending_keys';
+  function load(){
+    try{ var o=JSON.parse(localStorage.getItem(DIRTY)||'{}');
+      return (o && typeof o==='object' && !Array.isArray(o)) ? o : {}; }catch(e){ return {}; }
+  }
+  function save(o){ try{ localStorage.setItem(DIRTY, JSON.stringify(o)); }catch(e){} }
+  function mark(k){ var o=load(); o[k]=Date.now(); save(o); paint(); }
+  function clear(k){ var o=load(); delete o[k]; save(o); paint(); }
+  function pending(){ return Object.keys(load()); }
+  window.remcPendingKeys = pending;
+
+  function paint(){
+    try{
+      var el=document.getElementById('remc-saving');
+      if(!el) return;
+      var n=pending().length;
+      if(n>0){ el.style.display=''; el.textContent='Saving\u2026'; el.title=n+' change(s) still going up'; }
+      else { el.style.display='none'; el.textContent=''; el.title=''; }
+    }catch(e){}
+  }
+
+  // Rapid edits - typing across a row - collapse into one send.
+  var timers={};
+  window.remcSaveKey = function(key, valueStr, wait){
+    try{ localStorage.setItem(key, valueStr); }catch(e){ alert('Browser storage is full.'); return; }
+    mark(key);
+    clearTimeout(timers[key]);
+    timers[key]=setTimeout(function(){ push(key); }, (wait==null?700:wait));
+  };
+
+  var busy={};
+  function push(key){
+    if(busy[key]) return;
+    if(!navigator.onLine) return;
+    if(typeof window.remcCloudUpsertKey!=='function') return;
+    var val=null;
+    try{ val=localStorage.getItem(key); }catch(e){}
+    if(val==null){ clear(key); return; }
+    busy[key]=true;
+    try{
+      window.remcCloudUpsertKey(key, val, function(err){
+        busy[key]=false;
+        if(!err) clear(key);          // only forget it once the cloud has it
+      });
+    }catch(e){ busy[key]=false; }
+  }
+  function pushAll(){ pending().forEach(push); }
+  window.remcFlushPending = pushAll;
+
+  // Every reason to think it might work now
+  window.addEventListener('online', pushAll);
+  document.addEventListener('visibilitychange', function(){ if(!document.hidden) pushAll(); });
+  setInterval(function(){ if(!document.hidden) pushAll(); }, 8000);
+  setTimeout(pushAll, 2500);          // anything left over from last time
+
+  // Closing with work still in flight: try one last time, and let the browser
+  // ask before leaving so nothing is lost by accident.
+  window.addEventListener('pagehide', pushAll);
+  window.addEventListener('beforeunload', function(ev){
+    if(!pending().length) return;
+    pushAll();
+    ev.preventDefault();
+    ev.returnValue='';
+    return '';
+  });
+
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', paint);
+  else paint();
 })();
 </script>
 
