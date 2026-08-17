@@ -238,7 +238,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
       <div class="nav-item" onclick="showPage('settings')">⚙️ Settings</div>
     </div>
     <div class="nav-right">
-      <div class="build-tag" id="topbuild" title="Software version. If this does not match the file you uploaded, the browser is still using an old copy - press Ctrl+Shift+R.">build 2026-08-07v</div>
+      <div class="build-tag" id="topbuild" title="Software version. If this does not match the file you uploaded, the browser is still using an old copy - press Ctrl+Shift+R.">build 2026-08-08d</div>
       <div class="nav-date" id="topdate">—</div>
       <button id="remc-logout-btn" onclick="remcLogout()" title="Sign out of this device" style="font-family:Barlow,sans-serif;font-size:12px;font-weight:700;color:var(--mid);background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:5px 12px;cursor:pointer;display:none">Log out</button>
       <div class="nav-vis-btn" id="navVisBtn" onclick="toggleNavVisPanel()" title="Customize menu tabs">
@@ -431,7 +431,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
         <div class="quot-search-wrap">
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="6.5" cy="6.5" r="4.5"/><path d="M10.5 10.5l3 3"/></svg>
           <input name="remcflt_quotsearch" type="search" id="quot-search" class="quot-search-input" autocomplete="off" autocorrect="off" spellcheck="false"
-            placeholder="Search project, client, REMC #, status, date…"
+            placeholder="Search project, client, job number, status, date…"
             oninput="renderQuotations()" data-lpignore="true" data-1p-ignore data-form-type="other" aria-autocomplete="none">
           <button id="quot-search-clear" onclick="document.getElementById('quot-search').value='';renderQuotations()" style="display:none;background:none;border:none;cursor:pointer;color:var(--muted);font-size:13px;padding:0 2px;line-height:1">✕</button>
         </div>
@@ -1057,7 +1057,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
         <div class="emp-section-title">Identity</div>
         <div class="emp-form-grid">
           <div class="emp-fg"><label>Employee number</label><input id="emp-f-empnum" placeholder="e.g. E-1024"></div>
-          <div class="emp-fg"><label>Full name <span class="req">*</span></label><input id="emp-f-name" placeholder="e.g. Adrian Zanardo"></div>
+          <div class="emp-fg"><label>Full name <span class="req">*</span></label><input id="emp-f-name" placeholder="Full name"></div>
           <div class="emp-fg"><label>Job title <span class="req">*</span></label><input id="emp-f-jobtitle" placeholder="e.g. Excavator Operator"></div>
           <div class="emp-fg"><label>Company</label><input id="emp-f-company" placeholder="Company"></div>
           <div class="emp-fg"><label>Role</label><input id="emp-f-role" placeholder="Role"></div>
@@ -1208,7 +1208,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
             <div style="display:flex;flex-direction:column;gap:10px">
               <div style="display:flex;flex-direction:column;gap:4px">
                 <label style="font-size:10px;font-weight:700;color:var(--mid);text-transform:uppercase;letter-spacing:0.5px">REMC Job #</label>
-                <input id="pm-jobnum" placeholder="e.g. REMC-001" style="background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:7px 10px;font-size:13px;color:var(--text);outline:none;width:100%;box-sizing:border-box">
+                <input id="pm-jobnum" placeholder="Job number" style="background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:7px 10px;font-size:13px;color:var(--text);outline:none;width:100%;box-sizing:border-box">
               </div>
               <div style="display:flex;flex-direction:column;gap:4px">
                 <label style="font-size:10px;font-weight:700;color:var(--mid);text-transform:uppercase;letter-spacing:0.5px">Project Name *</label>
@@ -1268,7 +1268,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
             <div style="display:flex;flex-direction:column;gap:10px">
               <div style="display:flex;flex-direction:column;gap:4px">
                 <label style="font-size:10px;font-weight:700;color:var(--mid);text-transform:uppercase;letter-spacing:0.5px">Builder / Company</label>
-                <input id="pm-builder" placeholder="e.g. ABN Constructions" style="background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:7px 10px;font-size:13px;color:var(--text);outline:none;width:100%;box-sizing:border-box">
+                <input id="pm-builder" placeholder="Builder name" style="background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:7px 10px;font-size:13px;color:var(--text);outline:none;width:100%;box-sizing:border-box">
               </div>
               <div style="display:flex;flex-direction:column;gap:4px">
                 <label style="font-size:10px;font-weight:700;color:var(--mid);text-transform:uppercase;letter-spacing:0.5px">Contact Person</label>
@@ -1276,11 +1276,11 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
               </div>
               <div style="display:flex;flex-direction:column;gap:4px">
                 <label style="font-size:10px;font-weight:700;color:var(--mid);text-transform:uppercase;letter-spacing:0.5px">Phone</label>
-                <input id="pm-phone" type="tel" placeholder="0412 345 678" style="background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:7px 10px;font-size:13px;color:var(--text);outline:none;width:100%;box-sizing:border-box">
+                <input id="pm-phone" type="tel" placeholder="Mobile number" style="background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:7px 10px;font-size:13px;color:var(--text);outline:none;width:100%;box-sizing:border-box">
               </div>
               <div style="display:flex;flex-direction:column;gap:4px">
                 <label style="font-size:10px;font-weight:700;color:var(--mid);text-transform:uppercase;letter-spacing:0.5px">Email</label>
-                <input id="pm-email" type="email" placeholder="contact@builder.com.au" style="background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:7px 10px;font-size:13px;color:var(--text);outline:none;width:100%;box-sizing:border-box">
+                <input id="pm-email" type="email" placeholder="name@builder.com" style="background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:7px 10px;font-size:13px;color:var(--text);outline:none;width:100%;box-sizing:border-box">
               </div>
             </div>
           </div>
@@ -1293,11 +1293,6 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
                 <label style="font-size:10px;font-weight:700;color:var(--mid);text-transform:uppercase;letter-spacing:0.5px">REMC Supervisor</label>
                 <select id="pm-supervisor" style="background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:7px 10px;font-size:13px;color:var(--text);outline:none">
                   <option value="">— Select —</option>
-                  <option>Mark Davies</option>
-                  <option>Jay Sumaryo</option>
-                  <option>Matt Winfield</option>
-                  <option>Andrew De Haas</option>
-                  <option>Sandra Lee</option>
                 </select>
               </div>
               <div style="display:flex;flex-direction:column;gap:4px">
@@ -1667,39 +1662,90 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
   .pa-tot-v{font-family:'Barlow Condensed',sans-serif;font-size:23px;font-weight:800;line-height:1}
   .pa-tot-v.out{color:var(--red)} .pa-tot-v.in{color:var(--green)} .pa-tot-v.n{color:var(--text)}
   .pa-tot-u{font-size:12px;font-weight:700;color:var(--muted);margin-left:3px}
-  .pa-sec{border:1px solid var(--border);border-radius:11px;margin-bottom:14px;overflow:hidden;background:var(--surface)}
-  .pa-sec-head{display:flex;align-items:center;gap:8px;padding:9px 12px;background:var(--surface2);
-    border-bottom:1.5px solid var(--border2)}
-  .pa-sec-ref{width:52px;background:var(--surface);border:1px solid var(--border);border-radius:6px;
-    padding:5px 7px;font-size:12px;font-weight:800;font-family:'Barlow',sans-serif;color:var(--red);
-    text-align:center;outline:none}
-  .pa-sec-name{flex:1;min-width:0;background:none;border:1px solid transparent;border-radius:6px;padding:5px 8px;
-    font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;text-transform:uppercase;
-    letter-spacing:.5px;color:var(--text);outline:none}
-  .pa-sec-name:hover{border-color:var(--border)} .pa-sec-name:focus{border-color:var(--red);background:var(--surface)}
-  .pa-th,.pa-tr{display:grid;grid-template-columns:56px 1fr 82px 74px 96px 96px 28px;gap:6px;align-items:center;padding:6px 12px}
-  .pa-th{background:var(--surface);border-bottom:1px solid var(--border);font-size:8.5px;font-weight:800;
-    text-transform:uppercase;letter-spacing:.9px;color:var(--muted)}
-  .pa-th .r{text-align:right}
-  .pa-tr{border-bottom:1px solid var(--border)}
-  .pa-tr:last-child{border-bottom:none}
-  .pa-tr:hover{background:var(--surface2)}
-  .pa-i{width:100%;background:none;border:1px solid transparent;border-radius:6px;padding:5px 7px;
-    font-size:12.5px;font-family:'Barlow',sans-serif;color:var(--text);outline:none}
-  .pa-i:hover{border-color:var(--border)} .pa-i:focus{border-color:var(--blue);background:var(--surface)}
-  .pa-i.num{text-align:right;font-weight:700}
-  .pa-i.ref{font-weight:800;color:var(--red);text-align:center}
-  .pa-i.out{color:var(--red);font-weight:800}
-  .pa-i.inn{color:var(--green);font-weight:800}
-  .pa-x{background:none;border:none;color:var(--muted);cursor:pointer;font-size:12px;padding:0}
+  .pa-subtot{background:#fdf5f5}
+  .co-head{margin-bottom:16px}
+  .co-title{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;
+    text-transform:uppercase;letter-spacing:.5px}
+  .co-sub{font-size:12.5px;color:var(--muted);margin-top:2px}
+  .co-logo-row{display:flex;gap:18px;align-items:center;padding:16px;background:var(--surface);
+    border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);margin-bottom:16px}
+  .co-logo-box{width:170px;height:96px;border:1.5px dashed var(--border2);border-radius:10px;
+    display:flex;align-items:center;justify-content:center;background:#fff;flex-shrink:0;overflow:hidden}
+  .co-logo-box img{max-width:100%;max-height:100%;object-fit:contain}
+  .co-logo-empty{font-size:12px;color:var(--muted);font-weight:700}
+  .co-logo-side{flex:1;min-width:0}
+  .co-logo-name{font-size:13px;font-weight:800;color:var(--text)}
+  .co-logo-hint{font-size:11.5px;color:var(--muted);margin-top:2px}
+  .co-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .co-f.wide{grid-column:1/-1}
+  .co-f label{display:block;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;
+    color:var(--muted);margin-bottom:4px}
+  .co-f input{width:100%;box-sizing:border-box;background:var(--surface);border:1.5px solid var(--border);
+    border-radius:8px;padding:9px 12px;font-size:13px;font-family:'Barlow',sans-serif;color:var(--text);outline:none}
+  .co-f input:focus{border-color:var(--red)}
+  @media (max-width:760px){ .co-grid{grid-template-columns:1fr} .co-logo-row{flex-direction:column;align-items:flex-start} }
+  .pa-sheet{padding:16px 20px;background:#fff}
+  .pa-banner{display:flex;align-items:center;gap:9px;margin-bottom:14px}
+  .pa-logo{width:28px;height:28px;background:#111;border-radius:5px;display:flex;align-items:center;
+    justify-content:center;flex-shrink:0}
+  .pa-logo-r{color:#e11d1d;font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;line-height:1}
+  .pa-logo-img{max-height:34px;max-width:150px;object-fit:contain}
+  .pa-logo-txt{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;line-height:1.05;color:#111}
+  .pa-logo-txt span{font-size:9px;font-weight:600;color:var(--mid);letter-spacing:.5px}
+  .pa-doc-title{flex:1;text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:24px;
+    font-weight:800;letter-spacing:1px;text-decoration:underline;text-underline-offset:4px;padding-right:60px}
+  table.pa-t{border-collapse:collapse;width:100%;table-layout:fixed}
+  table.pa-t td{border:1px solid #111;padding:0;height:24px;vertical-align:middle}
+  table.pa-t td.lb{background:#fff;padding:0 8px;font-size:12px;font-weight:800;color:#111;white-space:nowrap}
+  .pa-info-wrap{border:2px dashed #16a34a;padding:3px;margin-bottom:12px}
+  .pa-two{display:flex;gap:20px;margin-bottom:14px;align-items:flex-start}
+  .pa-two>div{flex:1}
+  .pa-cc{text-align:center;font-size:12px;font-weight:800;color:#111;background:#fff}
+  .pa-f{width:100%;box-sizing:border-box;border:none;background:none;padding:0 8px;height:22px;
+    font-size:12px;font-family:'Barlow',sans-serif;font-weight:700;color:#1d4ed8;outline:none}
+  .pa-f:focus{background:#eff6ff}
+  table.pa-grid{border-collapse:collapse;width:100%;table-layout:fixed;border:2px solid #16a34a}
+  table.pa-grid th{border:1px solid #111;background:#fff;color:#e11d1d;font-size:11.5px;font-weight:800;
+    padding:4px 3px;line-height:1.1;text-align:center}
+  table.pa-grid td{border:1px solid #f0bcbc;padding:0;height:22px;vertical-align:middle}
+  table.pa-grid tr.sec td{background:#fde8e8;border-color:#e8a5a5;border-top:2px solid #e11d1d}
+  table.pa-grid tbody tr:hover td{background:#fffafa}
+  table.pa-grid tbody tr.sec:hover td{background:#fbdede}
+  table.pa-grid td.tint{background:#fdecec}
+  table.pa-grid tr.sub td{background:#fdf3f3;font-size:11.5px;font-weight:800;color:#111;
+    text-align:center;padding:0 4px}
+  table.pa-grid tr.sub td.lbl{text-align:right;color:var(--mid);font-size:11px;padding-right:8px}
+  .pa-c{width:100%;box-sizing:border-box;border:none;background:none;padding:0 6px;height:20px;
+    font-size:12px;font-family:'Barlow',sans-serif;color:#111;outline:none}
+  .pa-c:focus{background:#fff;box-shadow:inset 0 0 0 2px var(--blue)}
+  .pa-c.mid{text-align:center}
+  .pa-c.ref{text-align:center;font-weight:800}
+  .pa-c.sec{font-weight:800;text-transform:uppercase}
+  .pa-x{background:none;border:none;color:#d8dee7;cursor:pointer;font-size:11px;padding:0;width:100%;height:20px}
   .pa-x:hover{color:var(--red)}
-  .pa-sec-foot{display:flex;align-items:center;gap:10px;padding:7px 12px;background:var(--surface2);
-    border-top:1px solid var(--border);font-size:11px;font-weight:700;color:var(--mid)}
-  .pa-addrow{background:none;border:1px dashed var(--border2);border-radius:7px;padding:4px 12px;
-    font-family:'Barlow',sans-serif;font-size:11px;font-weight:800;color:var(--mid);cursor:pointer}
+  table.pa-grid td.refc{text-align:center;font-size:12px;font-weight:800;color:#111;padding:0 3px}
+  table.pa-grid tr.ins td{border:none;height:9px;padding:0;background:transparent}
+  table.pa-grid tr.ins:hover td{background:transparent}
+  .ins-bar{position:relative;height:9px;display:flex;align-items:center;justify-content:center;gap:5px;
+    opacity:0;transition:opacity .12s}
+  .ins-bar:hover{opacity:1}
+  tr.ins:hover .ins-bar{opacity:1}
+  .ins-bar:before{content:'';position:absolute;left:0;right:0;top:50%;height:1px;background:var(--blue);opacity:.4}
+  .ins-b{position:relative;z-index:1;background:var(--blue);color:#fff;border:none;border-radius:9px;
+    padding:1px 9px;font-family:'Barlow',sans-serif;font-size:9.5px;font-weight:800;cursor:pointer;line-height:1.5}
+  .ins-b:hover{background:#1d4ed8}
+  .ins-b.sec{background:#111}
+  .ins-b.sec:hover{background:#333}
+  .pa-addrow{background:none;border:1px dashed var(--border2);border-radius:5px;padding:1px 10px;
+    font-family:'Barlow',sans-serif;font-size:11px;font-weight:800;color:var(--mid);cursor:pointer;margin:3px 6px}
   .pa-addrow:hover{border-color:var(--blue);color:var(--blue)}
-  .pa-sec-sum{margin-left:auto;display:flex;gap:14px}
-  .pa-sec-sum b{font-family:'Barlow Condensed',sans-serif;font-size:14px}
+  .pa-tot{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);
+    border-top:1px solid var(--border)}
+  .pa-tot-c{background:var(--surface);padding:10px 18px}
+  .pa-tot-l{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1.3px;color:var(--muted);margin-bottom:2px}
+  .pa-tot-v{font-family:'Barlow Condensed',sans-serif;font-size:21px;font-weight:800;line-height:1}
+  .pa-tot-v.out{color:var(--red)} .pa-tot-v.in{color:var(--green)} .pa-tot-v.n{color:var(--text)}
+  .pa-tot-u{font-size:11px;font-weight:700;color:var(--muted);margin-left:3px}
   .pa-none{padding:44px 20px;text-align:center;color:var(--muted);font-size:13px}
   .pa-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}
   .pa-title{font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:1.2px;color:var(--mid)}
@@ -1908,7 +1954,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
           </div>
           <div class="proj-form-group rq-dest-name" style="display:none">
             <label id="rq-dest-name-label">Place</label>
-            <input id="rq-dest-where" list="rq-dest-list" placeholder="e.g. Red Hill Waste Facility">
+            <input id="rq-dest-where" list="rq-dest-list" placeholder="Site name">
             <datalist id="rq-dest-list"></datalist>
           </div>
           <div class="proj-form-group rq-dest-name" style="display:none">
@@ -1929,17 +1975,17 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
           </div>
           <div class="proj-form-group rq-own-only" style="display:none">
             <label>Truck</label>
-            <input id="rq-truck" list="rq-trucks" placeholder="e.g. Truck &amp; Dog 1">
+            <input id="rq-truck" list="rq-trucks" placeholder="Truck name or number">
             <datalist id="rq-trucks"></datalist>
           </div>
           <div class="proj-form-group rq-own-only" style="display:none">
             <label>Driver</label>
-            <input id="rq-driver" list="rq-drivers" placeholder="e.g. Mark Davies">
+            <input id="rq-driver" list="rq-drivers" placeholder="Driver name">
             <datalist id="rq-drivers"></datalist>
           </div>
           <div class="proj-form-group rq-sub-only" style="display:none;grid-column:1/-1">
             <label>Company</label>
-            <input id="rq-company" list="rq-companies" placeholder="e.g. Perth Haulage Pty Ltd">
+            <input id="rq-company" list="rq-companies" placeholder="Company name">
             <datalist id="rq-companies"></datalist>
           </div>
           <div class="proj-form-group" style="grid-column:1/-1">
@@ -1964,7 +2010,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
         <div>
           <div class="ops-title">Site Coordination</div>
           <div class="ops-sub">Booking compaction tests, moving machines between sites and scheduling subcontractors
-            <span style="margin-left:8px;font-size:10px;font-weight:700;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:1px 7px">build 2026-08-07v</span>
+            <span style="margin-left:8px;font-size:10px;font-weight:700;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:1px 7px">build 2026-08-08d</span>
           </div>
         </div>
         <div style="display:flex;gap:8px;align-items:center">
@@ -2136,7 +2182,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
           </div>
           <div class="proj-form-group ops-full">
             <label>Company doing the test</label>
-            <input id="op-test-company" list="op-test-companies" placeholder="e.g. Geotech WA">
+            <input id="op-test-company" list="op-test-companies" placeholder="Testing company">
             <datalist id="op-test-companies"></datalist>
             <div class="ops-hint">Leave empty and it will show on the Overview as "lab not booked yet".</div>
           </div>
@@ -2238,7 +2284,8 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
   </div>
 
   <!-- ─────────── PROJECT ALLOWANCES ─────────── -->
-  <div class="proj-modal-overlay" id="pa-modal">
+  <!-- opened from inside the project panel, so it has to sit above it -->
+  <div class="proj-modal-overlay" id="pa-modal" style="z-index:1100">
     <div class="proj-modal" style="width:1150px;max-width:97vw">
       <div class="proj-modal-header">
         <span>&#128203; Project Allowances</span>
@@ -2246,11 +2293,17 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
         <button class="proj-modal-close" onclick="paClose()">&#10005;</button>
       </div>
       <div class="proj-modal-body" style="max-height:74vh;overflow-y:auto;padding:0">
+        <div class="pa-sheet">
+          <div class="pa-banner" id="pa-banner"></div>
+          <div id="pa-info"></div>
+          <div id="pa-body"></div>
+        </div>
         <div class="pa-tot" id="pa-tot"></div>
-        <div id="pa-body" style="padding:14px 18px"></div>
       </div>
       <div class="proj-modal-footer">
         <button class="proj-modal-cancel" onclick="paAddSection()" style="margin-right:auto">+ Add section</button>
+        <button class="proj-modal-cancel" onclick="paPrint()"
+          title="Opens the print dialog. Choose &quot;Save as PDF&quot; there to keep a copy.">&#128424; Print / Save PDF</button>
         <button class="proj-modal-save" onclick="paClose()">Done</button>
       </div>
     </div>
@@ -2296,7 +2349,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
           </div>
           <div class="proj-form-group">
             <label>Company</label>
-            <input id="op-sub-name" list="op-sub-companies" placeholder="e.g. Perth Civil Pty Ltd">
+            <input id="op-sub-name" list="op-sub-companies" placeholder="Company name">
             <datalist id="op-sub-companies"></datalist>
           </div>
           <div class="proj-form-group">
@@ -2337,6 +2390,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
         </div>
       </div>
 
+      <!-- Company Details panel is appended after the other stab-panels below -->
       <!-- SETTINGS: category buttons on top, tabs of the chosen group below -->
       <div class="settings-cats" id="settingsCats">
         <button type="button" class="scat active" data-cat="data"    onclick="showSettingsCat('data')">📋 Data &amp; Information</button>
@@ -2359,6 +2413,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
         <div class="stab" onclick="showSettingsTab('backup')"            data-tab="backup"         data-cat="system">🗃️ Backup</div>
         <div class="stab" onclick="showSettingsTab('outlook')"           data-tab="outlook"        data-cat="system">📧 Email (Outlook)</div>
         <div class="stab" onclick="showSettingsTab('display')"           data-tab="display"        data-cat="display">🖥️ Display</div>
+        <div class="stab" onclick="showSettingsTab('company')"           data-tab="company"        data-cat="display">🏢 Company Details</div>
       </div>
 
       <!-- TAB: COMMERCIAL PROJECTS -->
@@ -2858,6 +2913,14 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
         </div>
       </div>
 
+      <div class="stab-panel" id="stpanel-company">
+        <div class="co-head">
+          <div class="co-title">&#127970; Company Details</div>
+          <div class="co-sub">Used on the Project Allowances sheet and anywhere the company is shown.</div>
+        </div>
+        <div id="co-body"></div>
+      </div>
+
       <div class="stab-panel" id="stpanel-access">
         <div class="stpanel-inner">
           <div class="stpanel-desc">Register everyone in the <b>office</b> who is allowed to use the REMC system. This list is shared with every device.</div>
@@ -2880,11 +2943,11 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
             </div>
             <div class="step-body">
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
-                <div><div class="map-lbl">First name</div><input id="acc-first" class="map-sel" placeholder="e.g. Michael"></div>
-                <div><div class="map-lbl">Last name</div><input id="acc-last" class="map-sel" placeholder="e.g. Di Trento"></div>
-                <div><div class="map-lbl">Email</div><input id="acc-email" class="map-sel" type="email" placeholder="e.g. michael@remc.com.au"></div>
-                <div><div class="map-lbl">Username</div><input id="acc-user" class="map-sel" placeholder="e.g. MDT"></div>
-                <div><div class="map-lbl">Password</div><input id="acc-pass" class="map-sel" placeholder="e.g. REMC123"></div>
+                <div><div class="map-lbl">First name</div><input id="acc-first" class="map-sel" placeholder="First name"></div>
+                <div><div class="map-lbl">Last name</div><input id="acc-last" class="map-sel" placeholder="Surname"></div>
+                <div><div class="map-lbl">Email</div><input id="acc-email" class="map-sel" type="email" placeholder="name@yourcompany.com"></div>
+                <div><div class="map-lbl">Username</div><input id="acc-user" class="map-sel" placeholder="Initials"></div>
+                <div><div class="map-lbl">Password</div><input id="acc-pass" class="map-sel" placeholder="Set a password"></div>
                 <div><div class="map-lbl">Role</div>
                   <select id="acc-role" class="map-sel" onchange="remcAccRoleChanged()">
                     <option value="office">Office</option>
@@ -3086,7 +3149,13 @@ function tick() {
 // One-time build check
 if (!window._buildChecked) {
   window._buildChecked = true;
-  window.REMC_BUILD = "2026-08-07v";
+  window.REMC_BUILD = "2026-08-08d";
+  // the top-bar mark follows the company details too
+  try{
+    if(document.readyState==='loading')
+      document.addEventListener('DOMContentLoaded', function(){ try{ window.remcApplyBrand(); }catch(e){} });
+    else setTimeout(function(){ try{ window.remcApplyBrand(); }catch(e){} }, 0);
+  }catch(e){}
   console.log("%c REMC v1.1 \u00B7 build " + window.REMC_BUILD + " loaded successfully ", "background:#16a34a;color:white;font-size:14px;padding:4px 8px;border-radius:4px");
 }
 
@@ -3489,6 +3558,186 @@ function showSettingsCat(cat, keepPanel) {
 }
 window.showSettingsCat = showSettingsCat;
 document.addEventListener('DOMContentLoaded', function(){ try{ showSettingsCat('data', true); }catch(e){} });
+// ── Company details: the logo and address that go on printed sheets ────────
+var CO_KEY='remc_company';
+function coLoad(){
+  try{ var o=JSON.parse(localStorage.getItem(CO_KEY)||'{}');
+    return (o && typeof o==='object' && !Array.isArray(o)) ? o : {}; }catch(e){ return {}; }
+}
+function coSave(o){
+  try{ localStorage.setItem(CO_KEY, JSON.stringify(o)); }catch(e){ alert('Browser storage is full.'); return; }
+  try{ if(typeof window.remcCloudUpsertKey==='function') window.remcCloudUpsertKey(CO_KEY, JSON.stringify(o)); }catch(e){}
+}
+window.remcCompany = coLoad;
+// Everything that shows the company reads through these, so changing the
+// details in Settings changes them everywhere at once.
+window.remcCoName = function(){
+  var c=coLoad();
+  return String(c.name||'').trim() || 'Your Company';
+};
+window.remcCoLogo = function(){ var c=coLoad(); return String(c.logo||''); };
+window.remcCoLine = function(){
+  var c=coLoad(), bits=[];
+  if(c.address) bits.push(c.address);
+  if(c.phone) bits.push(c.phone);
+  if(c.email) bits.push(c.email);
+  return bits.join('  \u00B7  ');
+};
+// A ready-made header for printed pages and pop-outs.
+window.remcCoHeaderHTML = function(sub){
+  var name=String(window.remcCoName()).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+  var logo=window.remcCoLogo();
+  var line=String(window.remcCoLine()).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+  return (logo
+      ? '<img src="'+String(logo).replace(/"/g,'&quot;')+'" alt="" style="max-height:34px;max-width:150px;object-fit:contain">'
+      : '<div class="brand"><span class="brand-r">R</span>EMC</div>')
+    + '<div><div style="font-size:15px;font-weight:800;color:#1e293b">'+name+'</div>'
+    + (line?('<div style="font-size:10px;color:#94a3b8">'+line+'</div>'):'')
+    + (sub?('<div style="font-size:12px;color:#64748b;margin-top:2px">'
+            +String(sub).replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</div>'):'')
+    + '</div>';
+};
+// The name shown in the top bar of the app itself.
+// The project supervisor picker is filled from the people actually set up in
+// Settings, so no names are ever written into the software itself.
+window.remcFillSupervisorPicker = function(){
+  try{
+    var sel=document.getElementById('pm-supervisor'); if(!sel) return;
+    var names={}, out=[];
+    function add(n){ n=String(n||'').trim(); if(n && !names[n.toLowerCase()]){ names[n.toLowerCase()]=1; out.push(n); } }
+    try{ (JSON.parse(localStorage.getItem('remc_supervisors')||'[]')||[]).forEach(function(x){ add(x&&x.name); }); }catch(e){}
+    try{ (JSON.parse(localStorage.getItem('remc_staff')||'[]')||[]).forEach(function(x){
+      if(x && String(x.role||'').toLowerCase().indexOf('supervis')>=0) add(x.name); }); }catch(e){}
+    if(!out.length){
+      try{ (JSON.parse(localStorage.getItem('remc_staff')||'[]')||[]).forEach(function(x){ add(x&&x.name); }); }catch(e){}
+    }
+    out.sort();
+    var keep=sel.value;
+    sel.innerHTML='<option value="">\u2014 Select \u2014</option>'
+      + out.map(function(n){
+          return '<option'+(n===keep?' selected':'')+'>'
+            +String(n).replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</option>'; }).join('');
+    if(keep && out.indexOf(keep)<0){
+      sel.insertAdjacentHTML('beforeend','<option selected>'
+        +String(keep).replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</option>');
+    }
+  }catch(e){}
+};
+try{
+  document.addEventListener('focusin', function(ev){
+    if(ev.target && ev.target.id==='pm-supervisor') window.remcFillSupervisorPicker();
+  }, true);
+}catch(e){}
+
+window.remcApplyBrand = function(){
+  try{
+    var el=document.querySelector('.nav-left .brand') || document.querySelector('.brand');
+    if(!el) return;
+    var c=coLoad();
+    var logo=String(c.logo||'');
+    var name=String(c.name||'').trim();
+    if(logo){
+      el.innerHTML='<img src="'+logo.replace(/"/g,'&quot;')+'" alt="" '
+        +'style="max-height:26px;max-width:120px;object-fit:contain;vertical-align:middle">'
+        +'<span id="remc-version" style="font-size:9px;color:#16a34a;font-weight:700;margin-left:6px;'
+        +'background:#dcfce7;padding:2px 6px;border-radius:4px">v1.1</span>';
+    } else if(name){
+      var first=name.charAt(0).toUpperCase(), rest=name.slice(1);
+      el.innerHTML='<span class="brand-r">'+first+'</span><span class="brand-rest">'
+        +rest.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</span>'
+        +'<span id="remc-version" style="font-size:9px;color:#16a34a;font-weight:700;margin-left:6px;'
+        +'background:#dcfce7;padding:2px 6px;border-radius:4px">v1.1</span>';
+    }
+  }catch(e){}
+};
+window.coSet = function(field, v){
+  var o=coLoad(); o[field]=String(v||''); coSave(o);
+  try{ coRender(); }catch(e){}
+  try{ window.remcApplyBrand(); }catch(e){}
+};
+window.coPickLogo = function(){
+  var inp=document.createElement('input');
+  inp.type='file'; inp.accept='image/png,image/jpeg,image/svg+xml,image/webp';
+  inp.onchange=function(){
+    var f=inp.files && inp.files[0]; if(!f) return;
+    if(f.size > 4*1024*1024){ alert('That image is bigger than 4 MB. Please use a smaller one.'); return; }
+    coUploadLogo(f);
+  };
+  inp.click();
+};
+function coUploadLogo(file){
+  var sb=null; try{ sb=window.REMC_SB; }catch(e){}
+  // Cloud storage keeps the shared document small. If it is not available, a
+  // small image can still be held locally.
+  if(sb && sb.storage && typeof sb.storage.from==='function'){
+    var path='company/logo_'+Date.now()+'_'+file.name.replace(/[^A-Za-z0-9._-]/g,'_');
+    sb.storage.from('remc-media').upload(path, file, { upsert:true, contentType:file.type||'image/png' })
+      .then(function(res){
+        if(res && res.error){ coLogoFallback(file, res.error.message||res.error); return; }
+        var url='';
+        try{ url=sb.storage.from('remc-media').getPublicUrl(path).data.publicUrl; }catch(e){}
+        var o=coLoad(); o.logo=url; o.logoName=file.name; coSave(o); coRender();
+        try{ window.remcApplyBrand(); }catch(e){}
+      })
+      .catch(function(e){ coLogoFallback(file, (e&&e.message)||'network'); });
+    return;
+  }
+  coLogoFallback(file, 'cloud storage not available');
+}
+function coLogoFallback(file, why){
+  if(file.size > 200*1024){
+    alert('Could not upload the logo ('+why+').\n\n'
+      +'The image is too big to keep on this device instead. Please use one under 200 KB, '
+      +'or try again when the connection is back.');
+    return;
+  }
+  var r=new FileReader();
+  r.onload=function(){
+    var o=coLoad(); o.logo=String(r.result||''); o.logoName=file.name; coSave(o); coRender();
+    try{ window.remcApplyBrand(); }catch(e){}
+    alert('Saved on this device. It will not reach the other devices until cloud storage is working.');
+  };
+  r.readAsDataURL(file);
+}
+window.coClearLogo = function(){
+  if(!confirm('Remove the company logo?')) return;
+  var o=coLoad(); delete o.logo; delete o.logoName; coSave(o); coRender();
+  try{ window.remcApplyBrand(); }catch(e){}
+};
+function coRender(){
+  var host=document.getElementById('co-body'); if(!host) return;
+  var c=coLoad();
+  function fld(label, field, ph, wide){
+    return '<div class="co-f'+(wide?' wide':'')+'"><label>'+label+'</label>'
+      +'<input value="'+String(c[field]||'').replace(/"/g,'&quot;')+'" placeholder="'+ph+'" '
+      +'onchange="coSet(\''+field+'\',this.value)"></div>';
+  }
+  host.innerHTML=
+     '<div class="co-logo-row">'
+      +'<div class="co-logo-box">'
+        +(c.logo ? '<img src="'+String(c.logo).replace(/"/g,'&quot;')+'" alt="Company logo">'
+                 : '<div class="co-logo-empty">No logo yet</div>')
+      +'</div>'
+      +'<div class="co-logo-side">'
+        +'<div class="co-logo-name">'+(c.logoName ? String(c.logoName).replace(/</g,'&lt;') : 'PNG, JPG or SVG')+'</div>'
+        +'<div class="co-logo-hint">Appears on the Project Allowances sheet and on anything printed.</div>'
+        +'<div style="display:flex;gap:7px;margin-top:9px">'
+          +'<button class="ops-btn primary" onclick="coPickLogo()">'+(c.logo?'Replace logo':'Upload logo')+'</button>'
+          +(c.logo?'<button class="ops-btn" onclick="coClearLogo()">Remove</button>':'')
+        +'</div>'
+      +'</div>'
+    +'</div>'
+    +'<div class="co-grid">'
+      +fld('Company name','name','Your company name',true)
+      +fld('Address','address','Street, suburb, state, postcode',true)
+      +fld('Phone','phone','Office phone')
+      +fld('Email','email','name@yourcompany.com')
+      +fld('ABN','abn','ABN')
+      +fld('Website','website','Website')
+    +'</div>';
+}
+window.coRender = coRender;
+
 function showSettingsTab(tab) {
 document.querySelectorAll('.stab').forEach(function(t) {
 t.classList.toggle('active', t.getAttribute('data-tab') === tab);
@@ -3496,6 +3745,7 @@ t.classList.toggle('active', t.getAttribute('data-tab') === tab);
 document.querySelectorAll('.stab-panel').forEach(function(p) {
 p.classList.toggle('active', p.id === 'stpanel-' + tab);
 });
+if(tab==='company'){ try{ coRender(); }catch(e){ console.warn('company details:', e); } }
 if(tab==='projects'){ try{ if(typeof window.remcReloadProjData==='function') window.remcReloadProjData(); if(typeof remcRenderCommercialModeUI==='function') remcRenderCommercialModeUI(); }catch(e){} }
 if(tab==='quotations'){ try{ if(typeof remcRenderQuotModeUI==='function') remcRenderQuotModeUI(); }catch(e){} }
 if(tab==='supervisors'){ try{ if(typeof window.remcRenderSupers==='function') window.remcRenderSupers(); }catch(e){} }
@@ -4550,9 +4800,9 @@ const projects_map = [
 {
 id: 'cockburn',
 type: 'commercial',
-name: 'Cockburn Central Carpark',
-address: 'Cockburn, WA',
-supervisor: 'Mark Davies',
+name: 'Sample Commercial Site',
+address: 'Sample Suburb',
+supervisor: 'Sample Supervisor 1',
 status: 'active',
 lat: -32.1150, lng: 115.8270,
 areaIn: 0, areaOut: 2400, trucks: 4
@@ -4562,7 +4812,7 @@ id: 'harbor',
 type: 'commercial',
 name: 'Harbor Tower Parking',
 address: 'Fremantle, WA',
-supervisor: 'Andrew De Haas',
+supervisor: 'Sample Supervisor 4',
 status: 'delayed',
 lat: -32.0550, lng: 115.7470,
 areaIn: 1800, areaOut: 0, trucks: 2,
@@ -4584,7 +4834,7 @@ id: 'lennard',
 type: 'residential',
 name: '#1 Lennard St, Herne Hill',
 address: 'Herne Hill, WA',
-supervisor: 'Jay Sumaryo',
+supervisor: 'Sample Supervisor 2',
 status: 'active',
 lat: -31.8235, lng: 116.0295,
 areaIn: 420, areaOut: 0, trucks: 2
@@ -4594,7 +4844,7 @@ id: 'belford',
 type: 'residential',
 name: '#10 Belford St, City Beach',
 address: 'City Beach, WA',
-supervisor: 'Matt Winfield',
+supervisor: 'Sample Supervisor 3',
 status: 'active',
 lat: -31.9140, lng: 115.7620,
 areaIn: 380, areaOut: 150, trucks: 3
@@ -4604,7 +4854,7 @@ id: 'quay',
 type: 'residential',
 name: '#1 Quay Court, Sorrento',
 address: 'Sorrento, WA',
-supervisor: 'Andrew De Haas',
+supervisor: 'Sample Supervisor 4',
 status: 'active',
 lat: -31.8280, lng: 115.7520,
 areaIn: 540, areaOut: 200, trucks: 3
@@ -4614,7 +4864,7 @@ id: 'hester',
 type: 'residential',
 name: '#1 Hester Rd, Wellard',
 address: 'Wellard, WA',
-supervisor: 'Matt Winfield',
+supervisor: 'Sample Supervisor 3',
 status: 'standby',
 lat: -32.2560, lng: 115.8490,
 areaIn: 0, areaOut: 0, trucks: 0,
@@ -4625,7 +4875,7 @@ id: 'rosebery',
 type: 'residential',
 name: '#1 Rosebery St, Bayswater',
 address: 'Bayswater, WA',
-supervisor: 'Matt Winfield',
+supervisor: 'Sample Supervisor 3',
 status: 'standby',
 lat: -31.9190, lng: 115.9190,
 areaIn: 0, areaOut: 0, trucks: 0
@@ -4705,18 +4955,18 @@ window._leafletMap = map;
 }
 
 const STAFF = [
-{ id: 1, name: 'Mark Davies', role: 'Supervisor', initials: 'MD', color: '#dcfce7', textColor: '#15803d', skills: ['CAT 320', 'Dump Truck', 'Excavator'] },
-{ id: 2, name: 'Jay Sumaryo', role: 'Supervisor', initials: 'JS', color: '#eff6ff', textColor: '#1d4ed8', skills: ['Mini Excavator', 'Bobcat'] },
-{ id: 3, name: 'Matt Winfield', role: 'Supervisor', initials: 'MW', color: '#f0fdf4', textColor: '#166534', skills: ['CAT 320', 'Roller Compactor', 'Tipper'] },
-{ id: 4, name: 'Andrew De Haas', role: 'Supervisor', initials: 'AD', color: '#f3e8ff', textColor: '#6b21a8', skills: ['All Machines'] },
-{ id: 5, name: 'Peter Halse', role: 'Operator', initials: 'PH', color: '#fef9c3', textColor: '#854d0e', skills: ['Bobcat S650', 'Mini Excavator'] },
-{ id: 6, name: 'Sandra Lee', role: 'Supervisor', initials: 'SL', color: '#fce7f3', textColor: '#9d174d', skills: ['CAT 320', 'Excavator'] },
+{ id: 1, name: 'Sample Supervisor 1', role: 'Supervisor', initials: 'MD', color: '#dcfce7', textColor: '#15803d', skills: ['CAT 320', 'Dump Truck', 'Excavator'] },
+{ id: 2, name: 'Sample Supervisor 2', role: 'Supervisor', initials: 'JS', color: '#eff6ff', textColor: '#1d4ed8', skills: ['Mini Excavator', 'Bobcat'] },
+{ id: 3, name: 'Sample Supervisor 3', role: 'Supervisor', initials: 'MW', color: '#f0fdf4', textColor: '#166534', skills: ['CAT 320', 'Roller Compactor', 'Tipper'] },
+{ id: 4, name: 'Sample Supervisor 4', role: 'Supervisor', initials: 'AD', color: '#f3e8ff', textColor: '#6b21a8', skills: ['All Machines'] },
+{ id: 5, name: 'Sample Operator 1', role: 'Operator', initials: 'PH', color: '#fef9c3', textColor: '#854d0e', skills: ['Bobcat S650', 'Mini Excavator'] },
+{ id: 6, name: 'Sample Supervisor 5', role: 'Supervisor', initials: 'SL', color: '#fce7f3', textColor: '#9d174d', skills: ['CAT 320', 'Excavator'] },
 { id: 7, name: 'Tom Williams', role: 'Operator', initials: 'TW', color: '#fff7ed', textColor: '#9a3412', skills: ['Dump Truck', 'Tipper'] },
 { id: 8, name: 'James K.', role: 'Operator', initials: 'JK', color: '#ede9fe', textColor: '#5b21b6', skills: ['Roller Compactor', 'Bobcat'] },
 ];
 
 const ALL_PROJECTS = [
-{ id: 'cockburn', name: 'Cockburn Central Carpark', type: 'commercial', address: 'Cockburn, WA', color: '#dbeafe', textColor: '#1e40af' },
+{ id: 'cockburn', name: 'Sample Commercial Site', type: 'commercial', address: 'Sample Suburb', color: '#dbeafe', textColor: '#1e40af' },
 { id: 'harbor', name: 'Harbor Tower Parking', type: 'commercial', address: 'Fremantle, WA', color: '#ede9fe', textColor: '#5b21b6' },
 { id: 'midtown', name: 'Midtown Office Complex', type: 'commercial', address: 'Perth CBD, WA', color: '#e0f2fe', textColor: '#0369a1' },
 { id: 'lennard', name: '#1 Lennard St, Herne Hill', type: 'residential', address: 'Herne Hill, WA', color: '#dcfce7', textColor: '#15803d' },
@@ -5520,8 +5770,12 @@ function printSchedule() {
     + '@media print{body{padding:14px 16px}@page{size:A4 portrait;margin:12mm}}'
     + '</style></head><body>'
     + '<div class="header">'
-    + '<div><div class="brand"><span class="brand-r">R</span>EMC Earthmoving</div>'
-    + '<div style="font-size:12px;color:#64748b;margin-top:3px">Team Schedule</div></div>'
+    + '<div style="display:flex;align-items:center;gap:10px">'
+    +   (typeof window.remcCoHeaderHTML==='function'
+          ? window.remcCoHeaderHTML('Team Schedule')
+          : '<div><div class="brand"><span class="brand-r">R</span>EMC Earthmoving</div>'
+            +'<div style="font-size:12px;color:#64748b;margin-top:3px">Team Schedule</div></div>')
+    + '</div>'
     + '<div class="meta"><strong style="font-size:15px;color:#1e293b">' + dateStr + '</strong><br>'
     + 'Printed: ' + new Date().toLocaleString('en-AU') + '</div>'
     + '</div>';
@@ -5618,7 +5872,13 @@ lines.push('.brand{font-size:20px;font-weight:900;letter-spacing:1px}');
 lines.push('.brand-r{color:#e11d1d}.brand-w{color:white}');
 lines.push('.sub{font-size:12px;color:#64748b}');
 lines.push('#map{height:calc(100vh - 46px)}</style></head><body>');
-lines.push('<div class="hdr"><span class="brand"><span class="brand-r">R</span><span class="brand-w">EMC</span></span>');
+var _coName='REMC', _coLogo='';
+try{ _coName=window.remcCoName(); _coLogo=window.remcCoLogo(); }catch(e){}
+lines.push('<div class="hdr">'
+  + (_coLogo
+      ? '<img src="'+String(_coLogo).replace(/"/g,'&quot;')+'" alt="" style="max-height:28px;max-width:130px;object-fit:contain">'
+      : '<span class="brand"><span class="brand-r">'+String(_coName).charAt(0)
+        +'</span><span class="brand-w">'+String(_coName).slice(1).replace(/</g,'&lt;')+'</span></span>'));
 lines.push('<span class="sub">Project Locations - Perth Metro</span></div>');
 lines.push('<div id="map"></div>');
 lines.push('<scr'+'ipt src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"><\/scr'+'ipt>');
@@ -10259,10 +10519,30 @@ function paSections(pid){
   if(d && Array.isArray(d.sections)) return d.sections;
   return [];
 }
+// Bill references follow their position: the first heading is 2, the next 3,
+// and the lines under heading 2 are 2.1, 2.2 and so on. Renumbering happens on
+// every save, so inserting a row in the middle fixes everything below it.
+function paRenumber(sections){
+  sections.forEach(function(sec, si){
+    sec.ref = String(si + 2);
+    (sec.items||[]).forEach(function(it, ii){
+      it.ref = sec.ref + '.' + (ii + 1);
+    });
+  });
+  return sections;
+}
 function paWrite(pid, sections){
   var all=paLoad();
-  if(sections.length) all[String(pid)]={ sections:sections };
-  else delete all[String(pid)];
+  paRenumber(sections);
+  if(sections.length){
+    var keep=(all[String(pid)] && !Array.isArray(all[String(pid)])) ? all[String(pid)] : {};
+    keep.sections=sections;
+    all[String(pid)]=keep;
+  } else {
+    if(all[String(pid)] && !Array.isArray(all[String(pid)]) && all[String(pid)].meta){
+      all[String(pid)]={ meta:all[String(pid)].meta, sections:[] };
+    } else delete all[String(pid)];
+  }
   paSave(all);
 }
 function paTotals(sections){
@@ -10284,15 +10564,131 @@ window.paOpen = function(pid){
   document.getElementById('pa-modal').classList.add('open');
   paDraw();
 };
+// Build a clean page for paper: the same sheet, without the editing controls.
+// The browser's own print dialog has "Save as PDF", so one button covers both.
+window.paPrint = function(){
+  if(PA_PID==null) return;
+  var p=paProj(), m=paMeta(PA_PID), secs=paSections(PA_PID), t=paTotals(secs);
+  var c={}; try{ c=(typeof window.remcCompany==='function') ? window.remcCompany() : {}; }catch(e){}
+  var coName='Your Company';
+  try{ coName=window.remcCoName(); }catch(e){ coName=String(c.name||'Your Company'); }
+  var coLine=''; try{ coLine=window.remcCoLine(); }catch(e){}
+
+  function e(x){ return paEsc(x); }
+  function v(field, fallback){ return e(m[field] || fallback || ''); }
+  function detail(label, val){
+    return '<tr><td class="lb">'+e(label)+'</td><td class="vv">'+e(val)+'</td></tr>';
+  }
+
+  var rows='';
+  secs.forEach(function(sec){
+    rows+='<tr class="sec"><td class="rf">'+e(sec.ref)+'</td><td colspan="5">'+e(sec.title)+'</td></tr>';
+    (sec.items||[]).forEach(function(it){
+      rows+='<tr>'
+        +'<td class="rf">'+e(it.ref)+'</td>'
+        +'<td>'+e(it.desc)+'</td>'
+        +'<td class="ct tn">'+e(it.qty)+'</td>'
+        +'<td class="ct tn">'+e(it.unit)+'</td>'
+        +'<td class="ct tn">'+(it.m3out ? e(it.m3out)+' m3' : '')+'</td>'
+        +'<td class="ct tn">'+(it.tonneIn ? e(it.tonneIn)+' T' : '')+'</td>'
+        +'</tr>';
+    });
+    var so=0, sin=0;
+    (sec.items||[]).forEach(function(it){ so+=paNum(it.m3out); sin+=paNum(it.tonneIn); });
+    if(so || sin){
+      rows+='<tr class="sub"><td></td><td class="rt">Section total</td><td></td><td></td>'
+        +'<td class="ct">'+(so?Math.round(so).toLocaleString('en-AU')+' m3':'')+'</td>'
+        +'<td class="ct">'+(sin?Math.round(sin).toLocaleString('en-AU')+' T':'')+'</td></tr>';
+    }
+  });
+
+  var html='<!DOCTYPE html><html><head><meta charset="utf-8">'
+    +'<title>Project Allowances - '+v('projNo', p.jobNumber)+'</title>'
+    +'<style>'
+    +'*{box-sizing:border-box}'
+    +"body{font-family:Arial,Helvetica,sans-serif;color:#111;margin:0;padding:16mm 12mm;font-size:11px}"
+    +'.top{display:flex;align-items:center;gap:10px;margin-bottom:14px}'
+    +'.top img{max-height:38px;max-width:170px;object-fit:contain}'
+    +'.co{font-size:14px;font-weight:800;line-height:1.2}'
+    +'.co small{display:block;font-size:9px;font-weight:400;color:#666}'
+    +'.doc{flex:1;text-align:center;font-size:22px;font-weight:800;letter-spacing:1px;'
+      +'text-decoration:underline;text-underline-offset:4px;padding-right:120px}'
+    +'table{border-collapse:collapse;width:100%}'
+    +'.info{border:2px dashed #16a34a;padding:2px;margin-bottom:10px}'
+    +'.info table td,.mini table td{border:1px solid #111;padding:3px 6px;height:18px}'
+    +'td.lb{font-weight:700;width:150px;white-space:nowrap}'
+    +'td.vv{color:#1d4ed8;font-weight:700}'
+    +'.two{display:flex;gap:16px;margin-bottom:12px}.two>div{flex:1}'
+    +'.cc{text-align:center;font-weight:800;border:1px solid #111;padding:3px}'
+    +'.grid{border:2px solid #16a34a}'
+    +'.grid th{border:1px solid #111;color:#e11d1d;font-size:10.5px;padding:4px 3px;text-align:center}'
+    +'.grid td{border:1px solid #f0bcbc;padding:3px 5px;height:17px}'
+    +'.grid tr.sec td{background:#fde8e8;border-color:#e8a5a5;font-weight:800;text-transform:uppercase}'
+    +'.grid tr.sub td{background:#fdf3f3;font-weight:800}'
+    +'td.rf{text-align:center;font-weight:700;width:52px}'
+    +'td.ct{text-align:center}td.rt{text-align:right;color:#555;font-weight:700}'
+    +'td.tn{background:#fdecec}'
+    +'.tot{margin-top:12px;display:flex;gap:26px;border-top:2px solid #111;padding-top:7px;font-size:12px}'
+    +'.tot b{font-size:15px}'
+    +'.foot{margin-top:14px;padding-top:6px;border-top:1px solid #ddd;font-size:9px;color:#888;'
+      +'display:flex;justify-content:space-between}'
+    +'@media print{body{padding:10mm 8mm}@page{size:A4 portrait;margin:10mm}'
+      +'tr{page-break-inside:avoid}tr.sec{page-break-after:avoid}thead{display:table-header-group}}'
+    +'</style></head><body>'
+    +'<div class="top">'
+      +(c.logo ? '<img src="'+String(c.logo).replace(/"/g,'&quot;')+'" alt="">' : '')
+      +'<div class="co">'+e(coName)+(coLine?('<small>'+e(coLine)+'</small>'):'')+'</div>'
+      +'<div class="doc">PROJECT ALLOWANCES</div>'
+    +'</div>'
+    +'<div class="info"><table>'
+      +detail('Project number:', m.projNo||p.jobNumber||'')
+      +detail('Project name:',   m.projName||p.name||'')
+      +detail('Builder company:',m.builder||p.builder||'')
+      +detail('Project Address:',m.address||p.address||'')
+    +'</table></div>'
+    +'<div class="two">'
+      +'<div class="mini"><table>'
+        +detail('Start Date', m.startDate||p.dateStart||'')
+        +detail('PO Code:',   m.poCode||'')
+        +detail('Supervisor', m.supervisor||p.supervisor||'')
+      +'</table></div>'
+      +'<div class="mini"><table>'
+        +'<tr><td class="cc" colspan="2">Client Contact</td></tr>'
+        +detail('Client PM:', m.clientPM||p.cName||'')
+        +detail('Phone',      m.phone||p.cPhone||p.phone||'')
+        +detail('Email',      m.email||p.cEmail||p.email||'')
+      +'</table></div>'
+    +'</div>'
+    +'<table class="grid">'
+      +'<colgroup><col style="width:52px"><col><col style="width:64px"><col style="width:52px">'
+        +'<col style="width:74px"><col style="width:74px"></colgroup>'
+      +'<thead><tr><th>Bill Ref.</th><th>Description</th><th>Qty</th><th>Unit</th>'
+        +'<th>M3 (OUT)</th><th>Tonne (IN)</th></tr></thead>'
+      +'<tbody>'+(rows || '<tr><td colspan="6" style="text-align:center;padding:16px;color:#888">No allowances entered.</td></tr>')+'</tbody>'
+    +'</table>'
+    +'<div class="tot">'
+      +'<span>Total M3 (OUT): <b>'+Math.round(t.out).toLocaleString('en-AU')+'</b> m3</span>'
+      +'<span>Total Tonne (IN): <b>'+Math.round(t.inn).toLocaleString('en-AU')+'</b> T</span>'
+      +'<span>Lines: <b>'+t.items+'</b></span>'
+    +'</div>'
+    +'<div class="foot"><span>'+e(coName)+'</span>'
+      +'<span>Printed '+new Date().toLocaleString('en-AU')+'</span></div>'
+    +'</body></html>';
+
+  var w=window.open('', '_blank');
+  if(!w){ alert('The print window was blocked.\n\nAllow pop-ups for this site and try again.'); return; }
+  w.document.open(); w.document.write(html); w.document.close();
+  // give the logo a moment to load, or it prints as a blank box
+  setTimeout(function(){ try{ w.focus(); w.print(); }catch(e){} }, 400);
+};
+
 window.paClose = function(){
   document.getElementById('pa-modal').classList.remove('open');
   if(PA_PID!=null){ try{ paRender(PA_PID); }catch(e){} }
 };
 window.paAddSection = function(){
   if(PA_PID==null) return;
-  var secs=paSections(PA_PID);
-  secs.push({ id:paNid('sec'), ref:String(secs.length+1), title:'', items:[] });
-  paWrite(PA_PID, secs); paDraw();
+  paInsertSection(paSections(PA_PID).length);
 };
 window.paDelSection = function(si){
   var secs=paSections(PA_PID);
@@ -10301,9 +10697,24 @@ window.paDelSection = function(si){
   secs.splice(si,1); paWrite(PA_PID, secs); paDraw();
 };
 window.paSetSection = function(si, field, v){
+  if(field==='ref') return;                       // worked out from the position
   var secs=paSections(PA_PID);
   if(!secs[si]) return;
   secs[si][field]=String(v||'');
+  paWrite(PA_PID, secs); paDraw();
+};
+// Insert a heading, or a line, at any point in the sheet.
+window.paInsertSection = function(at){
+  if(PA_PID==null) return;
+  var secs=paSections(PA_PID);
+  secs.splice(at, 0, { id:paNid('sec'), ref:'', title:'', items:[] });
+  paWrite(PA_PID, secs); paDraw();
+};
+window.paInsertItem = function(si, at){
+  var secs=paSections(PA_PID);
+  if(!secs[si]) return;
+  if(!Array.isArray(secs[si].items)) secs[si].items=[];
+  secs[si].items.splice(at, 0, { id:paNid('it'), ref:'', desc:'', qty:'', unit:'', m3out:0, tonneIn:0 });
   paWrite(PA_PID, secs); paDraw();
 };
 window.paAddItem = function(si){
@@ -10322,6 +10733,7 @@ window.paDelItem = function(si, ii){
   paWrite(PA_PID, secs); paDraw();
 };
 window.paSetItem = function(si, ii, field, v){
+  if(field==='ref') return;                       // worked out from the position
   var secs=paSections(PA_PID);
   if(!secs[si] || !secs[si].items || !secs[si].items[ii]) return;
   if(field==='m3out' || field==='tonneIn') secs[si].items[ii][field]=paNum(v);
@@ -10329,8 +10741,71 @@ window.paSetItem = function(si, ii, field, v){
   paWrite(PA_PID, secs); paDraw();
 };
 
+// Details that are not on the project record are kept with the allowances.
+function paMeta(pid){
+  var d=paLoad()[String(pid)];
+  return (d && !Array.isArray(d) && d.meta) ? d.meta : {};
+}
+window.paSetMeta = function(field, v){
+  var all=paLoad(), k=String(PA_PID);
+  if(!all[k] || Array.isArray(all[k])) all[k]={ sections:paSections(PA_PID) };
+  if(!all[k].meta) all[k].meta={};
+  all[k].meta[field]=String(v||'');
+  paSave(all);
+};
+function paProj(){
+  var list=(typeof PROJ_DATA!=='undefined'&&Array.isArray(PROJ_DATA))?PROJ_DATA:[];
+  return list.find(function(x){ return String(x.id)===String(PA_PID); }) || {};
+}
+function paField(field, val, ph){
+  return '<div class="pa-info-v"><input class="pa-f" value="'+paEsc(val)+'" placeholder="'+paEsc(ph||'')+'" '
+    +'onchange="paSetMeta(\'' + field + '\',this.value)"></div>';
+}
+function paDrawBanner(){
+  var host=document.getElementById('pa-banner'); if(!host) return;
+  var c={}; try{ c=(typeof window.remcCompany==='function') ? window.remcCompany() : {}; }catch(e){}
+  host.innerHTML=
+     (c.logo
+       ? '<img class="pa-logo-img" src="'+String(c.logo).replace(/"/g,'&quot;')+'" alt="">'
+       : '<div class="pa-logo"><span class="pa-logo-r">R</span></div>')
+    +'<div class="pa-logo-txt">'+paEsc(c.name||'Your Company')
+      +(c.phone?('<br><span>'+paEsc(c.phone)+'</span>'):'')+'</div>'
+    +'<div class="pa-doc-title">PROJECT ALLOWANCES</div>';
+}
+function paDrawInfo(){
+  paDrawBanner();
+  var host=document.getElementById('pa-info'); if(!host) return;
+  var p=paProj(), m=paMeta(PA_PID);
+  function row(label, field, val, ph){
+    return '<tr><td class="lb" style="width:145px">'+paEsc(label)+'</td><td>'
+      +'<input class="pa-f" value="'+paEsc(val)+'" placeholder="'+paEsc(ph||'')+'" '
+      +'onchange="paSetMeta(\'' + field + '\',this.value)"></td></tr>';
+  }
+  host.innerHTML=
+     '<div class="pa-info-wrap"><table class="pa-t">'
+      +row('Project number:','projNo', m.projNo||p.jobNumber||'')
+      +row('Project name:','projName', m.projName||p.name||'')
+      +row('Builder company:','builder', m.builder||p.builder||'')
+      +row('Project Address:','address', m.address||p.address||'')
+     +'</table></div>'
+    +'<div class="pa-two">'
+      +'<div><table class="pa-t">'
+        +row('Start Date','startDate', m.startDate||p.dateStart||'', 'dd-mmm-yy')
+        +row('PO Code:','poCode', m.poCode||'')
+        +row('Supervisor','supervisor', m.supervisor||p.supervisor||'')
+      +'</table></div>'
+      +'<div><table class="pa-t">'
+        +'<tr><td class="pa-cc" colspan="2">Client Contact</td></tr>'
+        +row('Client PM:','clientPM', m.clientPM||p.cName||'')
+        +row('Phone','phone', m.phone||p.cPhone||p.phone||'')
+        +row('Email','email', m.email||p.cEmail||p.email||'')
+      +'</table></div>'
+    +'</div>';
+}
+
 function paDraw(){
   var box=document.getElementById('pa-body'); if(!box) return;
+  paDrawInfo();
   var secs=paSections(PA_PID);
   var t=paTotals(secs);
 
@@ -10353,49 +10828,65 @@ function paDraw(){
   }
 
   var units=PA_UNITS.map(function(u){ return '<option value="'+paEsc(u)+'">'; }).join('');
-  box.innerHTML='<datalist id="pa-units">'+units+'</datalist>'
-    + secs.map(function(sec, si){
+
+  // A slim strip between every row, to slot a line or a heading in the middle.
+  function ins(si, at, both){
+    return '<tr class="ins"><td colspan="7"><div class="ins-bar">'
+      + (si!=null ? '<button class="ins-b" onclick="paInsertItem('+si+','+at+')">+ line</button>' : '')
+      + (both!=null ? '<button class="ins-b sec" onclick="paInsertSection('+both+')">+ heading</button>' : '')
+      + '</div></td></tr>';
+  }
+
+  var body='';
+  secs.forEach(function(sec, si){
+    body+=ins(null, null, si);                       // a heading can go above this one
+    body+='<tr class="sec">'
+      +'<td class="refc">'+paEsc(sec.ref)+'</td>'
+      +'<td><input class="pa-c sec" value="'+paEsc(sec.title)+'" placeholder="SECTION HEADING" '
+        +'onchange="paSetSection('+si+',\'title\',this.value)"></td>'
+      +'<td></td><td></td><td></td><td></td>'
+      +'<td><button class="pa-x" title="Remove heading" onclick="paDelSection('+si+')">\u2715</button></td>'
+      +'</tr>';
+
+    (sec.items||[]).forEach(function(it, ii){
+      body+=ins(si, ii, null);
+      body+='<tr>'
+        +'<td class="refc">'+paEsc(it.ref)+'</td>'
+        +'<td><input class="pa-c" value="'+paEsc(it.desc)+'" placeholder="Description" '
+          +'onchange="paSetItem('+si+','+ii+',\'desc\',this.value)"></td>'
+        +'<td class="tint"><input class="pa-c mid" value="'+paEsc(it.qty)+'" '
+          +'title="A number, or Yes when it is a lump sum" '
+          +'onchange="paSetItem('+si+','+ii+',\'qty\',this.value)"></td>'
+        +'<td class="tint"><input class="pa-c mid" list="pa-units" value="'+paEsc(it.unit)+'" '
+          +'onchange="paSetItem('+si+','+ii+',\'unit\',this.value)"></td>'
+        +'<td class="tint"><input class="pa-c mid" type="number" step="any" value="'+(it.m3out||'')+'" '
+          +'onchange="paSetItem('+si+','+ii+',\'m3out\',this.value)"></td>'
+        +'<td class="tint"><input class="pa-c mid" type="number" step="any" value="'+(it.tonneIn||'')+'" '
+          +'onchange="paSetItem('+si+','+ii+',\'tonneIn\',this.value)"></td>'
+        +'<td><button class="pa-x" title="Remove line" onclick="paDelItem('+si+','+ii+')">\u2715</button></td>'
+        +'</tr>';
+    });
+
+    body+=ins(si, (sec.items||[]).length, null);     // a line can go at the end
+
     var so=0, sin=0;
     (sec.items||[]).forEach(function(it){ so+=paNum(it.m3out); sin+=paNum(it.tonneIn); });
-    var rows=(sec.items||[]).map(function(it, ii){
-      return '<div class="pa-tr">'
-        +'<input class="pa-i ref" value="'+paEsc(it.ref)+'" placeholder="'+paEsc((sec.ref||'')+'.'+(ii+1))+'" '
-          +'onchange="paSetItem('+si+','+ii+',\'ref\',this.value)">'
-        +'<input class="pa-i" value="'+paEsc(it.desc)+'" placeholder="Description" '
-          +'onchange="paSetItem('+si+','+ii+',\'desc\',this.value)">'
-        +'<input class="pa-i num" value="'+paEsc(it.qty)+'" placeholder="Qty" '
-          +'title="A number, or Yes when it is a lump sum" '
-          +'onchange="paSetItem('+si+','+ii+',\'qty\',this.value)">'
-        +'<input class="pa-i" list="pa-units" value="'+paEsc(it.unit)+'" placeholder="Unit" '
-          +'onchange="paSetItem('+si+','+ii+',\'unit\',this.value)">'
-        +'<input class="pa-i num out" type="number" step="any" value="'+(it.m3out||'')+'" placeholder="0" '
-          +'onchange="paSetItem('+si+','+ii+',\'m3out\',this.value)">'
-        +'<input class="pa-i num inn" type="number" step="any" value="'+(it.tonneIn||'')+'" placeholder="0" '
-          +'onchange="paSetItem('+si+','+ii+',\'tonneIn\',this.value)">'
-        +'<button class="pa-x" title="Remove line" onclick="paDelItem('+si+','+ii+')">\u2715</button>'
-        +'</div>';
-    }).join('');
+    if(so || sin){
+      body+='<tr class="sub"><td></td><td class="lbl">Section total</td><td></td><td></td>'
+        +'<td>'+(so?Math.round(so).toLocaleString('en-AU')+' m3':'')+'</td>'
+        +'<td>'+(sin?Math.round(sin).toLocaleString('en-AU')+' T':'')+'</td><td></td></tr>';
+    }
+  });
+  body+=ins(null, null, secs.length);                // and one at the very bottom
 
-    return '<div class="pa-sec">'
-      +'<div class="pa-sec-head">'
-        +'<input class="pa-sec-ref" value="'+paEsc(sec.ref)+'" placeholder="No." '
-          +'onchange="paSetSection('+si+',\'ref\',this.value)">'
-        +'<input class="pa-sec-name" value="'+paEsc(sec.title)+'" placeholder="Section heading, e.g. BULK EARTHWORKS" '
-          +'onchange="paSetSection('+si+',\'title\',this.value)">'
-        +'<button class="pa-x" title="Remove section" onclick="paDelSection('+si+')">\u2715</button>'
-      +'</div>'
-      +'<div class="pa-th"><div>Bill Ref</div><div>Description</div><div class="r">Qty</div>'
-        +'<div>Unit</div><div class="r">M\u00B3 (OUT)</div><div class="r">Tonne (IN)</div><div></div></div>'
-      +(rows || '<div class="pa-tr" style="color:var(--muted);font-size:12px;padding:12px">No lines yet.</div>')
-      +'<div class="pa-sec-foot">'
-        +'<button class="pa-addrow" onclick="paAddItem('+si+')">+ Add line</button>'
-        +'<div class="pa-sec-sum">'
-          +'<span>M\u00B3 out: <b style="color:var(--red)">'+Math.round(so).toLocaleString('en-AU')+'</b></span>'
-          +'<span>Tonne in: <b style="color:var(--green)">'+Math.round(sin).toLocaleString('en-AU')+'</b></span>'
-        +'</div>'
-      +'</div>'
-      +'</div>';
-  }).join('');
+  box.innerHTML='<datalist id="pa-units">'+units+'</datalist>'
+    +'<table class="pa-grid">'
+    +'<colgroup><col style="width:58px"><col><col style="width:78px"><col style="width:66px">'
+      +'<col style="width:84px"><col style="width:84px"><col style="width:26px"></colgroup>'
+    +'<thead><tr>'
+      +'<th>Bill<br>Ref.</th><th>Description</th><th>Qty</th><th>Unit</th>'
+      +'<th>M3<br>(OUT)</th><th>Tonne<br>(IN)</th><th></th>'
+    +'</tr></thead><tbody>'+body+'</tbody></table>';
 }
 
 // What the project panel shows: just the heading and a way in.
@@ -13237,7 +13728,7 @@ function teamEditProjectBooking(pid){
     var id=String(idOrEmail||'').trim().toLowerCase(); if(!id) return null;
     var list=[]; try{ list=JSON.parse(localStorage.getItem('remc_users')||'[]'); if(!Array.isArray(list)) list=[]; }catch(e){ list=[]; }
     // if nothing is stored yet, fall back to the built-in administrator
-    if(!list.length) list=[{ id:'u-adm', firstName:'Administrator', lastName:'', email:'', username:'adm', password:'REMC123', role:'admin' }];
+    if(!list.length) list=[{ id:'u-adm', firstName:'Administrator', lastName:'', email:'', username:'adm', password:'admin123', role:'admin' }];
     var u=list.find(function(x){
       return String(x.username||'').trim().toLowerCase()===id || String(x.email||'').trim().toLowerCase()===id;
     });
@@ -13414,7 +13905,7 @@ function teamEditProjectBooking(pid){
   function save(a){ saveLocal(a); try{ if(typeof window.remcCloudUpsertKey==='function') window.remcCloudUpsertKey(KEY, JSON.stringify(a||[])); }catch(e){} }
 
   // The built-in administrator account. Seeded only when the list is empty.
-  var ADMIN_SEED = { id:'u-adm', firstName:'Administrator', lastName:'', email:'', username:'adm', password:'REMC123', role:'admin', createdAt:Date.now() };
+  var ADMIN_SEED = { id:'u-adm', firstName:'Administrator', lastName:'', email:'', username:'adm', password:'admin123', role:'admin', createdAt:Date.now() };
   function ensureSeed(){
     var list=load();
     if(list.length===0){ saveLocal([ADMIN_SEED]); return true; }
@@ -13802,26 +14293,9 @@ function teamEditProjectBooking(pid){
 (function(){
   function loadSupers(){ try{ var a=JSON.parse(localStorage.getItem('remc_supervisors')||'[]'); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
   function saveSupers(a){ localStorage.setItem('remc_supervisors', JSON.stringify(a||[])); try{ if(typeof window.remcCloudUpsertKey==='function') window.remcCloudUpsertKey('remc_supervisors', JSON.stringify(a||[])); }catch(e){} }
-  // Seed the two initial supervisors only if the list is empty
-  if(loadSupers().length===0){
-    saveSupers([
-      { username:'MDT', password:'REMC123', name:'Michael Di Trento' },
-      { username:'MR',  password:'REMC123', name:'Michael Ricciardo' }
-    ]);
-  }
-  // Safety re-seed: the cloud pull on load can briefly clear local data, so
-  // re-seed (which re-pushes to the cloud) shortly after the sync settles.
-  function ensureSeed(){
-    if(loadSupers().length===0){
-      saveSupers([
-        { username:'MDT', password:'REMC123', name:'Michael Di Trento' },
-        { username:'MR',  password:'REMC123', name:'Michael Ricciardo' }
-      ]);
-      try{ renderSupers(); }catch(e){}
-    }
-  }
-  setTimeout(ensureSeed, 2500);
-  setTimeout(ensureSeed, 7000);
+  // No names are seeded. A fresh install starts empty and the office adds its
+  // own supervisors here. (This used to plant two real people, and re-added
+  // them whenever the list was emptied - so deleting a supervisor never stuck.)
   // Publish the project list so the Supervisor app can read it from the shared database
   var _lastProjJson = '';
   function publishProjects(){ try{
@@ -13829,7 +14303,7 @@ function teamEditProjectBooking(pid){
     if(typeof PROJ_DATA!=='undefined' && Array.isArray(PROJ_DATA)){ var s=JSON.stringify(PROJ_DATA); if(s!==_lastProjJson){ _lastProjJson=s; localStorage.setItem('remc_projects', s); } }
   }catch(e){} }
   publishProjects();
-  setInterval(function(){ try{ ensureSeed(); }catch(e){} publishProjects(); }, 5000);
+  setInterval(function(){ publishProjects(); }, 5000);
   ['pSave','pDelete'].forEach(function(fn){ if(typeof window[fn]==='function'){ var _o=window[fn]; window[fn]=function(){ var r=_o.apply(this,arguments); setTimeout(publishProjects,50); return r; }; } });
 
   function projectSupervisorNames(){ var set={}; try{ (typeof PROJ_DATA!=='undefined'?PROJ_DATA:[]).forEach(function(p){ if(p.supervisor) set[p.supervisor]=true; }); }catch(e){} return Object.keys(set).sort(); }
@@ -13861,7 +14335,7 @@ function teamEditProjectBooking(pid){
     var nameEl=document.getElementById('sup-add-name'); if(!nameEl) return;
     var name=nameEl.value.trim();
     var uEl=document.getElementById('sup-add-user'), pEl=document.getElementById('sup-add-pass');
-    if(!name){ if(uEl) uEl.value=''; if(pEl) pEl.value='REMC123'; return; }
+    if(!name){ if(uEl) uEl.value=''; if(pEl) pEl.value='admin123'; return; }
     var uname=supUsernameFrom(name);
     var year=supBirthYearFor(name);
     if(uEl) uEl.value=uname;
@@ -13892,9 +14366,9 @@ function teamEditProjectBooking(pid){
       + '</div>'
       + '<div class="step-card"><div class="step-head"><div class="step-num">+</div><div><div class="step-title">Add supervisor</div><div class="step-sub">Username, supervisor name and password</div></div></div>'
       + '<div class="step-body"><div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">'
-      +   '<div style="flex:1;min-width:120px"><div class="map-lbl">Username</div><input id="sup-add-user" class="map-sel" placeholder="e.g. MDT"></div>'
+      +   '<div style="flex:1;min-width:120px"><div class="map-lbl">Username</div><input id="sup-add-user" class="map-sel" placeholder="Initials"></div>'
       +   '<div style="flex:1.4;min-width:170px"><div class="map-lbl">Supervisor name</div><input id="sup-add-name" class="map-sel" list="sup-name-list" placeholder="Employee with Supervisor role…" oninput="supAutofillFromName()"><datalist id="sup-name-list"></datalist></div>'
-      +   '<div style="flex:1;min-width:120px"><div class="map-lbl">Password</div><input id="sup-add-pass" class="map-sel" value="REMC123"></div>'
+      +   '<div style="flex:1;min-width:120px"><div class="map-lbl">Password</div><input id="sup-add-pass" class="map-sel" value="admin123"></div>'
       +   '<button class="step-btn-pri" id="sup-add-btn">Add</button>'
       + '</div></div></div>'
       + '<div style="font-size:11px;color:var(--muted);margin:2px 0 12px;display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span style="color:#16a34a">☁️</span> Supervisors are saved and kept in sync automatically.'
@@ -13974,7 +14448,7 @@ function teamEditProjectBooking(pid){
     var list=loadSupers();
     if(list.some(function(s){return (s.username||'').toLowerCase()===u.toLowerCase();})){ alert('That username already exists.'); return; }
     list.push({username:u, name:n, password:p}); saveSupers(list);
-    document.getElementById('sup-add-user').value=''; document.getElementById('sup-add-name').value=''; document.getElementById('sup-add-pass').value='REMC123';
+    document.getElementById('sup-add-user').value=''; document.getElementById('sup-add-name').value=''; document.getElementById('sup-add-pass').value='';
     renderSupers();
   }
   window.remcSupDelete=function(i){ var list=loadSupers(); if(!list[i])return; if(!confirm('Delete supervisor "'+(list[i].name||list[i].username)+'"?'))return; list.splice(i,1); saveSupers(list); renderSupers(); };
