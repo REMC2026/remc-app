@@ -17180,7 +17180,7 @@ function teamEditProjectBooking(pid){
       l.push({ id:'log_'+Date.now()+'_'+Math.random().toString(36).slice(2,6), at:new Date().toISOString(),
         by:'Office', user:String(window.REMC_ME||''), app:'PC', projectId:String(pid),
         projectName:pName(pid), kind:'material', action:action, detail:detail||'' });
-      if(l.length>2000) l=l.slice(-2000);
+      if(l.length>400) l=l.slice(-400);        // keeps the shared document small
       save(K_LOG,l);
     }catch(e){}
   }
@@ -17868,7 +17868,7 @@ function teamEditProjectBooking(pid){
       list.push({ id:'log_'+Date.now()+'_'+Math.random().toString(36).slice(2,6), at:new Date().toISOString(),
         by:'Office', user:String(window.REMC_ME||''), app:'PC', projectId:String(pid),
         projectName: p?(p.name||('Project '+pid)):('Project '+pid), kind:kind, action:action, detail:detail||'' });
-      if(list.length>2000) list=list.slice(-2000);
+      if(list.length>400) list=list.slice(-400); // keeps the shared document small
       save(K_LOG,list);
     }catch(e){}
   }

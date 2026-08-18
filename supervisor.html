@@ -1006,6 +1006,17 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
       cb(d);
     }).catch(function(){ cb(null); });
   }
+  // Timing, so a slow save can be explained rather than guessed at.
+  var _t0=0, _tRead=0;
+  function _tstart(){ _t0=Date.now(); _tRead=0; }
+  function _tread(){ _tRead=Date.now()-_t0; }
+  function _tdone(bytes){
+    var total=Date.now()-_t0;
+    console.log('[REMC] save took '+(total/1000).toFixed(1)+'s'
+      +'  (fetch '+(_tRead/1000).toFixed(1)+'s, upload '+((total-_tRead)/1000).toFixed(1)+'s)'
+      +'  document '+Math.round((bytes||0)/1024)+' KB');
+  }
+
   function withDoc(cb){
     if(_docStamp && DATA && typeof DATA==='object' && !Array.isArray(DATA)){
       sb.from('remc_state').select('updated_at').eq('id',WS).maybeSingle().then(function(t){
@@ -1021,9 +1032,12 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
   function writeDoc(d, cb, after){
     var mine=new Date().toISOString();
     d['__client']=CLIENT;
+    _tread();
+    var _bytes=0; try{ _bytes=JSON.stringify(d).length; }catch(e){}
     sb.from('remc_state').upsert({ id:WS, data:d, updated_at:mine }).then(function(r){
       if(r && r.error){ _cloudFail(); if(cb) cb(r.error.message||'error'); return; }
       DATA=d; _docStamp=mine; _cloudOk();
+      try{ _tdone(_bytes); }catch(e){}
       // our own write moved the timestamp; tell the background check so it does
       // not download the whole document again for a change we just made
       try{ _lastSeen=mine; }catch(e){}
@@ -1148,6 +1162,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
   }
   function pushVariations(cb){
     if(!ensureClient()){ if(cb) cb('noconfig'); return; }
+    _tstart();
     setCloud('saving…','#fef3c7','#92400e');
     withDoc(function(d){
       if(!d){ _cloudFail(); if(cb) cb('read failed'); return; }
