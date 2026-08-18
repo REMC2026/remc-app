@@ -1627,6 +1627,152 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
   .pt-main{flex:1;min-width:0}
   .pt-t{font-size:12.5px;font-weight:800;margin-bottom:2px}
   .pt-m{font-size:11px;color:var(--muted);line-height:1.5}
+  .pc-strip{display:flex;align-items:center;gap:12px;margin-top:12px;padding:12px 14px;
+    background:var(--surface);border:1px solid var(--border);border-radius:11px;box-shadow:var(--shadow)}
+  .pc-strip-l{flex:1;min-width:0}
+  .pc-strip-t{font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;color:var(--blue)}
+  .pc-strip-s{font-size:11.5px;color:var(--muted);margin-top:2px}
+  .pc-strip-b{padding:8px 20px;background:var(--red);color:#fff;border:none;border-radius:8px;
+    font-family:'Barlow',sans-serif;font-size:12.5px;font-weight:800;cursor:pointer;white-space:nowrap}
+  .pc-strip-b:hover{background:#c81a1a}
+
+  /* The drawing quadrant is a flex column that hides overflow, so the panel has
+     to hold its own height and scroll inside itself instead of being squeezed. */
+  /* The panel takes whatever height is left in the quadrant, never less than
+     enough for three rows. The drawing gives way first. Nothing overflows, so
+     the only scrollbar on the page is the one inside this list. */
+  .pc-panel{margin-top:10px;background:var(--surface);border:1px solid var(--border);
+    border-radius:11px;box-shadow:var(--shadow);overflow:hidden;
+    flex:1 1 auto;min-height:104px;display:flex;flex-direction:column}
+  .pc-panel-h{display:flex;align-items:center;gap:10px;padding:9px 12px;
+    border-bottom:1px solid var(--border);flex-shrink:0}
+  .pc-panel-h .pc-strip-s{margin-left:0;font-size:11px}
+  .pc-panel-h .pc-plus{margin-left:auto;width:24px;height:24px;font-size:15px}
+  /* the list is the only part that scrolls, and its bar is always visible so it
+     is obvious there is more below */
+  .pc-pl{flex:1 1 auto;min-height:0;overflow-y:scroll;overscroll-behavior:contain;
+    scrollbar-width:auto;scrollbar-color:var(--muted) var(--surface2)}
+  .pc-pl::-webkit-scrollbar{width:14px}
+  .pc-pl::-webkit-scrollbar-track{background:var(--surface2)}
+  .pc-pl::-webkit-scrollbar-thumb{background:var(--border2);border-radius:7px;
+    border:3px solid var(--surface2)}
+  .pc-pl::-webkit-scrollbar-thumb:hover{background:var(--muted)}
+  .pc-pi{display:flex;align-items:center;gap:10px;padding:0 12px;height:40px;flex-shrink:0;
+    border-bottom:1px solid var(--border);cursor:pointer}
+  .pc-pi:last-child{border-bottom:none}
+  .pc-pi:hover{background:var(--surface2)}
+  .pc-pi-n{flex:1;min-width:0;font-size:12.5px;font-weight:800;color:var(--text);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .pc-pi-e{padding:16px 14px;font-size:12px;color:var(--muted);font-style:italic}
+  .pc-pl-f{padding:7px 14px;border-top:1px solid var(--border);background:var(--surface2);
+    font-size:11px;color:var(--muted);display:flex;align-items:center;gap:10px;flex-shrink:0}
+  .pc-pl-f button{margin-left:auto;background:none;border:none;color:var(--blue);
+    font-family:'Barlow',sans-serif;font-size:11.5px;font-weight:800;cursor:pointer}
+  .pc-sheet{padding:18px 22px;background:#fff}
+  .pc-top{display:flex;align-items:flex-start;gap:14px;padding-bottom:16px;margin-bottom:18px;
+    border-bottom:2px solid #111}
+  .pc-logo{max-height:52px;max-width:190px;object-fit:contain}
+  .pc-mark{width:46px;height:46px;background:#111;border-radius:8px;display:flex;align-items:center;
+    justify-content:center;flex-shrink:0}
+  .pc-mark span{color:#e11d1d;font-family:'Barlow Condensed',sans-serif;font-size:30px;font-weight:800;line-height:1}
+  .pc-co{min-width:0}
+  .pc-co-n{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;
+    text-transform:uppercase;letter-spacing:.5px;color:#111;line-height:1.1}
+  .pc-co-l{font-size:11.5px;color:#555;margin-top:3px;line-height:1.5}
+  .pc-co-abn{font-size:11.5px;font-weight:700;color:#111;margin-top:2px}
+  .pc-doc{margin-left:auto;text-align:right}
+  .pc-doc-t{font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:800;
+    text-transform:uppercase;letter-spacing:1px;color:#111}
+  .pc-doc-s{font-size:11.5px;color:#555;margin-top:2px}
+  .pc-doc-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 0 14px;
+    border-bottom:1px solid #ddd;margin-bottom:14px}
+  .pc-doc-name{font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:800;
+    text-transform:uppercase;letter-spacing:.5px;color:#111}
+  .pc-ref{margin-left:auto;display:flex;gap:20px;font-size:11.5px;text-align:right}
+  .pc-ref b{display:block;font-size:8.5px;font-weight:800;text-transform:uppercase;
+    letter-spacing:1.1px;color:#888}
+  .pc-ref span{font-weight:800;color:#111}
+  .pc-ref input{border:none;border-bottom:1px dashed #bbb;background:none;padding:1px 2px;
+    font-family:'Barlow',sans-serif;font-size:11.5px;font-weight:800;color:#111;outline:none;width:130px}
+  .pc-ref input:focus{border-bottom-color:var(--blue);background:#eff6ff}
+  .pc-plus{margin-left:auto;width:28px;height:28px;border-radius:8px;border:1.5px solid var(--border);
+    background:var(--surface);color:var(--blue);font-size:17px;font-weight:800;line-height:1;
+    cursor:pointer;font-family:'Barlow',sans-serif;display:flex;align-items:center;
+    justify-content:center;padding:0}
+  .pc-plus:hover{background:var(--blue);border-color:var(--blue);color:#fff}
+  .pc-item-r{font-size:11px;color:var(--muted);font-weight:700}
+  .pc-ask{display:grid;grid-template-columns:1fr 110px;gap:10px}
+  .pc-ask label{display:block;font-size:9px;font-weight:800;text-transform:uppercase;
+    letter-spacing:1.2px;color:var(--muted);margin-bottom:4px}
+  .pc-ask select,.pc-ask input{width:100%;box-sizing:border-box;background:var(--surface);
+    border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;font-size:13px;
+    font-family:'Barlow',sans-serif;color:var(--text);outline:none}
+  .pc-ask select:focus,.pc-ask input:focus{border-color:var(--red)}
+  .pc-per{font-size:13px;font-weight:800}
+  .pc-rev{font-size:11px;color:var(--muted);font-weight:700}
+  .pc-st{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:800;
+    letter-spacing:.4px;color:var(--muted);white-space:nowrap;background:none;border:none;padding:0}
+  .pc-st:before{content:'';width:7px;height:7px;border-radius:50%;background:currentColor;flex-shrink:0}
+  .pc-st.open{color:#16a34a}
+  .pc-st.pending{color:#d97706}
+  .pc-st.finalised{color:#111}
+  .pc-open-b{padding:4px 13px;background:var(--surface);border:1px solid var(--border2);
+    border-radius:7px;font-family:'Barlow',sans-serif;font-size:11.5px;font-weight:800;
+    color:var(--mid);cursor:pointer;white-space:nowrap}
+  .pc-open-b:hover{background:var(--blue);border-color:var(--blue);color:#fff}
+  .pc-st-pick{border:1px solid var(--border);border-radius:7px;padding:5px 10px;
+    font-family:'Barlow',sans-serif;font-size:12px;font-weight:800;background:var(--surface);
+    outline:none;cursor:pointer}
+  .pc-x{background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;padding:0}
+  .pc-x:hover{color:var(--red)}
+  .pc-info{display:grid;grid-template-columns:130px 1fr;gap:0;margin-bottom:14px;max-width:560px}
+  .pc-info div{padding:3px 0;font-size:12px}
+  .pc-info .l{font-weight:800;color:#111}
+  .pc-info input{width:100%;box-sizing:border-box;border:none;border-bottom:1px dashed #ccc;
+    background:none;padding:2px 3px;font-family:'Barlow',sans-serif;font-size:12px;color:#1d4ed8;
+    font-weight:700;outline:none}
+  .pc-info input:focus{background:#eff6ff;border-bottom-color:var(--blue)}
+  .pc-sum{border-collapse:collapse;margin-bottom:16px}
+  .pc-sum th,.pc-sum td{border:1px solid #999;padding:4px 10px;font-size:12px;text-align:right}
+  .pc-sum th{background:#d9d9d9;font-weight:800;font-size:10.5px;text-transform:uppercase;
+    letter-spacing:.5px;text-align:center}
+  .pc-sum td.l{text-align:right;font-weight:800;background:#fff;border:none}
+  .pc-sum td.per{background:#bfbfbf;font-weight:800}
+  table.pc-tbl{border-collapse:collapse;width:100%;table-layout:fixed}
+  table.pc-tbl th{border:1px solid #999;background:#d9d9d9;font-size:9.5px;font-weight:800;
+    padding:4px 3px;text-align:center;line-height:1.2}
+  table.pc-tbl td{border:1px solid #ccc;padding:2px 5px;font-size:11.5px;height:20px}
+  table.pc-tbl tr.sec td{background:#f2f2f2;font-weight:800;border-color:#999}
+  table.pc-tbl tr.sec td.n{font-size:12.5px}
+  table.pc-tbl td.n{text-align:right}
+  table.pc-tbl td.c{text-align:center}
+  table.pc-tbl td.per{background:#bfbfbf}
+  table.pc-tbl tr:hover td{background:#fffdf5}
+  table.pc-tbl tr.sec:hover td{background:#ececec}
+  .pc-i{width:100%;box-sizing:border-box;border:none;background:none;padding:1px 3px;
+    font-family:'Barlow',sans-serif;font-size:11.5px;color:#111;outline:none}
+  .pc-i:focus{background:#fff;box-shadow:inset 0 0 0 2px var(--blue)}
+  .pc-i.n{text-align:right} .pc-i.c{text-align:center;font-weight:800}
+  .pc-tools{display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+  .pc-btn{padding:5px 13px;background:var(--surface);border:1px solid var(--border);border-radius:7px;
+    font-family:'Barlow',sans-serif;font-size:11.5px;font-weight:800;color:var(--mid);cursor:pointer}
+  .pc-btn:hover{border-color:var(--blue);color:var(--blue)}
+  .pc-btn.go{background:var(--blue);border-color:var(--blue);color:#fff}
+  .pc-btn.go:hover{background:#1d4ed8}
+  .pc-back{font-size:12px;font-weight:800;color:var(--blue);cursor:pointer;margin-bottom:10px;display:inline-block}
+  .pc-soon{padding:50px 20px;text-align:center;color:var(--muted);font-size:13.5px;line-height:1.7}
+  .pdacc{border-bottom:1px solid var(--border)}
+  .pdacc:last-of-type{border-bottom:none}
+  .pdacc-h{display:flex;align-items:center;gap:8px;padding:11px 2px;cursor:pointer;user-select:none}
+  .pdacc-h:hover .pdacc-t{color:var(--blue)}
+  .pdacc-i{font-size:14px}
+  .pdacc-t{font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;color:var(--blue)}
+  .pdacc-s{margin-left:auto;font-size:11px;font-weight:700;color:var(--muted);white-space:nowrap}
+  .pdacc-c{font-size:11px;color:var(--muted);transition:transform .15s;width:12px;text-align:center}
+  .pdacc.open .pdacc-c{transform:rotate(180deg)}
+  .pdacc-b{display:none;padding:0 2px 16px}
+  .pdacc.open .pdacc-b{display:block}
+  .pdacc .pd-add-btn{margin-left:0;width:22px;height:22px;font-size:14px}
   .pd-docs-head{display:flex;align-items:center;gap:8px;margin-bottom:12px}
   .pd-add-btn{margin-left:auto;width:26px;height:26px;border-radius:7px;border:1.5px solid var(--border);
     background:var(--surface);color:var(--blue);font-size:16px;font-weight:800;line-height:1;cursor:pointer;
@@ -2386,6 +2532,46 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
       </div>
       <div class="proj-modal-footer">
         <button class="proj-modal-save" onclick="supCatClose()">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────── PROGRESS CLAIMS ─────────── -->
+  <div class="proj-modal-overlay" id="pc-modal" style="z-index:1100">
+    <div class="proj-modal" style="width:1150px;max-width:97vw">
+      <div class="proj-modal-header">
+        <span>&#128181; Progress Claims</span>
+        <span id="pc-proj" style="font-size:12px;font-weight:600;color:var(--muted);margin-left:10px"></span>
+        <button class="proj-modal-close" onclick="pcClose()">&#10005;</button>
+      </div>
+      <div class="proj-modal-body" style="max-height:76vh;overflow-y:auto;padding:0">
+        <div class="pc-sheet">
+          <div class="pc-top" id="pc-top"></div>
+          <div class="pc-doc-bar" id="pc-doc-bar"></div>
+          <div id="pc-body"></div>
+        </div>
+      </div>
+      <div class="proj-modal-footer">
+        <button class="proj-modal-save" onclick="pcClose()">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────── NEW CLAIM ─────────── -->
+  <div class="proj-modal-overlay" id="pcnew-modal" style="z-index:1200">
+    <div class="proj-modal" style="width:460px">
+      <div class="proj-modal-header"><span>&#128181; New progress claim</span>
+        <button class="proj-modal-close" onclick="pcNewClose()">&#10005;</button></div>
+      <div class="proj-modal-body">
+        <div style="font-size:12.5px;color:var(--muted);margin-bottom:14px" id="pcnew-hint"></div>
+        <div class="pc-ask">
+          <div><label>Claim month</label><select id="pcnew-month"></select></div>
+          <div><label>Year</label><input id="pcnew-year" type="number" min="2000" max="2100"></div>
+        </div>
+      </div>
+      <div class="proj-modal-footer">
+        <button class="proj-modal-cancel" onclick="pcNewClose()">Cancel</button>
+        <button class="proj-modal-save" onclick="pcNewConfirm()">Create claim</button>
       </div>
     </div>
   </div>
@@ -10781,8 +10967,16 @@ function ptRender(pid){
       +'</div>'+badge+'</div>';
   }).join('');
 
-  host.innerHTML='<div class="pa-head"><div class="pa-title">\uD83E\uDDEA Compaction tests</div></div>'
-    +(list.length
+  try{
+    var bits=[];
+    if(nPass) bits.push(nPass+' passed');
+    if(nFail) bits.push(nFail+' failed');
+    if(nWait) bits.push(nWait+' awaiting');
+    if(nBook) bits.push(nBook+' booking');
+    window.pdAccSummary('tests', bits.length ? bits.join(' \u00B7 ') : 'none yet');
+  }catch(e){}
+  try{ pdAccApply(); }catch(e){}
+  host.innerHTML=(list.length
       ? (rows + '<div class="pt-sum">'
          +'<span>Passed: <b style="color:var(--green)">'+nPass+'</b></span>'
          +'<span>Failed: <b style="color:var(--red)">'+nFail+'</b></span>'
@@ -10791,6 +10985,493 @@ function ptRender(pid){
       : '<div class="pa-empty">No compaction tests on this job yet.</div>');
 }
 window.ptRender = ptRender;
+
+// ── Progress Claims ───────────────────────────────────────
+// Where the money and the progress on a job are tracked. The company details
+// at the top come from Settings, so they are set once and used everywhere.
+var PC_KEY = 'remc_progress_claims';
+var PC_PID = null;
+
+function pcLoad(){
+  try{ var o=JSON.parse(localStorage.getItem(PC_KEY)||'{}');
+    return (o && typeof o==='object' && !Array.isArray(o)) ? o : {}; }catch(e){ return {}; }
+}
+function pcSave(o){
+  var txt=JSON.stringify(o);
+  if(typeof window.remcSaveKey==='function'){ window.remcSaveKey(PC_KEY, txt); return; }
+  try{ localStorage.setItem(PC_KEY, txt); }catch(e){ alert('Browser storage is full.'); }
+}
+function pcClaims(pid){
+  var a=pcLoad()[String(pid)];
+  return Array.isArray(a) ? a : [];
+}
+function pcEsc(x){ return String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+  .replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function pcProj(){
+  var list=(typeof PROJ_DATA!=='undefined' && Array.isArray(PROJ_DATA)) ? PROJ_DATA : [];
+  return list.find(function(x){ return String(x.id)===String(PC_PID); }) || {};
+}
+
+window.pcOpen = function(id){
+  PC_PID = window._pdCurrentId;
+  if(PC_PID == null) return;
+  if(id) PC_SEL = id;
+  if(!PC_SEL) return;                       // nothing to show without a claim
+  var p=pcProj();
+  var lbl=document.getElementById('pc-proj');
+  if(lbl) lbl.textContent = (p.jobNumber?(p.jobNumber+'  \u00B7  '):'') + (p.name||'');
+  document.getElementById('pc-modal').classList.add('open');
+  pcDraw();
+};
+window.pcClose = function(){
+  document.getElementById('pc-modal').classList.remove('open');
+  PC_SEL = null;
+  try{ pcStrip(window._pdCurrentId); }catch(e){}
+};
+
+// The letterhead: logo, company name and ABN, straight from Settings.
+function pcDrawTop(){
+  var host=document.getElementById('pc-top'); if(!host) return;
+  var c={}; try{ c=(typeof window.remcCompany==='function') ? window.remcCompany() : {}; }catch(e){}
+  var name='Your Company';
+  try{ name=window.remcCoName(); }catch(e){ name=String(c.name||'Your Company'); }
+  var p=pcProj();
+  var bits=[];
+  if(c.address) bits.push(c.address);
+  if(c.phone) bits.push(c.phone);
+  if(c.email) bits.push(c.email);
+
+  host.innerHTML =
+     (c.logo
+       ? '<img class="pc-logo" src="'+String(c.logo).replace(/"/g,'&quot;')+'" alt="">'
+       : '<div class="pc-mark"><span>'+pcEsc(String(name).charAt(0).toUpperCase())+'</span></div>')
+    +'<div class="pc-co">'
+      +'<div class="pc-co-n">'+pcEsc(name)+'</div>'
+      +(bits.length ? '<div class="pc-co-l">'+pcEsc(bits.join('  \u00B7  '))+'</div>' : '')
+      +(c.abn ? '<div class="pc-co-abn">ABN '+pcEsc(c.abn)+'</div>' : '')
+    +'</div>'
+    +'<div class="pc-doc">'
+      +'<div class="pc-doc-t">Progress Claims</div>'
+      +'<div class="pc-doc-s">'+pcEsc((p.jobNumber||'')+(p.jobNumber&&p.name?'  \u00B7  ':'')+(p.name||''))+'</div>'
+      +(p.builder ? '<div class="pc-doc-s">'+pcEsc(p.builder)+'</div>' : '')
+    +'</div>';
+}
+
+var PC_MONTHS=['January','February','March','April','May','June',
+               'July','August','September','October','November','December'];
+var PC_STATES=['open','pending','finalised'];
+var PC_STATE_LABEL={ open:'Open', pending:'Pending', finalised:'Finalised' };
+// Older claims were marked draft/sent/approved/paid. Read those as the nearest
+// of the three, so nothing shows up blank.
+function pcState(c){
+  var v=String((c && c.status) || 'open').toLowerCase();
+  if(PC_STATES.indexOf(v)>=0) return v;
+  if(v==='paid') return 'finalised';
+  if(v==='sent' || v==='approved') return 'pending';
+  return 'open';
+}
+var PC_SEL=null;
+
+function pcWrite(pid, list){
+  var all=pcLoad();
+  if(list && list.length) all[String(pid)]=list;
+  else delete all[String(pid)];
+  pcSave(all);
+}
+function pcMeta(pid){
+  var o=pcLoad();
+  var m=o['meta_'+String(pid)];
+  return (m && typeof m==='object') ? m : {};
+}
+window.pcSetMeta=function(field, v){
+  var o=pcLoad(), k='meta_'+String(PC_PID);
+  if(!o[k] || typeof o[k]!=='object') o[k]={};
+  o[k][field]=String(v||'');
+  pcSave(o);
+};
+function pcPad(n){ return (n<10?'0':'')+n; }
+// Claims run in sequence. A month with nothing to claim is simply skipped;
+// the next one carries on from the last number used.
+function pcNextNo(pid){
+  var n=0;
+  pcClaims(pid).forEach(function(c){ var v=parseInt(c.no,10); if(v>n) n=v; });
+  return n+1;
+}
+function pcTitle(c){
+  return 'PROGRESS CLAIM ' + pcPad(parseInt(c.no,10)||0)
+    + (c.period ? ' - ' + String(c.period).toUpperCase() : '')
+    + (Number(c.rev)>0 ? ' REV. ' + c.rev : '');
+}
+window.pcTitleOf = pcTitle;
+
+// The month that follows the last claim, so the usual case needs no thought.
+function pcNextPeriod(pid){
+  var list=pcClaims(pid).slice().sort(function(a,b){
+    return (parseInt(a.no,10)||0) - (parseInt(b.no,10)||0); });
+  var last=list[list.length-1];
+  var d=new Date();
+  if(last && last.period){
+    var mi=PC_MONTHS.indexOf(String(last.period));
+    var yr=parseInt(last.year,10) || d.getFullYear();
+    if(mi>=0){
+      mi++; if(mi>11){ mi=0; yr++; }
+      return { month:PC_MONTHS[mi], year:yr };
+    }
+  }
+  return { month:PC_MONTHS[d.getMonth()], year:d.getFullYear() };
+}
+window.pcNew=function(){
+  if(PC_PID==null) return;
+  var nxt=pcNextPeriod(PC_PID);
+  var sel=document.getElementById('pcnew-month');
+  if(sel){
+    sel.innerHTML=PC_MONTHS.map(function(m){
+      return '<option value="'+m+'"'+(m===nxt.month?' selected':'')+'>'+m+'</option>'; }).join('');
+  }
+  var yr=document.getElementById('pcnew-year');
+  if(yr) yr.value=nxt.year;
+  var hint=document.getElementById('pcnew-hint');
+  if(hint){
+    var n=pcNextNo(PC_PID);
+    hint.innerHTML='This will be claim <strong>'+pcPad(n)+'</strong>. '
+      +'The month suggested is the one after your last claim \u2014 change it if you skipped a month.';
+  }
+  document.getElementById('pcnew-modal').classList.add('open');
+};
+window.pcNewClose=function(){
+  document.getElementById('pcnew-modal').classList.remove('open');
+};
+window.pcNewConfirm=function(){
+  if(PC_PID==null) return;
+  var month=(document.getElementById('pcnew-month')||{}).value || PC_MONTHS[new Date().getMonth()];
+  var year=parseInt((document.getElementById('pcnew-year')||{}).value,10) || new Date().getFullYear();
+  var list=pcClaims(PC_PID);
+  var clash=list.find(function(c){
+    return String(c.period)===String(month) && (parseInt(c.year,10)||0)===year; });
+  if(clash && !confirm(month+' '+year+' already has claim '+pcPad(clash.no)+'.\n\n'
+      +'Create another one for the same month?')) return;
+  var rec={
+    id:'pcl_'+Date.now()+'_'+Math.random().toString(36).slice(2,5),
+    no:pcNextNo(PC_PID),
+    period:month, year:year, rev:0, status:'open',
+    createdAt:new Date().toISOString(), pct:{}
+  };
+  list.push(rec);
+  pcWrite(PC_PID, list);
+  pcNewClose();
+  // the list on the project page has to show it straight away
+  try{ pcStrip(PC_PID); }catch(e){}
+  PC_SEL=rec.id;
+  pcDraw();
+};
+
+// How each claim is named in the list.
+function pcItemName(c){
+  var p=pcProj();
+  var job=String(p.jobNumber||'').trim();
+  var name=String(p.name||'').trim();
+  // On some jobs the number already spells out the project, so saying it twice
+  // reads badly. Only add the name when it is not already in there.
+  var head=job;
+  if(name && job.toLowerCase().indexOf(name.toLowerCase())<0){
+    head = job ? (job+' - '+name) : name;
+  }
+  return [ head, 'PC ' + pcPad(parseInt(c.no,10)||0),
+           String(c.period||'') + (c.year?(' '+c.year):'') ]
+    .filter(function(x){ return String(x).trim(); }).join(' - ');
+}
+window.pcItemName = pcItemName;
+
+window.pcSet=function(id, field, v){
+  var list=pcClaims(PC_PID);
+  var c=list.find(function(x){ return String(x.id)===String(id); });
+  if(!c) return;
+  if(field==='no' || field==='rev' || field==='year'){
+    var n=parseInt(v,10); c[field]=isFinite(n)&&n>=0 ? n : 0;
+  } else c[field]=String(v||'');
+  pcWrite(PC_PID, list);
+  try{ pcStrip(PC_PID); }catch(e){}
+  pcDraw();
+};
+window.pcDelete=function(id){
+  var list=pcClaims(PC_PID);
+  var c=list.find(function(x){ return String(x.id)===String(id); });
+  if(!c) return;
+  if(!confirm('Remove '+pcTitle(c)+'?\n\nThe numbers of the other claims are not changed.')) return;
+  pcWrite(PC_PID, list.filter(function(x){ return String(x.id)!==String(id); }));
+  if(PC_SEL===id) PC_SEL=null;
+  try{ pcStrip(PC_PID); }catch(e){}
+  pcDraw();
+};
+
+// The line that names the document, with the job and order numbers beside it.
+function pcDrawBar(){
+  var host=document.getElementById('pc-doc-bar'); if(!host) return;
+  var p=pcProj(), m=pcMeta(PC_PID);
+  var list=pcClaims(PC_PID);
+  var c=list.find(function(x){ return String(x.id)===String(PC_SEL); });
+  host.innerHTML=
+     '<div class="pc-doc-name">'+pcEsc(c ? pcTitle(c) : '')+'</div>'
+    +'<div class="pc-ref">'
+      +'<div><b>Job No.</b><span>'+pcEsc(p.jobNumber||'\u2014')+'</span></div>'
+      +'<div><b>PO / Works Order No.</b>'
+        +'<input value="'+pcEsc(m.po||'')+'" placeholder="e.g. WA-24-018" '
+        +'onchange="pcSetMeta(\'po\',this.value)"></div>'
+    +'</div>';
+}
+
+// ---- the schedule of works: written once, shared by every claim ----
+function pcWorks(pid){
+  var a=pcLoad()['works_'+String(pid)];
+  return Array.isArray(a) ? a : [];
+}
+function pcWorksWrite(pid, list){
+  var o=pcLoad();
+  if(list && list.length) o['works_'+String(pid)]=list;
+  else delete o['works_'+String(pid)];
+  pcSave(o);
+}
+function pcNum(v){ var n=parseFloat(String(v).replace(/[^0-9.\-]/g,'')); return isFinite(n)?n:0; }
+function pcMoney(n){
+  n=Math.round((Number(n)||0)*100)/100;
+  return '$ '+n.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+window.pcWorkAdd=function(section){
+  var list=pcWorks(PC_PID);
+  list.push({ id:'w_'+Date.now()+'_'+Math.random().toString(36).slice(2,5),
+              section:!!section, ref:'', desc:'', total:0 });
+  pcWorksWrite(PC_PID, list); pcDraw();
+};
+window.pcWorkSet=function(id, field, v){
+  var list=pcWorks(PC_PID);
+  var w=list.find(function(x){ return String(x.id)===String(id); });
+  if(!w) return;
+  if(field==='total') w.total=pcNum(v); else w[field]=String(v||'');
+  pcWorksWrite(PC_PID, list); pcDraw();
+};
+window.pcWorkDel=function(id){
+  if(!confirm('Remove this line from the schedule of works?')) return;
+  pcWorksWrite(PC_PID, pcWorks(PC_PID).filter(function(x){ return String(x.id)!==String(id); }));
+  pcDraw();
+};
+// Bring the priced lines straight off the Project Allowances sheet.
+window.pcWorkImport=function(){
+  var secs=[];
+  try{
+    var o=JSON.parse(localStorage.getItem('remc_proj_allowances')||'{}');
+    var d=o[String(PC_PID)];
+    if(d && !Array.isArray(d) && Array.isArray(d.sections)) secs=d.sections;
+  }catch(e){}
+  if(!secs.length){ alert('There are no Project Allowances on this job to bring across yet.'); return; }
+  var list=pcWorks(PC_PID);
+  var have={};
+  list.forEach(function(w){ have[String(w.ref)+'|'+String(w.desc)]=1; });
+  var added=0;
+  secs.forEach(function(sec){
+    var key=String(sec.ref||'')+'.0|'+String(sec.title||'');
+    if(!have[key]){
+      list.push({ id:'w_'+Date.now()+'_'+Math.random().toString(36).slice(2,5),
+                  section:true, ref:(sec.ref||'')+'.0', desc:sec.title||'', total:0 });
+      have[key]=1; added++;
+    }
+    (sec.items||[]).forEach(function(it){
+      var k=String(it.ref||'')+'|'+String(it.desc||'');
+      if(have[k]) return;
+      list.push({ id:'w_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
+                  section:false, ref:it.ref||'', desc:it.desc||'', total:0 });
+      have[k]=1; added++;
+    });
+  });
+  pcWorksWrite(PC_PID, list);
+  alert(added ? (added+' line'+(added===1?'':'s')+' brought across.\n\n'
+        +'Put the dollar value against each one \u2014 that is the Item Total the claims work from.')
+      : 'Everything from the allowances is already here.');
+  pcDraw();
+};
+
+// ---- what each claim has claimed ----
+// Nothing is copied between months. What was claimed before is added up from
+// the earlier claims, so a new month only needs this period's figures.
+function pcPct(claim, wid){ return pcNum((claim && claim.pct && claim.pct[wid]) || 0); }
+window.pcSetPct=function(claimId, wid, v){
+  var list=pcClaims(PC_PID);
+  var c=list.find(function(x){ return String(x.id)===String(claimId); });
+  if(!c) return;
+  if(!c.pct) c.pct={};
+  var n=pcNum(v);
+  if(n<0) n=0; if(n>100) n=100;
+  c.pct[wid]=n;
+  pcWrite(PC_PID, list); pcDraw();
+};
+function pcPrevPct(claim, wid){
+  var mine=parseInt(claim.no,10)||0, sum=0;
+  pcClaims(PC_PID).forEach(function(c){
+    if((parseInt(c.no,10)||0) < mine) sum += pcPct(c, wid);
+  });
+  return sum;
+}
+function pcGstRate(){
+  var m=pcMeta(PC_PID);
+  var r=(m.gst===undefined || m.gst==='') ? 10 : pcNum(m.gst);
+  return r;
+}
+
+function pcDrawClaim(c){
+  var works=pcWorks(PC_PID);
+  var rows='', subPrev=0, subPer=0, subTo=0;
+
+  works.forEach(function(w){
+    if(w.section){
+      // a heading line: its total is whatever its items add up to
+      rows+='<tr class="sec">'
+        +'<td class="c"><input class="pc-i c" value="'+pcEsc(w.ref)+'" '
+          +'onchange="pcWorkSet(\'' + w.id + '\',\'ref\',this.value)"></td>'
+        +'<td><input class="pc-i" value="'+pcEsc(w.desc)+'" placeholder="SECTION" '
+          +'onchange="pcWorkSet(\'' + w.id + '\',\'desc\',this.value)"></td>'
+        +'<td colspan="7"></td>'
+        +'<td class="c"><button class="pc-x" onclick="pcWorkDel(\'' + w.id + '\')">\u2715</button></td>'
+        +'</tr>';
+      return;
+    }
+    var total=pcNum(w.total);
+    var prevP=pcPrevPct(c, w.id), perP=pcPct(c, w.id), toP=prevP+perP;
+    var prevA=total*prevP/100, perA=total*perP/100, toA=total*toP/100;
+    subPrev+=prevA; subPer+=perA; subTo+=toA;
+    rows+='<tr>'
+      +'<td class="c"><input class="pc-i c" value="'+pcEsc(w.ref)+'" '
+        +'onchange="pcWorkSet(\'' + w.id + '\',\'ref\',this.value)"></td>'
+      +'<td><input class="pc-i" value="'+pcEsc(w.desc)+'" placeholder="Description" '
+        +'onchange="pcWorkSet(\'' + w.id + '\',\'desc\',this.value)"></td>'
+      +'<td class="n"><input class="pc-i n" value="'+(total?total:'')+'" placeholder="0.00" '
+        +'onchange="pcWorkSet(\'' + w.id + '\',\'total\',this.value)"></td>'
+      +'<td class="c">'+Math.round(prevP)+'%</td>'
+      +'<td class="c per"><input class="pc-i c" value="'+(perP?perP:'')+'" placeholder="0" '
+        +'onchange="pcSetPct(\'' + c.id + '\',\'' + w.id + '\',this.value)"></td>'
+      +'<td class="c">'+Math.round(toP)+'%</td>'
+      +'<td class="n">'+(prevA?pcMoney(prevA):'$   -')+'</td>'
+      +'<td class="n per">'+(perA?pcMoney(perA):'$   -')+'</td>'
+      +'<td class="n">'+(toA?pcMoney(toA):'$   -')+'</td>'
+      +'<td class="c"><button class="pc-x" onclick="pcWorkDel(\'' + w.id + '\')">\u2715</button></td>'
+      +'</tr>';
+  });
+
+  var g=pcGstRate()/100;
+  var m=pcMeta(PC_PID);
+  function info(label, field, ph){
+    return '<div class="l">'+label+'</div><div><input value="'+pcEsc(m[field]||'')+'" '
+      +'placeholder="'+pcEsc(ph||'')+'" onchange="pcSetMeta(\'' + field + '\',this.value)"></div>';
+  }
+
+  var st=pcState(c);
+  return '<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">'
+      +'<span class="pc-back" onclick="pcClose()">\u2190 Back to the project</span>'
+      +'<span style="margin-left:auto;font-size:9px;font-weight:800;text-transform:uppercase;'
+        +'letter-spacing:1.2px;color:var(--muted)">Status</span>'
+      +'<select class="pc-st-pick" onchange="pcSet(\''+pcEsc(c.id)+'\',\'status\',this.value)">'
+      + PC_STATES.map(function(x){
+          return '<option value="'+x+'"'+(x===st?' selected':'')+'>'
+            +(PC_STATE_LABEL[x]||x)+'</option>'; }).join('')
+      +'</select>'
+    +'</div>'
+    +'<div class="pc-info">'
+      +info('Client:','client','Builder or client')
+      +info('Contract:','contract','Contract or site name')
+      +'<div class="l">Works Order No:</div><div><input value="'+pcEsc(m.po||'')+'" '
+        +'placeholder="e.g. WA-24-018" onchange="pcSetMeta(\'po\',this.value)"></div>'
+      +'<div class="l">Claim Period:</div><div><input value="'+pcEsc(c.period||'')+'" '
+        +'onchange="pcSet(\'' + c.id + '\',\'period\',this.value)"></div>'
+      +info('Contact Name:','contactName','Who receives the claim')
+      +info('Contact Email:','contactEmail','name@builder.com')
+      +info('Contract Sum:','contractSum','$0.00 + GST')
+    +'</div>'
+    +'<table class="pc-sum"><tr><th></th><th>Previous</th><th>Period</th><th>Claim to Date</th></tr>'
+      +'<tr><td class="l">Sub Total</td><td>'+pcMoney(subPrev)+'</td>'
+        +'<td class="per">'+pcMoney(subPer)+'</td><td>'+pcMoney(subTo)+'</td></tr>'
+      +'<tr><td class="l">GST ('+pcGstRate()+'%)</td><td>'+pcMoney(subPrev*g)+'</td>'
+        +'<td class="per">'+pcMoney(subPer*g)+'</td><td>'+pcMoney(subTo*g)+'</td></tr>'
+      +'<tr><td class="l">Total</td><td>'+pcMoney(subPrev*(1+g))+'</td>'
+        +'<td class="per">'+pcMoney(subPer*(1+g))+'</td><td>'+pcMoney(subTo*(1+g))+'</td></tr>'
+    +'</table>'
+    +'<div class="pc-tools">'
+      +'<strong style="font-size:12px">Contract Works</strong>'
+      +'<button class="pc-btn" onclick="pcWorkAdd(true)">+ Section</button>'
+      +'<button class="pc-btn" onclick="pcWorkAdd(false)">+ Line</button>'
+      +'<button class="pc-btn go" onclick="pcWorkImport()">Bring in from Allowances</button>'
+    +'</div>'
+    +'<table class="pc-tbl">'
+      +'<colgroup><col style="width:48px"><col><col style="width:92px">'
+        +'<col style="width:52px"><col style="width:56px"><col style="width:56px">'
+        +'<col style="width:98px"><col style="width:98px"><col style="width:98px">'
+        +'<col style="width:26px"></colgroup>'
+      +'<thead><tr>'
+        +'<th rowspan="2">Item</th><th rowspan="2">Description</th><th rowspan="2">Item Total</th>'
+        +'<th colspan="3">Percentage Complete</th><th colspan="3">Amount</th><th rowspan="2"></th>'
+      +'</tr><tr>'
+        +'<th>Prev.</th><th>Period</th><th>To Date</th>'
+        +'<th>Previous</th><th>Period</th><th>Claim to Date</th>'
+      +'</tr></thead>'
+      +'<tbody>'+(rows || '<tr><td colspan="10" style="text-align:center;padding:22px;color:#888">'
+        +'No works listed yet. Use <strong>Bring in from Allowances</strong> or add lines by hand.</td></tr>')
+      +'</tbody></table>';
+}
+
+// The window always shows one claim. The list lives on the project page.
+function pcDraw(){
+  pcDrawTop();
+  pcDrawBar();
+  var box=document.getElementById('pc-body'); if(!box) return;
+  var c=pcClaims(PC_PID).find(function(x){ return String(x.id)===String(PC_SEL); });
+  if(!c){ pcClose(); return; }
+  box.innerHTML=pcDrawClaim(c);
+}
+
+// The claims, right on the project page. Clicking one opens it straight away.
+window.pcPanelOpen=function(id){
+  PC_PID = window._pdCurrentId;
+  PC_SEL = id || null;
+  var p=pcProj();
+  var lbl=document.getElementById('pc-proj');
+  if(lbl) lbl.textContent=(p.jobNumber?(p.jobNumber+'  \u00B7  '):'')+(p.name||'');
+  document.getElementById('pc-modal').classList.add('open');
+  pcDraw();
+};
+window.pcPanelNew=function(){
+  PC_PID = window._pdCurrentId;
+  if(PC_PID==null) return;
+  pcNew();
+};
+function pcStrip(pid){
+  PC_PID = pid;
+  var sub=document.getElementById('pc-strip-sub');
+  var box=document.getElementById('pc-panel-list');
+  var list=pcClaims(pid).slice().sort(function(a,b){
+    return (parseInt(b.no,10)||0) - (parseInt(a.no,10)||0); });   // newest first
+  if(sub) sub.textContent = list.length
+    ? (list.length + ' claim' + (list.length===1?'':'s'))
+    : 'none yet';
+  if(!box) return;
+  if(!list.length){
+    box.innerHTML='<div class="pc-pi-e">No claims on this job yet. Use + to start the first month.</div>';
+    return;
+  }
+  box.innerHTML='<div class="pc-pl">'
+    + list.map(function(c){
+        var st=pcState(c);
+        return '<div class="pc-pi" ondblclick="pcPanelOpen(\''+pcEsc(c.id)+'\')">'
+          +'<div class="pc-pi-n">'+pcEsc(pcItemName(c))
+            +(Number(c.rev)>0 ? ' <span class="pc-item-r">REV. '+c.rev+'</span>' : '')+'</div>'
+          +'<span class="pc-st '+st+'">'+pcEsc(PC_STATE_LABEL[st]||st)+'</span>'
+          +'<button class="pc-open-b" onclick="event.stopPropagation();'
+            +'pcPanelOpen(\''+pcEsc(c.id)+'\')">Open</button>'
+          +'</div>';
+      }).join('')
+    +'</div>'
+    + '<div class="pc-pl-f">'
+      + (list.length>3 ? ('Scroll for '+(list.length-3)+' more \u00B7 newest first')
+                       : 'Newest first')
+      + '</div>';
+}
+window.pcStrip = pcStrip;
 
 // ── Project Allowances ──────────────────────────────────────────────────────
 // The figures written on the builder's allowance sheet, typed in once so the
@@ -11229,6 +11910,12 @@ function paDraw(){
 function paRender(pid){
   var host=document.getElementById('pd-allow-items'); if(!host) return;
   var secs=paSections(pid), t=paTotals(secs);
+  try{
+    window.pdAccSummary('allow', t.items
+      ? (secs.length+' section'+(secs.length===1?'':'s')+' \u00B7 '+t.items+' line'+(t.items===1?'':'s'))
+      : 'none yet');
+  }catch(e){}
+  try{ pdAccApply(); }catch(e){}
   host.innerHTML='<button class="pa-open" onclick="paOpen(\''+paEsc(pid)+'\')">'
     +'<span style="font-size:15px">\uD83D\uDCCB</span>'
     +'<span>Open Project Allowances</span>'
@@ -11270,6 +11957,33 @@ var PD_KINDS = [
   { key:'landscape',  icon:'\uD83C\uDF3F', label:'Landscape Plans', hint:'Soft and hard landscaping' },
   { key:'other',      icon:'\uD83D\uDCCE', label:'Other Files',     hint:'Permits, reports, anything else' }
 ];
+// One section open at a time keeps the panel short. Which one stays open is
+// remembered, so it is still there the next time a project is opened.
+var PD_ACC_KEY = 'remc_pd_open_section';
+function pdAccGet(){
+  try{ return localStorage.getItem(PD_ACC_KEY) || ''; }catch(e){ return ''; }
+}
+window.pdAcc = function(which){
+  var now = pdAccGet();
+  var next = (now === which) ? '' : which;      // clicking the open one closes it
+  try{ localStorage.setItem(PD_ACC_KEY, next); }catch(e){}
+  pdAccApply();
+};
+function pdAccApply(){
+  var open = pdAccGet();
+  ['allow','tests','docs'].forEach(function(k){
+    var el = document.getElementById('pdacc-' + k);
+    if (el) el.classList.toggle('open', k === open);
+  });
+}
+window.pdAccApply = pdAccApply;
+// A short summary on the header, so the panel says what is inside without
+// having to be opened.
+window.pdAccSummary = function(which, text){
+  var el = document.getElementById('pdacc-s-' + which);
+  if (el) el.textContent = text || '';
+};
+
 function pdKind(key){
   return PD_KINDS.find(function(k){ return k.key===key; })
     || { key:key, icon:'\uD83D\uDCCE', label:key, hint:'' };
@@ -11309,6 +12023,8 @@ function pdRenderDocs(id) {
   host.innerHTML = total
     ? html
     : '<div class="pd-none">Nothing attached yet. Use <strong>+</strong> to add a plan or document.</div>';
+  try{ window.pdAccSummary('docs', total ? (total + ' file' + (total===1?'':'s')) : 'none yet'); }catch(e){}
+  try{ pdAccApply(); }catch(e){}
 }
 
 // The + button: pick what kind of drawing this is, then how to attach it.
@@ -12554,6 +13270,7 @@ function projDetailOpen(id) {
   try { pdRenderDocs(id); } catch(e) { console.warn('pdRenderDocs error:', e); }
   try { paRender(id); } catch(e) { console.warn('paRender error:', e); }
   try { ptRender(id); } catch(e) { console.warn('ptRender error:', e); }
+  try { pcStrip(id); } catch(e) { console.warn('pcStrip error:', e); }
   try { pdRenderTimeline(id); } catch(e) { console.warn('pdRenderTimeline error:', e); }
 
   m.style.display = 'flex';
@@ -13434,10 +14151,10 @@ function teamEditProjectBooking(pid){
   </div>
 
   <!-- 4-quadrant grid -->
-  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:1px;background:var(--border);overflow:hidden">
+  <div style="flex:1 1 0;min-height:0;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:1px;background:var(--border);overflow:hidden">
 
     <!-- Q1 TOP-LEFT: Project info -->
-    <div style="background:var(--surface);overflow-y:auto;padding:20px">
+    <div style="background:var(--surface);overflow-y:auto;min-height:0;min-width:0;padding:20px">
       <div style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;color:var(--blue);margin-bottom:16px">&#128203; Project Information</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px 18px">
         <div><div class="pd-lbl">Builder / Client</div><div id="pd-builder" class="pd-val">&mdash;</div></div>
@@ -13456,12 +14173,12 @@ function teamEditProjectBooking(pid){
     </div>
 
     <!-- Q2 TOP-RIGHT: Drawing -->
-    <div style="background:var(--surface);overflow:hidden;padding:10px;display:flex;flex-direction:column">
+    <div style="background:var(--surface);overflow:hidden;padding:10px;display:flex;flex-direction:column;min-height:0;min-width:0">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-shrink:0">
         <span style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;color:var(--blue)">&#128208; Drawing</span>
         <div style="display:flex;gap:5px" id="pd-drawing-controls"></div>
       </div>
-      <div id="pd-drawing-area" style="flex:1;position:relative;background:#1e293b;border-radius:10px;overflow:hidden;display:flex;align-items:center;justify-content:center">
+      <div id="pd-drawing-area" style="flex:1 1 0;min-height:46px;position:relative;background:#1e293b;border-radius:10px;overflow:hidden;display:flex;align-items:center;justify-content:center">
         <div id="pd-drawing-empty" style="text-align:center;color:#94a3b8;padding:20px">
           <div style="font-size:28px;margin-bottom:8px">&#128196;</div>
           <button onclick="document.getElementById('pd-drawing-input').click()" style="padding:7px 14px;background:var(--blue);color:#fff;border:none;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer">Upload Drawing</button>
@@ -13471,18 +14188,55 @@ function teamEditProjectBooking(pid){
         </div>
       </div>
       <input type="file" id="pd-drawing-input" accept="application/pdf,image/*" style="display:none" onchange="pdDrawingUpload(event)">
+      <div class="pc-panel">
+        <div class="pc-panel-h">
+          <div class="pc-strip-t">&#128181; Progress Claims</div>
+          <div class="pc-strip-s" id="pc-strip-sub"></div>
+          <button class="pc-plus" onclick="pcPanelNew()" title="Add a new month">+</button>
+        </div>
+        <div id="pc-panel-list"></div>
+      </div>
     </div>
 
     <!-- Q4 BOTTOM-RIGHT: Project Plans & Documents -->
-    <div style="background:var(--surface);overflow-y:auto;padding:16px 18px">
-      <div style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;color:var(--blue);margin-bottom:10px">&#128203; Project Allowances</div>
-      <div id="pd-allow-items" style="margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border)"></div>
-      <div id="pd-tests" style="margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border)"></div>
-      <div class="pd-docs-head">
-        <div style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;color:var(--blue)">&#128194; Project Plans & Documents</div>
-        <button class="pd-add-btn" onclick="pdDocNew()" title="Attach a plan or document">+</button>
+    <div style="background:var(--surface);overflow-y:auto;min-height:0;min-width:0;padding:16px 18px">
+      <div class="pdacc" id="pdacc-allow">
+        <div class="pdacc-h" onclick="pdAcc('allow')">
+          <span class="pdacc-i">&#128203;</span>
+          <span class="pdacc-t">Project Allowances</span>
+          <span class="pdacc-s" id="pdacc-s-allow"></span>
+          <span class="pdacc-c">&#9662;</span>
+        </div>
+        <div class="pdacc-b" id="pdacc-b-allow">
+          <div id="pd-allow-items"></div>
+        </div>
       </div>
-      <div id="pd-docs-all"></div>
+
+      <div class="pdacc" id="pdacc-tests">
+        <div class="pdacc-h" onclick="pdAcc('tests')">
+          <span class="pdacc-i">&#129514;</span>
+          <span class="pdacc-t">Compaction Tests</span>
+          <span class="pdacc-s" id="pdacc-s-tests"></span>
+          <span class="pdacc-c">&#9662;</span>
+        </div>
+        <div class="pdacc-b" id="pdacc-b-tests">
+          <div id="pd-tests"></div>
+        </div>
+      </div>
+
+      <div class="pdacc" id="pdacc-docs">
+        <div class="pdacc-h" onclick="pdAcc('docs')">
+          <span class="pdacc-i">&#128194;</span>
+          <span class="pdacc-t">Project Plans &amp; Documents</span>
+          <span class="pdacc-s" id="pdacc-s-docs"></span>
+          <button class="pd-add-btn" onclick="event.stopPropagation();pdDocNew()"
+            title="Attach a plan or document">+</button>
+          <span class="pdacc-c">&#9662;</span>
+        </div>
+        <div class="pdacc-b" id="pdacc-b-docs">
+          <div id="pd-docs-all"></div>
+        </div>
+      </div>
       <input type="file" id="pd-doc-file-input" accept="application/pdf,image/*,.xlsx,.xls,.doc,.docx,.dwg,.dxf" style="display:none" onchange="pdDocFileChosen(event)">
     </div>
   </div><!-- end grid -->
@@ -16153,7 +16907,7 @@ function teamEditProjectBooking(pid){
     rqClose(); rqRender(); rqMarkSeen();
   };
 
-  ['pa-modal'].forEach(function(id){
+  ['pc-modal','pa-modal'].forEach(function(id){
     document.addEventListener('click', function(ev){
       var ov=document.getElementById(id);
       if(ov && ev.target===ov){ ov.classList.remove('open'); try{ paClose(); }catch(e){} }
