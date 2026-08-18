@@ -1973,6 +1973,23 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
   .vp-b.ok{background:var(--green);border-color:var(--green);color:#fff}
   .vp-b.ok:hover{background:#15803d;border-color:#15803d;color:#fff}
   .vp-b.no:hover{border-color:var(--red);color:var(--red)}
+  /* five of these fit; the rest scroll */
+  #vp-done{max-height:320px}
+  .vp-mini{display:flex;align-items:center;gap:8px;padding:8px 12px;
+    border-bottom:1px solid var(--border)}
+  .vp-mini:last-child{border-bottom:none}
+  .vp-mini:hover{background:var(--surface2)}
+  .vp-mini-l{flex:1;min-width:0}
+  .vp-mini-top{display:flex;align-items:baseline;gap:6px}
+  .vp-mini-tick{font-size:11px;font-weight:800;flex-shrink:0}
+  .vp-mini-tick.yes{color:var(--green)} .vp-mini-tick.no{color:var(--red)}
+  .vp-mini-d{flex:1;min-width:0;font-size:12.5px;font-weight:800;color:var(--text);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .vp-mini-a{font-size:12px;font-weight:800;color:var(--mid);white-space:nowrap}
+  .vp-mini-sub{font-size:10.5px;color:var(--muted);white-space:nowrap;
+    overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+  .vp-mini-r{display:flex;gap:5px;flex-shrink:0}
+  .vp-b.sm{padding:2px 8px;font-size:10px}
   .vp-none{padding:34px 16px;text-align:center;color:var(--muted);font-size:12.5px;font-style:italic}
   .vp-out{font-size:11px;font-weight:800;margin-top:6px}
   .vp-out.yes{color:var(--green)} .vp-out.no{color:var(--red)}
@@ -12035,6 +12052,33 @@ window.vpDelete=function(id){
   vpRender();
 };
 
+// Once it is decided there is nothing left to do with it, so a short line is
+// enough. Five fit; the rest are reached by scrolling.
+function vqCardSmall(r){
+  var p=vqProjOf(r);
+  var head=[(p?(p.jobNumber||''):(r.jobNumber||'')),
+            (p?(p.name||''):(r.projectName||''))]
+    .filter(function(x){ return String(x).trim(); }).join(' - ') || 'No job given';
+  var yes=(r.state==='approved');
+  return '<div class="vp-mini" title="'+vqEsc((r.desc||'')+'\n'+(r.reason||''))+'">'
+    +'<div class="vp-mini-l">'
+      +'<div class="vp-mini-top">'
+        +'<span class="vp-mini-tick '+(yes?'yes':'no')+'">'+(yes?'\u2713':'\u2715')+'</span>'
+        +'<span class="vp-mini-d">'+vqEsc(r.desc||'Untitled')+'</span>'
+        +'<span class="vp-mini-a">'+vqMoney(r.amount)+'</span>'
+      +'</div>'
+      +'<div class="vp-mini-sub">'+vqEsc(head)
+        +' \u00B7 '+vqEsc(r.decidedBy||r.by||'')
+        +(r.decidedAt?(' \u00B7 '+vqEsc(vqWhen(r.decidedAt).replace(/,.*$/,''))):'')
+      +'</div>'
+    +'</div>'
+    +'<div class="vp-mini-r">'
+      +'<button class="vp-b sm" onclick="vpMove(\''+r.id+'\',\'approval\')" title="Put it back for approval">Reopen</button>'
+      +'<button class="vp-b sm no" onclick="vpDelete(\''+r.id+'\')" title="Remove this record">\u2715</button>'
+    +'</div>'
+  +'</div>';
+}
+
 function vqCard(r){
   var p=vqProjOf(r);
   var job=(p ? (p.jobNumber||'') : (r.jobNumber||''));
@@ -12156,7 +12200,10 @@ function vpRender(){
 
   fill('vp-approval', forApproval, 'Nothing waiting.');
   fill('vp-check', toCheck, 'Nothing being thought about.');
-  fill('vp-done', done, 'Nothing decided yet.');
+  var elDone=document.getElementById('vp-done');
+  if(elDone) elDone.innerHTML = done.length
+    ? done.map(vqCardSmall).join('')
+    : '<div class="vp-none">Nothing decided yet.</div>';
 
   function n(id, arr){ var e=document.getElementById(id); if(e) e.textContent=arr.length||''; }
   n('vp-n-approval', forApproval); n('vp-n-check', toCheck); n('vp-n-done', done);
