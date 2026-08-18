@@ -636,6 +636,24 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
           <div class="vp-list" id="vp-done"></div>
         </div>
       </div>
+
+      <div class="vp-all">
+        <div class="vp-all-h">
+          <span class="vp-col-t">&#128203; Every variation on the books</span>
+          <span class="vp-all-n" id="vp-all-n"></span>
+        </div>
+        <div class="vp-all-wrap">
+          <table class="vp-tbl">
+            <colgroup><col style="width:110px"><col style="width:230px"><col style="width:62px">
+              <col><col style="width:118px"><col style="width:96px"></colgroup>
+            <thead><tr>
+              <th>Job No.</th><th>Project</th><th>VO</th>
+              <th>Description</th><th>Amount</th><th>Status</th>
+            </tr></thead>
+            <tbody id="vp-all-rows"></tbody>
+          </table>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1903,6 +1921,27 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
   .pa-tot-u{font-size:12px;font-weight:700;color:var(--muted);margin-left:3px}
   .pa-subtot{background:#fdf5f5}
   .vp-page{padding:22px 26px;max-width:1500px;margin:0 auto}
+  .vp-all{margin-top:18px;background:var(--surface);border:1px solid var(--border);
+    border-radius:12px;box-shadow:var(--shadow);overflow:hidden}
+  .vp-all-h{display:flex;align-items:center;gap:8px;padding:11px 14px;
+    border-bottom:2px solid var(--border2);background:var(--surface2)}
+  .vp-all-n{margin-left:auto;font-size:11.5px;font-weight:800;color:var(--mid)}
+  .vp-all-wrap{max-height:44vh;overflow-y:auto;overscroll-behavior:contain}
+  .vp-all-wrap::-webkit-scrollbar{width:10px}
+  .vp-all-wrap::-webkit-scrollbar-thumb{background:var(--border2);border-radius:5px;
+    border:2px solid var(--surface)}
+  table.vp-tbl{border-collapse:collapse;width:100%;table-layout:fixed}
+  table.vp-tbl th{position:sticky;top:0;background:var(--surface2);border-bottom:1px solid var(--border);
+    padding:7px 12px;text-align:left;font-size:9px;font-weight:800;text-transform:uppercase;
+    letter-spacing:1.1px;color:var(--muted);white-space:nowrap}
+  table.vp-tbl td{border-bottom:1px solid var(--border);padding:8px 12px;font-size:12.5px;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  table.vp-tbl tbody tr:last-child td{border-bottom:none}
+  table.vp-tbl tbody tr:hover td{background:var(--surface2)}
+  td.vp-t-job{font-weight:800;color:var(--red);font-size:11px;text-transform:uppercase}
+  td.vp-t-no{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800}
+  td.vp-t-amt{text-align:right;font-weight:800}
+  tr.vp-t-sum td{background:var(--surface2);font-weight:800;border-top:2px solid var(--border2)}
   .vp-cols{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;align-items:start}
   .vp-col{background:var(--surface);border:1px solid var(--border);border-radius:12px;
     box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column}
@@ -11944,10 +11983,22 @@ window.vpApprove=function(id){
        if(o && typeof o==='object' && !Array.isArray(o)) all=o; }catch(e){}
   var arr=Array.isArray(all[String(p.id)]) ? all[String(p.id)] : [];
   var no=0; arr.forEach(function(v){ var x=parseInt(v.no,10); if(x>no) no=x; });
-  arr.push({ id:'vr_'+Date.now()+'_'+Math.random().toString(36).slice(2,5),
-             no:no+1, desc:r.desc, amount:vqNum(r.amount), status:'open',
-             createdAt:new Date().toISOString(), fromRequest:r.id,
-             raisedBy:r.by||'', raisedAt:r.at||'' });
+  // One raised on the phone is already sitting there, waiting. Approve that one
+  // rather than adding a second copy of the same work.
+  var mine = r.recId ? arr.find(function(v){ return String(v.id)===String(r.recId); }) : null;
+  if(mine){
+    delete mine.state;
+    mine.no = parseInt(mine.no,10)>=1 ? mine.no : (no+1);
+    if(!String(mine.desc||'').trim()) mine.desc = r.desc || mine.description || '';
+    if(!vqNum(mine.amount)) mine.amount = vqNum(r.amount);
+    mine.status = mine.status || 'open';
+    mine.fromRequest = r.id;
+  } else {
+    arr.push({ id:'vr_'+Date.now()+'_'+Math.random().toString(36).slice(2,5),
+               no:no+1, desc:r.desc, amount:vqNum(r.amount), status:'open',
+               createdAt:new Date().toISOString(), fromRequest:r.id,
+               raisedBy:r.by||'', raisedAt:r.at||'' });
+  }
   all[String(p.id)]=arr;
   var txt=JSON.stringify(all);
   if(typeof window.remcSaveKey==='function') window.remcSaveKey('remc_variations', txt);
@@ -12030,6 +12081,59 @@ function vqCard(r){
   +'</div>';
 }
 
+// Every variation that made it onto a job, whatever project it belongs to.
+function vpAllRender(){
+  var body=document.getElementById('vp-all-rows'); if(!body) return;
+  var all={};
+  try{ var o=JSON.parse(localStorage.getItem('remc_variations')||'{}');
+       if(o && typeof o==='object' && !Array.isArray(o)) all=o; }catch(e){}
+  var q=String((document.getElementById('vp-search')||{}).value||'').trim().toLowerCase();
+
+  var rows=[];
+  vqProjects().forEach(function(p){
+    (Array.isArray(all[String(p.id)]) ? all[String(p.id)] : []).forEach(function(v, i){
+      if(v.state==='pending') return;            // not approved yet
+      var no=parseInt(v.no,10); if(!isFinite(no) || no<1) no=i+1;
+      rows.push({ job:p.jobNumber||'', project:p.name||'', no:no,
+                  desc:String(v.desc||v.description||'').trim() || 'Untitled variation',
+                  amount:vqNum(v.amount), status:String(v.status||'open').toLowerCase() });
+    });
+  });
+  if(q) rows=rows.filter(function(r){
+    return (r.job+' '+r.project+' '+r.desc).toLowerCase().indexOf(q)>=0; });
+  rows.sort(function(a,b){
+    return a.job===b.job ? (a.no-b.no) : String(a.job).localeCompare(String(b.job)); });
+
+  var total=0; rows.forEach(function(r){ total+=r.amount; });
+  var label=document.getElementById('vp-all-n');
+  if(label) label.textContent = rows.length
+    ? (rows.length+' variation'+(rows.length===1?'':'s')+'  \u00B7  '+vqMoney(total)) : '';
+
+  if(!rows.length){
+    body.innerHTML='<tr><td colspan="6" style="text-align:center;padding:28px;'
+      +'color:var(--muted);font-style:italic">'
+      +(q ? 'None match that.' : 'No variations on any job yet.')+'</td></tr>';
+    return;
+  }
+  var LBL={ open:'Open', pending:'Pending', finalised:'Finalised',
+            draft:'Open', sent:'Pending', approved:'Pending', paid:'Finalised' };
+  body.innerHTML=rows.map(function(r){
+    var st=LBL[r.status] ? r.status : 'open';
+    var cls=(LBL[st]||'Open').toLowerCase();
+    return '<tr>'
+      +'<td class="vp-t-job">'+vqEsc(r.job)+'</td>'
+      +'<td>'+vqEsc(r.project)+'</td>'
+      +'<td class="vp-t-no">'+(r.no<10?('0'+r.no):r.no)+'</td>'
+      +'<td title="'+vqEsc(r.desc)+'">'+vqEsc(r.desc)+'</td>'
+      +'<td class="vp-t-amt">'+vqMoney(r.amount)+'</td>'
+      +'<td><span class="pc-st '+cls+'">'+vqEsc(LBL[st]||'Open')+'</span></td>'
+      +'</tr>';
+  }).join('')
+  + '<tr class="vp-t-sum"><td colspan="4">Total</td>'
+    +'<td class="vp-t-amt">'+vqMoney(total)+'</td><td></td></tr>';
+}
+window.vpAllRender = vpAllRender;
+
 function vpRender(){
   var host=document.getElementById('vp-approval'); if(!host) return;
   var q=String((document.getElementById('vp-search')||{}).value||'').trim().toLowerCase();
@@ -12056,6 +12160,7 @@ function vpRender(){
 
   function n(id, arr){ var e=document.getElementById(id); if(e) e.textContent=arr.length||''; }
   n('vp-n-approval', forApproval); n('vp-n-check', toCheck); n('vp-n-done', done);
+  try{ vpAllRender(); }catch(e){ console.warn('variations list:', e); }
 }
 window.vpRender = vpRender;
 window.renderVariations = vpRender;
@@ -12131,7 +12236,10 @@ window.vrDelete=function(id){
 function vrRender(pid){
   var sub=document.getElementById('vr-sub');
   var box=document.getElementById('vr-list');
-  var list=vrList(pid).slice().sort(function(a,b){
+  // Anything still waiting on the office is not on the job yet, so it is left
+  // out here and out of the totals. It shows on the Variations page instead.
+  var list=vrList(pid).filter(function(v){ return v.state!=='pending'; })
+    .slice().sort(function(a,b){
     return (parseInt(b.no,10)||0)-(parseInt(a.no,10)||0); });   // newest first
   var total=0; list.forEach(function(v){ total+=pcNum(v.amount); });
   if(sub) sub.textContent = list.length
@@ -12147,7 +12255,7 @@ function vrRender(pid){
         // Entries saved before, or with a field left blank, still read sensibly.
         var no=parseInt(v.no,10);
         if(!isFinite(no) || no<1) no=list.length-i;
-        var desc=String(v.desc||'').trim() || 'Untitled variation';
+        var desc=String(v.desc||v.description||'').trim() || 'Untitled variation';
         return '<div class="pc-pi" ondblclick="vrEdit(\''+pcEsc(v.id)+'\')" '
           +'title="Double-click to change">'
           +'<button class="pc-pen" title="Change this variation" '

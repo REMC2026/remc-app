@@ -697,6 +697,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
   var VIEW = 'list', OFFSET = 0, EDIT_ID = null, PICK_COLOR = COLORS[0], NOTES_PID = null;
   var TESTS = {}, TEST_PID = null;
   var TRANSFERS = {}, TR_PID = null, TR_ACTION = '';
+  var VARREQ = [];
   var VARIATIONS = {}, VAR_PID = null, _varPhotos = [], _varDockets = [], _varSaving = false, VAR_EDIT_ID = null;
   var SUBCONS = {}, SUB_PID = null, SUB_STATUS = 'booked', SUB_ACT = { pid:null, id:null };
   var PROJDOCS = {}, ALLOW_PID = null;
@@ -889,6 +890,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     TESTS    = j('remc_compaction_tests','{}'); if(!TESTS || typeof TESTS!=='object' || Array.isArray(TESTS)) TESTS={};
     TRANSFERS= j('remc_machine_transfers','{}'); if(!TRANSFERS || typeof TRANSFERS!=='object' || Array.isArray(TRANSFERS)) TRANSFERS={};
     VARIATIONS= j('remc_variations','{}'); if(!VARIATIONS || typeof VARIATIONS!=='object' || Array.isArray(VARIATIONS)) VARIATIONS={};
+    VARREQ = j('remc_variation_requests','[]'); if(!Array.isArray(VARREQ)) VARREQ=[];
     SUBCONS  = j('remc_sub_bookings','{}'); if(!SUBCONS || typeof SUBCONS!=='object' || Array.isArray(SUBCONS)) SUBCONS={};
     PROJDOCS = j('remc_proj_docs','{}'); if(!PROJDOCS || typeof PROJDOCS!=='object' || Array.isArray(PROJDOCS)) PROJDOCS={};
     ACTIVITY = j('remc_activity_log','[]'); if(!Array.isArray(ACTIVITY)) ACTIVITY=[];
@@ -1142,6 +1144,9 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     withDoc(function(d){
       if(!d){ _cloudFail(); if(cb) cb('read failed'); return; }
       d['remc_variations'] = JSON.stringify(VARIATIONS);
+      // A variation raised on site is a request, not a decision. The office sees
+      // it on the Variations page, and only then does it land on the job.
+      d['remc_variation_requests'] = JSON.stringify(VARREQ);
       writeDoc(d, cb);
     });
   }
@@ -2031,6 +2036,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
       dockets:_varDockets.filter(function(d){ return d && !d.uploading; }).slice(),
       createdAt:new Date().toISOString(), bookedBy: ME? ME.name : 'Supervisor', au_user: ME? (ME.username||'') : '', au_app:'Mobile'
     };
+    rec.state='pending';                 // waiting on the office
     if(!VARIATIONS[String(pid)]) VARIATIONS[String(pid)]=[];
     var wasEdit=false;
     if(VAR_EDIT_ID){
@@ -2047,6 +2053,30 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     } else {
       VARIATIONS[String(pid)].push(rec);
     }
+    // Put it in front of the office. An edit updates the request already there
+    // rather than raising a second one for the same job.
+    try{
+      if(!Array.isArray(VARREQ)) VARREQ=[];
+      var _p=(PROJECTS||[]).find(function(x){ return String(x.id)===String(pid); }) || {};
+      var _req = VARREQ.find(function(x){ return String(x.recId)===String(rec.id); });
+      if(!_req){
+        _req={ id:'vq_'+Date.now()+'_'+Math.random().toString(36).slice(2,5), state:'approval' };
+        VARREQ.push(_req);
+      }
+      _req.recId=rec.id;
+      _req.pid=pid;
+      _req.jobNumber=_p.jobNumber||'';
+      _req.projectName=_p.name||'';
+      _req.desc=rec.description||'';
+      _req.amount=0;                      // site does not price it
+      _req.source='site';
+      _req.by=rec.bookedBy||'Supervisor';
+      _req.at=rec.createdAt||new Date().toISOString();
+      _req.machine=rec.machine||'';
+      _req.notes=rec.comments||'';
+      if(_req.state==='declined' || _req.state==='approved') _req.state='approval';
+    }catch(e){ console.warn('variation request:', e); }
+
     VAR_EDIT_ID=null;
     // reset the form
     _varPhotos=[]; _varDockets=[];
@@ -2067,6 +2097,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
   };
   window.deleteVariation=function(pid, id){
     if(!confirm('Remove this variation?')) return;
+    try{ VARREQ=(VARREQ||[]).filter(function(x){ return String(x.recId)!==String(id); }); }catch(e){}
     var _v=(VARIATIONS[String(pid)]||[]).find(function(x){return String(x.id)===String(id);});
     if(_v){ try{ logActivity('variation','deleted', pid, String(_v.description||'').slice(0,60)); }catch(e){} }
     VARIATIONS[String(pid)] = (VARIATIONS[String(pid)]||[]).filter(function(v){ return String(v.id)!==String(id); });
