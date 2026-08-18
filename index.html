@@ -12165,6 +12165,25 @@ function vpRender(){
 window.vpRender = vpRender;
 window.renderVariations = vpRender;
 
+// Something raised on site can land at any moment. While the page is open,
+// keep an eye on the stored requests and redraw when they change.
+(function(){
+  var seen=null;
+  function tick(){
+    try{
+      var page=document.getElementById('page-variations');
+      if(!page || page.style.display==='none' || !page.classList.contains('active')){
+        if(!page || page.offsetParent===null) return;    // not on screen
+      }
+      var now='';
+      try{ now=(localStorage.getItem(VQ_KEY)||'')+'|'+(localStorage.getItem('remc_variations')||''); }catch(e){}
+      if(seen===null){ seen=now; return; }
+      if(now!==seen){ seen=now; vpRender(); }
+    }catch(e){}
+  }
+  setInterval(tick, 2000);
+})();
+
 // Work outside the original contract, priced separately and claimed like any
 // other line once approved.
 var VR_KEY='remc_variations';

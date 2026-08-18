@@ -2113,7 +2113,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
             ? 'Saved on this phone. No connection right now \u2014 it will go up when you are back online.'
             : ('Saved on this phone, but the office copy did not update: ' + why));
       }
-      else { pull(function(){ renderVariations(); }); supShowResult(true, wasEdit ? 'Variation updated' : 'Variation added'); }
+      else { renderVariations(); supShowResult(true, wasEdit ? 'Variation updated' : 'Variation added'); }
     });
   };
   window.deleteVariation=function(pid, id){
@@ -2126,7 +2126,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     supShowSaving('Saving…');
     pushVariations(function(err){
       if(err){ supShowResult(false, 'Saved on this phone. The office copy did not update \u2014 it will go up when the connection is back.'); }
-      else { pull(function(){ renderVariations(); }); supShowResult(true, 'Variation removed'); }
+      else { renderVariations(); supShowResult(true, 'Variation removed'); }
     });
   };
 
