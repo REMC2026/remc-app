@@ -599,6 +599,46 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
   </div>
 
   <!-- ══ PAGE: MATERIALS ══ -->
+  <div class="page" id="page-variations">
+    <div class="vp-page">
+      <div class="ops-header">
+        <div>
+          <div class="ops-title">&#128260; Variations</div>
+          <div class="ops-sub">Extra work sent in from site, waiting on a decision.</div>
+        </div>
+        <div class="ops-tools">
+          <input class="ops-search" id="vp-search" placeholder="Search project, job number or description&hellip;"
+            oninput="vpRender()" autocomplete="off">
+          <button class="ops-btn green" onclick="vpNew()">+ Add one here</button>
+        </div>
+      </div>
+
+      <div class="vp-cols">
+        <div class="vp-col">
+          <div class="vp-col-h">
+            <span class="vp-col-t">&#9203; For approval</span>
+            <span class="vp-col-n" id="vp-n-approval"></span>
+          </div>
+          <div class="vp-list" id="vp-approval"></div>
+        </div>
+        <div class="vp-col">
+          <div class="vp-col-h">
+            <span class="vp-col-t">&#129300; To double check</span>
+            <span class="vp-col-n" id="vp-n-check"></span>
+          </div>
+          <div class="vp-list" id="vp-check"></div>
+        </div>
+        <div class="vp-col">
+          <div class="vp-col-h">
+            <span class="vp-col-t">&#9989; Decided</span>
+            <span class="vp-col-n" id="vp-n-done"></span>
+          </div>
+          <div class="vp-list" id="vp-done"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="page" id="page-materials">
     <div class="sup-page">
       <div class="ops-header">
@@ -1862,6 +1902,41 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
   .pa-tot-v.out{color:var(--red)} .pa-tot-v.in{color:var(--green)} .pa-tot-v.n{color:var(--text)}
   .pa-tot-u{font-size:12px;font-weight:700;color:var(--muted);margin-left:3px}
   .pa-subtot{background:#fdf5f5}
+  .vp-page{padding:22px 26px;max-width:1500px;margin:0 auto}
+  .vp-cols{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;align-items:start}
+  .vp-col{background:var(--surface);border:1px solid var(--border);border-radius:12px;
+    box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column}
+  .vp-col-h{display:flex;align-items:center;gap:8px;padding:11px 14px;
+    border-bottom:2px solid var(--border2);background:var(--surface2)}
+  .vp-col-t{font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:1.2px;color:var(--text)}
+  .vp-col-n{margin-left:auto;font-size:11px;font-weight:800;color:var(--muted)}
+  .vp-list{max-height:60vh;overflow-y:auto;overscroll-behavior:contain}
+  .vp-list::-webkit-scrollbar{width:10px}
+  .vp-list::-webkit-scrollbar-thumb{background:var(--border2);border-radius:5px;
+    border:2px solid var(--surface)}
+  .vp-card{padding:12px 14px;border-bottom:1px solid var(--border)}
+  .vp-card:last-child{border-bottom:none}
+  .vp-card:hover{background:var(--surface2)}
+  .vp-job{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;
+    color:var(--red);margin-bottom:2px}
+  .vp-desc{font-size:13px;font-weight:800;color:var(--text);line-height:1.35;margin-bottom:3px}
+  .vp-amt{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;color:var(--text)}
+  .vp-meta{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.5}
+  .vp-meta b{color:var(--mid);font-weight:800}
+  .vp-src{display:inline-block;font-size:9px;font-weight:800;text-transform:uppercase;
+    letter-spacing:.6px;border-radius:4px;padding:1px 6px;margin-left:5px}
+  .vp-src.site{background:var(--blue-light);color:#1d4ed8}
+  .vp-src.office{background:var(--surface2);color:var(--mid);border:1px solid var(--border)}
+  .vp-acts{display:flex;gap:6px;margin-top:9px;flex-wrap:wrap}
+  .vp-b{padding:4px 11px;border-radius:6px;border:1px solid var(--border2);background:var(--surface);
+    font-family:'Barlow',sans-serif;font-size:11px;font-weight:800;color:var(--mid);cursor:pointer}
+  .vp-b:hover{border-color:var(--blue);color:var(--blue)}
+  .vp-b.ok{background:var(--green);border-color:var(--green);color:#fff}
+  .vp-b.ok:hover{background:#15803d;border-color:#15803d;color:#fff}
+  .vp-b.no:hover{border-color:var(--red);color:var(--red)}
+  .vp-none{padding:34px 16px;text-align:center;color:var(--muted);font-size:12.5px;font-style:italic}
+  .vp-out{font-size:11px;font-weight:800;margin-top:6px}
+  .vp-out.yes{color:var(--green)} .vp-out.no{color:var(--red)}
   .sup-page{padding:22px 26px;max-width:1300px;margin:0 auto}
   .sup-tbl-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;
     box-shadow:var(--shadow);overflow:hidden}
@@ -4219,6 +4294,9 @@ try{ renderMaterialBalance(); }catch(e){ console.warn('material balance:', e); }
 }
 if (name === 'materials') {
 renderMaterials();
+}
+if (name === 'variations') {
+try{ vpRender(); }catch(e){ console.warn('variations:', e); }
 }
 if (name === 'quotations') {
 renderQuotations();
@@ -8243,6 +8321,7 @@ var NAV_TABS = [
 { key: 'material',    label: 'Material Balance',  icon: '⚖️',  onclick: "showPage('material')" },
 { key: 'requests',    label: 'Requests',          icon: '📋', onclick: "showPage('requests')" },
 { key: 'materials',   label: 'Material / Supplies', icon: '🚚', onclick: "showPage('materials')" },
+{ key: 'variations',  label: 'Variations',          icon: '🔄', onclick: "showPage('variations')" },
 { key: 'quotations',  label: 'Quotations',        icon: '📊', onclick: "showPage('quotations')" },
 { key: 'team',        label: 'Team Planning',     icon: '👥', onclick: "showPage('team')" },
 { key: 'employees',   label: 'Employees',         icon: '👷', onclick: "showPage('employees')" },
@@ -11760,6 +11839,227 @@ function pcStrip(pid){
 window.pcStrip = pcStrip;
 
 // \u2500\u2500 Variations \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+// \u2500\u2500 Variations page: what site sends in, and what the office decides \u2500\u2500\u2500\u2500\u2500
+// A supervisor raising a variation on the phone lands here, not straight on the
+// project. Someone in the office decides, and only then does it become a
+// variation on the job.
+var VQ_KEY='remc_variation_requests';
+function vqLoad(){
+  try{ var a=JSON.parse(localStorage.getItem(VQ_KEY)||'[]'); return Array.isArray(a)?a:[]; }
+  catch(e){ return []; }
+}
+function vqWrite(list){
+  var txt=JSON.stringify(list||[]);
+  if(typeof window.remcSaveKey==='function'){ window.remcSaveKey(VQ_KEY, txt); return; }
+  try{ localStorage.setItem(VQ_KEY, txt); }catch(e){ alert('Browser storage is full.'); }
+}
+function vqEsc(x){ return String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+  .replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function vqMoney(n){
+  n=Math.round((Number(n)||0)*100)/100;
+  return '$ '+n.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+function vqNum(v){ var n=parseFloat(String(v).replace(/[^0-9.\-]/g,'')); return isFinite(n)?n:0; }
+function vqProjects(){
+  return (typeof PROJ_DATA!=='undefined' && Array.isArray(PROJ_DATA)) ? PROJ_DATA : [];
+}
+// The job number and the project name are what tie a request to a project.
+function vqProjOf(r){
+  var list=vqProjects();
+  var byId=list.find(function(p){ return String(p.id)===String(r.pid); });
+  if(byId) return byId;
+  var job=String(r.jobNumber||'').trim().toLowerCase();
+  var nm=String(r.projectName||'').trim().toLowerCase();
+  return list.find(function(p){
+    return (job && String(p.jobNumber||'').trim().toLowerCase()===job)
+        || (nm && String(p.name||'').trim().toLowerCase()===nm);
+  }) || null;
+}
+function vqWhen(iso){
+  if(!iso) return '';
+  var d=new Date(iso);
+  if(isNaN(d.getTime())) return String(iso);
+  var days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  var mons=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  function p(n){ return String(n).padStart(2,'0'); }
+  return days[d.getDay()]+' '+d.getDate()+' '+mons[d.getMonth()]
+    +' '+d.getFullYear()+', '+p(d.getHours())+':'+p(d.getMinutes());
+}
+
+window.vpNew=function(){
+  var desc=prompt('What is the variation for?', '');
+  if(desc===null) return;
+  desc=String(desc).trim(); if(!desc) return;
+  var jobs=vqProjects().map(function(p){
+    return (p.jobNumber||'')+' - '+(p.name||''); }).join('\n');
+  var which=prompt('Which job?\n\n'+jobs, '');
+  if(which===null) return;
+  var amt=prompt('Amount (excluding GST), if you know it:', '');
+  if(amt===null) return;
+  var hit=null, w=String(which).trim().toLowerCase();
+  if(w){
+    hit=vqProjects().find(function(p){
+      return ((p.jobNumber||'')+' - '+(p.name||'')).toLowerCase().indexOf(w)>=0
+          || String(p.jobNumber||'').toLowerCase()===w; }) || null;
+  }
+  var list=vqLoad();
+  list.push({
+    id:'vq_'+Date.now()+'_'+Math.random().toString(36).slice(2,5),
+    pid: hit ? hit.id : null,
+    jobNumber: hit ? (hit.jobNumber||'') : String(which||'').trim(),
+    projectName: hit ? (hit.name||'') : '',
+    desc:desc, amount:vqNum(amt),
+    state:'approval', source:'office',
+    by: (function(){ try{ var me=window.remcWhoAmI(); return me?me.name:''; }catch(e){ return ''; } })(),
+    at:new Date().toISOString()
+  });
+  vqWrite(list); vpRender();
+};
+
+window.vpMove=function(id, state){
+  var list=vqLoad();
+  var r=list.find(function(x){ return String(x.id)===String(id); });
+  if(!r) return;
+  r.state=state;
+  vqWrite(list); vpRender();
+};
+
+window.vpApprove=function(id){
+  var list=vqLoad();
+  var r=list.find(function(x){ return String(x.id)===String(id); });
+  if(!r) return;
+  var p=vqProjOf(r);
+  if(!p){
+    alert('This one is not matched to a job yet.\n\n'
+      +'It came in as "'+(r.jobNumber||r.projectName||'no job given')+'", which does not '
+      +'match any project. Fix that before approving, or the variation has nowhere to go.');
+    return;
+  }
+  if(!confirm('Approve this variation and put it on '+(p.jobNumber||'')+' '+(p.name||'')+'?\n\n'
+      +vqEsc(r.desc)+'\n'+vqMoney(r.amount))) return;
+
+  // put it on the project, using the same store the project panel reads
+  var all={};
+  try{ var o=JSON.parse(localStorage.getItem('remc_variations')||'{}');
+       if(o && typeof o==='object' && !Array.isArray(o)) all=o; }catch(e){}
+  var arr=Array.isArray(all[String(p.id)]) ? all[String(p.id)] : [];
+  var no=0; arr.forEach(function(v){ var x=parseInt(v.no,10); if(x>no) no=x; });
+  arr.push({ id:'vr_'+Date.now()+'_'+Math.random().toString(36).slice(2,5),
+             no:no+1, desc:r.desc, amount:vqNum(r.amount), status:'open',
+             createdAt:new Date().toISOString(), fromRequest:r.id,
+             raisedBy:r.by||'', raisedAt:r.at||'' });
+  all[String(p.id)]=arr;
+  var txt=JSON.stringify(all);
+  if(typeof window.remcSaveKey==='function') window.remcSaveKey('remc_variations', txt);
+  else { try{ localStorage.setItem('remc_variations', txt); }catch(e){} }
+
+  r.state='approved'; r.pid=p.id;
+  r.projectName=p.name||r.projectName; r.jobNumber=p.jobNumber||r.jobNumber;
+  r.decidedAt=new Date().toISOString();
+  try{ var me=window.remcWhoAmI(); r.decidedBy=me?me.name:''; }catch(e){}
+  vqWrite(list);
+  vpRender();
+  try{ if(String(window._pdCurrentId)===String(p.id)) vrRender(p.id); }catch(e){}
+};
+
+window.vpDecline=function(id){
+  var list=vqLoad();
+  var r=list.find(function(x){ return String(x.id)===String(id); });
+  if(!r) return;
+  var why=prompt('Why is it not going ahead?\n\n(This is kept with the record.)', '');
+  if(why===null) return;
+  r.state='declined'; r.reason=String(why||'').trim();
+  r.decidedAt=new Date().toISOString();
+  try{ var me=window.remcWhoAmI(); r.decidedBy=me?me.name:''; }catch(e){}
+  vqWrite(list); vpRender();
+};
+
+window.vpDelete=function(id){
+  var list=vqLoad();
+  var r=list.find(function(x){ return String(x.id)===String(id); });
+  if(!r) return;
+  if(!confirm('Remove this request?\n\n'+(r.desc||'')+'\n\n'
+    +'If it was approved, the variation already on the job stays there.')) return;
+  vqWrite(list.filter(function(x){ return String(x.id)!==String(id); }));
+  vpRender();
+};
+
+function vqCard(r){
+  var p=vqProjOf(r);
+  var job=(p ? (p.jobNumber||'') : (r.jobNumber||''));
+  var name=(p ? (p.name||'') : (r.projectName||''));
+  var head=[job, name].filter(function(x){ return String(x).trim(); }).join(' - ')
+    || 'No job given';
+  var src=(r.source==='office')
+    ? '<span class="vp-src office">Office</span>'
+    : '<span class="vp-src site">From site</span>';
+  var acts='';
+  if(r.state==='approval'){
+    acts='<div class="vp-acts">'
+      +'<button class="vp-b ok" onclick="vpApprove(\'' + r.id + '\')">Approve</button>'
+      +'<button class="vp-b" onclick="vpMove(\'' + r.id + '\',\'check\')">Double check</button>'
+      +'<button class="vp-b no" onclick="vpDecline(\'' + r.id + '\')">Not going ahead</button>'
+      +'</div>';
+  } else if(r.state==='check'){
+    acts='<div class="vp-acts">'
+      +'<button class="vp-b ok" onclick="vpApprove(\'' + r.id + '\')">Approve</button>'
+      +'<button class="vp-b" onclick="vpMove(\'' + r.id + '\',\'approval\')">Back to approval</button>'
+      +'<button class="vp-b no" onclick="vpDecline(\'' + r.id + '\')">Not going ahead</button>'
+      +'</div>';
+  } else {
+    acts='<div class="vp-acts">'
+      +'<button class="vp-b" onclick="vpMove(\'' + r.id + '\',\'approval\')">Reopen</button>'
+      +'<button class="vp-b no" onclick="vpDelete(\'' + r.id + '\')">Remove</button>'
+      +'</div>';
+  }
+  var outcome='';
+  if(r.state==='approved') outcome='<div class="vp-out yes">\u2713 Approved'
+    +(r.decidedBy?(' by '+vqEsc(r.decidedBy)):'')
+    +(r.decidedAt?(' \u00B7 '+vqEsc(vqWhen(r.decidedAt))):'')+'</div>';
+  if(r.state==='declined') outcome='<div class="vp-out no">\u2715 Not going ahead'
+    +(r.decidedBy?(' \u00B7 '+vqEsc(r.decidedBy)):'')+'</div>'
+    +(r.reason?('<div class="vp-meta">'+vqEsc(r.reason)+'</div>'):'');
+
+  return '<div class="vp-card">'
+    +'<div class="vp-job">'+vqEsc(head)+(p?'':' \u26A0')+'</div>'
+    +'<div class="vp-desc">'+vqEsc(r.desc||'Untitled')+'</div>'
+    +'<div class="vp-amt">'+vqMoney(r.amount)+'</div>'
+    +'<div class="vp-meta"><b>'+vqEsc(r.by||'Unknown')+'</b>'+src
+      +'<br>'+vqEsc(vqWhen(r.at))+'</div>'
+    + outcome + acts
+  +'</div>';
+}
+
+function vpRender(){
+  var host=document.getElementById('vp-approval'); if(!host) return;
+  var q=String((document.getElementById('vp-search')||{}).value||'').trim().toLowerCase();
+  var all=vqLoad().filter(function(r){
+    if(!q) return true;
+    var p=vqProjOf(r);
+    return ((r.desc||'')+' '+(r.by||'')+' '+(r.jobNumber||'')+' '+(r.projectName||'')+' '
+      +(p?((p.jobNumber||'')+' '+(p.name||'')):'')).toLowerCase().indexOf(q)>=0;
+  });
+  all.sort(function(a,b){ return String(b.at||'').localeCompare(String(a.at||'')); });
+
+  function fill(id, rows, empty){
+    var el=document.getElementById(id); if(!el) return;
+    el.innerHTML = rows.length ? rows.map(vqCard).join('')
+      : '<div class="vp-none">'+empty+'</div>';
+  }
+  var forApproval=all.filter(function(r){ return (r.state||'approval')==='approval'; });
+  var toCheck=all.filter(function(r){ return r.state==='check'; });
+  var done=all.filter(function(r){ return r.state==='approved' || r.state==='declined'; });
+
+  fill('vp-approval', forApproval, 'Nothing waiting.');
+  fill('vp-check', toCheck, 'Nothing being thought about.');
+  fill('vp-done', done, 'Nothing decided yet.');
+
+  function n(id, arr){ var e=document.getElementById(id); if(e) e.textContent=arr.length||''; }
+  n('vp-n-approval', forApproval); n('vp-n-check', toCheck); n('vp-n-done', done);
+}
+window.vpRender = vpRender;
+window.renderVariations = vpRender;
+
 // Work outside the original contract, priced separately and claimed like any
 // other line once approved.
 var VR_KEY='remc_variations';
@@ -15578,6 +15878,7 @@ function teamEditProjectBooking(pid){
     { key:'overview',     label:'🏗️ Overview' },
     { key:'material',     label:'⚖️ Material Balance' },
     { key:'materials',    label:'🚚 Material / Supplies' },
+    { key:'variations',   label:'🔄 Variations' },
     { key:'quotations',   label:'📊 Quotations' },
     { key:'team',         label:'👥 Team Planning' },
     { key:'employees',    label:'👷 Employees' },
