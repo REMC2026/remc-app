@@ -1641,9 +1641,14 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
   /* The panel takes whatever height is left in the quadrant, never less than
      enough for three rows. The drawing gives way first. Nothing overflows, so
      the only scrollbar on the page is the one inside this list. */
-  .pc-panel{margin-top:10px;background:var(--surface);border:1px solid var(--border);
-    border-radius:11px;box-shadow:var(--shadow);overflow:hidden;
-    flex:1 1 auto;min-height:104px;display:flex;flex-direction:column}
+  /* The quadrant is split in two: claims above, variations below. Each half
+     holds its own space and scrolls inside, so neither pushes the other. */
+  .pc-half{flex:1 1 0;min-height:0;display:flex;flex-direction:column;overflow:hidden;
+    background:var(--surface)}
+  .pc-half-b{border-top:1.5px solid var(--border)}
+  .pc-body-wrap{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+  .pc-panel{background:var(--surface);border:1px solid var(--border);border-radius:11px;
+    overflow:hidden;flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
   .pc-panel-h{display:flex;align-items:center;gap:10px;padding:9px 12px;
     border-bottom:1px solid var(--border);flex-shrink:0}
   .pc-panel-h .pc-strip-s{margin-left:0;font-size:11px}
@@ -1657,7 +1662,9 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
   .pc-pl::-webkit-scrollbar-thumb{background:var(--border2);border-radius:7px;
     border:3px solid var(--surface2)}
   .pc-pl::-webkit-scrollbar-thumb:hover{background:var(--muted)}
-  .pc-pi{display:flex;align-items:center;gap:10px;padding:0 12px;height:40px;flex-shrink:0;
+  /* Three rows fit; anything more is reached by scrolling the list itself. */
+  .pc-pl{max-height:126px}
+  .pc-pi{display:flex;align-items:center;gap:10px;padding:0 12px;height:42px;flex-shrink:0;
     border-bottom:1px solid var(--border);cursor:pointer}
   .pc-pi:last-child{border-bottom:none}
   .pc-pi:hover{background:var(--surface2)}
@@ -11467,13 +11474,94 @@ function pcStrip(pid){
       }).join('')
     +'</div>'
     + '<div class="pc-pl-f">'
-      + (list.length>3 ? ('Scroll for '+(list.length-3)+' more \u00B7 newest first')
+      + (list.length>3 ? ('Newest first \u00B7 scroll for '+(list.length-3)+' more')
                        : 'Newest first')
       + '</div>';
 }
 window.pcStrip = pcStrip;
 
-// ── Project Allowances ──────────────────────────────────────────────────────
+// \u2500\u2500 Variations \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+// Work outside the original contract, priced separately and claimed like any
+// other line once approved.
+var VR_KEY='remc_variations';
+function vrLoad(){
+  try{ var o=JSON.parse(localStorage.getItem(VR_KEY)||'{}');
+    return (o && typeof o==='object' && !Array.isArray(o)) ? o : {}; }catch(e){ return {}; }
+}
+function vrList(pid){ var a=vrLoad()[String(pid)]; return Array.isArray(a)?a:[]; }
+function vrWrite(pid, list){
+  var all=vrLoad();
+  if(list && list.length) all[String(pid)]=list; else delete all[String(pid)];
+  var txt=JSON.stringify(all);
+  if(typeof window.remcSaveKey==='function'){ window.remcSaveKey(VR_KEY, txt); }
+  else { try{ localStorage.setItem(VR_KEY, txt); }catch(e){ alert('Browser storage is full.'); } }
+}
+function vrNextNo(pid){
+  var n=0; vrList(pid).forEach(function(v){ var x=parseInt(v.no,10); if(x>n) n=x; });
+  return n+1;
+}
+window.vrNew=function(){
+  var pid=window._pdCurrentId; if(pid==null) return;
+  var desc=prompt('What is the variation for?', '');
+  if(desc===null) return;
+  desc=String(desc).trim(); if(!desc) return;
+  var amt=prompt('Amount (excluding GST):', '');
+  if(amt===null) return;
+  var list=vrList(pid);
+  list.push({ id:'vr_'+Date.now()+'_'+Math.random().toString(36).slice(2,5),
+              no:vrNextNo(pid), desc:desc, amount:pcNum(amt),
+              status:'open', createdAt:new Date().toISOString() });
+  vrWrite(pid, list);
+  vrRender(pid);
+};
+window.vrSet=function(id, field, v){
+  var pid=window._pdCurrentId;
+  var list=vrList(pid);
+  var r=list.find(function(x){ return String(x.id)===String(id); });
+  if(!r) return;
+  if(field==='amount') r.amount=pcNum(v); else r[field]=String(v||'');
+  vrWrite(pid, list); vrRender(pid);
+};
+window.vrDelete=function(id){
+  var pid=window._pdCurrentId;
+  var list=vrList(pid);
+  var r=list.find(function(x){ return String(x.id)===String(id); });
+  if(!r) return;
+  if(!confirm('Remove variation '+pcPad(r.no)+'?')) return;
+  vrWrite(pid, list.filter(function(x){ return String(x.id)!==String(id); }));
+  vrRender(pid);
+};
+function vrRender(pid){
+  var sub=document.getElementById('vr-sub');
+  var box=document.getElementById('vr-list');
+  var list=vrList(pid).slice().sort(function(a,b){
+    return (parseInt(b.no,10)||0)-(parseInt(a.no,10)||0); });   // newest first
+  var total=0; list.forEach(function(v){ total+=pcNum(v.amount); });
+  if(sub) sub.textContent = list.length
+    ? (list.length+' \u00B7 '+pcMoney(total)) : 'none yet';
+  if(!box) return;
+  if(!list.length){
+    box.innerHTML='<div class="pc-pi-e">No variations on this job yet. Use + to add one.</div>';
+    return;
+  }
+  box.innerHTML='<div class="pc-pl">'
+    + list.map(function(v){
+        var st=pcState(v);
+        return '<div class="pc-pi">'
+          +'<div class="pc-pi-n">VO '+pcPad(parseInt(v.no,10)||0)+' \u00B7 '+pcEsc(v.desc)+'</div>'
+          +'<span style="font-size:12px;font-weight:800;white-space:nowrap">'+pcMoney(v.amount)+'</span>'
+          +'<span class="pc-st '+st+'">'+pcEsc(PC_STATE_LABEL[st]||st)+'</span>'
+          +'<button class="pc-x" title="Remove" onclick="vrDelete(\''+pcEsc(v.id)+'\')">\u2715</button>'
+          +'</div>';
+      }).join('')
+    +'</div>'
+    +'<div class="pc-pl-f">'
+      +(list.length>3 ? ('Newest first \u00B7 scroll for '+(list.length-3)+' more') : 'Newest first')
+    +'</div>';
+}
+window.vrRender = vrRender;
+
+// \u2500\u2500 Project Allowances \u2500\u2500────────────────────────────────────────────────────
 // The figures written on the builder's allowance sheet, typed in once so the
 // rest of the system can work with them. Sections mirror the bill headings
 // (SITE CLEARANCE, BULK EARTHWORKS...), with the priced items underneath.
@@ -13271,6 +13359,7 @@ function projDetailOpen(id) {
   try { paRender(id); } catch(e) { console.warn('paRender error:', e); }
   try { ptRender(id); } catch(e) { console.warn('ptRender error:', e); }
   try { pcStrip(id); } catch(e) { console.warn('pcStrip error:', e); }
+  try { vrRender(id); } catch(e) { console.warn('vrRender error:', e); }
   try { pdRenderTimeline(id); } catch(e) { console.warn('pdRenderTimeline error:', e); }
 
   m.style.display = 'flex';
@@ -14178,7 +14267,7 @@ function teamEditProjectBooking(pid){
         <span style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;color:var(--blue)">&#128208; Drawing</span>
         <div style="display:flex;gap:5px" id="pd-drawing-controls"></div>
       </div>
-      <div id="pd-drawing-area" style="flex:1 1 0;min-height:46px;position:relative;background:#1e293b;border-radius:10px;overflow:hidden;display:flex;align-items:center;justify-content:center">
+      <div id="pd-drawing-area" style="flex:1 1 0;min-height:0;position:relative;background:#1e293b;border-radius:10px;overflow:hidden;display:flex;align-items:center;justify-content:center">
         <div id="pd-drawing-empty" style="text-align:center;color:#94a3b8;padding:20px">
           <div style="font-size:28px;margin-bottom:8px">&#128196;</div>
           <button onclick="document.getElementById('pd-drawing-input').click()" style="padding:7px 14px;background:var(--blue);color:#fff;border:none;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer">Upload Drawing</button>
@@ -14188,14 +14277,6 @@ function teamEditProjectBooking(pid){
         </div>
       </div>
       <input type="file" id="pd-drawing-input" accept="application/pdf,image/*" style="display:none" onchange="pdDrawingUpload(event)">
-      <div class="pc-panel">
-        <div class="pc-panel-h">
-          <div class="pc-strip-t">&#128181; Progress Claims</div>
-          <div class="pc-strip-s" id="pc-strip-sub"></div>
-          <button class="pc-plus" onclick="pcPanelNew()" title="Add a new month">+</button>
-        </div>
-        <div id="pc-panel-list"></div>
-      </div>
     </div>
 
     <!-- Q4 BOTTOM-RIGHT: Project Plans & Documents -->
@@ -14239,6 +14320,27 @@ function teamEditProjectBooking(pid){
       </div>
       <input type="file" id="pd-doc-file-input" accept="application/pdf,image/*,.xlsx,.xls,.doc,.docx,.dwg,.dxf" style="display:none" onchange="pdDocFileChosen(event)">
     </div>
+
+    <!-- Q4 BOTTOM-RIGHT: Progress Claims on top, Variations below -->
+    <div style="background:var(--surface);overflow:hidden;min-height:0;min-width:0;padding:0;display:flex;flex-direction:column">
+      <div class="pc-half">
+        <div class="pc-panel-h">
+          <div class="pc-strip-t">&#128181; Progress Claims</div>
+          <div class="pc-strip-s" id="pc-strip-sub"></div>
+          <button class="pc-plus" onclick="pcPanelNew()" title="Add a new month">+</button>
+        </div>
+        <div id="pc-panel-list" class="pc-body-wrap"></div>
+      </div>
+      <div class="pc-half pc-half-b">
+        <div class="pc-panel-h">
+          <div class="pc-strip-t">&#128260; Variations</div>
+          <div class="pc-strip-s" id="vr-sub"></div>
+          <button class="pc-plus" onclick="vrNew()" title="Add a variation">+</button>
+        </div>
+        <div id="vr-list" class="pc-body-wrap"></div>
+      </div>
+    </div>
+
   </div><!-- end grid -->
 
   <!-- Horizontal subcontractor timeline strip -->
