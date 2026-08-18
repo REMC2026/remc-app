@@ -1138,6 +1138,19 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     });
   }
 
+  // A failed send is retried by itself. Without this the variation would sit on
+  // the phone and the office would never see it.
+  var _varRetry=null;
+  function varRetryLater(){
+    if(_varRetry) return;
+    _varRetry=setInterval(function(){
+      if(!navigator.onLine) return;
+      pushVariations(function(err){
+        if(!err){ clearInterval(_varRetry); _varRetry=null;
+          try{ setCloud('saved','#dcfce7','#15803d'); }catch(e){} }
+      });
+    }, 12000);
+  }
   function pushVariations(cb){
     if(!ensureClient()){ if(cb) cb('noconfig'); return; }
     setCloud('saving…','#fef3c7','#92400e');
@@ -1667,7 +1680,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     renderTests();
     supShowSaving('Saving to the system…');
     pushTests(function(err){
-      if(err){ supShowResult(false, 'Could not save. Check your connection and try again.'); }
+      if(err){ supShowResult(false, 'Saved on this phone. The office copy did not update \u2014 it will go up when the connection is back.'); }
       else { pull(function(){ renderTests(); }); supShowResult(true, 'Test booked'); }
     });
   };
@@ -1679,7 +1692,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     renderTests();
     supShowSaving('Saving…');
     pushTests(function(err){
-      if(err){ supShowResult(false, 'Could not save. Check your connection.'); }
+      if(err){ supShowResult(false, 'Saved on this phone. The office copy did not update \u2014 it will go up when the connection is back.'); }
       else { pull(function(){ renderTests(); }); supShowResult(true, 'Test removed'); }
     });
   };
@@ -1795,7 +1808,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     renderTransfers();
     supShowSaving('Saving…');
     pushTransfers(function(err){
-      if(err){ supShowResult(false, 'Could not save. Check your connection.'); }
+      if(err){ supShowResult(false, 'Saved on this phone. The office copy did not update \u2014 it will go up when the connection is back.'); }
       else { pull(function(){ renderTransfers(); }); supShowResult(true, 'Request removed'); }
     });
   };
@@ -2091,7 +2104,15 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     supShowSaving('Saving to the system…');
     pushVariations(function(err){
       _varSaving=false; if($('var-close-btn')) $('var-close-btn').disabled=false;
-      if(err){ supShowResult(false, 'Could not save. Check your connection and try again.'); }
+      if(err){
+        var why=String(err||'');
+        console.warn('[REMC] variation save failed:', why);
+        try{ varRetryLater(); }catch(e){}
+        supShowResult(false,
+          (why==='noconfig' || why==='read failed' || !navigator.onLine)
+            ? 'Saved on this phone. No connection right now \u2014 it will go up when you are back online.'
+            : ('Saved on this phone, but the office copy did not update: ' + why));
+      }
       else { pull(function(){ renderVariations(); }); supShowResult(true, wasEdit ? 'Variation updated' : 'Variation added'); }
     });
   };
@@ -2104,7 +2125,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     renderVariations();
     supShowSaving('Saving…');
     pushVariations(function(err){
-      if(err){ supShowResult(false, 'Could not save. Check your connection.'); }
+      if(err){ supShowResult(false, 'Saved on this phone. The office copy did not update \u2014 it will go up when the connection is back.'); }
       else { pull(function(){ renderVariations(); }); supShowResult(true, 'Variation removed'); }
     });
   };
@@ -2829,7 +2850,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     render();
     supShowSaving('Saving…');
     pushNotes(function(err){
-      if(err){ supShowResult(false, 'Could not save. Check your connection and try again.'); }
+      if(err){ supShowResult(false, 'Saved on this phone. The office copy did not update \u2014 it will go up when the connection is back.'); }
       else {
         pull(function(){ render(); });
         supShowResult(true, !hasText ? 'Note removed' : (existed ? 'Note updated' : 'Note added'));
@@ -2906,7 +2927,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     // show the saving bar; report success only once it is really saved to the system
     supShowSaving('Saving to the system…');
     pushBookings(function(err){
-      if(err){ supShowResult(false, 'Could not save. Check your connection and try again.'); }
+      if(err){ supShowResult(false, 'Saved on this phone. The office copy did not update \u2014 it will go up when the connection is back.'); }
       else { pull(function(){ render(); }); supShowResult(true, isNew ? 'Job registered successfully' : 'Changes saved'); }
     });
   };
