@@ -2023,6 +2023,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
   .sys-l{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1.3px;color:var(--muted)}
   .sys-v{font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:800;color:var(--text)}
   .sys-n{grid-column:2;font-size:11.5px;color:var(--muted)}
+  .ops-btn.sm{padding:2px 10px;font-size:11px}
   .sys-foot{max-width:620px;margin-top:10px;font-size:11px;color:var(--muted);text-align:right}
   .sys-foot code{background:var(--surface2);border:1px solid var(--border);border-radius:4px;
     padding:1px 6px;font-size:10.5px}
@@ -4246,6 +4247,57 @@ function coRender(){
 window.coRender = coRender;
 
 // ── System: version and when it was last updated ───────────────────────────
+// What is actually taking up room in the shared document.
+function sysSize(){
+  var parts=[], total=0;
+  try{
+    for(var i=0;i<localStorage.length;i++){
+      var k=localStorage.key(i);
+      if(!k || k.indexOf('remc_')!==0) continue;
+      var v=localStorage.getItem(k)||'';
+      parts.push({ key:k, bytes:v.length });
+      total+=v.length;
+    }
+  }catch(e){}
+  parts.sort(function(a,b){ return b.bytes-a.bytes; });
+  return { total:total, parts:parts };
+}
+
+// Trim what nobody needs, so the row fits and saves stop timing out.
+window.sysCompact=function(){
+  var before=sysSize().total;
+  var freed=0, notes=[];
+
+  // the activity log is office history; site never reads it
+  try{
+    var l=JSON.parse(localStorage.getItem('remc_activity_log')||'[]');
+    if(Array.isArray(l) && l.length>400){
+      var was=JSON.stringify(l).length;
+      l=l.slice(-400);
+      var txt=JSON.stringify(l);
+      freed += was-txt.length;
+      notes.push('activity log cut to the last 400 entries');
+      if(typeof window.remcSaveKey==='function') window.remcSaveKey('remc_activity_log', txt);
+      else localStorage.setItem('remc_activity_log', txt);
+    }
+  }catch(e){}
+
+  // pictures pasted straight into the data, instead of uploaded
+  try{
+    var raw=localStorage.getItem('remc_proj_docs')||'';
+    if(raw.indexOf('data:image')>=0) notes.push('some drawings are stored inside the data');
+  }catch(e){}
+
+  var after=sysSize().total;
+  sysRender();
+  alert(freed
+    ? ('Freed '+Math.round(freed/1024)+' KB.\n\n'+notes.join('\n')
+       +'\n\nShared data is now '+Math.round(after/1024)+' KB '
+       +'(was '+Math.round(before/1024)+' KB).')
+    : ('Nothing to trim right now. Shared data is '+Math.round(after/1024)+' KB.'
+       +(notes.length ? ('\n\n'+notes.join('\n')) : '')));
+};
+
 function sysRender(){
   var host=document.getElementById('sys-body'); if(!host) return;
   var ver=String(window.REMC_VERSION||'1.1');
@@ -4264,8 +4316,18 @@ function sysRender(){
       +'<div class="sys-v">'+value+'</div>'
       +(note?('<div class="sys-n">'+note+'</div>'):'')+'</div>';
   }
+  var size=sysSize();
+  var kb=Math.round(size.total/1024);
+  var heavy=size.parts.slice(0,3).map(function(p){
+    return p.key.replace(/^remc_/,'')+' '+Math.round(p.bytes/1024)+' KB'; }).join(', ');
   host.innerHTML='<div class="sys-card">'
     + row('Version', 'v'+ver.replace(/</g,'&lt;'), 'The release running on this device.')
+    + row('Shared data', kb+' KB',
+        (kb>350
+          ? 'Large. Every save from a phone sends all of this, and the server '
+            + 'gives up past a point. Biggest: ' + heavy
+          : 'Biggest: ' + heavy)
+        + ' &nbsp; <button class="ops-btn sm" onclick="sysCompact()">Compact now</button>')
     + row('Last updated', when || 'Unknown',
           'When this version of the software was released.')
     + row('Cloud', cloud, cloud==='Connected'
