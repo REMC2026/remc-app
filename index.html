@@ -1630,8 +1630,8 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
   .pc-strip{display:flex;align-items:center;gap:12px;margin-top:12px;padding:12px 14px;
     background:var(--surface);border:1px solid var(--border);border-radius:11px;box-shadow:var(--shadow)}
   .pc-strip-l{flex:1;min-width:0}
-  .pc-strip-t{font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;color:var(--blue)}
-  .pc-strip-s{font-size:11.5px;color:var(--muted);margin-top:2px}
+  .pc-strip-t{font-size:9.5px;font-weight:900;text-transform:uppercase;letter-spacing:1.2px;color:var(--blue)}
+  .pc-strip-s{font-size:10px;color:var(--muted);margin-top:0}
   .pc-strip-b{padding:8px 20px;background:var(--red);color:#fff;border:none;border-radius:8px;
     font-family:'Barlow',sans-serif;font-size:12.5px;font-weight:800;cursor:pointer;white-space:nowrap}
   .pc-strip-b:hover{background:#c81a1a}
@@ -1649,7 +1649,7 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
   .pc-body-wrap{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;overflow:hidden}
   .pc-panel{background:var(--surface);border:1px solid var(--border);border-radius:11px;
     overflow:hidden;flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
-  .pc-panel-h{display:flex;align-items:center;gap:10px;padding:9px 12px;
+  .pc-panel-h{display:flex;align-items:center;gap:8px;padding:7px 11px;
     border-bottom:1px solid var(--border);flex-shrink:0}
   .pc-panel-h .pc-strip-s{margin-left:0;font-size:11px}
   .pc-panel-h .pc-plus{margin-left:auto;width:24px;height:24px;font-size:15px}
@@ -1663,16 +1663,20 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
     border:3px solid var(--surface2)}
   .pc-pl::-webkit-scrollbar-thumb:hover{background:var(--muted)}
   /* Three rows fit; anything more is reached by scrolling the list itself. */
-  .pc-pl{max-height:126px}
-  .pc-pi{display:flex;align-items:center;gap:10px;padding:0 12px;height:42px;flex-shrink:0;
+  .pc-pl{max-height:136px}
+  .pc-pi{display:flex;align-items:center;gap:8px;padding:0 11px;height:34px;flex-shrink:0;
     border-bottom:1px solid var(--border);cursor:pointer}
   .pc-pi:last-child{border-bottom:none}
   .pc-pi:hover{background:var(--surface2)}
-  .pc-pi-n{flex:1;min-width:0;font-size:12.5px;font-weight:800;color:var(--text);
+  .pc-pen{background:none;border:none;padding:0;width:16px;flex-shrink:0;cursor:pointer;
+    color:var(--border2);font-size:12px;line-height:1}
+  .pc-pi:hover .pc-pen{color:var(--muted)}
+  .pc-pen:hover{color:var(--blue)}
+  .pc-pi-n{flex:1;min-width:0;font-size:11px;font-weight:800;color:var(--text);
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .pc-pi-e{padding:16px 14px;font-size:12px;color:var(--muted);font-style:italic}
-  .pc-pl-f{padding:7px 14px;border-top:1px solid var(--border);background:var(--surface2);
-    font-size:11px;color:var(--muted);display:flex;align-items:center;gap:10px;flex-shrink:0}
+  .pc-pl-f{padding:5px 11px;border-top:1px solid var(--border);background:var(--surface2);
+    font-size:10px;color:var(--muted);display:flex;align-items:center;gap:10px;flex-shrink:0}
   .pc-pl-f button{margin-left:auto;background:none;border:none;color:var(--blue);
     font-family:'Barlow',sans-serif;font-size:11.5px;font-weight:800;cursor:pointer}
   .pc-sheet{padding:18px 22px;background:#fff}
@@ -1702,10 +1706,10 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
   .pc-ref input{border:none;border-bottom:1px dashed #bbb;background:none;padding:1px 2px;
     font-family:'Barlow',sans-serif;font-size:11.5px;font-weight:800;color:#111;outline:none;width:130px}
   .pc-ref input:focus{border-bottom-color:var(--blue);background:#eff6ff}
-  .pc-plus{margin-left:auto;width:28px;height:28px;border-radius:8px;border:1.5px solid var(--border);
-    background:var(--surface);color:var(--blue);font-size:17px;font-weight:800;line-height:1;
+  .pc-plus{margin-left:auto;width:22px;height:22px;border-radius:6px;border:1.5px solid var(--border);
+    background:var(--surface);color:var(--blue);font-size:14px;font-weight:800;line-height:1;
     cursor:pointer;font-family:'Barlow',sans-serif;display:flex;align-items:center;
-    justify-content:center;padding:0}
+    justify-content:center;padding:0;flex-shrink:0}
   .pc-plus:hover{background:var(--blue);border-color:var(--blue);color:#fff}
   .pc-item-r{font-size:11px;color:var(--muted);font-weight:700}
   .pc-ask{display:grid;grid-template-columns:1fr 110px;gap:10px}
@@ -1717,29 +1721,42 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
   .pc-ask select:focus,.pc-ask input:focus{border-color:var(--red)}
   .pc-per{font-size:13px;font-weight:800}
   .pc-rev{font-size:11px;color:var(--muted);font-weight:700}
-  .pc-st{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:800;
+  .pc-st{display:inline-flex;align-items:center;gap:4px;font-size:9px;font-weight:800;
     letter-spacing:.4px;color:var(--muted);white-space:nowrap;background:none;border:none;padding:0}
-  .pc-st:before{content:'';width:7px;height:7px;border-radius:50%;background:currentColor;flex-shrink:0}
+  .pc-st:before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0}
   .pc-st.open{color:#16a34a}
   .pc-st.pending{color:#d97706}
   .pc-st.finalised{color:#111}
-  .pc-open-b{padding:4px 13px;background:var(--surface);border:1px solid var(--border2);
-    border-radius:7px;font-family:'Barlow',sans-serif;font-size:11.5px;font-weight:800;
+  .pc-open-b{padding:2px 10px;background:var(--surface);border:1px solid var(--border2);
+    border-radius:6px;font-family:'Barlow',sans-serif;font-size:10px;font-weight:800;
     color:var(--mid);cursor:pointer;white-space:nowrap}
   .pc-open-b:hover{background:var(--blue);border-color:var(--blue);color:#fff}
+  .pc-out-b{background:var(--surface);border:1px solid var(--border2);border-radius:7px;
+    padding:4px 12px;font-family:'Barlow',sans-serif;font-size:11.5px;font-weight:800;
+    color:var(--mid);cursor:pointer;white-space:nowrap;flex-shrink:0}
+  .pc-out-b:hover{background:var(--blue);border-color:var(--blue);color:#fff}
+  .pc-del-b{background:var(--red);border:1px solid var(--red);border-radius:7px;padding:4px 13px;
+    font-family:'Barlow',sans-serif;font-size:11.5px;font-weight:800;color:#fff;
+    cursor:pointer;white-space:nowrap;flex-shrink:0}
+  .pc-del-b:hover{background:#c81a1a;border-color:#c81a1a}
   .pc-st-pick{border:1px solid var(--border);border-radius:7px;padding:5px 10px;
     font-family:'Barlow',sans-serif;font-size:12px;font-weight:800;background:var(--surface);
     outline:none;cursor:pointer}
   .pc-x{background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;padding:0}
   .pc-x:hover{color:var(--red)}
-  .pc-info{display:grid;grid-template-columns:130px 1fr;gap:0;margin-bottom:14px;max-width:560px}
+  /* Contract details on the left, totals on the right, as on the printed sheet */
+  .pc-topline{display:flex;align-items:flex-start;gap:26px;margin-bottom:16px;flex-wrap:wrap}
+  .pc-info{display:grid;grid-template-columns:120px minmax(200px,1fr);gap:0;
+    flex:1 1 340px;min-width:0;margin-bottom:0}
   .pc-info div{padding:3px 0;font-size:12px}
   .pc-info .l{font-weight:800;color:#111}
   .pc-info input{width:100%;box-sizing:border-box;border:none;border-bottom:1px dashed #ccc;
     background:none;padding:2px 3px;font-family:'Barlow',sans-serif;font-size:12px;color:#1d4ed8;
     font-weight:700;outline:none}
   .pc-info input:focus{background:#eff6ff;border-bottom-color:var(--blue)}
-  .pc-sum{border-collapse:collapse;margin-bottom:16px}
+  .pc-sum{border-collapse:collapse;margin-bottom:0;margin-left:auto;flex:0 0 auto}
+  .pc-sum th.blank{background:#fff;border:none}
+  .pc-sum th.cap{background:#bfbfbf}
   .pc-sum th,.pc-sum td{border:1px solid #999;padding:4px 10px;font-size:12px;text-align:right}
   .pc-sum th{background:#d9d9d9;font-weight:800;font-size:10.5px;text-transform:uppercase;
     letter-spacing:.5px;text-align:center}
@@ -1756,6 +1773,8 @@ document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.
   table.pc-tbl td.per{background:#bfbfbf}
   table.pc-tbl tr:hover td{background:#fffdf5}
   table.pc-tbl tr.sec:hover td{background:#ececec}
+  table.pc-tbl tr.ins td{border:none;height:9px;padding:0;background:transparent}
+  table.pc-tbl tr.ins:hover td{background:transparent}
   .pc-i{width:100%;box-sizing:border-box;border:none;background:none;padding:1px 3px;
     font-family:'Barlow',sans-serif;font-size:11.5px;color:#111;outline:none}
   .pc-i:focus{background:#fff;box-shadow:inset 0 0 0 2px var(--blue)}
@@ -11030,6 +11049,161 @@ window.pcOpen = function(id){
   document.getElementById('pc-modal').classList.add('open');
   pcDraw();
 };
+// A clean page for paper. The browser's own dialog is what turns it into a PDF,
+// and it does so with real text rather than a picture, so the result stays
+// searchable and sharp. There is no separate export to build.
+window.pcPrint = function(mode){
+  if(PC_PID==null || !PC_SEL) return;
+  var c=pcClaims(PC_PID).find(function(x){ return String(x.id)===String(PC_SEL); });
+  if(!c) return;
+  var p=pcProj(), m=pcMeta(PC_PID), works=pcWorks(PC_PID);
+  var co={}; try{ co=(typeof window.remcCompany==='function') ? window.remcCompany() : {}; }catch(e){}
+  var coName='Your Company';
+  try{ coName=window.remcCoName(); }catch(e){ coName=String(co.name||'Your Company'); }
+  var coLine=''; try{ coLine=window.remcCoLine(); }catch(e){}
+
+  var e=pcEsc, rows='', subPrev=0, subPer=0, subTo=0;
+  works.forEach(function(w){
+    if(w.section){
+      rows+='<tr class="sec"><td class="c">'+e(w.ref)+'</td><td colspan="8">'+e(w.desc)+'</td></tr>';
+      return;
+    }
+    var total=pcNum(w.total);
+    var prevP=pcPrevPct(c, w.id), perP=pcPct(c, w.id), toP=prevP+perP;
+    var prevA=total*prevP/100, perA=total*perP/100, toA=total*toP/100;
+    subPrev+=prevA; subPer+=perA; subTo+=toA;
+    rows+='<tr>'
+      +'<td class="c">'+e(w.ref)+'</td>'
+      +'<td>'+e(w.desc)+'</td>'
+      +'<td class="n">'+(total?pcMoney(total):'')+'</td>'
+      +'<td class="c">'+Math.round(prevP)+'%</td>'
+      +'<td class="c per">'+Math.round(perP)+'%</td>'
+      +'<td class="c">'+Math.round(toP)+'%</td>'
+      +'<td class="n">'+(prevA?pcMoney(prevA):'$   -')+'</td>'
+      +'<td class="n per">'+(perA?pcMoney(perA):'$   -')+'</td>'
+      +'<td class="n">'+(toA?pcMoney(toA):'$   -')+'</td>'
+      +'</tr>';
+  });
+  var g=pcGstRate()/100;
+  function det(l,v){ return '<tr><td class="lb">'+e(l)+'</td><td class="vv">'+e(v)+'</td></tr>'; }
+
+  var html='<!DOCTYPE html><html><head><meta charset="utf-8">'
+    +'<title>'+e(pcTitle(c))+' - '+e(p.jobNumber||'')+'</title>'
+    +'<style>'
+    +'*{box-sizing:border-box}'
+    +'body{font-family:Arial,Helvetica,sans-serif;color:#111;margin:0;padding:14mm 10mm;font-size:10.5px}'
+    +'.top{display:flex;align-items:flex-start;gap:12px;padding-bottom:10px;'
+      +'margin-bottom:10px;border-bottom:2px solid #111}'
+    +'.top img{max-height:48px;max-width:180px;object-fit:contain}'
+    +'.co-n{font-size:15px;font-weight:800;text-transform:uppercase;line-height:1.15}'
+    +'.co-l{font-size:10px;color:#555;margin-top:2px}'
+    +'.co-abn{font-size:10px;font-weight:700;margin-top:1px}'
+    +'.legal{font-size:9.5px;color:#333;margin-bottom:9px;font-style:italic}'
+    +'.bar{background:#7f7f7f;color:#fff;display:flex;gap:26px;padding:5px 10px;'
+      +'font-weight:800;font-size:12px;margin-bottom:10px}'
+    +'.bar .g{color:#e6e6e6;font-weight:400}'
+    +'.mid{display:flex;align-items:flex-start;gap:20px;margin-bottom:10px}'
+    +'table{border-collapse:collapse}'
+    +'.det{flex:1}.det td{padding:2px 4px;font-size:10.5px}'
+    +'.det td.lb{font-weight:800;width:120px;white-space:nowrap}'
+    +'.det td.vv{color:#111}'
+    +'.sum{margin-left:auto}'
+    +'.sum th,.sum td{border:1px solid #999;padding:3px 9px;font-size:10.5px;text-align:right}'
+    +'.sum th{background:#bfbfbf;font-weight:800;text-align:center;font-size:9.5px}'
+    +'.sum td.l{border:none;font-weight:800;background:#fff}'
+    +'.sum td.per{background:#bfbfbf;font-weight:800}'
+    +'.grid{width:100%;table-layout:fixed}'
+    +'.grid th{border:1px solid #999;background:#d9d9d9;font-size:9px;font-weight:800;'
+      +'padding:3px 2px;text-align:center;line-height:1.2}'
+    +'.grid td{border:1px solid #ccc;padding:2px 4px;font-size:10px;height:15px}'
+    +'.grid tr.sec td{background:#f2f2f2;font-weight:800;border-color:#999;text-transform:uppercase}'
+    +'.grid td.n{text-align:right}.grid td.c{text-align:center}'
+    +'.grid td.per{background:#d9d9d9}'
+    +'.foot{margin-top:12px;padding-top:5px;border-top:1px solid #ddd;font-size:9px;'
+      +'color:#888;display:flex;justify-content:space-between}'
+    +'.noprint{position:fixed;top:12px;right:12px;background:#e11d1d;color:#fff;border:none;'
+      +'border-radius:8px;padding:9px 16px;font-family:Arial,sans-serif;font-size:13px;'
+      +'font-weight:700;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.2)}'
+    +'.hint{position:fixed;top:12px;left:12px;right:190px;background:#fef3c7;border:1px solid #fde68a;'
+      +'color:#92400e;border-radius:8px;padding:9px 14px;font-family:Arial,sans-serif;font-size:12.5px}'
+    +'@media print{body{padding:8mm 7mm}@page{size:A4 landscape;margin:8mm}'
+      +'.noprint,.hint{display:none !important}'
+      +'tr{page-break-inside:avoid}tr.sec{page-break-after:avoid}'
+      +'thead{display:table-header-group}}'
+    +'</style></head><body>'
+    + (mode==='pdf'
+        ? '<div class="hint"><strong>To keep a PDF:</strong> in the box that opens, set '
+          +'<strong>Destination</strong> to <strong>Save as PDF</strong>, then Save.</div>'
+        : '')
+    +'<div class="top">'
+      +(co.logo ? '<img src="'+String(co.logo).replace(/"/g,'&quot;')+'" alt="">' : '')
+      +'<div><div class="co-n">'+e(coName)+'</div>'
+      +(coLine?('<div class="co-l">'+e(coLine)+'</div>'):'')
+      +(co.abn?('<div class="co-abn">ABN '+e(co.abn)+'</div>'):'')+'</div>'
+    +'</div>'
+    +'<div class="legal">This is a payment claim made under the Building and Construction '
+      +'Industry (Security of Payment) Act 2021 (WA).</div>'
+    +'<div class="bar"><span>'+e(pcTitle(c))+'</span>'
+      +'<span><span class="g">JOB No.</span> '+e(p.jobNumber||'')+'</span>'
+      +'<span><span class="g">PO/WORKS ORDER No.</span> '+e(m.po||'')+'</span></div>'
+    +'<div class="mid">'
+      +'<table class="det">'
+        +det('Client:', m.client||p.builder||'')
+        +det('Contract:', m.contract||p.name||'')
+        +det('Works Order No:', m.po||'')
+        +det('Claim Period:', (c.period||'')+(c.year?(" '"+String(c.year).slice(-2)):''))
+        +det('Contact Name:', m.contactName||'')
+        +det('Contact Email:', m.contactEmail||'')
+        +det('Contract Sum:', m.contractSum||'')
+      +'</table>'
+      +'<table class="sum">'
+        +'<tr><th style="background:#fff;border:none"></th><th colspan="3">Total Amount</th></tr>'
+        +'<tr><th style="background:#fff;border:none"></th><th>Previous</th><th>Period</th>'
+          +'<th>Claim to Date</th></tr>'
+        +'<tr><td class="l">Sub Total</td><td>'+pcMoney(subPrev)+'</td>'
+          +'<td class="per">'+pcMoney(subPer)+'</td><td>'+pcMoney(subTo)+'</td></tr>'
+        +'<tr><td class="l">GST</td><td>'+pcMoney(subPrev*g)+'</td>'
+          +'<td class="per">'+pcMoney(subPer*g)+'</td><td>'+pcMoney(subTo*g)+'</td></tr>'
+        +'<tr><td class="l">Total</td><td>'+pcMoney(subPrev*(1+g))+'</td>'
+          +'<td class="per">'+pcMoney(subPer*(1+g))+'</td><td>'+pcMoney(subTo*(1+g))+'</td></tr>'
+      +'</table>'
+    +'</div>'
+    +'<table class="grid">'
+      +'<colgroup><col style="width:36px"><col><col style="width:78px">'
+        +'<col style="width:42px"><col style="width:44px"><col style="width:46px">'
+        +'<col style="width:82px"><col style="width:82px"><col style="width:82px"></colgroup>'
+      +'<thead><tr>'
+        +'<th rowspan="2">Item</th><th rowspan="2">Description</th><th rowspan="2">Item Total</th>'
+        +'<th colspan="3">Percentage Complete</th><th colspan="3">Amount</th></tr>'
+      +'<tr><th>Prev.</th><th>Period</th><th>To Date</th>'
+        +'<th>Previous</th><th>Period</th><th>Claim to Date</th></tr></thead>'
+      +'<tbody>'+(rows || '<tr><td colspan="9" style="text-align:center;padding:16px;color:#888">'
+        +'No contract works listed.</td></tr>')+'</tbody>'
+    +'</table>'
+    +'<div class="foot"><span>'+e(coName)+'</span>'
+      +'<span>Printed '+new Date().toLocaleString('en-AU')+'</span></div>'
+    +'<button class="noprint" onclick="window.print()">'
+      +(mode==='pdf' ? '\uD83D\uDCC4 Save as PDF' : '\uD83D\uDDA8 Print')+'</button>'
+    +'<scr'+'ipt>(function(){'
+      +'var done=false;'
+      +'function go(){ if(done) return; done=true; try{ window.focus(); window.print(); }catch(e){} }'
+      +'var imgs=document.images, left=imgs.length;'
+      +'if(!left){ setTimeout(go,150); return; }'
+      +'function tick(){ if(--left<=0) setTimeout(go,80); }'
+      +'for(var i=0;i<imgs.length;i++){'
+        +'if(imgs[i].complete) tick();'
+        +'else { imgs[i].addEventListener("load",tick); imgs[i].addEventListener("error",tick); }'
+      +'}'
+      +'setTimeout(go,2500);'
+    +'})();</scr'+'ipt>'
+    +'</body></html>';
+
+  var w=window.open('', '_blank');
+  if(!w){ alert('The window was blocked.\n\nAllow pop-ups for this site and try again.'); return; }
+  w.document.open(); w.document.write(html); w.document.close();
+  try{ w.focus(); }catch(e){}
+};
+
 window.pcClose = function(){
   document.getElementById('pc-modal').classList.remove('open');
   PC_SEL = null;
@@ -11174,6 +11348,9 @@ window.pcNewConfirm=function(){
 
 // How each claim is named in the list.
 function pcItemName(c){
+  // A name typed by hand wins over the one worked out from the job and month.
+  var own=String((c && c.label) || '').trim();
+  if(own) return own;
   var p=pcProj();
   var job=String(p.jobNumber||'').trim();
   var name=String(p.name||'').trim();
@@ -11189,6 +11366,25 @@ function pcItemName(c){
 }
 window.pcItemName = pcItemName;
 
+// The pencil: change how a claim is named. Leaving it empty puts the worked-out
+// name back, so nothing is ever stuck with a bad label.
+window.pcRename=function(id){
+  var pid=window._pdCurrentId;
+  PC_PID=pid;
+  var list=pcClaims(pid);
+  var c=list.find(function(x){ return String(x.id)===String(id); });
+  if(!c) return;
+  var now=pcItemName(c);
+  var v=prompt('Name for this claim:\n\nLeave it empty to go back to the standard name.', now);
+  if(v===null) return;
+  v=String(v).trim();
+  if(v===pcItemName(Object.assign({}, c, {label:''}))) v='';   // typed the standard one
+  c.label=v;
+  pcWrite(pid, list);
+  try{ pcStrip(pid); }catch(e){}
+  pcDraw();
+};
+
 window.pcSet=function(id, field, v){
   var list=pcClaims(PC_PID);
   var c=list.find(function(x){ return String(x.id)===String(id); });
@@ -11201,14 +11397,24 @@ window.pcSet=function(id, field, v){
   pcDraw();
 };
 window.pcDelete=function(id){
-  var list=pcClaims(PC_PID);
+  var pid = (PC_PID!=null) ? PC_PID : window._pdCurrentId;
+  PC_PID = pid;
+  var list=pcClaims(pid);
   var c=list.find(function(x){ return String(x.id)===String(id); });
   if(!c) return;
-  if(!confirm('Remove '+pcTitle(c)+'?\n\nThe numbers of the other claims are not changed.')) return;
-  pcWrite(PC_PID, list.filter(function(x){ return String(x.id)!==String(id); }));
-  if(PC_SEL===id) PC_SEL=null;
-  try{ pcStrip(PC_PID); }catch(e){}
-  pcDraw();
+  // Deleting a claim throws away the figures entered against it, and those
+  // figures are what later months count as already claimed. Worth being plain
+  // about that before it happens.
+  var lines=Object.keys(c.pct||{}).length;
+  if(!confirm('Delete ' + pcTitle(c) + '?\n\n'
+      + (lines ? ('The ' + lines + ' figure' + (lines===1?'':'s')
+                  + ' entered on it will be lost, and later claims will no longer '
+                  + 'count them as already claimed.\n\n') : '')
+      + 'The other claims keep their numbers. This cannot be undone.')) return;
+  pcWrite(pid, list.filter(function(x){ return String(x.id)!==String(id); }));
+  PC_SEL=null;
+  try{ pcStrip(pid); }catch(e){}
+  try{ pcClose(); }catch(e){}
 };
 
 // The line that names the document, with the job and order numbers beside it.
@@ -11219,6 +11425,12 @@ function pcDrawBar(){
   var c=list.find(function(x){ return String(x.id)===String(PC_SEL); });
   host.innerHTML=
      '<div class="pc-doc-name">'+pcEsc(c ? pcTitle(c) : '')+'</div>'
+    + (c ? ('<button class="pc-out-b" onclick="pcPrint(\'print\')" '
+            +'title="Send this claim to a printer">\uD83D\uDDA8 Print</button>'
+          +'<button class="pc-out-b" onclick="pcPrint(\'pdf\')" '
+            +'title="Keep a PDF copy of this claim">\uD83D\uDCC4 Save as PDF</button>'
+          +'<button class="pc-del-b" onclick="pcDelete(\''+pcEsc(c.id)+'\')" '
+            +'title="Delete this claim">\uD83D\uDDD1 Delete this claim</button>') : '')
     +'<div class="pc-ref">'
       +'<div><b>Job No.</b><span>'+pcEsc(p.jobNumber||'\u2014')+'</span></div>'
       +'<div><b>PO / Works Order No.</b>'
@@ -11243,6 +11455,15 @@ function pcMoney(n){
   n=Math.round((Number(n)||0)*100)/100;
   return '$ '+n.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2});
 }
+// Slot a line or a heading in at any point, not only at the end.
+window.pcWorkInsert=function(at, section){
+  var list=pcWorks(PC_PID);
+  var i=parseInt(at,10); if(!isFinite(i) || i<0) i=0;
+  if(i>list.length) i=list.length;
+  list.splice(i, 0, { id:'w_'+Date.now()+'_'+Math.random().toString(36).slice(2,5),
+                      section:!!section, ref:'', desc:'', total:0 });
+  pcWorksWrite(PC_PID, list); pcDraw();
+};
 window.pcWorkAdd=function(section){
   var list=pcWorks(PC_PID);
   list.push({ id:'w_'+Date.now()+'_'+Math.random().toString(36).slice(2,5),
@@ -11257,45 +11478,19 @@ window.pcWorkSet=function(id, field, v){
   pcWorksWrite(PC_PID, list); pcDraw();
 };
 window.pcWorkDel=function(id){
-  if(!confirm('Remove this line from the schedule of works?')) return;
-  pcWorksWrite(PC_PID, pcWorks(PC_PID).filter(function(x){ return String(x.id)!==String(id); }));
-  pcDraw();
-};
-// Bring the priced lines straight off the Project Allowances sheet.
-window.pcWorkImport=function(){
-  var secs=[];
-  try{
-    var o=JSON.parse(localStorage.getItem('remc_proj_allowances')||'{}');
-    var d=o[String(PC_PID)];
-    if(d && !Array.isArray(d) && Array.isArray(d.sections)) secs=d.sections;
-  }catch(e){}
-  if(!secs.length){ alert('There are no Project Allowances on this job to bring across yet.'); return; }
   var list=pcWorks(PC_PID);
-  var have={};
-  list.forEach(function(w){ have[String(w.ref)+'|'+String(w.desc)]=1; });
-  var added=0;
-  secs.forEach(function(sec){
-    var key=String(sec.ref||'')+'.0|'+String(sec.title||'');
-    if(!have[key]){
-      list.push({ id:'w_'+Date.now()+'_'+Math.random().toString(36).slice(2,5),
-                  section:true, ref:(sec.ref||'')+'.0', desc:sec.title||'', total:0 });
-      have[key]=1; added++;
-    }
-    (sec.items||[]).forEach(function(it){
-      var k=String(it.ref||'')+'|'+String(it.desc||'');
-      if(have[k]) return;
-      list.push({ id:'w_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
-                  section:false, ref:it.ref||'', desc:it.desc||'', total:0 });
-      have[k]=1; added++;
-    });
-  });
-  pcWorksWrite(PC_PID, list);
-  alert(added ? (added+' line'+(added===1?'':'s')+' brought across.\n\n'
-        +'Put the dollar value against each one \u2014 that is the Item Total the claims work from.')
-      : 'Everything from the allowances is already here.');
+  var w=list.find(function(x){ return String(x.id)===String(id); });
+  if(!w) return;
+  var name=String(w.desc||'').trim() || (w.section ? 'this heading' : 'this line');
+  // Removing a priced line also removes what every claim recorded against it.
+  var msg = w.section
+    ? ('Remove the heading "'+name+'"?\n\nThe lines under it stay where they are.')
+    : ('Remove "'+name+'"?\n\nAny percentages entered against it, in this claim '
+       +'and in earlier ones, are lost with it. This cannot be undone.');
+  if(!confirm(msg)) return;
+  pcWorksWrite(PC_PID, list.filter(function(x){ return String(x.id)!==String(id); }));
   pcDraw();
 };
-
 // ---- what each claim has claimed ----
 // Nothing is copied between months. What was claimed before is added up from
 // the earlier claims, so a new month only needs this period's figures.
@@ -11327,7 +11522,17 @@ function pcDrawClaim(c){
   var works=pcWorks(PC_PID);
   var rows='', subPrev=0, subPer=0, subTo=0;
 
-  works.forEach(function(w){
+  // A slim strip between rows, so a line or a heading can be slotted into the
+  // middle instead of only at the end.
+  function ins(at){
+    return '<tr class="ins"><td colspan="10"><div class="ins-bar">'
+      +'<button class="ins-b" onclick="pcWorkInsert('+at+',false)">+ line</button>'
+      +'<button class="ins-b sec" onclick="pcWorkInsert('+at+',true)">+ heading</button>'
+      +'</div></td></tr>';
+  }
+
+  works.forEach(function(w, wi){
+    rows+=ins(wi);
     if(w.section){
       // a heading line: its total is whatever its items add up to
       rows+='<tr class="sec">'
@@ -11361,6 +11566,7 @@ function pcDrawClaim(c){
       +'<td class="c"><button class="pc-x" onclick="pcWorkDel(\'' + w.id + '\')">\u2715</button></td>'
       +'</tr>';
   });
+  rows+=ins(works.length);
 
   var g=pcGstRate()/100;
   var m=pcMeta(PC_PID);
@@ -11380,6 +11586,7 @@ function pcDrawClaim(c){
             +(PC_STATE_LABEL[x]||x)+'</option>'; }).join('')
       +'</select>'
     +'</div>'
+    +'<div class="pc-topline">'
     +'<div class="pc-info">'
       +info('Client:','client','Builder or client')
       +info('Contract:','contract','Contract or site name')
@@ -11391,7 +11598,9 @@ function pcDrawClaim(c){
       +info('Contact Email:','contactEmail','name@builder.com')
       +info('Contract Sum:','contractSum','$0.00 + GST')
     +'</div>'
-    +'<table class="pc-sum"><tr><th></th><th>Previous</th><th>Period</th><th>Claim to Date</th></tr>'
+    +'<table class="pc-sum">'
+      +'<tr><th class="blank"></th><th colspan="3" class="cap">Total Amount</th></tr>'
+      +'<tr><th class="blank"></th><th>Previous</th><th>Period</th><th>Claim to Date</th></tr>'
       +'<tr><td class="l">Sub Total</td><td>'+pcMoney(subPrev)+'</td>'
         +'<td class="per">'+pcMoney(subPer)+'</td><td>'+pcMoney(subTo)+'</td></tr>'
       +'<tr><td class="l">GST ('+pcGstRate()+'%)</td><td>'+pcMoney(subPrev*g)+'</td>'
@@ -11399,11 +11608,11 @@ function pcDrawClaim(c){
       +'<tr><td class="l">Total</td><td>'+pcMoney(subPrev*(1+g))+'</td>'
         +'<td class="per">'+pcMoney(subPer*(1+g))+'</td><td>'+pcMoney(subTo*(1+g))+'</td></tr>'
     +'</table>'
+    +'</div>'
     +'<div class="pc-tools">'
       +'<strong style="font-size:12px">Contract Works</strong>'
       +'<button class="pc-btn" onclick="pcWorkAdd(true)">+ Section</button>'
       +'<button class="pc-btn" onclick="pcWorkAdd(false)">+ Line</button>'
-      +'<button class="pc-btn go" onclick="pcWorkImport()">Bring in from Allowances</button>'
     +'</div>'
     +'<table class="pc-tbl">'
       +'<colgroup><col style="width:48px"><col><col style="width:92px">'
@@ -11465,6 +11674,8 @@ function pcStrip(pid){
     + list.map(function(c){
         var st=pcState(c);
         return '<div class="pc-pi" ondblclick="pcPanelOpen(\''+pcEsc(c.id)+'\')">'
+          +'<button class="pc-pen" title="Change this name" '
+            +'onclick="event.stopPropagation();pcRename(\''+pcEsc(c.id)+'\')">\u270E</button>'
           +'<div class="pc-pi-n">'+pcEsc(pcItemName(c))
             +(Number(c.rev)>0 ? ' <span class="pc-item-r">REV. '+c.rev+'</span>' : '')+'</div>'
           +'<span class="pc-st '+st+'">'+pcEsc(PC_STATE_LABEL[st]||st)+'</span>'
@@ -11522,12 +11733,30 @@ window.vrSet=function(id, field, v){
   if(field==='amount') r.amount=pcNum(v); else r[field]=String(v||'');
   vrWrite(pid, list); vrRender(pid);
 };
+window.vrEdit=function(id){
+  var pid=window._pdCurrentId;
+  var list=vrList(pid);
+  var r=list.find(function(x){ return String(x.id)===String(id); });
+  if(!r) return;
+  var desc=prompt('What is the variation for?', r.desc||'');
+  if(desc===null) return;
+  desc=String(desc).trim(); if(!desc) return;
+  var amt=prompt('Amount (excluding GST):', r.amount||'');
+  if(amt===null) return;
+  r.desc=desc; r.amount=pcNum(amt);
+  if(!(parseInt(r.no,10)>=1)) r.no=vrNextNo(pid);
+  vrWrite(pid, list); vrRender(pid);
+};
 window.vrDelete=function(id){
   var pid=window._pdCurrentId;
   var list=vrList(pid);
   var r=list.find(function(x){ return String(x.id)===String(id); });
   if(!r) return;
-  if(!confirm('Remove variation '+pcPad(r.no)+'?')) return;
+  var no=parseInt(r.no,10); if(!isFinite(no) || no<1) no=0;
+  if(!confirm('Delete variation ' + (no?pcPad(no):'') + ' \u2014 '
+      + (String(r.desc||'').trim() || 'untitled') + '?\n\n'
+      + pcMoney(r.amount) + ' will be taken off the variations total. '
+      + 'This cannot be undone.')) return;
   vrWrite(pid, list.filter(function(x){ return String(x.id)!==String(id); }));
   vrRender(pid);
 };
@@ -11545,10 +11774,17 @@ function vrRender(pid){
     return;
   }
   box.innerHTML='<div class="pc-pl">'
-    + list.map(function(v){
+    + list.map(function(v, i){
         var st=pcState(v);
-        return '<div class="pc-pi">'
-          +'<div class="pc-pi-n">VO '+pcPad(parseInt(v.no,10)||0)+' \u00B7 '+pcEsc(v.desc)+'</div>'
+        // Entries saved before, or with a field left blank, still read sensibly.
+        var no=parseInt(v.no,10);
+        if(!isFinite(no) || no<1) no=list.length-i;
+        var desc=String(v.desc||'').trim() || 'Untitled variation';
+        return '<div class="pc-pi" ondblclick="vrEdit(\''+pcEsc(v.id)+'\')" '
+          +'title="Double-click to change">'
+          +'<button class="pc-pen" title="Change this variation" '
+            +'onclick="event.stopPropagation();vrEdit(\''+pcEsc(v.id)+'\')">\u270E</button>'
+          +'<div class="pc-pi-n">VO '+pcPad(no)+' \u00B7 '+pcEsc(desc)+'</div>'
           +'<span style="font-size:12px;font-weight:800;white-space:nowrap">'+pcMoney(v.amount)+'</span>'
           +'<span class="pc-st '+st+'">'+pcEsc(PC_STATE_LABEL[st]||st)+'</span>'
           +'<button class="pc-x" title="Remove" onclick="vrDelete(\''+pcEsc(v.id)+'\')">\u2715</button>'
