@@ -594,12 +594,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     <div class="test-form">
       <div class="th">🔧 Add a variation</div>
       <div class="fld"><label>Description <span class="req">*</span></label><textarea id="v-desc" rows="3" placeholder="What is the variation? e.g. Extra rock excavation in north corner…" oninput="updateVarSave()"></textarea></div>
-      <div class="row2">
-        <div class="fld"><label>Start date <span class="req">*</span></label><input id="v-start" type="date" oninput="updateVarSave()" onchange="updateVarSave()"></div>
-        <div class="fld"><label>Finish date <span class="req">*</span></label><input id="v-end" type="date" oninput="updateVarSave()" onchange="updateVarSave()"></div>
-      </div>
-      <div id="v-extra-ranges"></div>
-      <button type="button" class="add-range-btn" id="v-add-range" onclick="varAddRange()">+ Add another period</button>
+      <div class="fld"><label>Date <span class="req">*</span></label><input id="v-start" type="date" oninput="updateVarSave()" onchange="updateVarSave()"></div>
       <div class="fld"><label>Machine needed <span class="opt">(optional)</span></label><input id="v-machine" list="mac-list" placeholder="e.g. 20T Excavator"></div>
       <div class="fld"><label>Comments <span class="opt">(optional)</span></label><textarea id="v-comments" rows="2" placeholder="Any comments about this variation…"></textarea></div>
       <div class="fld"><label>Photos <span class="opt">(optional)</span></label>
@@ -1939,34 +1934,21 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     e.target.value='';
   };
   function varReadRanges(){
-    var out=[];
-    var s0=($('v-start')||{}).value||'', e0=($('v-end')||{}).value||'';
-    if(s0&&e0) out.push({start:s0,end:e0});
-    var rows=document.querySelectorAll('#v-extra-ranges .f-range-row');
-    for(var i=0;i<rows.length;i++){ var s=(rows[i].querySelector('.rr-start')||{}).value||'', e=(rows[i].querySelector('.rr-end')||{}).value||''; if(s&&e) out.push({start:s,end:e}); }
-    out.forEach(function(r){ if(r.end<r.start){ var t=r.start; r.start=r.end; r.end=t; } });
-    return out;
+    // One day now. It is still stored as a start and a finish so that variations
+    // saved before this, and everything that reads them, carry on working.
+    var s0=($('v-start')||{}).value||'';
+    return s0 ? [{start:s0,end:s0}] : [];
   }
-  window.varAddRange=function(start,end){
-    var host=$('v-extra-ranges'); if(!host) return;
-    var wrap=document.createElement('div'); wrap.className='f-range-row';
-    wrap.innerHTML='<div class="fld"><label>Also from</label><input type="date" class="rr-start"></div>'
-      +'<div class="fld"><label>to</label><input type="date" class="rr-end"></div>'
-      +'<button type="button" class="rr-x" title="Remove this period" onclick="var r=this.closest(\'.f-range-row\'); if(r) r.remove();">✕</button>';
-    host.appendChild(wrap);
-    if(start) wrap.querySelector('.rr-start').value=start;
-    if(end) wrap.querySelector('.rr-end').value=end;
-  };
   window.updateVarSave=function(){
     var btn=$('v-save'); if(!btn) return;
-    var ok = !!($('v-desc')&&$('v-desc').value.trim()) && !!($('v-start')&&$('v-start').value) && !!($('v-end')&&$('v-end').value);
+    var ok = !!($('v-desc')&&$('v-desc').value.trim()) && !!($('v-start')&&$('v-start').value);
     btn.disabled=!ok; btn.classList.toggle('disabled', !ok);
   };
   function varFormHasContent(){
     var f=function(id){ return !!($(id) && String($(id).value||'').trim()); };
-    if(f('v-desc')||f('v-start')||f('v-end')||f('v-machine')||f('v-comments')) return true;
+    if(f('v-desc')||f('v-start')||f('v-machine')||f('v-comments')) return true;
     if(_varPhotos.length || _varDockets.length) return true;
-    if(document.querySelectorAll('#v-extra-ranges .f-range-row').length) return true;
+
     return false;
   }
   window.openVariation=function(pid){
@@ -1976,8 +1958,8 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     $('var-title').textContent = p ? (p.name||('Project '+pid)) : 'Variations';
     var _th=document.querySelector('#variation-ov .th'); if(_th) _th.textContent='🔧 Add a variation';
     if($('v-save')) $('v-save').textContent='+ Add variation';
-    ['v-desc','v-start','v-end','v-machine','v-comments'].forEach(function(id){ if($(id)) $(id).value=''; });
-    if($('v-extra-ranges')) $('v-extra-ranges').innerHTML='';
+    ['v-desc','v-start','v-machine','v-comments'].forEach(function(id){ if($(id)) $(id).value=''; });
+    
     fillMachineList();
     varRenderPending();
     updateVarSave();
@@ -1992,9 +1974,9 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     if($('v-desc')) $('v-desc').value=v.description||'';
     var rs=(v.ranges&&v.ranges.length)?v.ranges:[];
     if($('v-start')) $('v-start').value=(rs[0]&&rs[0].start)||'';
-    if($('v-end')) $('v-end').value=(rs[0]&&rs[0].end)||'';
-    if($('v-extra-ranges')) $('v-extra-ranges').innerHTML='';
-    for(var i=1;i<rs.length;i++){ if(rs[i]&&rs[i].start&&rs[i].end) varAddRange(rs[i].start, rs[i].end); }
+
+    
+
     if($('v-machine')) $('v-machine').value=v.machine||'';
     if($('v-comments')) $('v-comments').value=v.comments||'';
     var _th=document.querySelector('#variation-ov .th'); if(_th) _th.textContent='✏️ Edit variation';
@@ -2009,7 +1991,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     if(_varSaving){ supShowSaving('Still saving — please wait…'); return; }
     if(varFormHasContent()){ if(!confirm('You have an unsaved variation. Go back and lose what you entered?')) return; }
     _varPhotos=[]; _varDockets=[];
-    if($('v-extra-ranges')) $('v-extra-ranges').innerHTML='';
+    
     varRenderPending();
     $('variation-ov').classList.remove('open'); VAR_PID=null;
   };
@@ -2038,7 +2020,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     var desc=(($('v-desc')||{}).value||'').trim();
     if(!desc){ alert('Please add a description for the variation.'); return; }
     var ranges=varReadRanges();
-    if(!ranges.length){ alert('Please choose start and finish dates.'); return; }
+    if(!ranges.length){ alert('Please choose the date.'); return; }
     var rec={
       id:'vr_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
       description:desc,
@@ -2093,8 +2075,8 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     VAR_EDIT_ID=null;
     // reset the form
     _varPhotos=[]; _varDockets=[];
-    ['v-desc','v-start','v-end','v-machine','v-comments'].forEach(function(id){ if($(id)) $(id).value=''; });
-    if($('v-extra-ranges')) $('v-extra-ranges').innerHTML='';
+    ['v-desc','v-start','v-machine','v-comments'].forEach(function(id){ if($(id)) $(id).value=''; });
+    
     var _th=document.querySelector('#variation-ov .th'); if(_th) _th.textContent='🔧 Add a variation';
     if($('v-save')) $('v-save').textContent='+ Add variation';
     varRenderPending();
