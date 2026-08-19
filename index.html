@@ -210,6 +210,7 @@ body.hide-residential .overview-layout{grid-template-columns:200px 1fr 180px}
        replaces localStorage.setItem. -->
   <script src="remc-data.js"></script>
   <script src="remc-variations.js"></script>
+  <script src="remc-claims.js"></script>
   <script>
   (function(){
     var CFG = window.REMC_CLOUD || {};
@@ -225,17 +226,25 @@ body.hide-residential .overview-layout{grid-template-columns:200px 1fr 180px}
     window.remcData.configure({
       url: CFG.url,
       anonKey: CFG.anonKey,
-      tables: ['remc_variations'],
-      project: function(t){ try{ window.remcVariations.project(t); }catch(e){ console.warn('[REMC data]', e); } },
+      tables: ['remc_variations', 'remc_claims'],
+      project: function(t){
+        try{ window.remcVariations.project(t); }catch(e){ console.warn('[REMC data]', e); }
+        try{ window.remcClaims.project(t); }catch(e){ console.warn('[REMC data]', e); }
+      },
       log: function(){ try{ console.log.apply(console, ['[REMC data]'].concat([].slice.call(arguments))); }catch(e){} }
     });
     window.remcVariations.init({ data: window.remcData, actor: whoAmI });
+    window.remcClaims.init({ data: window.remcData, actor: whoAmI });
 
     function boot(){
       window.remcData.start();
       window.remcData.watch('remc_variations', function(){
         try{ if (typeof window.vpRender === 'function') window.vpRender(); }catch(e){}
         try{ if (window._pdCurrentId != null && typeof window.vrRender === 'function') window.vrRender(window._pdCurrentId); }catch(e){}
+      });
+      window.remcData.watch('remc_claims', function(){
+        try{ if (typeof window.pcDraw === 'function') window.pcDraw(); }catch(e){}
+        try{ if (window._pdCurrentId != null && typeof window.pcStrip === 'function') window.pcStrip(window._pdCurrentId); }catch(e){}
       });
       window.remcData.onStatus(function(st){
         var el = document.getElementById('remc-cloud-badge');
@@ -11355,6 +11364,14 @@ function pcLoad(){
     return (o && typeof o==='object' && !Array.isArray(o)) ? o : {}; }catch(e){ return {}; }
 }
 function pcSave(o){
+  // Every claim change in the app comes through here. The data layer works out
+  // which rows actually changed and sends only those, so typing one percentage
+  // no longer rewrites every claim on every job.
+  if(window.remcClaims && window.remcData && window.remcData.status().configured){
+    window.remcClaims.writeAll(o||{})
+      .catch(function(e){ console.warn('[REMC] progress claims:', e && e.message); });
+    return;
+  }
   var txt=JSON.stringify(o);
   if(typeof window.remcSaveKey==='function'){ window.remcSaveKey(PC_KEY, txt); return; }
   try{ localStorage.setItem(PC_KEY, txt); }catch(e){ alert('Browser storage is full.'); }
@@ -11998,6 +12015,10 @@ function pcCompletion(pid){
   return { total:total, done:done, pct: total ? (done/total*100) : 0 };
 }
 window.pcCompletion = pcCompletion;
+
+// The data layer redraws the claims when somebody else changes one, so it
+// needs to be able to reach this.
+window.pcDraw = pcDraw;
 
 function pcDrawCompletion(pid){
   var el=document.getElementById('pd-completion'); if(!el) return;

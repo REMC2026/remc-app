@@ -136,6 +136,44 @@
     return true;
   }
 
+  // Merging on a conflict, done properly.
+  //
+  // The naive way is "take theirs, then put all of mine on top". That looks
+  // right until a page sends the whole record back - which every one of these
+  // pages does. Fields the person never touched come along for the ride and
+  // wipe what somebody else just saved.
+  //
+  // So three things are compared, not two: what we had when we started (base),
+  // what we are sending (mine), and what is there now (theirs). A field only
+  // wins if it actually changed. Where both changed the same field, the later
+  // save wins - and the history keeps the other one.
+  function merge3(base, mine, theirs) {
+    if (same(mine, theirs)) return theirs;
+    if (same(mine, base)) return theirs;            // we did not touch it
+    if (same(theirs, base)) return mine;            // they did not touch it
+
+    var plain = isObj(base) && isObj(mine) && isObj(theirs);
+    if (!plain) return mine;                        // both changed: later wins
+
+    var out = {}, keys = {};
+    [base, mine, theirs].forEach(function (o) {
+      Object.keys(o || {}).forEach(function (k) { keys[k] = true; });
+    });
+    Object.keys(keys).forEach(function (k) {
+      var inMine = Object.prototype.hasOwnProperty.call(mine, k);
+      var inTheirs = Object.prototype.hasOwnProperty.call(theirs, k);
+      var inBase = Object.prototype.hasOwnProperty.call(base, k);
+
+      if (!inMine && inBase) return;                // we removed it
+      if (!inTheirs && inBase && !same(mine[k], base[k])) { out[k] = mine[k]; return; }
+      if (!inTheirs && inBase) return;              // they removed it
+      if (!inMine) { out[k] = theirs[k]; return; }
+      if (!inTheirs) { out[k] = mine[k]; return; }
+      out[k] = merge3(inBase ? base[k] : undefined, mine[k], theirs[k]);
+    });
+    return out;
+  }
+
   // An id a person can read on a history screen, and that stays unique when
   // two phones create records in the same second with no signal.
   function newId(prefix) {
@@ -455,13 +493,13 @@
 
         var merged;
         if (typeof cfg.merge === 'function') {
-          merged = cfg.merge(op.table, op.data, theirs.data, op);
+          merged = cfg.merge(op.table, op.data, theirs.data, op, op.base);
         } else {
-          merged = {};
-          Object.keys(theirs.data || {}).forEach(function (k) { merged[k] = theirs.data[k]; });
-          Object.keys(op.data || {}).forEach(function (k) { merged[k] = op.data[k]; });
+          merged = merge3(op.base || {}, op.data || {}, theirs.data || {});
         }
         op.data = merged;
+        // The next attempt starts from what is there now.
+        op.base = clone(theirs.data || {});
         op.expectVersion = theirs.version;
         op.writeId = newId('w');          // a different write, different content
         // keep what was there, so a conflicts screen can show it
@@ -624,6 +662,9 @@
         actor: opts.actor || cfg.actor || null,
         writeId: newId('w'),
         expectVersion: existing ? Number(existing.version) : null,
+        // What the record looked like when this change started. Without it a
+        // conflict cannot tell what the person actually changed.
+        base: existing ? clone(existing.data) : {},
         queuedAt: new Date().toISOString(),
         tries: 0
       };
@@ -770,6 +811,9 @@
 
     /** Compare two records without depending on key order. */
     same: same,
+
+    /** Three-way merge: base, mine, theirs. */
+    merge3: merge3,
 
     /** Clear everything this layer keeps on this device. The database is not
      *  touched - next time it is read again from the start. */
