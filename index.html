@@ -205,19 +205,19 @@ body.hide-residential .overview-layout{grid-template-columns:200px 1fr 180px}
     };
   </script>
 
-  <!-- 🗄️ CAMADA DE DADOS — uma linha por registo, em vez da linha unica.
-       Carregada aqui de proposito: antes da sincronizacao antiga, que mais
-       abaixo substitui o localStorage.setItem. -->
+  <!-- 🗄️ DATA LAYER — one row per record, instead of the single row.
+       Loaded here on purpose: ahead of the old sync, which further down
+       replaces localStorage.setItem. -->
   <script src="remc-data.js"></script>
   <script src="remc-variations.js"></script>
   <script>
   (function(){
     var CFG = window.REMC_CLOUD || {};
-    var pronto = CFG.url && CFG.anonKey
+    var ready = CFG.url && CFG.anonKey
       && String(CFG.url).indexOf('PASTE_') < 0 && String(CFG.anonKey).indexOf('PASTE_') < 0;
-    if (!pronto || !window.remcData){ console.log('[REMC dados] sem configuracao — fica como estava'); return; }
+    if (!ready || !window.remcData){ console.log('[REMC data] not configured — carrying on as before'); return; }
 
-    function quemSou(){
+    function whoAmI(){
       try { var m = window.remcWhoAmI && window.remcWhoAmI(); return (m && m.name) || 'Office'; }
       catch(e){ return 'Office'; }
     }
@@ -226,12 +226,12 @@ body.hide-residential .overview-layout{grid-template-columns:200px 1fr 180px}
       url: CFG.url,
       anonKey: CFG.anonKey,
       tables: ['remc_variations'],
-      project: function(t){ try{ window.remcVariations.project(t); }catch(e){ console.warn('[REMC dados]', e); } },
-      log: function(){ try{ console.log.apply(console, ['[REMC dados]'].concat([].slice.call(arguments))); }catch(e){} }
+      project: function(t){ try{ window.remcVariations.project(t); }catch(e){ console.warn('[REMC data]', e); } },
+      log: function(){ try{ console.log.apply(console, ['[REMC data]'].concat([].slice.call(arguments))); }catch(e){} }
     });
-    window.remcVariations.init({ data: window.remcData, actor: quemSou });
+    window.remcVariations.init({ data: window.remcData, actor: whoAmI });
 
-    function arrancar(){
+    function boot(){
       window.remcData.start();
       window.remcData.watch('remc_variations', function(){
         try{ if (typeof window.vpRender === 'function') window.vpRender(); }catch(e){}
@@ -240,11 +240,11 @@ body.hide-residential .overview-layout{grid-template-columns:200px 1fr 180px}
       window.remcData.onStatus(function(st){
         var el = document.getElementById('remc-cloud-badge');
         if (!el || !st.pending) return;
-        el.title = st.pending + ' alteracao(oes) por enviar';
+        el.title = st.pending + ' change' + (st.pending === 1 ? '' : 's') + ' waiting to send';
       });
     }
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', arrancar);
-    else arrancar();
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+    else boot();
   })();
   </script>
   <script>
@@ -12084,12 +12084,12 @@ function vqLoad(){
   catch(e){ return []; }
 }
 function vqWrite(list){
-  // A camada de dados transforma a lista inteira nas alteracoes minimas: so
-  // sobe a linha que mudou, com a versao de que parte. Quem chama esta funcao
-  // nao precisa de saber nada disso.
+  // The data layer turns the whole list into the smallest set of changes:
+  // only the row that actually changed goes up, carrying the version it is
+  // working from. Callers need to know none of that.
   if(window.remcVariations && window.remcData && window.remcData.status().configured){
     window.remcVariations.writeRequests(list||[])
-      .catch(function(e){ console.warn('[REMC] pedidos de variacao:', e && e.message); });
+      .catch(function(e){ console.warn('[REMC] variation requests:', e && e.message); });
     return;
   }
   var txt=JSON.stringify(list||[]);
@@ -12203,8 +12203,8 @@ window.vpApprove=function(id){
                createdAt:new Date().toISOString(), fromRequest:r.id,
                raisedBy:r.by||'', raisedAt:r.at||'' });
   }
-  // Aprovar passa pelo mesmo sitio que tudo o resto. Antes escrevia a chave
-  // inteira a mao, o que apagava o que outra pessoa tivesse gravado entretanto.
+  // Approving goes through the same place as everything else. It used to write
+  // the whole key by hand, which wiped whatever anyone else had saved meanwhile.
   vrWrite(p.id, arr);
 
   r.state='approved'; r.pid=p.id;
@@ -12428,7 +12428,7 @@ function vrList(pid){ var a=vrLoad()[String(pid)]; return Array.isArray(a)?a:[];
 function vrWrite(pid, list){
   if(window.remcVariations && window.remcData && window.remcData.status().configured){
     window.remcVariations.writeMap(pid, list||[])
-      .catch(function(e){ console.warn('[REMC] variacoes:', e && e.message); });
+      .catch(function(e){ console.warn('[REMC] variations:', e && e.message); });
     return;
   }
   var all=vrLoad();
@@ -15566,8 +15566,8 @@ function teamEditProjectBooking(pid){
   window.REMC_SB = sb;
   var _applying = false, _pushTimer = null, _dirty = {};
 
-  // As chaves que ja vivem nas tabelas novas nao vao para a linha unica: se
-  // fossem, as duas escreviam por cima uma da outra.
+  // Keys that now live in the new tables are kept out of the single row: if
+  // they went in, the two would write over each other.
   function _remcOwned(k){ try{ return !!(window.remcData && window.remcData.owns(k)); }catch(e){ return false; } }
   function collectState(){
     var out = { __client: CLIENT_ID };

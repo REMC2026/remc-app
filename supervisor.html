@@ -349,18 +349,18 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
   };
 </script>
 
-<!-- 🗄️ CAMADA DE DADOS — a mesma que a app do escritorio, ficheiro a ficheiro.
-     Uma variacao gravada aqui e uma linha, nao a base de dados inteira. -->
+<!-- 🗄️ DATA LAYER — the same files as the office app, byte for byte.
+     A variation saved here is one row, not the whole database. -->
 <script src="remc-data.js"></script>
 <script src="remc-variations.js"></script>
 <script>
 (function(){
   var CFG = window.REMC_SUP_CLOUD || {};
-  var pronto = CFG.url && CFG.anonKey
+  var ready = CFG.url && CFG.anonKey
     && String(CFG.url).indexOf('PASTE_') < 0 && String(CFG.anonKey).indexOf('PASTE_') < 0;
-  if (!pronto || !window.remcData){ console.log('[REMC dados] sem configuracao'); return; }
+  if (!ready || !window.remcData){ console.log('[REMC data] not configured'); return; }
 
-  function quemSou(){
+  function whoAmI(){
     try { return (window.REMC_ME && window.REMC_ME.name) || 'Supervisor'; }
     catch(e){ return 'Supervisor'; }
   }
@@ -370,10 +370,10 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     anonKey: CFG.anonKey,
     tables: ['remc_variations'],
     pollMs: 15000,
-    project: function(t){ try{ window.remcVariations.project(t); }catch(e){ console.warn('[REMC dados]', e); } },
-    log: function(){ try{ console.log.apply(console, ['[REMC dados]'].concat([].slice.call(arguments))); }catch(e){} }
+    project: function(t){ try{ window.remcVariations.project(t); }catch(e){ console.warn('[REMC data]', e); } },
+    log: function(){ try{ console.log.apply(console, ['[REMC data]'].concat([].slice.call(arguments))); }catch(e){} }
   });
-  window.remcVariations.init({ data: window.remcData, actor: quemSou });
+  window.remcVariations.init({ data: window.remcData, actor: whoAmI });
 })();
 </script>
 
@@ -717,7 +717,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
   var DATA = {};           // full shared document
   var PROJECTS = [], BOOKINGS = [], SUPERS = [], NOTES = {}, MACHINES = [];
   var ME = null;           // {username, name}
-  // A camada de dados corre fora deste bloco e precisa de saber quem gravou.
+  // The data layer runs outside this block and needs to know who saved.
   function _setME(m){ ME = m; try{ window.REMC_ME = m; }catch(e){} return m; }
   var VIEW = 'list', OFFSET = 0, EDIT_ID = null, PICK_COLOR = COLORS[0], NOTES_PID = null;
   var TESTS = {}, TEST_PID = null;
@@ -914,8 +914,8 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     MACHINES = j('remc_machine_names','[]'); if(!Array.isArray(MACHINES)) MACHINES=[];
     TESTS    = j('remc_compaction_tests','{}'); if(!TESTS || typeof TESTS!=='object' || Array.isArray(TESTS)) TESTS={};
     TRANSFERS= j('remc_machine_transfers','{}'); if(!TRANSFERS || typeof TRANSFERS!=='object' || Array.isArray(TRANSFERS)) TRANSFERS={};
-    // As variacoes ja nao vivem no documento unico: vem da sua propria tabela,
-    // uma linha cada. O resto desta funcao nao mudou.
+    // Variations no longer live in the single document: they come from their
+    // own table, one row each. The rest of this function is unchanged.
     if(window.remcVariations && window.remcData && window.remcData.status().configured){
       VARIATIONS = window.remcVariations.map();
       VARREQ     = window.remcVariations.requests();
@@ -1068,8 +1068,8 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
   // One place that writes, so every save behaves the same way.
   function writeDoc(d, cb, after){
     var mine=new Date().toISOString();
-    // O que ja vive nas tabelas novas sai do documento unico. Se ficasse, as
-    // duas escritas competiam pela mesma variacao.
+    // Anything that now lives in the new tables is taken out of the single
+    // document. Left in, the two writes would compete over the same variation.
     try{ if(window.remcData){ Object.keys(d).forEach(function(k){
       if(window.remcData.owns(k)) delete d[k]; }); } }catch(e){}
     d['__client']=CLIENT;
@@ -1201,9 +1201,9 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
       });
     }, 12000);
   }
-  // Uma variacao passou a ser uma linha. Gravar deixou de reescrever a base de
-  // dados inteira - por isso deixou de demorar 25 segundos, e deixou de poder
-  // apagar o que outra pessoa gravou no mesmo momento.
+  // A variation is now one row. Saving no longer rewrites the whole database -
+  // which is why it stopped taking 25 seconds, and why it can no longer wipe
+  // what somebody else saved at the same moment.
   function persistVariation(pid, rec, req, cb){
     if(window.remcVariations && window.remcData && window.remcData.status().configured){
       window.remcVariations.saveRecord(pid, rec, { state:'approval', req:req })
@@ -1222,7 +1222,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     }
     pushVariations(cb);
   }
-  // Fica como estava, para quando a app corre sem configuracao de nuvem.
+  // Left as it was, for when the app runs with no cloud configured.
   function pushVariations(cb){
     if(!ensureClient()){ if(cb) cb('noconfig'); return; }
     _tstart();
@@ -2510,8 +2510,8 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
   // kept showing "Waiting" until the screen was closed and reopened.
   // Each step stands on its own. A failure in one is reported and the rest
   // still run, so a stale screen can never be caused by an unrelated error.
-  // O escritorio aprova, e o telemovel ve. Sem esperar pela proxima leitura
-  // do documento inteiro.
+  // The office approves and the phone sees it, without waiting for the next
+  // read of the whole document.
   try{
     if(window.remcData && window.remcData.status().configured){
       window.remcData.watch('remc_variations', function(){
@@ -2521,11 +2521,11 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
         try{ updateNotifBadge(); }catch(e){}
       });
       window.remcData.onStatus(function(st){
-        if(st.pending > 0) setCloud(st.pending + ' por enviar','#fef3c7','#92400e');
+        if(st.pending > 0) setCloud(st.pending + ' to send','#fef3c7','#92400e');
       });
       window.remcData.start();
     }
-  }catch(e){ console.warn('[REMC dados] arranque', e); }
+  }catch(e){ console.warn('[REMC data] startup', e); }
 
   function applyIncoming(){
     try{ parseData(); }catch(e){ console.warn('[REMC] parseData failed', e); }

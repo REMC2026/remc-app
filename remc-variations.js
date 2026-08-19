@@ -1,23 +1,22 @@
 /* ==========================================================================
- * remc-variations.js  -  as variacoes, uma linha por variacao
+ * remc-variations.js  -  variations, one row per variation
  * --------------------------------------------------------------------------
- * Ate aqui a mesma variacao vivia em dois sitios: um registo em
- * remc_variations e um pedido em remc_variation_requests, ligados por um
- * campo. Manter os dois a par era o que fazia as variacoes do telemovel nao
- * chegarem ao escritorio.
+ * Until now the same variation lived in two places: a record in
+ * remc_variations and a request in remc_variation_requests, tied together by
+ * a field. Keeping the two in step is what made variations raised on a phone
+ * fail to reach the office.
  *
- * Agora e uma linha so, na tabela remc_variations. Onde ela esta no percurso
- * de aprovacao e uma coluna dessa linha:
+ * Now it is a single row in remc_variations. Where it sits in the approval
+ * run is a column on that row:
  *
- *     approval   levantada na obra, a espera do escritorio
- *     check      o escritorio esta a ver
- *     approved   aprovada - e so aqui que entra na obra
- *     declined   nao avanca
+ *     approval   raised on site, waiting on the office
+ *     check      the office is looking at it
+ *     approved   approved - only now does it land on the job
+ *     declined   not going ahead
  *
- * As paginas nao mudaram. Este ficheiro reconstroi, a partir das linhas, as
- * duas chaves que elas ja liam - e traduz as gravacoes delas em alteracoes as
- * linhas. Enquanto isto se mantiver, cada area seguinte e um ficheiro destes,
- * nao uma reescrita.
+ * The pages did not change. This file rebuilds, from the rows, the two keys
+ * they already read - and turns their saves into changes to the rows. As long
+ * as that holds, each area after this one is a file like this, not a rewrite.
  * ========================================================================== */
 (function (root) {
   'use strict';
@@ -26,14 +25,14 @@
   var KEY_V = 'remc_variations';
   var KEY_R = 'remc_variation_requests';
 
-  var d = null;                 // a camada de dados
+  var d = null;                 // the data layer
   var opts = { actor: function () { return ''; }, log: function () {} };
   var _mapCache = null, _reqCache = null;
 
-  // Um registo levantado na obra fica fora da obra ate ser aprovado. As paginas
-  // reconhecem isso por um campo "state" com o valor 'pending'; quando ele
-  // desaparece, a variacao esta na obra. Mantemos essa linguagem para nao ter
-  // de mexer em nada do que desenha os ecras.
+  // A record raised on site stays off the job until it is approved. The pages
+  // recognise that by a "state" field holding 'pending'; when it goes away,
+  // the variation is on the job. We keep that wording so nothing that draws
+  // the screens has to change.
   function legacyState(rowState) {
     if (rowState === 'approved' || rowState == null || rowState === '') return null;
     return 'pending';
@@ -41,11 +40,11 @@
 
   function isReqOnly(row) { return !!(row.data && row.data._reqOnly); }
 
-  // ------------------------------------------------------------ projeccao ---
+  // ------------------------------------------------------------ projection --
   function buildMap() {
     var out = {};
     d.all(TABLE).forEach(function (row) {
-      if (isReqOnly(row)) return;                 // pedido sem registo na obra
+      if (isReqOnly(row)) return;                 // a request with no job record
       if (row.project_id == null) return;
       var rec = {};
       Object.keys(row.data || {}).forEach(function (k) {
@@ -59,7 +58,7 @@
       if (row._failed) rec._failed = row._failed;
       (out[String(row.project_id)] = out[String(row.project_id)] || []).push(rec);
     });
-    // A ordem com que estavam: mais antigo primeiro, como o telemovel espera.
+    // The order they were in: oldest first, which is what the phone expects.
     Object.keys(out).forEach(function (pid) {
       out[pid].sort(function (a, b) {
         var x = a.createdAt || '', y = b.createdAt || '';
@@ -93,12 +92,13 @@
     d.writeLegacy(KEY_R, JSON.stringify(_reqCache));
   }
 
-  // -------------------------------------------------------------- escrita ---
-  function sameData(a, b) {
-    try { return JSON.stringify(a) === JSON.stringify(b); } catch (e) { return false; }
-  }
+  // --------------------------------------------------------------- writing --
+  // Not as text: see the comment in remc-data.js. Compared as text, a record
+  // that came back from the server always looks different from the one we
+  // hold, and the page saves what has not changed - every two seconds.
+  function sameData(a, b) { return d.same(a, b); }
 
-  /** Grava uma variacao. rec e o registo tal como as paginas o escrevem. */
+  /** Save a variation. rec is the record exactly as the pages write it. */
   function saveRecord(pid, rec, o) {
     o = o || {};
     var id = String(rec.id || d.newId('vr'));
@@ -108,7 +108,7 @@
       if (k === 'id' || k === 'state' || k === '_pending' || k === '_failed') return;
       data[k] = rec[k];
     });
-    // o que era so do pedido fica onde estava
+    // anything that belonged to the request stays where it was
     if (existing && existing.data && existing.data._req) data._req = existing.data._req;
     if (existing && existing.data && existing.data._reqOnly) data._reqOnly = existing.data._reqOnly;
     if (o.req) data._req = o.req;
@@ -116,7 +116,7 @@
     var state = o.state;
     if (!state) {
       if (rec.state === 'pending') {
-        // ja estava a espera: mantem o sitio exacto onde estava na aprovacao
+        // already waiting: keep the exact place it had in the approval run
         state = (existing && existing.state && existing.state !== 'approved')
           ? existing.state : 'approval';
       } else {
@@ -126,7 +126,7 @@
 
     if (existing && sameData(existing.data, data) && existing.state === state &&
         String(existing.project_id) === String(pid)) {
-      return Promise.resolve(existing);        // nada mudou, nada sobe
+      return Promise.resolve(existing);        // nothing changed, nothing goes up
     }
 
     return d.save(TABLE, {
@@ -137,8 +137,9 @@
 
   function removeRecord(id) { return d.remove(TABLE, String(id), { actor: opts.actor() }); }
 
-  /** Recebe a lista inteira de variacoes de uma obra, como as paginas ja a
-   *  escreviam, e transforma-a nas alteracoes minimas. So sobe o que mudou. */
+  /** Takes a job's whole list of variations, exactly as the pages already
+   *  wrote it, and turns it into the smallest set of changes. Only what
+   *  actually changed goes up. */
   function writeMap(pid, list) {
     list = Array.isArray(list) ? list : [];
     var keep = {};
@@ -156,7 +157,7 @@
     return Promise.all(jobs);
   }
 
-  /** O mesmo para a lista de pedidos da pagina Variations. */
+  /** The same for the request list on the Variations page. */
   function writeRequests(list) {
     list = Array.isArray(list) ? list : [];
     var seen = {};
@@ -179,8 +180,9 @@
       if (row && row.data) {
         Object.keys(row.data).forEach(function (k) { if (k !== '_req') data[k] = row.data[k]; });
       } else {
-        // Um pedido levantado no escritorio sem registo na obra: fica so como
-        // pedido. Se for aprovado, e ai que nasce a variacao na obra.
+        // A request raised in the office with no record on the job: it stays
+        // a request only. If it is approved, that is when the variation on the
+        // job comes into being.
         data._reqOnly = true;
         data.desc = req.desc || '';
         data.amount = req.amount || 0;
@@ -199,9 +201,10 @@
       }, { actor: opts.actor() }));
     });
 
-    // Um pedido retirado da lista. Se so existia como pedido, sai. Se ja tinha
-    // entrado na obra, a variacao fica la - so deixa de ter pedido, que e
-    // exactamente o que a pagina avisa quando se apaga um pedido aprovado.
+    // A request taken off the list. If it only ever existed as a request, it
+    // goes. If it had already landed on the job, the variation stays - it just
+    // stops having a request, which is exactly what the page warns about when
+    // an approved request is deleted.
     d.all(TABLE).forEach(function (row) {
       if (!row.data || !row.data._req) return;
       if (seen[row.id]) return;
@@ -215,37 +218,37 @@
     return Promise.all(jobs);
   }
 
-  // ------------------------------------------------------ o que ja existia --
-  // Assim que a projeccao corre pela primeira vez, ela reescreve as duas
-  // chaves antigas a partir das linhas - que a comecar estao vazias. O que
-  // este computador tinha guardado desapareceria sem ninguem dar por isso.
-  // Por isso guarda-se uma copia, uma unica vez, antes de a projeccao mexer.
-  var BK = 'remcdl:v1:antigo:variacoes';
+  // ---------------------------------------------------- what was here before -
+  // The moment the projection runs for the first time, it rewrites the two old
+  // keys from the rows - which start out empty. Whatever this computer had
+  // saved would vanish without anyone noticing. So a copy is kept, once, before
+  // the projection touches anything.
+  var BK = 'remcdl:v1:legacy:variations';
 
-  function guardarAntigo() {
+  function keepLegacyCopy() {
     var s = d._internal.cfg.storage ||
             (typeof localStorage !== 'undefined' ? localStorage : null);
     if (!s) return;
     var ja = null;
     try { ja = s.getItem(BK); } catch (e) {}
-    if (ja) return;                                   // ja foi guardado antes
+    if (ja) return;                                   // already kept earlier
     var v = null, r = null;
     try { v = s.getItem(KEY_V); r = s.getItem(KEY_R); } catch (e) {}
     if (!v && !r) return;
     d.writeLegacy(BK, JSON.stringify({ at: new Date().toISOString(), v: v || '{}', r: r || '[]' }));
-    opts.log('copia do que ja existia guardada em ' + BK);
+    opts.log('copy of what was here before kept under ' + BK);
   }
 
-  /** Traz para as tabelas o que este computador tinha antes. So corre quando
-   *  se pede, e nao faz mal correr duas vezes: cada registo mantem o seu id,
-   *  por isso o segundo import nao cria copias. */
-  function importarAntigo() {
+  /** Bring into the tables whatever this computer held before. It only runs
+   *  when asked, and running it twice does no harm: every record keeps its own
+   *  id, so a second import does not create copies. */
+  function importLegacy() {
     var s = d._internal.cfg.storage || (typeof localStorage !== 'undefined' ? localStorage : null);
     var raw = null;
     try { raw = s && s.getItem(BK); } catch (e) {}
-    if (!raw) return Promise.resolve({ variacoes: 0, pedidos: 0, nota: 'nao havia nada guardado' });
+    if (!raw) return Promise.resolve({ variations: 0, requests: 0, note: 'nothing was kept' });
 
-    var bk; try { bk = JSON.parse(raw); } catch (e) { return Promise.reject(new Error('copia ilegivel')); }
+    var bk; try { bk = JSON.parse(raw); } catch (e) { return Promise.reject(new Error('the kept copy cannot be read')); }
     var mapa = {}, pedidos = [];
     try { mapa = JSON.parse(bk.v || '{}') || {}; } catch (e) {}
     try { pedidos = JSON.parse(bk.r || '[]') || []; } catch (e) {}
@@ -257,7 +260,7 @@
     Object.keys(mapa).forEach(function (pid) {
       (mapa[pid] || []).forEach(function (rec) {
         if (!rec || !rec.id) return;
-        if (d.byId(TABLE, rec.id)) return;            // ja esta la
+        if (d.byId(TABLE, rec.id)) return;            // already there
         var p = porRec[String(rec.id)];
         var estado = p ? (p.state || 'approval') : (rec.state === 'pending' ? 'approval' : 'approved');
         var req = null;
@@ -272,7 +275,7 @@
       });
     });
 
-    // pedidos que nunca chegaram a ter registo na obra
+    // requests that never came to have a record on the job
     pedidos.forEach(function (p) {
       if (!p || !p.id) return;
       if (p.recId) return;
@@ -282,21 +285,21 @@
     });
 
     return Promise.all(jobs).then(function () {
-      return { variacoes: nV, pedidos: nP };
+      return { variations: nV, requests: nP };
     });
   }
 
-  // ---------------------------------------------------------------- publico -
+  // ----------------------------------------------------------------- public -
   var api = {
     TABLE: TABLE,
     init: function (o) {
       o = o || {};
       d = o.data || root.remcData;
-      if (!d) throw new Error('remc-variations precisa da camada de dados');
+      if (!d) throw new Error('remc-variations needs the data layer');
       if (o.actor) opts.actor = (typeof o.actor === 'function') ? o.actor : function () { return o.actor; };
       if (o.log) opts.log = o.log;
       d.claim(KEY_V, KEY_R);
-      guardarAntigo();
+      keepLegacyCopy();
       return api;
     },
     project: function (table) { if (table === TABLE) project(); },
@@ -309,8 +312,8 @@
     writeRequests: writeRequests,
     watch: function (fn) { return d.watch(TABLE, function () { fn(api.map(), api.requests()); }); },
 
-    /** Quanto e que este computador tinha guardado antes da mudanca. */
-    antigo: function () {
+    /** How much this computer had saved before the change. */
+    legacyCopy: function () {
       var s = d._internal.cfg.storage || (typeof localStorage !== 'undefined' ? localStorage : null);
       var raw = null; try { raw = s && s.getItem(BK); } catch (e) {}
       if (!raw) return null;
@@ -318,10 +321,10 @@
         var bk = JSON.parse(raw);
         var mapa = JSON.parse(bk.v || '{}') || {};
         var n = 0; Object.keys(mapa).forEach(function (k) { n += (mapa[k] || []).length; });
-        return { guardadoEm: bk.at, variacoes: n, pedidos: (JSON.parse(bk.r || '[]') || []).length };
+        return { keptAt: bk.at, variations: n, requests: (JSON.parse(bk.r || '[]') || []).length };
       } catch (e) { return null; }
     },
-    importarAntigo: importarAntigo,
+    importLegacy: importLegacy,
     _rebuild: function () { _mapCache = null; _reqCache = null; }
   };
 
