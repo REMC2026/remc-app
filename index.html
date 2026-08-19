@@ -204,6 +204,49 @@ body.hide-residential .overview-layout{grid-template-columns:200px 1fr 180px}
       workspace: "remc-main"
     };
   </script>
+
+  <!-- 🗄️ CAMADA DE DADOS — uma linha por registo, em vez da linha unica.
+       Carregada aqui de proposito: antes da sincronizacao antiga, que mais
+       abaixo substitui o localStorage.setItem. -->
+  <script src="remc-data.js"></script>
+  <script src="remc-variations.js"></script>
+  <script>
+  (function(){
+    var CFG = window.REMC_CLOUD || {};
+    var pronto = CFG.url && CFG.anonKey
+      && String(CFG.url).indexOf('PASTE_') < 0 && String(CFG.anonKey).indexOf('PASTE_') < 0;
+    if (!pronto || !window.remcData){ console.log('[REMC dados] sem configuracao — fica como estava'); return; }
+
+    function quemSou(){
+      try { var m = window.remcWhoAmI && window.remcWhoAmI(); return (m && m.name) || 'Office'; }
+      catch(e){ return 'Office'; }
+    }
+
+    window.remcData.configure({
+      url: CFG.url,
+      anonKey: CFG.anonKey,
+      tables: ['remc_variations'],
+      project: function(t){ try{ window.remcVariations.project(t); }catch(e){ console.warn('[REMC dados]', e); } },
+      log: function(){ try{ console.log.apply(console, ['[REMC dados]'].concat([].slice.call(arguments))); }catch(e){} }
+    });
+    window.remcVariations.init({ data: window.remcData, actor: quemSou });
+
+    function arrancar(){
+      window.remcData.start();
+      window.remcData.watch('remc_variations', function(){
+        try{ if (typeof window.vpRender === 'function') window.vpRender(); }catch(e){}
+        try{ if (window._pdCurrentId != null && typeof window.vrRender === 'function') window.vrRender(window._pdCurrentId); }catch(e){}
+      });
+      window.remcData.onStatus(function(st){
+        var el = document.getElementById('remc-cloud-badge');
+        if (!el || !st.pending) return;
+        el.title = st.pending + ' alteracao(oes) por enviar';
+      });
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', arrancar);
+    else arrancar();
+  })();
+  </script>
   <script>
 document.addEventListener("click",function(e){if(e.target&&!e.target.closest&&e.target.parentElement){e.target.closest=function(s){return e.target.parentElement.closest(s)}}},true);["dblclick","dragstart","dragover","dragleave","drop","mousedown","mouseup","contextmenu"].forEach(function(t){document.addEventListener(t,function(e){if(e.target&&!e.target.closest&&e.target.parentElement){e.target.closest=function(s){return e.target.parentElement.closest(s)}}},true)});
 
@@ -12041,6 +12084,14 @@ function vqLoad(){
   catch(e){ return []; }
 }
 function vqWrite(list){
+  // A camada de dados transforma a lista inteira nas alteracoes minimas: so
+  // sobe a linha que mudou, com a versao de que parte. Quem chama esta funcao
+  // nao precisa de saber nada disso.
+  if(window.remcVariations && window.remcData && window.remcData.status().configured){
+    window.remcVariations.writeRequests(list||[])
+      .catch(function(e){ console.warn('[REMC] pedidos de variacao:', e && e.message); });
+    return;
+  }
   var txt=JSON.stringify(list||[]);
   if(typeof window.remcSaveKey==='function'){ window.remcSaveKey(VQ_KEY, txt); return; }
   try{ localStorage.setItem(VQ_KEY, txt); }catch(e){ alert('Browser storage is full.'); }
@@ -12152,10 +12203,9 @@ window.vpApprove=function(id){
                createdAt:new Date().toISOString(), fromRequest:r.id,
                raisedBy:r.by||'', raisedAt:r.at||'' });
   }
-  all[String(p.id)]=arr;
-  var txt=JSON.stringify(all);
-  if(typeof window.remcSaveKey==='function') window.remcSaveKey('remc_variations', txt);
-  else { try{ localStorage.setItem('remc_variations', txt); }catch(e){} }
+  // Aprovar passa pelo mesmo sitio que tudo o resto. Antes escrevia a chave
+  // inteira a mao, o que apagava o que outra pessoa tivesse gravado entretanto.
+  vrWrite(p.id, arr);
 
   r.state='approved'; r.pid=p.id;
   r.projectName=p.name||r.projectName; r.jobNumber=p.jobNumber||r.jobNumber;
@@ -12376,6 +12426,11 @@ function vrLoad(){
 }
 function vrList(pid){ var a=vrLoad()[String(pid)]; return Array.isArray(a)?a:[]; }
 function vrWrite(pid, list){
+  if(window.remcVariations && window.remcData && window.remcData.status().configured){
+    window.remcVariations.writeMap(pid, list||[])
+      .catch(function(e){ console.warn('[REMC] variacoes:', e && e.message); });
+    return;
+  }
   var all=vrLoad();
   if(list && list.length) all[String(pid)]=list; else delete all[String(pid)];
   var txt=JSON.stringify(all);
@@ -15511,15 +15566,18 @@ function teamEditProjectBooking(pid){
   window.REMC_SB = sb;
   var _applying = false, _pushTimer = null, _dirty = {};
 
+  // As chaves que ja vivem nas tabelas novas nao vao para a linha unica: se
+  // fossem, as duas escreviam por cima uma da outra.
+  function _remcOwned(k){ try{ return !!(window.remcData && window.remcData.owns(k)); }catch(e){ return false; } }
   function collectState(){
     var out = { __client: CLIENT_ID };
-    for (var i=0;i<localStorage.length;i++){ var k=localStorage.key(i); if(k && k.indexOf('remc_')===0) out[k]=localStorage.getItem(k); }
+    for (var i=0;i<localStorage.length;i++){ var k=localStorage.key(i); if(k && k.indexOf('remc_')===0 && !_remcOwned(k)) out[k]=localStorage.getItem(k); }
     return out;
   }
   function applyState(data){
     if(!data) return;
     _applying = true;
-    try { Object.keys(data).forEach(function(k){ if(k.indexOf('remc_')===0){ try{ localStorage.setItem(k, data[k]); }catch(e){} } }); }
+    try { Object.keys(data).forEach(function(k){ if(k.indexOf('remc_')===0 && !_remcOwned(k)){ try{ localStorage.setItem(k, data[k]); }catch(e){} } }); }
     finally { _applying = false; try{ markSnapshotClean(); }catch(e){} }
   }
   function setStatus(state){
@@ -15837,7 +15895,7 @@ function teamEditProjectBooking(pid){
   var _lastLocalSnap = null, _watchTimer = null;
   function localSnapshot(){
     var o = {};
-    try{ for(var i=0;i<localStorage.length;i++){ var k=localStorage.key(i); if(k && k.indexOf('remc_')===0) o[k]=localStorage.getItem(k); } }catch(e){}
+    try{ for(var i=0;i<localStorage.length;i++){ var k=localStorage.key(i); if(k && k.indexOf('remc_')===0 && !_remcOwned(k)) o[k]=localStorage.getItem(k); } }catch(e){}
     return o;
   }
   function markSnapshotClean(){ _lastLocalSnap = localSnapshot(); }

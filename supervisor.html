@@ -349,6 +349,34 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
   };
 </script>
 
+<!-- 🗄️ CAMADA DE DADOS — a mesma que a app do escritorio, ficheiro a ficheiro.
+     Uma variacao gravada aqui e uma linha, nao a base de dados inteira. -->
+<script src="remc-data.js"></script>
+<script src="remc-variations.js"></script>
+<script>
+(function(){
+  var CFG = window.REMC_SUP_CLOUD || {};
+  var pronto = CFG.url && CFG.anonKey
+    && String(CFG.url).indexOf('PASTE_') < 0 && String(CFG.anonKey).indexOf('PASTE_') < 0;
+  if (!pronto || !window.remcData){ console.log('[REMC dados] sem configuracao'); return; }
+
+  function quemSou(){
+    try { return (window.REMC_ME && window.REMC_ME.name) || 'Supervisor'; }
+    catch(e){ return 'Supervisor'; }
+  }
+
+  window.remcData.configure({
+    url: CFG.url,
+    anonKey: CFG.anonKey,
+    tables: ['remc_variations'],
+    pollMs: 15000,
+    project: function(t){ try{ window.remcVariations.project(t); }catch(e){ console.warn('[REMC dados]', e); } },
+    log: function(){ try{ console.log.apply(console, ['[REMC dados]'].concat([].slice.call(arguments))); }catch(e){} }
+  });
+  window.remcVariations.init({ data: window.remcData, actor: quemSou });
+})();
+</script>
+
 <!-- LOGIN -->
 <div class="login" id="login">
   <div class="login-card">
@@ -689,6 +717,8 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
   var DATA = {};           // full shared document
   var PROJECTS = [], BOOKINGS = [], SUPERS = [], NOTES = {}, MACHINES = [];
   var ME = null;           // {username, name}
+  // A camada de dados corre fora deste bloco e precisa de saber quem gravou.
+  function _setME(m){ ME = m; try{ window.REMC_ME = m; }catch(e){} return m; }
   var VIEW = 'list', OFFSET = 0, EDIT_ID = null, PICK_COLOR = COLORS[0], NOTES_PID = null;
   var TESTS = {}, TEST_PID = null;
   var TRANSFERS = {}, TR_PID = null, TR_ACTION = '';
@@ -884,8 +914,15 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     MACHINES = j('remc_machine_names','[]'); if(!Array.isArray(MACHINES)) MACHINES=[];
     TESTS    = j('remc_compaction_tests','{}'); if(!TESTS || typeof TESTS!=='object' || Array.isArray(TESTS)) TESTS={};
     TRANSFERS= j('remc_machine_transfers','{}'); if(!TRANSFERS || typeof TRANSFERS!=='object' || Array.isArray(TRANSFERS)) TRANSFERS={};
-    VARIATIONS= j('remc_variations','{}'); if(!VARIATIONS || typeof VARIATIONS!=='object' || Array.isArray(VARIATIONS)) VARIATIONS={};
-    VARREQ = j('remc_variation_requests','[]'); if(!Array.isArray(VARREQ)) VARREQ=[];
+    // As variacoes ja nao vivem no documento unico: vem da sua propria tabela,
+    // uma linha cada. O resto desta funcao nao mudou.
+    if(window.remcVariations && window.remcData && window.remcData.status().configured){
+      VARIATIONS = window.remcVariations.map();
+      VARREQ     = window.remcVariations.requests();
+    } else {
+      VARIATIONS= j('remc_variations','{}'); if(!VARIATIONS || typeof VARIATIONS!=='object' || Array.isArray(VARIATIONS)) VARIATIONS={};
+      VARREQ = j('remc_variation_requests','[]'); if(!Array.isArray(VARREQ)) VARREQ=[];
+    }
     SUBCONS  = j('remc_sub_bookings','{}'); if(!SUBCONS || typeof SUBCONS!=='object' || Array.isArray(SUBCONS)) SUBCONS={};
     PROJDOCS = j('remc_proj_docs','{}'); if(!PROJDOCS || typeof PROJDOCS!=='object' || Array.isArray(PROJDOCS)) PROJDOCS={};
     ACTIVITY = j('remc_activity_log','[]'); if(!Array.isArray(ACTIVITY)) ACTIVITY=[];
@@ -1031,6 +1068,10 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
   // One place that writes, so every save behaves the same way.
   function writeDoc(d, cb, after){
     var mine=new Date().toISOString();
+    // O que ja vive nas tabelas novas sai do documento unico. Se ficasse, as
+    // duas escritas competiam pela mesma variacao.
+    try{ if(window.remcData){ Object.keys(d).forEach(function(k){
+      if(window.remcData.owns(k)) delete d[k]; }); } }catch(e){}
     d['__client']=CLIENT;
     _tread();
     var _bytes=0; try{ _bytes=JSON.stringify(d).length; }catch(e){}
@@ -1160,6 +1201,28 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
       });
     }, 12000);
   }
+  // Uma variacao passou a ser uma linha. Gravar deixou de reescrever a base de
+  // dados inteira - por isso deixou de demorar 25 segundos, e deixou de poder
+  // apagar o que outra pessoa gravou no mesmo momento.
+  function persistVariation(pid, rec, req, cb){
+    if(window.remcVariations && window.remcData && window.remcData.status().configured){
+      window.remcVariations.saveRecord(pid, rec, { state:'approval', req:req })
+        .then(function(){ _cloudOk(); if(cb) cb(null); })
+        .catch(function(e){ _cloudFail(); if(cb) cb((e && e.message) || 'network'); });
+      return;
+    }
+    pushVariations(cb);
+  }
+  function removeVariation(pid, id, cb){
+    if(window.remcVariations && window.remcData && window.remcData.status().configured){
+      window.remcVariations.removeRecord(id)
+        .then(function(){ _cloudOk(); if(cb) cb(null); })
+        .catch(function(e){ _cloudFail(); if(cb) cb((e && e.message) || 'network'); });
+      return;
+    }
+    pushVariations(cb);
+  }
+  // Fica como estava, para quando a app corre sem configuracao de nuvem.
   function pushVariations(cb){
     if(!ensureClient()){ if(cb) cb('noconfig'); return; }
     _tstart();
@@ -1167,8 +1230,6 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     withDoc(function(d){
       if(!d){ _cloudFail(); if(cb) cb('read failed'); return; }
       d['remc_variations'] = JSON.stringify(VARIATIONS);
-      // A variation raised on site is a request, not a decision. The office sees
-      // it on the Variations page, and only then does it land on the job.
       d['remc_variation_requests'] = JSON.stringify(VARREQ);
       writeDoc(d, cb);
     });
@@ -2099,7 +2160,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     renderVariations();
     _varSaving=true; if($('var-close-btn')) $('var-close-btn').disabled=true;
     supShowSaving('Saving to the system…');
-    pushVariations(function(err){
+    persistVariation(pid, rec, _req, function(err){
       _varSaving=false; if($('var-close-btn')) $('var-close-btn').disabled=false;
       if(err){
         var why=String(err||'');
@@ -2121,7 +2182,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
     VARIATIONS[String(pid)] = (VARIATIONS[String(pid)]||[]).filter(function(v){ return String(v.id)!==String(id); });
     renderVariations();
     supShowSaving('Saving…');
-    pushVariations(function(err){
+    removeVariation(pid, id, function(err){
       if(err){ supShowResult(false, 'Saved on this phone. The office copy did not update \u2014 it will go up when the connection is back.'); }
       else { renderVariations(); supShowResult(true, 'Variation removed'); }
     });
@@ -2449,6 +2510,23 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
   // kept showing "Waiting" until the screen was closed and reopened.
   // Each step stands on its own. A failure in one is reported and the rest
   // still run, so a stale screen can never be caused by an unrelated error.
+  // O escritorio aprova, e o telemovel ve. Sem esperar pela proxima leitura
+  // do documento inteiro.
+  try{
+    if(window.remcData && window.remcData.status().configured){
+      window.remcData.watch('remc_variations', function(){
+        try{ VARIATIONS = window.remcVariations.map(); }catch(e){}
+        try{ VARREQ = window.remcVariations.requests(); }catch(e){}
+        try{ renderVariations(); }catch(e){}
+        try{ updateNotifBadge(); }catch(e){}
+      });
+      window.remcData.onStatus(function(st){
+        if(st.pending > 0) setCloud(st.pending + ' por enviar','#fef3c7','#92400e');
+      });
+      window.remcData.start();
+    }
+  }catch(e){ console.warn('[REMC dados] arranque', e); }
+
   function applyIncoming(){
     try{ parseData(); }catch(e){ console.warn('[REMC] parseData failed', e); }
     try{ supApplyBrand(); }catch(e){}
@@ -2993,7 +3071,7 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
       var byName = SUPERS.find(function(s){ return String(s.username||'').trim().toLowerCase()===u; });
       if(!byName){ msg.textContent='Username "'+($('lg-user').value||'').trim()+'" not found ('+SUPERS.length+' supervisor(s) loaded).'; return; }
       if(String(byName.password||'')!==String($('lg-pass').value||'')){ msg.textContent='Wrong password for '+byName.username+'.'; return; }
-      ME={username:byName.username, name:byName.name||byName.username}; msg.textContent='';
+      _setME({username:byName.username, name:byName.name||byName.username}); msg.textContent='';
       try{ var rem=$('lg-remember')&&$('lg-remember').checked;
         if(rem){ localStorage.setItem('sup_saved_user',byName.username); localStorage.setItem('sup_saved_pass',$('lg-pass').value||''); localStorage.setItem('sup_remember','1'); }
         else { localStorage.removeItem('sup_saved_user'); localStorage.removeItem('sup_saved_pass'); localStorage.setItem('sup_remember','0'); }
@@ -3028,15 +3106,15 @@ body.cal-mode .mcell{min-height:0;overflow-y:auto;display:flex;flex-direction:co
       ldSet(75,'Loading projects and bookings…');
       var loginRequired = String((DATA && DATA['remc_sup_login_required']!=null) ? DATA['remc_sup_login_required'] : 'true') !== 'false';
       if(!loginRequired){
-        ME = { username:'*', name:'Supervisor', openMode:true };
+        _setME({ username:'*', name:'Supervisor', openMode:true });
         ldSet(90,'Preparing your screen…'); startApp(); ldHide();
         return;
       }
-      if(saved){ var still=SUPERS.find(function(s){return String(s.username)===String(saved.username);}); if(still){ ME={username:still.username,name:still.name}; ldSet(90,'Preparing your screen…'); startApp(); ldHide(); return; } }
+      if(saved){ var still=SUPERS.find(function(s){return String(s.username)===String(saved.username);}); if(still){ _setME({username:still.username,name:still.name}); ldSet(90,'Preparing your screen…'); startApp(); ldHide(); return; } }
       // Auto sign-in from saved credentials on this device
       if(remOn && remUser && remPass){
         var m=SUPERS.find(function(s){ return String(s.username||'').trim().toLowerCase()===String(remUser).trim().toLowerCase(); });
-        if(m && String(m.password||'')===String(remPass)){ ME={username:m.username, name:m.name||m.username}; ldSet(90,'Preparing your screen…'); startApp(); ldHide(); return; }
+        if(m && String(m.password||'')===String(remPass)){ _setME({username:m.username, name:m.name||m.username}); ldSet(90,'Preparing your screen…'); startApp(); ldHide(); return; }
       }
       ldHide(); // no auto-login → show the login screen
     });
