@@ -199,8 +199,8 @@ body.hide-residential .overview-layout{grid-template-columns:200px 1fr 180px}
     // Paste your Supabase Project URL and anon (public) key here to turn on cloud sync + login.
     // While these say PASTE_..., the app works exactly as before (offline, local only).
     window.REMC_CLOUD = {
-      url:      "https://etupmtayutnupkgbrxkg.supabase.co",
-      anonKey:  "sb_publishable_SU2eO_JM4tqx5hbI0RxJHg_cshf_kLF",
+      url:      "https://mpphvwxouafmsvjepynp.supabase.co",
+      anonKey:  "sb_publishable_NflQAP_sPa9djwf0kDPazA_GMa05Vcg",
       workspace: "remc-main"
     };
   </script>
@@ -4263,6 +4263,75 @@ function sysSize(){
   return { total:total, parts:parts };
 }
 
+// A copy you can hold. Everything, in one file, that can be put back exactly as
+// it was. Worth taking before any change to how the data is stored.
+window.sysBackup=function(){
+  var out={ _saved:new Date().toISOString(), _version:String(window.REMC_VERSION||''),
+            _build:String(window.REMC_BUILD||''), data:{} };
+  var n=0, bytes=0;
+  try{
+    for(var i=0;i<localStorage.length;i++){
+      var k=localStorage.key(i);
+      if(!k || k.indexOf('remc_')!==0) continue;
+      var v=localStorage.getItem(k);
+      out.data[k]=v; n++; bytes+=(v||'').length;
+    }
+  }catch(e){}
+  if(!n){ alert('There is nothing to copy yet.'); return; }
+  var txt=JSON.stringify(out);
+  var d=new Date();
+  function p(x){ return String(x).padStart(2,'0'); }
+  var name='remc-backup-'+d.getFullYear()+p(d.getMonth()+1)+p(d.getDate())
+    +'-'+p(d.getHours())+p(d.getMinutes())+'.json';
+  try{
+    var blob=new Blob([txt],{type:'application/json'});
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement('a');
+    a.href=url; a.download=name; document.body.appendChild(a); a.click();
+    setTimeout(function(){ try{ document.body.removeChild(a); URL.revokeObjectURL(url); }catch(e){} }, 400);
+    alert('Saved '+name+'\n\n'+n+' sets of data, '+Math.round(bytes/1024)+' KB.\n\n'
+      +'Keep it somewhere outside this computer. It can be put back with Restore.');
+  }catch(e){ alert('Could not save the file: '+((e&&e.message)||e)); }
+};
+
+// Putting one back. Deliberately awkward, because it replaces everything.
+window.sysRestore=function(){
+  var inp=document.createElement('input');
+  inp.type='file'; inp.accept='application/json,.json';
+  inp.onchange=function(){
+    var f=inp.files && inp.files[0]; if(!f) return;
+    var r=new FileReader();
+    r.onload=function(){
+      var o=null;
+      try{ o=JSON.parse(String(r.result||'')); }catch(e){}
+      if(!o || !o.data || typeof o.data!=='object'){
+        alert('That does not look like a REMC copy.'); return;
+      }
+      var keys=Object.keys(o.data);
+      if(!keys.length){ alert('That copy is empty.'); return; }
+      if(!confirm('Put back the copy from '+(o._saved||'an unknown date')+'?\n\n'
+        +keys.length+' sets of data will REPLACE what is here now.\n\n'
+        +'Anything changed since that copy was made will be lost. '
+        +'This cannot be undone.')) return;
+      if(!confirm('Last check.\n\nReplace everything with the copy from '
+        +(o._saved||'an unknown date')+'?')) return;
+      var done=0;
+      keys.forEach(function(k){
+        try{
+          if(typeof window.remcSaveKey==='function') window.remcSaveKey(k, o.data[k]);
+          else localStorage.setItem(k, o.data[k]);
+          done++;
+        }catch(e){}
+      });
+      alert(done+' sets of data put back.\n\nThe page will reload.');
+      setTimeout(function(){ location.reload(); }, 600);
+    };
+    r.onerror=function(){ alert('That file could not be read.'); };
+    r.readAsText(f);
+  };
+  inp.click();
+};
+
 // Trim what nobody needs, so the row fits and saves stop timing out.
 window.sysCompact=function(){
   var before=sysSize().total;
@@ -4317,11 +4386,16 @@ function sysRender(){
       +(note?('<div class="sys-n">'+note+'</div>'):'')+'</div>';
   }
   var size=sysSize();
+  var n_sets=size.parts.length;
   var kb=Math.round(size.total/1024);
   var heavy=size.parts.slice(0,3).map(function(p){
     return p.key.replace(/^remc_/,'')+' '+Math.round(p.bytes/1024)+' KB'; }).join(', ');
   host.innerHTML='<div class="sys-card">'
     + row('Version', 'v'+ver.replace(/</g,'&lt;'), 'The release running on this device.')
+    + row('A copy of everything', n_sets+' sets of data',
+        'Take one before any big change. '
+        + '<button class="ops-btn sm" onclick="sysBackup()">Download a copy</button> '
+        + '<button class="ops-btn sm" onclick="sysRestore()">Restore</button>')
     + row('Shared data', kb+' KB',
         (kb>350
           ? 'Large. Every save from a phone sends all of this, and the server '
@@ -18705,7 +18779,10 @@ function teamEditProjectBooking(pid){
       var c=new Date(start); c.setDate(start.getDate()+i);
       var k=dkey(c), other=(c.getMonth()!==d.getMonth()), wk=(c.getDay()===0||c.getDay()===6);
       var cls='ops-cal-day'+(other?' other':'')+(wk?' wkend':'')+(k===today()?' today':'');
-      var chips=(byDay[k]||[]).map(function(x){
+      // days shown from the month either side belong to that month's own
+      // calendar, which is right next to this one. Showing them here too
+      // makes one booking look like two.
+      var chips=(other ? [] : (byDay[k]||[])).map(function(x){
         return '<div class="ops-chip '+testChipClass(x)+'" onclick="opResOpen(\''+esc(x._pid)+'\',\''+esc(x.id)+'\')" '
           +'title="'+esc((x.type||'')+' \u2014 '+projName(x._pid)+(x.company?(' \u2014 '+x.company):''))+'">'
           +'<div class="ops-chip-proj">'+esc(projName(x._pid))+'</div>'
@@ -18965,7 +19042,10 @@ function teamEditProjectBooking(pid){
       var c=new Date(start); c.setDate(start.getDate()+i);
       var k=dkey(c), other=(c.getMonth()!==d.getMonth()), wk=(c.getDay()===0||c.getDay()===6);
       var cls='ops-cal-day'+(other?' other':'')+(wk?' wkend':'')+(k===today()?' today':'');
-      var chips=(byDay[k]||[]).map(function(x){
+      // days shown from the month either side belong to that month's own
+      // calendar, which is right next to this one. Showing them here too
+      // makes one booking look like two.
+      var chips=(other ? [] : (byDay[k]||[])).map(function(x){
         var done=(trStage(x)==='done');
         return '<div class="ops-chip '+(done?'pass':'booked')+'" '
           +'onclick="opTrOpen(\''+esc(x._pid)+'\',\''+esc(x.id)+'\')" '
@@ -19242,7 +19322,10 @@ function teamEditProjectBooking(pid){
       var c=new Date(start); c.setDate(start.getDate()+i);
       var k=dkey(c), other=(c.getMonth()!==d.getMonth()), wk=(c.getDay()===0||c.getDay()===6);
       var cls='ops-cal-day'+(other?' other':'')+(wk?' wkend':'')+(k===today()?' today':'');
-      var chips=(byDay[k]||[]).map(function(x){
+      // days shown from the month either side belong to that month's own
+      // calendar, which is right next to this one. Showing them here too
+      // makes one booking look like two.
+      var chips=(other ? [] : (byDay[k]||[])).map(function(x){
         var chip = x.req ? 'fail' : 'booked';
         return '<div class="ops-chip '+chip+'" '
           +'onclick="opSubOpen(\''+esc(x._pid)+'\',\''+esc(x.id)+'\')" '
